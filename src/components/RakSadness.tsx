@@ -1,14 +1,20 @@
 import { Button, Sheet } from "@mui/joy";
-import { useCallback, useEffect, useState } from "react";
+import { ChangeEvent, ChangeEventHandler, useCallback, useEffect, useRef, useState } from "react";
 import { RakMadnessScores } from "../types/RakMadnessScores";
 import getClasses from "../utils/getClasses";
 import FloatingLabelInput from "./floatingLabelInput/FloatingLabelInput";
 import { Toast, useToastContext } from "../context/ToastContext";
 import "./RakSadness.css";
+import { readFileSync } from "fs";
+import getPlayerScores from "../utils/getPlayerScores";
 
 export default function RakSadness() {
     const { showToast } = useToastContext();
 
+    // File input ref
+    const fileInputRef = useRef(null);
+
+    // Week number (input by user)
     const [week, setWeek] = useState<string>("");
 
     // Loading flags
@@ -22,16 +28,49 @@ export default function RakSadness() {
     }, []);
 
     const [scores, setScores] = useState<RakMadnessScores>();
-    const scoreSpreadsheet = useCallback(() => {
+    // const scoreSpreadsheet = useCallback(() => {
+    //     if (!week) return;
+    //     const scoreSpreadsheetAsync = async () => {
+    //         setScoresLoading(true);
+    //         // TODO: Implement for web
+    //         const newScores = await window.pickAndScoreSpreadsheet(Number(week));
+    //         const newScores: RakMadnessScores = {
+    //             tiebreaker: 0,
+    //             scores: [],
+    //         }
+    //         if (newScores) {
+    //             setScores(newScores);
+    //             setScoresLoading(false);
+    //             showToast(new Toast("success", "Success", "Generated results from picks spreadsheet"));
+    //         } else {
+    //             setScores(null);
+    //             setScoresLoading(false);
+    //             showToast(new Toast("neutral", "Info", "Aborted picks shreadsheet selection"));
+    //         }
+    //     };
+    //     scoreSpreadsheetAsync();
+    // }, [week]);
+
+    const clickFileInput = useCallback(() => {
+        fileInputRef.current?.click();
+    }, []);
+
+    const handleFileUpload: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
         if (!week) return;
         const scoreSpreadsheetAsync = async () => {
             setScoresLoading(true);
-            // TODO: Implement for web
-            // const newScores = await window.pickAndScoreSpreadsheet(Number(week));
-            const newScores: RakMadnessScores = {
-                tiebreaker: 0,
-                scores: [],
+
+            // Get buffer from file.
+            const files = Array.from(event.target.files);
+            console.debug("files", files);
+            if (!files.length || !files[0]) {
+                setScores(null);
+                setScoresLoading(false);
+                showToast(new Toast("neutral", "Info", "Aborted picks shreadsheet selection"));
             }
+
+            const spreadsheetBuffer = readFileSync(files[0].name);
+            const newScores = await getPlayerScores(Number(week), spreadsheetBuffer);
             if (newScores) {
                 setScores(newScores);
                 setScoresLoading(false);
@@ -43,7 +82,7 @@ export default function RakSadness() {
             }
         };
         scoreSpreadsheetAsync();
-    }, [week]);
+    }, []);
 
 
     const exportResults = useCallback(() => {
@@ -76,12 +115,13 @@ export default function RakSadness() {
                         }}
                     />
                 </div>
+                <input ref={fileInputRef} className="home__file-input" type="file" onChange={handleFileUpload} />
                 <Button
                     className={`home__submit-button ${getClasses({
                         "--loading-btn": isScoresLoading
                     })}`}
                     variant="solid"
-                    onClick={scoreSpreadsheet}
+                    onClick={clickFileInput}
                     disabled={!week}
                 >
                     Select Picks Spreadsheet
