@@ -19,12 +19,15 @@
 }
 
 .home__footer {
-    position: fixed;
+    position: absolute;
     bottom: 16px;
-    justify-self: flex-end;
     color: #888888;
     text-decoration: none;
     text-align: center;
+
+    @media (max-height: 400px) {
+        display: none;
+    }
 }
 
 .home__week-input {
