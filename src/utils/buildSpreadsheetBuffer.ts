@@ -1,9 +1,9 @@
 import { Correctness, RakMadnessScores } from "../types/RakMadnessScores";
 import * as XLSX from "xlsx-js-style";
 
-function rangeWithPrefix(size: number, prefix: string = ""): Array<string> {
+function rangeWithPrefix(size: number, prefix = ""): Array<string> {
     return [...Array(size).keys()].map(index => `${prefix}${index + 1}`);
-};
+}
 
 const Color = {
     WHITE: {
@@ -54,7 +54,7 @@ function headerCell(value: string) {
             }
         }
     }
-};
+}
 
 function explanationCell(pick: string, isCorrect: Correctness) {
     // Determine cell color

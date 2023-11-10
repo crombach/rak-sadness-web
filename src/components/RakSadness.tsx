@@ -13,7 +13,7 @@ export default function RakSadness() {
 
     // Loading flags
     const [isScoresLoading, setScoresLoading] = useState(false);
-    const [isViewLoading, setViewLoading] = useState(false);
+    const [isViewLoading/* , setViewLoading */] = useState(false);
     const [isExportLoading, setExportLoading] = useState(false);
 
     const [scores, setScores] = useState<RakMadnessScores>();

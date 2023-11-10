@@ -10,14 +10,14 @@ import { GameScore } from "../types/GameScore";
 XLSX.stream.set_readable(Readable);
 
 // Capture group 1 is team abbreviation, capture group 3 is spread (if present)
-const pickRegex = /([\S]+)(\s+([+\-]?\d+(\.\d)?))?/;
+const pickRegex = /([\S]+)(\s+([+-]?\d+(\.\d)?))?/;
 
 function parsePick(pickString: string) {
     const [, teamAbbreviation, , spreadText] = pickRegex.exec(pickString);
     const spread = spreadText != null ? Number(spreadText) : 0;
     console.debug("spread text", spreadText);
     return { teamAbbreviation: teamAbbreviation.toUpperCase(), spread };
-};
+}
 
 function getCorrectness(score: GameScore): Correctness {
     if (score.wasNotFound) {
@@ -26,7 +26,7 @@ function getCorrectness(score: GameScore): Correctness {
         return "yes";
     }
     return "no";
-};
+}
 
 function getPickResults(picks: Array<string>, leagueResults: Array<LeagueResult>): Array<GameScore> {
     return picks.map((pick: string) => {
@@ -92,7 +92,7 @@ function getPickResults(picks: Array<string>, leagueResults: Array<LeagueResult>
 
         return { pointValue, wasNotFound: false, hasSpread };
     });
-};
+}
 
 export default async function getPlayerScores(week: number, picksBuffer: Buffer): Promise<RakMadnessScores> {
     // Parse the Excel spreadsheet.
@@ -184,4 +184,4 @@ export default async function getPlayerScores(week: number, picksBuffer: Buffer)
         tiebreaker: tiebreakerScore,
         scores: sortedScores,
     };
-};
+}
