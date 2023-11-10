@@ -25,11 +25,6 @@ export default function RakSadness() {
     const [isViewLoading/* , setViewLoading */] = useState(false);
     const [isExportLoading, setExportLoading] = useState(false);
 
-    // Set document title
-    useEffect(() => {
-        document.title = "Rak Sadness"
-    }, []);
-
     const clickFileInput = useCallback(() => {
         fileInputRef.current?.click();
     }, []);
