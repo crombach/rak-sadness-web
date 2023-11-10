@@ -162,7 +162,7 @@ export default function RakSadness() {
                     <table className="home__scores-table" cellSpacing="0">
                         <tr className="home__scores-table-header">
                             <th>Rank</th>
-                            <th>Player</th>
+                            <th className="home__scores-table-player-col">Player</th>
                             <th>Tiebreaker Pick</th>
                             <th>Tiebreaker Distance</th>
                             <th>College Score</th>
@@ -173,7 +173,7 @@ export default function RakSadness() {
                         {scores.scores.map((player, index) => {
                             return <tr>
                                 <td><b>{index + 1}</b></td>
-                                <td>{player.name}</td>
+                                <td className="home__scores-table-player-col">{player.name}</td>
                                 <td>{player.tiebreaker.pick}</td>
                                 <td>{player.tiebreaker.distance}</td>
                                 <td>{player.score.college}</td>

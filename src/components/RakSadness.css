@@ -48,13 +48,20 @@
 }
 
 .home__scores-table-header {
+    z-index: 1;
     position: sticky;
     top: 0;
     background-color: black;
 }
 
+.home__scores-table-player-col {
+    position: sticky;
+    left: 0;
+}
+
 .home__scores-table th {
     color: white;
+    background-color: black;
     min-width: max-content;
     padding: 2px 6px;
 }
