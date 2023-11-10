@@ -141,8 +141,8 @@ export default function buildSpreadsheetBuffer(scoresObject: RakMadnessScores, w
             return [
                 normalCell({ value: index + 1, alignment: "left", isBold: true }),
                 normalCell({ value: player.name, alignment: "left" }),
-                normalCell({ value: player.tiebreaker.pick }),
-                normalCell({ value: player.tiebreaker.distance >= 0 ? player.tiebreaker.distance : "Unknown" }),
+                normalCell({ value: player.tiebreaker.pick ?? "N/A" }),
+                normalCell({ value:  player.tiebreaker.distance ?? "N/A" }),
                 normalCell({ value: player.score.college }),
                 normalCell({ value: player.score.pro }),
                 normalCell({ value: player.score.proAgainstTheSpread }),

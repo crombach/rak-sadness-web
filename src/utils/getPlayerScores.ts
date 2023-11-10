@@ -156,7 +156,7 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
             },
             tiebreaker: {
                 pick: playerRow.Pts,
-                distance: tiebreakerScore != null ? Math.abs(playerRow.Pts - tiebreakerScore) : -1,
+                distance: playerRow.Pts != null && tiebreakerScore != null ? Math.abs(playerRow.Pts - tiebreakerScore) : undefined,
             },
             college: collegePicks.map((pick, index) => ({ pick, correct: getCorrectness(collegePickResults[index]) })),
             pro: proPicks.map((pick, index) => ({ pick, correct: getCorrectness(proPickResults[index]) })),
@@ -174,10 +174,12 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
             return 1;
         } else if (a.score.total > b.score.total) {
             return -1;
-        } else if (a.tiebreaker.distance > b.tiebreaker.distance) {
-            return 1;
-        } else if (a.tiebreaker.distance < b.tiebreaker.distance) {
-            return -1;
+        } else if (a.tiebreaker.distance && b.tiebreaker.distance) {
+            if (a.tiebreaker.distance > b.tiebreaker.distance) {
+                return 1;
+            } else if (a.tiebreaker.distance < b.tiebreaker.distance) {
+                return -1;
+            }
         } else if (a.score.college < b.score.college) {
             return 1;
         } else if (a.score.college > b.score.college) {

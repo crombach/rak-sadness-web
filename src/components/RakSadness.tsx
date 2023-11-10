@@ -160,28 +160,32 @@ export default function RakSadness() {
                 </Sheet>
                 <div className="home__scores-content">
                     <table className="home__scores-table" cellSpacing="0">
-                        <tr className="home__scores-table-header">
-                            <th>Rank</th>
-                            <th className="home__scores-table-player-col">Player</th>
-                            <th>Tiebreaker Pick</th>
-                            <th>Tiebreaker Distance</th>
-                            <th>College Score</th>
-                            <th>Pro Score</th>
-                            <th>Pro Score Against the Spread</th>
-                            <th>Total Score</th>
-                        </tr>
-                        {scores.scores.map((player, index) => {
-                            return <tr>
-                                <td><b>{index + 1}</b></td>
-                                <td className="home__scores-table-player-col">{player.name}</td>
-                                <td>{player.tiebreaker.pick}</td>
-                                <td>{player.tiebreaker.distance}</td>
-                                <td>{player.score.college}</td>
-                                <td>{player.score.pro}</td>
-                                <td>{player.score.proAgainstTheSpread}</td>
-                                <td><b>{player.score.total}</b></td>
+                        <thead className="home__scores-table-header">
+                            <tr>
+                                <th>Rank</th>
+                                <th className="home__scores-table-player-col">Player</th>
+                                <th>Tiebreaker Pick</th>
+                                <th>Tiebreaker Distance</th>
+                                <th>College Score</th>
+                                <th>Pro Score</th>
+                                <th>Pro Score Against the Spread</th>
+                                <th>Total Score</th>
                             </tr>
-                        })}
+                        </thead>
+                        <tbody>
+                            {scores.scores.map((player, index) => {
+                                return <tr key={player.name}>
+                                    <td><b>{index + 1}</b></td>
+                                    <td className="home__scores-table-player-col">{player.name}</td>
+                                    <td>{player.tiebreaker.pick ?? "N/A"}</td>
+                                    <td>{player.tiebreaker.distance ?? "N/A"}</td>
+                                    <td>{player.score.college}</td>
+                                    <td>{player.score.pro}</td>
+                                    <td>{player.score.proAgainstTheSpread}</td>
+                                    <td><b>{player.score.total}</b></td>
+                                </tr>
+                            })}
+                        </tbody>
                     </table>
                 </div>
             </div>}
