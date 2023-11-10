@@ -1,5 +1,5 @@
 import { Button, Sheet } from "@mui/joy";
-import { ChangeEventHandler, useCallback, useEffect, useRef, useState } from "react";
+import { ChangeEventHandler, useCallback, useRef, useState } from "react";
 import { Toast, useToastContext } from "../context/ToastContext";
 import { RakMadnessScores } from "../types/RakMadnessScores";
 import buildSpreadsheetBuffer from "../utils/buildSpreadsheetBuffer";
