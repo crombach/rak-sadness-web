@@ -24,8 +24,8 @@ type ToastContextData = {
 
 const ToastContext = createContext<ToastContextData>({
     toasts: [],
-    showToast: () => { },
-    removeToast: () => { },
+    showToast: () => { /* Placeholder */ },
+    removeToast: () => { /* Placeholder */ },
 });
 
 function useToastContextData(): ToastContextData {
