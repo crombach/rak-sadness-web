@@ -2,6 +2,7 @@ import { Button, Sheet } from "@mui/joy";
 import { ChangeEventHandler, useCallback, useEffect, useRef, useState } from "react";
 import { Toast, useToastContext } from "../context/ToastContext";
 import { RakMadnessScores } from "../types/RakMadnessScores";
+import buildSpreadsheetBuffer from "../utils/buildSpreadsheetBuffer";
 import getClasses from "../utils/getClasses";
 import getPlayerScores from "../utils/getPlayerScores";
 import "./RakSadness.css";
@@ -72,11 +73,21 @@ export default function RakSadness() {
         if (!week) return;
         const exportResultsAsync = async () => {
             setExportLoading(true);
-            // TODO: Implement for web
-            // const savedFile = await window.saveResultsSpreadsheet(scores, Number(week));
-            const savedFile = "TODO: Implement";
+            
+            // Build the spreadsheet buffer.
+            const spreadsheetBuffer = await buildSpreadsheetBuffer(scores, Number(week));
+
+            // Download the spreadsheet to the user's computer.
+            const blob = new Blob([spreadsheetBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+            const link = document.createElement("a");
+            link.href = window.URL.createObjectURL(blob);
+            link.download = `rak-madness_week-${week}_scores.xlsx`;
+            link.click();
+            link.remove();
+            
+            // Show success message.
             setExportLoading(false);
-            showToast(new Toast("success", "Success", `Exported results to ${savedFile}`));
+            showToast(new Toast("success", "Success", `Exported results spreadsheet`));
         };
         exportResultsAsync();
     }, [scores, week]);
@@ -98,7 +109,7 @@ export default function RakSadness() {
                         }}
                     />
                 </div>
-                <input ref={fileInputRef} className="home__file-input" type="file" onChange={handleFileUpload} />
+                <input ref={fileInputRef} className="home__file-input" type="file" accept=".xlsx" onChange={handleFileUpload} />
                 <Button
                     className={`home__submit-button ${getClasses({
                         "--loading-btn": isScoresLoading

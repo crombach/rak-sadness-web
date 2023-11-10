@@ -118,7 +118,7 @@ function normalCell({
     }
 }
 
-export default function buildSpreadsheetBuffer(scoresObject: RakMadnessScores, week: number): Promise<Buffer> {
+export default function buildSpreadsheetBuffer(scoresObject: RakMadnessScores, week: number): Promise<ArrayBuffer> {
     // Create a new Excel workbook.
     const workbook = XLSX.utils.book_new();
 
@@ -212,5 +212,5 @@ export default function buildSpreadsheetBuffer(scoresObject: RakMadnessScores, w
     XLSX.utils.book_append_sheet(workbook, explanationSheet, `Rak Madness Week ${week} Explanation`);
 
     // Write the workbook to a buffer and return that buffer.
-    return XLSX.write(workbook, { type: "buffer" });
+    return XLSX.write(workbook, { type: "array" });
 }
