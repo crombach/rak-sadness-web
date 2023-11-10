@@ -72,10 +72,17 @@
 
 .home__scores-table td {
     color: black;
-    background-color: white;
     min-width: max-content;
     padding: 2px 6px;
     border: 1px solid black;
+}
+
+.home__scores-table tbody tr:nth-child(odd) td {
+    background-color: white;
+}
+
+.home__scores-table tbody tr:nth-child(even) td {
+    background-color: #ededed;
 }
 
 .home__footer {
