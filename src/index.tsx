@@ -5,6 +5,7 @@ import '@fontsource-variable/inter';
 import { CssVarsProvider, CssBaseline } from '@mui/joy';
 import { ToastContextProvider } from './context/ToastContext';
 import Toaster from './components/toaster/Toaster';
+import "./index.css";
 
 const root = createRoot(document.getElementById('root'));
 root.render(
