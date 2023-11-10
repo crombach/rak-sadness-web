@@ -17,7 +17,7 @@ export async function getLeagueResults(league: League, week: number): Promise<Ar
     const extraParams = league === League.COLLEGE ? "&limit=200&groups=80" : "";
 
     // Build final request URL.
-    const requestUrl = `http://site.api.espn.com/apis/site/v2/sports/football/${league}/scoreboard?week=${adjustedWeek}${extraParams}`;
+    const requestUrl = `https://site.api.espn.com/apis/site/v2/sports/football/${league}/scoreboard?week=${adjustedWeek}${extraParams}`;
 
     const response = await fetch(requestUrl);
     const json = await response.json();
