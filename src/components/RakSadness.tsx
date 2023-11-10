@@ -1,12 +1,11 @@
 import { Button, Sheet } from "@mui/joy";
-import { ChangeEvent, ChangeEventHandler, useCallback, useEffect, useRef, useState } from "react";
+import { ChangeEventHandler, useCallback, useEffect, useRef, useState } from "react";
+import { Toast, useToastContext } from "../context/ToastContext";
 import { RakMadnessScores } from "../types/RakMadnessScores";
 import getClasses from "../utils/getClasses";
-import FloatingLabelInput from "./floatingLabelInput/FloatingLabelInput";
-import { Toast, useToastContext } from "../context/ToastContext";
-import "./RakSadness.css";
-import { readFileSync } from "fs";
 import getPlayerScores from "../utils/getPlayerScores";
+import "./RakSadness.css";
+import FloatingLabelInput from "./floatingLabelInput/FloatingLabelInput";
 
 export default function RakSadness() {
     const { showToast } = useToastContext();
@@ -14,8 +13,11 @@ export default function RakSadness() {
     // File input ref
     const fileInputRef = useRef(null);
 
-    // Week number (input by user)
+    // User input state
     const [week, setWeek] = useState<string>("");
+
+    // Calculated scores
+    const [scores, setScores] = useState<RakMadnessScores>();
 
     // Loading flags
     const [isScoresLoading, setScoresLoading] = useState(false);
@@ -27,62 +29,43 @@ export default function RakSadness() {
         document.title = "Rak Sadness"
     }, []);
 
-    const [scores, setScores] = useState<RakMadnessScores>();
-    // const scoreSpreadsheet = useCallback(() => {
-    //     if (!week) return;
-    //     const scoreSpreadsheetAsync = async () => {
-    //         setScoresLoading(true);
-    //         // TODO: Implement for web
-    //         const newScores = await window.pickAndScoreSpreadsheet(Number(week));
-    //         const newScores: RakMadnessScores = {
-    //             tiebreaker: 0,
-    //             scores: [],
-    //         }
-    //         if (newScores) {
-    //             setScores(newScores);
-    //             setScoresLoading(false);
-    //             showToast(new Toast("success", "Success", "Generated results from picks spreadsheet"));
-    //         } else {
-    //             setScores(null);
-    //             setScoresLoading(false);
-    //             showToast(new Toast("neutral", "Info", "Aborted picks shreadsheet selection"));
-    //         }
-    //     };
-    //     scoreSpreadsheetAsync();
-    // }, [week]);
-
     const clickFileInput = useCallback(() => {
         fileInputRef.current?.click();
     }, []);
 
     const handleFileUpload: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
-        if (!week) return;
+        if (!week) {
+            return;
+        }
+
+        const abort = () => {
+            setScores(null);
+            setScoresLoading(false);
+            showToast(new Toast("neutral", "Info", "Aborted picks shreadsheet selection"));
+        };
+
         const scoreSpreadsheetAsync = async () => {
             setScoresLoading(true);
 
             // Get buffer from file.
             const files = Array.from(event.target.files);
-            console.debug("files", files);
             if (!files.length || !files[0]) {
-                setScores(null);
-                setScoresLoading(false);
-                showToast(new Toast("neutral", "Info", "Aborted picks shreadsheet selection"));
+                abort();
+                return;
             }
 
-            const spreadsheetBuffer = readFileSync(files[0].name);
-            const newScores = await getPlayerScores(Number(week), spreadsheetBuffer);
+            const newScores = await getPlayerScores(Number(week), files[0]);
             if (newScores) {
                 setScores(newScores);
                 setScoresLoading(false);
                 showToast(new Toast("success", "Success", "Generated results from picks spreadsheet"));
             } else {
-                setScores(null);
-                setScoresLoading(false);
-                showToast(new Toast("neutral", "Info", "Aborted picks shreadsheet selection"));
+                abort();
             }
         };
+
         scoreSpreadsheetAsync();
-    }, []);
+    }, [week]);
 
 
     const exportResults = useCallback(() => {

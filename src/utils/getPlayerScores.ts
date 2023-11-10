@@ -1,13 +1,9 @@
 import * as XLSX from "xlsx-js-style";
-import { Readable } from "stream";
-import { getLeagueResults } from "./getLeagueResults";
+import { GameScore } from "../types/GameScore";
 import { League } from "../types/League";
 import { LeagueResult } from "../types/LeagueResult";
 import { Correctness, PlayerScore, RakMadnessScores } from "../types/RakMadnessScores";
-import { GameScore } from "../types/GameScore";
-
-// Add stream support to XLSX parser
-XLSX.stream.set_readable(Readable);
+import { getLeagueResults } from "./getLeagueResults";
 
 // Capture group 1 is team abbreviation, capture group 3 is spread (if present)
 const pickRegex = /([\S]+)(\s+([+-]?\d+(\.\d)?))?/;
@@ -94,9 +90,23 @@ function getPickResults(picks: Array<string>, leagueResults: Array<LeagueResult>
     });
 }
 
-export default async function getPlayerScores(week: number, picksBuffer: Buffer): Promise<RakMadnessScores> {
+async function readFile(file: File): Promise<ArrayBuffer> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            resolve(reader.result as ArrayBuffer)
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+export default async function getPlayerScores(week: number, picksFile: File): Promise<RakMadnessScores> {
+    // Read the provided file into a buffer.
+    const buffer = await readFile(picksFile);
+
     // Parse the Excel spreadsheet.
-    const workbook = XLSX.read(picksBuffer, { type: "buffer" });
+    const workbook = XLSX.read(buffer, { type: "array" });
     const picksSheet = workbook.Sheets[Object.keys(workbook.Sheets)[0]];
     const allPicks: Array<any> = XLSX.utils.sheet_to_json(picksSheet);
 
