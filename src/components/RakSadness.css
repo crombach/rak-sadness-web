@@ -30,15 +30,45 @@
     flex-direction: row;
     align-items: center;
     gap: 12px;
-    padding: 16px;
+    padding: 12px 16px;
+    font-weight: bold;
 }
 
 .home__scores-content {
     display: flex;
     flex-direction: column;
+    width: 100%;
     margin: 0;
-    padding: 16px;
     overflow: auto;
+}
+
+.home__scores-table {
+    max-width: 1400px;
+    margin: auto;
+}
+
+.home__scores-table-header {
+    position: sticky;
+    top: 0;
+    background-color: black;
+}
+
+.home__scores-table th {
+    color: white;
+    min-width: max-content;
+    padding: 2px 6px;
+}
+
+.home__scores-table th:not(:last-child) {
+    border-right: 1px solid white;
+}
+
+.home__scores-table td {
+    color: black;
+    background-color: white;
+    min-width: max-content;
+    padding: 2px 6px;
+    border: 1px solid black;
 }
 
 .home__footer {
