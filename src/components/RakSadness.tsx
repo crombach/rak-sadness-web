@@ -2,6 +2,7 @@ import { Button, Sheet } from "@mui/joy";
 import { ChangeEventHandler, useCallback, useRef, useState } from "react";
 import { Toast, useToastContext } from "../context/ToastContext";
 import { RakMadnessScores } from "../types/RakMadnessScores";
+import ChevronLeft from '@mui/icons-material/ChevronLeft';
 import buildSpreadsheetBuffer from "../utils/buildSpreadsheetBuffer";
 import getClasses from "../utils/getClasses";
 import getPlayerScores from "../utils/getPlayerScores";
@@ -16,6 +17,7 @@ export default function RakSadness() {
 
     // User input state
     const [week, setWeek] = useState<string>("");
+    const [showScores, setShowScores] = useState(false);
 
     // Calculated scores
     const [scores, setScores] = useState<RakMadnessScores>();
@@ -68,18 +70,18 @@ export default function RakSadness() {
         if (!week) return;
         const exportResultsAsync = async () => {
             setExportLoading(true);
-            
+
             // Build the spreadsheet buffer.
             const spreadsheetBuffer = await buildSpreadsheetBuffer(scores, Number(week));
 
             // Download the spreadsheet to the user's computer.
-            const blob = new Blob([spreadsheetBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+            const blob = new Blob([spreadsheetBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
             const link = document.createElement("a");
             link.href = window.URL.createObjectURL(blob);
             link.download = `rak-madness_week-${week}_scores.xlsx`;
             link.click();
             link.remove();
-            
+
             // Show success message.
             setExportLoading(false);
             showToast(new Toast("success", "Success", `Exported results spreadsheet`));
@@ -89,61 +91,83 @@ export default function RakSadness() {
 
     return (
         <Sheet className="home" variant="plain" color="neutral">
-            <div className="home__content">
-                <div className="home__week-input">
-                    <FloatingLabelInput
-                        label="Week"
-                        placeholder="Rak Madness week number"
-                        value={week}
-                        onChange={(event) => {
-                            setScores(null);
-                            const digitsRegex = /^[0-9\b]+$/;
-                            if (event.target.value === "" || digitsRegex.test(event.target.value)) {
-                                setWeek(event.target.value);
-                            }
-                        }}
-                    />
-                </div>
-                <input ref={fileInputRef} className="home__file-input" type="file" accept=".xlsx" onChange={handleFileUpload} />
-                <Button
-                    className={`home__submit-button ${getClasses({
-                        "--loading-btn": isScoresLoading
-                    })}`}
-                    variant="solid"
-                    onClick={clickFileInput}
-                    disabled={!week}
-                >
-                    Select Picks Spreadsheet
-                </Button>
-                <div className={`home__actions ${getClasses({
-                    "--expanded": !!week && !!scores
-                })}`}>
+            {!showScores && <>
+                <div className="home__controls">
+                    <div className="home__week-input">
+                        <FloatingLabelInput
+                            label="Week"
+                            placeholder="Rak Madness week number"
+                            value={week}
+                            onChange={(event) => {
+                                setScores(null);
+                                const digitsRegex = /^[0-9\b]+$/;
+                                if (event.target.value === "" || digitsRegex.test(event.target.value)) {
+                                    setWeek(event.target.value);
+                                }
+                            }}
+                        />
+                    </div>
+                    <input ref={fileInputRef} className="home__file-input" type="file" accept=".xlsx" onChange={handleFileUpload} />
                     <Button
-                        className={`home__actions-button ${getClasses({
-                            "--loading-btn": isViewLoading
+                        className={`home__submit-button ${getClasses({
+                            "--loading-btn": isScoresLoading
                         })}`}
-                        disabled
-                        // disabled={!week || !scores || isScoresLoading}
                         variant="solid"
-                        color="success"
-                        onClick={() => console.log("TODO: Implement View Results")}
+                        onClick={clickFileInput}
+                        disabled={!week}
                     >
-                        View Results
+                        Select Picks Spreadsheet
                     </Button>
-                    <Button
-                        className={`home__actions-button ${getClasses({
-                            "--loading-btn": isExportLoading
-                        })}`}
-                        disabled={!week || !scores || isScoresLoading}
-                        variant="solid"
-                        color="danger"
-                        onClick={exportResults}
-                    >
-                        Export Results
-                    </Button>
+                    <div className={`home__actions ${getClasses({
+                        "--expanded": !!week && !!scores
+                    })}`}>
+                        <Button
+                            className={`home__actions-button ${getClasses({
+                                "--loading-btn": isViewLoading
+                            })}`}
+                            disabled={!week || !scores || isScoresLoading}
+                            variant="solid"
+                            color="success"
+                            onClick={() => setShowScores(prev => !prev)}
+                        >
+                            View Results
+                        </Button>
+                        <Button
+                            className={`home__actions-button ${getClasses({
+                                "--loading-btn": isExportLoading
+                            })}`}
+                            disabled={!week || !scores || isScoresLoading}
+                            variant="solid"
+                            color="danger"
+                            onClick={exportResults}
+                        >
+                            Export Results
+                        </Button>
+                    </div>
                 </div>
-            </div>
-            <a className="home__footer" href="https://give.translifeline.org/give/461718/#!/donation/checkout" target="_blank">Trans rights are human rights 🏳️‍⚧️</a>
+                <a className="home__footer" href="https://give.translifeline.org/give/461718/#!/donation/checkout" target="_blank">Trans rights are human rights 🏳️‍⚧️</a>
+            </>}
+            {showScores && scores && <div className="home__scores">
+                <Sheet className="home__scores-header" variant="solid" color="primary">
+                    <Button
+                        variant="solid"
+                        color="primary"
+                        onClick={() => setShowScores(prev => !prev)}
+                    >
+                        <ChevronLeft />
+                    </Button>
+                    <span>Week {week} Results (This page is a WIP)</span>
+                </Sheet>
+                <div className="home__scores-content">
+                    <ol>
+                        {scores.scores.map((player) => {
+                            return <li>{player.name} ({player.score.total})</li>
+                        })}
+                    </ol>
+
+                </div>
+            </div>}
+
         </Sheet>
     );
 

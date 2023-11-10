@@ -4,7 +4,7 @@
     flex-direction: column-reverse;
     gap: 12px;
     position: fixed;
-    top: 0;
+    bottom: 0;
     right: 0;
     margin: 24px;
     width: min(calc(100% - 48px), 400px);
