@@ -67,7 +67,7 @@ function explanationCell(pick: string, isCorrect: Correctness) {
 
     // Return cell object
     return {
-        v: pick,
+        v: pick ?? "N/A",
         s: {
             alignment: {
                 horizontal: "center",
