@@ -1,17 +1,18 @@
-import { PlayerScore, RakMadnessScores } from "../../types/RakMadnessScores";
-import "./ScoresTable.css";
+import { memo } from "react";
+import { PlayerScore, RakMadnessScores } from "../../../types/RakMadnessScores";
+import "../Table.css";
 
-export default function ScoresTable({ scores }: { scores?: RakMadnessScores }) {
+function ScoresTable({ scores }: { scores?: RakMadnessScores }) {
     if (scores == null) {
         return null;
     }
 
     return (
-        <table className="scores-table" cellSpacing="0">
-            <thead className="scores-table__header">
+        <table className="table" cellSpacing="0">
+            <thead className="table__header">
                 <tr>
                     <th>Rank</th>
-                    <th className="scores-table__player-col">Player</th>
+                    <th className="table__player-col">Player</th>
                     <th>Tiebreaker Pick</th>
                     <th>Tiebreaker Distance</th>
                     <th>College Score</th>
@@ -24,7 +25,7 @@ export default function ScoresTable({ scores }: { scores?: RakMadnessScores }) {
                 {scores.scores.map((player: PlayerScore, index: number) => {
                     return <tr key={player.name}>
                         <td><b>{index + 1}</b></td>
-                        <td className="scores-table__player-col">{player.name}</td>
+                        <td className="table__player-col">{player.name}</td>
                         <td>{player.tiebreaker.pick ?? "N/A"}</td>
                         <td>{player.tiebreaker.distance ?? "N/A"}</td>
                         <td>{player.score.college}</td>
@@ -37,3 +38,6 @@ export default function ScoresTable({ scores }: { scores?: RakMadnessScores }) {
         </table>
     );
 }
+
+
+export default memo(ScoresTable);

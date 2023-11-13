@@ -1,9 +1,6 @@
 import { Correctness, RakMadnessScores } from "../types/RakMadnessScores";
 import * as XLSX from "xlsx-js-style";
-
-function rangeWithPrefix(size: number, prefix = ""): Array<string> {
-    return [...Array(size).keys()].map(index => `${prefix}${index + 1}`);
-}
+import rangeWithPrefix from "./rangeWithPrefix";
 
 const Color = {
     WHITE: {

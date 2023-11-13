@@ -3,12 +3,15 @@ import { ChangeEventHandler, useCallback, useRef, useState } from "react";
 import { Toast, useToastContext } from "../context/ToastContext";
 import { RakMadnessScores } from "../types/RakMadnessScores";
 import ChevronLeft from '@mui/icons-material/ChevronLeft';
+import Info from '@mui/icons-material/Info';
+import Leaderboard from '@mui/icons-material/Leaderboard';
 import buildSpreadsheetBuffer from "../utils/buildSpreadsheetBuffer";
 import getClasses from "../utils/getClasses";
 import getPlayerScores from "../utils/getPlayerScores";
 import "./RakSadness.css";
 import FloatingLabelInput from "./floatingLabelInput/FloatingLabelInput";
-import ScoresTable from "./scoresTable/ScoresTable";
+import ScoresTable from "./table/scores/ScoresTable";
+import ExplanationTable from "./table/explanation/ExplanationTable";
 
 export default function RakSadness() {
     const { showToast } = useToastContext();
@@ -18,7 +21,7 @@ export default function RakSadness() {
 
     // User input state
     const [week, setWeek] = useState<string>("");
-    const [showScores, setShowScores] = useState(false);
+    const [showScores, setShowScores] = useState<"leaderboard" | "explanation" | false>(false);
 
     // Calculated scores
     const [scores, setScores] = useState<RakMadnessScores>();
@@ -131,7 +134,7 @@ export default function RakSadness() {
                             disabled={!week || !scores || isScoresLoading}
                             variant="solid"
                             color="success"
-                            onClick={() => setShowScores(prev => !prev)}
+                            onClick={() => setShowScores("leaderboard")}
                         >
                             View Results
                         </Button>
@@ -157,19 +160,38 @@ export default function RakSadness() {
             {showScores && scores && <div className="home__scores">
                 {/* Header */}
                 <Sheet className="home__scores-header" variant="solid" color="primary">
-                    <Button
-                        variant="solid"
-                        color="primary"
-                        onClick={() => setShowScores(prev => !prev)}
-                    >
-                        <ChevronLeft />
-                    </Button>
-                    <span>Week {week} Results</span>
+                    <div className="home__scores-header-left">
+                        <Button
+                            variant="solid"
+                            color="primary"
+                            onClick={() => setShowScores(false)}
+                        >
+                            <ChevronLeft />
+                        </Button>
+                        <span>Week {week} {showScores === "leaderboard" ? "Leaderboard" : "Explanation"}</span>
+                    </div>
+                    <div className="home__scores-header-right">
+                        <Button
+                            variant="solid"
+                            color="primary"
+                            onClick={() => setShowScores("leaderboard")}
+                        >
+                            <Leaderboard />
+                        </Button>
+                        <Button
+                            variant="solid"
+                            color="primary"
+                            onClick={() => setShowScores("explanation")}
+                        >
+                            <Info />
+                        </Button>
+                    </div>
                 </Sheet>
 
                 {/* Table */}
                 <div className="home__scores-content">
-                    <ScoresTable scores={scores} />
+                    {showScores === "leaderboard" && <ScoresTable scores={scores} />}
+                    {showScores === "explanation" && <ExplanationTable scores={scores} />}
                 </div>
             </div>}
         </Sheet>
