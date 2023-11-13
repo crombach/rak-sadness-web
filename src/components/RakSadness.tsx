@@ -168,7 +168,7 @@ export default function RakSadness() {
                         >
                             <ChevronLeft />
                         </Button>
-                        <span>Week {week} {showScores === "leaderboard" ? "Leaderboard" : "Explanation"}</span>
+                        <span>{showScores === "leaderboard" ? "Leaderboard" : "Explanation"}</span>
                     </div>
                     <div className="home__scores-header-right">
                         <Button
