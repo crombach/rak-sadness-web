@@ -21,7 +21,7 @@ export default function RakSadness() {
 
     // User input state
     const [week, setWeek] = useState<string>("");
-    const [showScores, setShowScores] = useState<"leaderboard" | "explanation" | false>(false);
+    const [showScores, setShowScores] = useState<"Leaderboard" | "Explanation" | false>(false);
 
     // Calculated scores
     const [scores, setScores] = useState<RakMadnessScores>();
@@ -134,7 +134,7 @@ export default function RakSadness() {
                             disabled={!week || !scores || isScoresLoading}
                             variant="solid"
                             color="success"
-                            onClick={() => setShowScores("leaderboard")}
+                            onClick={() => setShowScores("Leaderboard")}
                         >
                             View Results
                         </Button>
@@ -169,20 +169,20 @@ export default function RakSadness() {
                             >
                                 <ChevronLeft />
                             </Button>
-                            <span>{showScores === "leaderboard" ? "Leaderboard" : "Explanation"}</span>
+                            <span>{showScores}</span>
                         </div>
                         <div className="home__scores-header-right">
                             <Button
                                 variant="solid"
                                 color="primary"
-                                onClick={() => setShowScores("leaderboard")}
+                                onClick={() => setShowScores("Leaderboard")}
                             >
                                 <Leaderboard />
                             </Button>
                             <Button
                                 variant="solid"
                                 color="primary"
-                                onClick={() => setShowScores("explanation")}
+                                onClick={() => setShowScores("Explanation")}
                             >
                                 <Info />
                             </Button>
@@ -192,8 +192,8 @@ export default function RakSadness() {
 
                 {/* Table */}
                 <div className="home__scores-content">
-                    {showScores === "leaderboard" && <ScoresTable scores={scores} />}
-                    {showScores === "explanation" && <ExplanationTable scores={scores} />}
+                    {showScores === "Leaderboard" && <ScoresTable scores={scores} />}
+                    {showScores === "Explanation" && <ExplanationTable scores={scores} />}
                 </div>
             </div>}
         </Sheet>
