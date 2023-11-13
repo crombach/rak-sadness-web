@@ -1,7 +1,10 @@
 .table {
-    font-size: 0.8rem;
     max-width: 1400px;
     margin: auto;
+
+    @media (max-width: 400px) {
+        font-size: 0.8rem;
+    }
 }
 
 .table__header {
