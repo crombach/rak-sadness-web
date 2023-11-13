@@ -22,7 +22,7 @@
         color: white;
         background-color: black;
         min-width: max-content;
-        padding: 2px 6px;
+        padding: 2px 8px;
     }
 
     th:not(:last-child) {

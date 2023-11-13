@@ -1,7 +1,7 @@
 .table {
     .table__pick-header {
         display: inline-block;
-        min-width: 68px;
+        min-width: 64px;
     }
 
     .table__center {
