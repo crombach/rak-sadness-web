@@ -8,6 +8,7 @@ import getClasses from "../utils/getClasses";
 import getPlayerScores from "../utils/getPlayerScores";
 import "./RakSadness.css";
 import FloatingLabelInput from "./floatingLabelInput/FloatingLabelInput";
+import ScoresTable from "./scoresTable/ScoresTable";
 
 export default function RakSadness() {
     const { showToast } = useToastContext();
@@ -91,7 +92,9 @@ export default function RakSadness() {
 
     return (
         <Sheet className="home" variant="plain" color="neutral">
+            {/* Home Page */}
             {!showScores && <>
+                {/* Input Controls */}
                 <div className="home__controls">
                     <div className="home__week-input">
                         <FloatingLabelInput
@@ -145,9 +148,14 @@ export default function RakSadness() {
                         </Button>
                     </div>
                 </div>
+
+                {/* Footer */}
                 <a className="home__footer" href="https://give.translifeline.org/give/461718/#!/donation/checkout" target="_blank">Trans rights are human rights 🏳️‍⚧️</a>
             </>}
+
+            {/* Scores Viewer */}
             {showScores && scores && <div className="home__scores">
+                {/* Header */}
                 <Sheet className="home__scores-header" variant="solid" color="primary">
                     <Button
                         variant="solid"
@@ -158,38 +166,12 @@ export default function RakSadness() {
                     </Button>
                     <span>Week {week} Results</span>
                 </Sheet>
+
+                {/* Table */}
                 <div className="home__scores-content">
-                    <table className="home__scores-table" cellSpacing="0">
-                        <thead className="home__scores-table-header">
-                            <tr>
-                                <th>Rank</th>
-                                <th className="home__scores-table-player-col">Player</th>
-                                <th>Tiebreaker Pick</th>
-                                <th>Tiebreaker Distance</th>
-                                <th>College Score</th>
-                                <th>Pro Score</th>
-                                <th>Pro Score Against the Spread</th>
-                                <th>Total Score</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {scores.scores.map((player, index) => {
-                                return <tr key={player.name}>
-                                    <td><b>{index + 1}</b></td>
-                                    <td className="home__scores-table-player-col">{player.name}</td>
-                                    <td>{player.tiebreaker.pick ?? "N/A"}</td>
-                                    <td>{player.tiebreaker.distance ?? "N/A"}</td>
-                                    <td>{player.score.college}</td>
-                                    <td>{player.score.pro}</td>
-                                    <td>{player.score.proAgainstTheSpread}</td>
-                                    <td><b>{player.score.total}</b></td>
-                                </tr>
-                            })}
-                        </tbody>
-                    </table>
+                    <ScoresTable scores={scores} />
                 </div>
             </div>}
-
         </Sheet>
     );
 

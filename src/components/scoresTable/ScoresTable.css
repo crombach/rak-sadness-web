@@ -1,0 +1,42 @@
+.scores-table {
+    max-width: 1400px;
+    margin: auto;
+}
+
+.scores-table__header {
+    z-index: 1;
+    position: sticky;
+    top: 0;
+    background-color: black;
+}
+
+.scores-table__player-col {
+    position: sticky;
+    left: 0;
+}
+
+.scores-table th {
+    color: white;
+    background-color: black;
+    min-width: max-content;
+    padding: 2px 6px;
+}
+
+.scores-table th:not(:last-child) {
+    border-right: 1px solid white;
+}
+
+.scores-table td {
+    color: black;
+    min-width: max-content;
+    padding: 2px 6px;
+    border: 1px solid black;
+}
+
+.scores-table tbody tr:nth-child(odd) td {
+    background-color: white;
+}
+
+.scores-table tbody tr:nth-child(even) td {
+    background-color: #ededed;
+}
