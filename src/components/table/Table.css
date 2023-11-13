@@ -5,43 +5,43 @@
     @media (max-width: 400px) {
         font-size: 0.8rem;
     }
+}
 
-    .table__header {
-        z-index: 1;
-        position: sticky;
-        top: 0;
-        background-color: black;
-    }
-    
-    .table__player-col {
-        position: sticky;
-        left: 0;
-    }
+.table .table__header {
+    z-index: 1;
+    position: sticky;
+    top: 0;
+    background-color: black;
+}
 
-    th {
-        color: white;
-        background-color: black;
-        min-width: max-content;
-        padding: 2px 8px;
-    }
+.table .table__player-col {
+    position: sticky;
+    left: 0;
+}
 
-    th:not(:last-child) {
-        border-right: 1px solid white;
-    }
+.table th {
+    color: white;
+    background-color: black;
+    min-width: max-content;
+    padding: 2px 8px;
+}
 
-    td {
-        color: black;
-        font-family: monospace;
-        min-width: max-content;
-        padding: 2px 6px;
-        border: 1px solid black;
-    }
+.table th:not(:last-child) {
+    border-right: 1px solid white;
+}
 
-    tbody tr:nth-child(odd) td {
-        background-color: white;
-    }
-    
-    tbody tr:nth-child(even) td {
-        background-color: #ededed;
-    }
+.table td {
+    color: black;
+    font-family: monospace;
+    min-width: max-content;
+    padding: 2px 6px;
+    border: 1px solid black;
+}
+
+.table tbody tr:nth-child(odd) td {
+    background-color: white;
+}
+
+.table tbody tr:nth-child(even) td {
+    background-color: #ededed;
 }

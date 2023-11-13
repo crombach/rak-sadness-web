@@ -7,10 +7,10 @@
     right: 0;
     margin: 24px;
     width: min(calc(100% - 48px), 400px);
+}
 
-    .toast {
-        display: flex;
-        align-items: flex-start;
-        width: 100%;
-    }
+.toast {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
 }
