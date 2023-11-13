@@ -1,5 +1,5 @@
 .table {
-    max-width: 1400px;
+    width: min(1400px, 100%);
     margin: auto;
 
     @media (max-width: 400px) {

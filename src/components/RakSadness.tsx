@@ -160,31 +160,33 @@ export default function RakSadness() {
             {showScores && scores && <div className="home__scores">
                 {/* Header */}
                 <Sheet className="home__scores-header" variant="solid" color="primary">
-                    <div className="home__scores-header-left">
-                        <Button
-                            variant="solid"
-                            color="primary"
-                            onClick={() => setShowScores(false)}
-                        >
-                            <ChevronLeft />
-                        </Button>
-                        <span>{showScores === "leaderboard" ? "Leaderboard" : "Explanation"}</span>
-                    </div>
-                    <div className="home__scores-header-right">
-                        <Button
-                            variant="solid"
-                            color="primary"
-                            onClick={() => setShowScores("leaderboard")}
-                        >
-                            <Leaderboard />
-                        </Button>
-                        <Button
-                            variant="solid"
-                            color="primary"
-                            onClick={() => setShowScores("explanation")}
-                        >
-                            <Info />
-                        </Button>
+                    <div className="home__scores-header-content">
+                        <div className="home__scores-header-left">
+                            <Button
+                                variant="solid"
+                                color="primary"
+                                onClick={() => setShowScores(false)}
+                            >
+                                <ChevronLeft />
+                            </Button>
+                            <span>{showScores === "leaderboard" ? "Leaderboard" : "Explanation"}</span>
+                        </div>
+                        <div className="home__scores-header-right">
+                            <Button
+                                variant="solid"
+                                color="primary"
+                                onClick={() => setShowScores("leaderboard")}
+                            >
+                                <Leaderboard />
+                            </Button>
+                            <Button
+                                variant="solid"
+                                color="primary"
+                                onClick={() => setShowScores("explanation")}
+                            >
+                                <Info />
+                            </Button>
+                        </div>
                     </div>
                 </Sheet>
 

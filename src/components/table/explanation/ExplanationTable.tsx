@@ -28,10 +28,10 @@ function ExplanationTable({ scores }: { scores?: RakMadnessScores }) {
                     <th>Rank</th>
                     <th className="table__player-col">Player</th>
                     {collegeHeaders}
-                    <th>College Score</th>
+                    <th>College</th>
                     {proHeaders}
-                    <th>Pro Score</th>
-                    <th>Total Score</th>
+                    <th>Pro</th>
+                    <th>Total</th>
                 </tr>
             </thead>
             <tbody>
