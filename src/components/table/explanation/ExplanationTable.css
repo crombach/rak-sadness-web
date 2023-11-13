@@ -1,35 +1,38 @@
-.table__pick-header {
-    display: inline-block;
-    min-width: 68px;
-}
+.table {
+    .table__pick-header {
+        display: inline-block;
+        min-width: 68px;
+    }
 
-.table__center {
-    text-align: center;
-}
+    .table__center {
+        text-align: center;
+    }
 
-.table__pick {
-    white-space: nowrap;
-}
+    .table__pick {
+        white-space: nowrap;
+    }
 
-table tbody td.table__pick.--yes {
-    background-color: #a3faa0;
-}
-table tbody tr:nth-child(even) td.table__pick.--yes {
-    background-color: #7ede7c;
-}
+    tbody td.table__pick.--yes {
+        background-color: #a3faa0;
+    }
 
+    tbody tr:nth-child(even) td.table__pick.--yes {
+        background-color: #7ede7c;
+    }
 
-table tbody td.table__pick.--no {
-    background-color: #faa0a0;
-}
-table tbody tr:nth-child(even) td.table__pick.--no {
-    background-color: #de7c7c;
-}
+    tbody td.table__pick.--no {
+        background-color: #faa0a0;
+    }
 
-table tbody td.table__pick.--unknown {
-    background-color: #edfaa0;
-}
+    tbody tr:nth-child(even) td.table__pick.--no {
+        background-color: #de7c7c;
+    }
 
-table tbody tr:nth-child(even) td.table__pick.--unknown {
-    background-color: #cfde7c;
+    tbody td.table__pick.--unknown {
+        background-color: #edfaa0;
+    }
+
+    tbody tr:nth-child(even) td.table__pick.--unknown {
+        background-color: #cfde7c;
+    }
 }

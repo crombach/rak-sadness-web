@@ -1,4 +1,3 @@
-/* TODO: Move alerts into their own component and use a context */
 .toaster {
     display: flex;
     flex-direction: column-reverse;
@@ -8,10 +7,10 @@
     right: 0;
     margin: 24px;
     width: min(calc(100% - 48px), 400px);
-}
 
-.toaster .toast {
-    display: flex;
-    align-items: flex-start;
-    width: 100%;
+    .toast {
+        display: flex;
+        align-items: flex-start;
+        width: 100%;
+    }
 }
