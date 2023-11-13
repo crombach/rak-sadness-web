@@ -136,8 +136,10 @@
     color: #888888;
     text-decoration: none;
     text-align: center;
+}
 
-    @media (max-height: 400px) {
+@media (max-height: 400px) {
+    .home__footer {
         display: none;
     }
 }
