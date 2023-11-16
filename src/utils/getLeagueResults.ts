@@ -22,7 +22,8 @@ export async function getLeagueResults(league: League, week: number): Promise<Ar
     const response = await fetch(requestUrl);
     const json = await response.json();
 
-    return json.events.filter((event: EspnEvent) => event.status.type.completed).map((event: EspnEvent) => {
+    return json.events.map((event: EspnEvent) => {
+        const isCompleted = event.status.type.completed;
         const home = event.competitions[0].competitors.find((competitor: EspnCompetitor) => {
             return competitor.homeAway === "home";
         });
@@ -33,13 +34,13 @@ export async function getLeagueResults(league: League, week: number): Promise<Ar
         const homeScore = Number(home.score);
         const awayScore = Number(away.score);
 
-        let winner;
-        if (homeScore > awayScore) {
-            winner = home;
-        } else if (awayScore > homeScore) {
-            winner = away;
-        } else {
-            winner = null;
+        let winner = null;
+        if (isCompleted) {
+            if (homeScore > awayScore) {
+                winner = home;
+            } else if (awayScore > homeScore) {
+                winner = away;
+            }
         }
 
         const winnerScore = (winner === home) ? homeScore : awayScore;
@@ -48,6 +49,7 @@ export async function getLeagueResults(league: League, week: number): Promise<Ar
         return {
             name: event.name,
             shortName: event.shortName,
+            isCompleted,
             home: {
                 team: {
                     name: home.team.displayName,

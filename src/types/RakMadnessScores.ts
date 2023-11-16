@@ -24,4 +24,4 @@ export type PickResult = {
     correct: Correctness;
 }
 
-export type Correctness = "yes" | "no" | "unknown";
+export type Correctness = "yes" | "no" | "incomplete" | "error";

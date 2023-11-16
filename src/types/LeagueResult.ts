@@ -6,6 +6,7 @@ type Team = {
  export type LeagueResult = {
     name: string;
     shortName: string;
+    isCompleted: boolean;
     home: {
         team: Team;
         score: number;

@@ -27,10 +27,10 @@
     background-color: #de7c7c;
 }
 
-.table tbody td.table__pick.--unknown {
+.table tbody td.table__pick.--error {
     background-color: #edfaa0;
 }
 
-.table tbody tr:nth-child(even) td.table__pick.--unknown {
+.table tbody tr:nth-child(even) td.table__pick.--error {
     background-color: #cfde7c;
 }

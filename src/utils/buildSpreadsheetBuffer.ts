@@ -55,11 +55,13 @@ function headerCell(value: string) {
 
 function explanationCell(pick: string, isCorrect: Correctness) {
     // Determine cell color
-    let cellColor = Color.YELLOW;
+    let cellColor = Color.WHITE;
     if (isCorrect === "yes") {
         cellColor = Color.GREEN;
     } else if (isCorrect === "no") {
         cellColor = Color.RED;
+    } else if (isCorrect == "error") {
+        cellColor = Color.YELLOW;
     }
 
     // Return cell object

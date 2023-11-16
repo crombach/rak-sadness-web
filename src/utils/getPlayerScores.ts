@@ -16,8 +16,10 @@ function parsePick(pickString: string) {
 }
 
 function getCorrectness(score: GameScore): Correctness {
-    if (score.wasNotFound) {
-        return "unknown";
+    if (score.wasNotFound) { // TODO: Score should always be present.
+        return "error";
+    } else if (!score.isCompleted) {
+        return "incomplete";
     } else if (score.pointValue === 1) {
         return "yes";
     }
@@ -40,7 +42,7 @@ function getPickResults(picks: Array<string>, leagueResults: Array<LeagueResult>
         });
         if (!gameResult) {
             console.error("FAILED to find game result for team abbreviation:", selectedTeam);
-            return { pointValue: 0, wasNotFound: true, hasSpread };
+            return { pointValue: 0, wasNotFound: true, isCompleted: false, hasSpread };
         }
         console.debug("Winner:", gameResult.winner);
 
@@ -86,7 +88,7 @@ function getPickResults(picks: Array<string>, leagueResults: Array<LeagueResult>
             }
         }
 
-        return { pointValue, wasNotFound: false, hasSpread };
+        return { pointValue, wasNotFound: false, isCompleted: gameResult.isCompleted, hasSpread };
     });
 }
 
@@ -121,7 +123,7 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
 
     // Determine MNF tiebreaker score.
     const { teamAbbreviation: tiebreakerTeam } = parsePick(allPicks[0][tiebreakerGameKey]);
-    const tiebreakerScore = proResults.find((result) => {
+    const tiebreakerScore = proResults.filter(result => result.isCompleted).find((result) => {
         return result.home.team.abbreviation === tiebreakerTeam || result.away.team.abbreviation === tiebreakerTeam;
     })?.totalScore;
 
@@ -130,17 +132,19 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
         // Score college picks
         const collegePicks = collegeKeys.map(key => playerRow[key]);
         const collegePickResults = getPickResults(collegePicks, collegeResults);
-        const scoreCollege = collegePickResults.reduce((partialSum: number, score: GameScore) => {
+        const collegePickResultsCompleted = collegePickResults.filter(result => result.isCompleted);
+        const scoreCollege = collegePickResultsCompleted.reduce((partialSum: number, score: GameScore) => {
             return partialSum + score.pointValue;
         }, 0);
 
         // Score pro picks
         const proPicks = proKeys.map(key => playerRow[key]);
         const proPickResults = getPickResults(proPicks, proResults);
-        const scorePro = proPickResults.reduce((partialSum: number, score: GameScore) => {
+        const proPickResultsCompleted = proPickResults.filter(result => result.isCompleted);
+        const scorePro = proPickResultsCompleted.reduce((partialSum: number, score: GameScore) => {
             return partialSum + score.pointValue;
         }, 0);
-        const scoreProAgainstTheSpread = proPickResults.reduce((partialSum: number, score: GameScore) => {
+        const scoreProAgainstTheSpread = proPickResultsCompleted.reduce((partialSum: number, score: GameScore) => {
             const gameValue = score.hasSpread ? score.pointValue : 0;
             return partialSum + gameValue;
         }, 0);
