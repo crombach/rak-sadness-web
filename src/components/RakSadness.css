@@ -121,6 +121,10 @@
     gap: 12px;
 }
 
+.home__scores-header-button.--selected {
+    background-color: var(--joy-palette-primary-600);
+}
+
 .home__scores-content {
     display: flex;
     flex-direction: column;
