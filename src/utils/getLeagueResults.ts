@@ -20,7 +20,7 @@ async function getLeagueEvents(league: League, week: number): Promise<Array<Espn
     // For college, we need to concatenate multiple groups.
     if (league === League.COLLEGE) {
         const collegePromises = COLLEGE_GROUPS.map((groupId: number) => {
-            const requestUrl = `https://site.api.espn.com/apis/site/v2/sports/football/${league}/scoreboard?week=${adjustedWeek}&limit=200&groups=${groupId}`;
+            const requestUrl = `${baseRequestUrl}&limit=200&groups=${groupId}`;
             return fetch(requestUrl).then(response => response.json().then(json => json.events as Array<EspnEvent>));
         });
         return (await Promise.all(collegePromises)).flat(1);
