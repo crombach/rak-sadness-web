@@ -164,7 +164,7 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
             },
             college: collegePicks.map((pick, index) => ({ pick, correct: getCorrectness(collegePickResults[index]) })),
             pro: proPicks.map((pick, index) => ({ pick, correct: getCorrectness(proPickResults[index]) })),
-            isKnockedOut: true,
+            isKnockedOut: false,
         }
     });
 
@@ -175,21 +175,28 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
     // 2. Number of college games picked correctly
     // 3. Number of NFL games with spreads picked correctly
     const sortedScores: Array<PlayerScore> = scores.sort((a, b) => {
+        // Total score
         if (a.score.total < b.score.total) {
             return 1;
         } else if (a.score.total > b.score.total) {
             return -1;
-        } else if (a.tiebreaker.distance && b.tiebreaker.distance) {
+        }
+        // Tiebreaker distance
+        if (a.tiebreaker.distance && b.tiebreaker.distance) {
             if (a.tiebreaker.distance > b.tiebreaker.distance) {
                 return 1;
             } else if (a.tiebreaker.distance < b.tiebreaker.distance) {
                 return -1;
             }
-        } else if (a.score.college < b.score.college) {
+        }
+        // College score
+        if (a.score.college < b.score.college) {
             return 1;
         } else if (a.score.college > b.score.college) {
             return -1;
-        } else if (a.score.proAgainstTheSpread < b.score.proAgainstTheSpread) {
+        }
+        // Pro score against the spread
+        if (a.score.proAgainstTheSpread < b.score.proAgainstTheSpread) {
             return 1;
         } else if (a.score.proAgainstTheSpread > b.score.proAgainstTheSpread) {
             return -1;
@@ -201,7 +208,7 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
     // This logic assumes the the team abbreviations are all correct.
     // If they're not (or the games can't be found for some other reason), results will be wrong.
     // Tiebreakers are not accounted for.
-    const topScore = sortedScores[0].score.total;
+    const topScore = sortedScores[0];
     const remainingCollegeGames: Array<{ index: number; pick: string; }> = [];
     sortedScores[0].college.forEach((pickResult, index) => {
         if (pickResult.correct === "incomplete") {
@@ -214,24 +221,63 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
             remainingProGames.push({ index, pick: pickResult.pick });
         }
     });
+
+    // A player is knocked out if the number of picks they have different from the leader
+    // is less than the score differential between them and the leader.
     const scoresWithKnockouts: Array<PlayerScore> = sortedScores.map((playerScore, index) => {
         // The first player is the leader, so we can skip them.
         if (index === 0) {
-            return { ...playerScore, isKnockedOut: false }
+            return playerScore;
         }
 
-        // A player is knocked out if the number of picks they have different from the leader
-        // is less than the score differential between them and the leader.
         const differentCollegePicks = remainingCollegeGames.reduce((acc, { index, pick }) => {
             return (playerScore.college[index].pick !== pick) ? acc + 1 : acc;
         }, 0);
-        const differentProPicks = remainingProGames.reduce((acc, { index, pick }) => {
-            return (playerScore.pro[index].pick !== pick) ? acc + 1 : acc;
+
+        let differentProPicks = 0;
+        let differentProPicksWithSpreads = 0;
+        remainingProGames.forEach(({ index, pick }) => {
+            const activePick = playerScore.pro[index].pick
+            if (activePick !== pick) {
+                differentProPicks += 1;
+                if (parsePick(activePick).spread !== 0) {
+                    differentProPicksWithSpreads += 1;
+                }
+            }
         }, 0);
-        const scoreDiff = topScore - playerScore.score.total;
+
+        const totalScoreDiff = topScore.score.total - playerScore.score.total;
         const totalDifferentPicks = differentCollegePicks + differentProPicks;
-        const isKnockedOut = totalDifferentPicks < scoreDiff;
-        return { ...playerScore, isKnockedOut };
+        if (totalDifferentPicks < totalScoreDiff) {
+            // If the player can't catch up on points, they're knocked out.
+            return { ...playerScore, isKnockedOut: true };
+        } else if (totalDifferentPicks === totalScoreDiff) {
+            // If the best a player can do is tie the leader, check if they're knocked out on breakers.
+            if (topScore.tiebreaker.pick === playerScore.tiebreaker.pick) {
+                // If the active player has the same tiebreaker pick as the leader, run through the list of other tiebreakers.
+                // If the leader has a better college score, check if the active player can catch up.
+                const collegeScoreDiff = topScore.score.college - playerScore.score.college;
+                if (collegeScoreDiff > 0 && differentCollegePicks < collegeScoreDiff) {
+                    return { ...playerScore, isKnockedOut: true };
+                }
+                // If college games are done and players are tied, check pro against the spread tiebreaker.
+                if (collegeScoreDiff === 0 && remainingCollegeGames.length == 0) {
+                    const proAgainstTheSpreadScoreDiff = topScore.score.proAgainstTheSpread - playerScore.score.proAgainstTheSpread;
+                    if (proAgainstTheSpreadScoreDiff > 0 && differentProPicksWithSpreads < proAgainstTheSpreadScoreDiff) {
+                        return { ...playerScore, isKnockedOut: true };
+                    }
+                }
+            } else if (tiebreakerScore != null) {
+                // If the tiebreaker score has been scraped, all games must be over.
+                // The first player in the leaderboard will be the winner, and all others should be knocked out.
+                const tiebreakerDistanceDiff = topScore.tiebreaker.distance - playerScore.tiebreaker.distance;
+                if (tiebreakerDistanceDiff < 0) {
+                    return { ...playerScore, isKnockedOut: true };
+                }
+            }
+        }
+
+        return playerScore;
     });
 
     return {
