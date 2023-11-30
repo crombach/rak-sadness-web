@@ -45,7 +45,7 @@ function ExplanationTable({ scores }: { scores?: RakMadnessScores }) {
                         {player.college.map((result, index) =>
                             <td
                                 key={`${player.name}-C${index + 1}`}
-                                className={`table__center table__pick --${result.correct}`}
+                                className={`table__center table__pick --${result.status}`}
                             >
                                 {result.pick || "N/A"}
                             </td>
@@ -54,7 +54,7 @@ function ExplanationTable({ scores }: { scores?: RakMadnessScores }) {
                         {player.pro.map((result, index) =>
                             <td
                                 key={`${player.name}-P${index + 1}`}
-                                className={`table__center table__pick --${result.correct}`}
+                                className={`table__center table__pick --${result.status}`}
                             >
                                 {result.pick || "N/A"}
                             </td>

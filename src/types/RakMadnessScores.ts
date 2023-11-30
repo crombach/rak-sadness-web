@@ -22,7 +22,7 @@ export type PlayerScore = {
 
 export type PickResult = {
     pick: string;
-    correct: Correctness;
+    status: Status;
 }
 
-export type Correctness = "yes" | "no" | "incomplete" | "error";
+export type Status = "yes" | "no" | "incomplete" | "error";

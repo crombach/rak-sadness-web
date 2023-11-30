@@ -1,4 +1,4 @@
-import { Correctness, RakMadnessScores } from "../types/RakMadnessScores";
+import { Status, RakMadnessScores } from "../types/RakMadnessScores";
 import * as XLSX from "xlsx-js-style";
 import rangeWithPrefix from "./rangeWithPrefix";
 
@@ -58,7 +58,7 @@ function headerCell(value: string) {
     }
 }
 
-function explanationCell(pick: string, isCorrect: Correctness) {
+function explanationCell(pick: string, isCorrect: Status) {
     // Determine cell color
     let cellColor = Color.WHITE;
     if (isCorrect === "yes") {
@@ -194,9 +194,9 @@ export default function buildSpreadsheetBuffer(scoresObject: RakMadnessScores, w
             return [
                 normalCell({ value: index + 1, alignment: "left", isBold: true }),
                 normalCell({ value: player.name, alignment: "left" }),
-                ...player.college.map(result => explanationCell(result.pick, result.correct)),
+                ...player.college.map(result => explanationCell(result.pick, result.status)),
                 normalCell({ value: player.score.college, alignment: "center" }),
-                ...player.pro.map(result => explanationCell(result.pick, result.correct)),
+                ...player.pro.map(result => explanationCell(result.pick, result.status)),
                 normalCell({ value: player.score.pro, alignment: "center" }),
                 normalCell({ value: player.score.total, alignment: "center", isBold: true }),
             ];
