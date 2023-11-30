@@ -253,7 +253,8 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
             return { ...playerScore, isKnockedOut: true };
         } else if (totalDifferentPicks === totalScoreDiff) {
             // If the best a player can do is tie the leader, check if they're knocked out on breakers.
-            if (topScore.tiebreaker.pick === playerScore.tiebreaker.pick) {
+            if (topScore.tiebreaker.pick === playerScore.tiebreaker.pick ||
+                (tiebreakerScore != null && topScore.tiebreaker.distance === playerScore.tiebreaker.distance)) {
                 // If the active player has the same tiebreaker pick as the leader, run through the list of other tiebreakers.
                 // If the leader has a better college score, check if the active player can catch up.
                 const collegeScoreDiff = topScore.score.college - playerScore.score.college;
@@ -267,13 +268,10 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
                         return { ...playerScore, isKnockedOut: true };
                     }
                 }
-            } else if (tiebreakerScore != null) {
+            } else if (tiebreakerScore != null && topScore.tiebreaker.distance - playerScore.tiebreaker.distance < 0) {
                 // If the tiebreaker score has been scraped, all games must be over.
                 // The first player in the leaderboard will be the winner, and all others should be knocked out.
-                const tiebreakerDistanceDiff = topScore.tiebreaker.distance - playerScore.tiebreaker.distance;
-                if (tiebreakerDistanceDiff < 0) {
-                    return { ...playerScore, isKnockedOut: true };
-                }
+                return { ...playerScore, isKnockedOut: true };
             }
         }
 
