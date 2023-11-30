@@ -31,6 +31,11 @@ const Border = {
     }
 }
 
+enum CellType {
+    Number = "n",
+    Text = "s"
+}
+
 function headerCell(value: string) {
     return {
         v: value,
@@ -66,6 +71,7 @@ function explanationCell(pick: string, isCorrect: Correctness) {
 
     // Return cell object
     return {
+        t: CellType.Text,
         v: pick ?? "N/A",
         s: {
             alignment: {
@@ -94,7 +100,9 @@ function normalCell({
     alignment?: "right" | "left" | "center";
     isBold?: boolean;
 }) {
+    const cellType = typeof (value) === "number" ? CellType.Number : CellType.Text;
     return {
+        t: cellType,
         v: value,
         s: {
             alignment: {
@@ -133,7 +141,7 @@ export default function buildSpreadsheetBuffer(scoresObject: RakMadnessScores, w
             headerCell("Pro Score"),
             headerCell("Pro Score Against the Spread"),
             headerCell("Total Score"),
-            
+
         ],
         // Data rows
         ...scoresObject.scores.map((player, index) => {
@@ -141,7 +149,7 @@ export default function buildSpreadsheetBuffer(scoresObject: RakMadnessScores, w
                 normalCell({ value: index + 1, alignment: "left", isBold: true }),
                 normalCell({ value: player.name, alignment: "left" }),
                 normalCell({ value: player.tiebreaker.pick ?? "N/A" }),
-                normalCell({ value:  player.tiebreaker.distance ?? "N/A" }),
+                normalCell({ value: player.tiebreaker.distance ?? "N/A" }),
                 normalCell({ value: player.score.college }),
                 normalCell({ value: player.score.pro }),
                 normalCell({ value: player.score.proAgainstTheSpread }),
