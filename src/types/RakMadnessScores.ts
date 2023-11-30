@@ -17,6 +17,7 @@ export type PlayerScore = {
         };
         college: Array<PickResult>,
         pro: Array<PickResult>,
+        isKnockedOut: boolean;
 }
 
 export type PickResult = {

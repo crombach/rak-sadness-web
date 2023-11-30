@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { PlayerScore, RakMadnessScores } from "../../../types/RakMadnessScores";
+import getClasses from "../../../utils/getClasses";
 import "../Table.css";
 
 function ScoresTable({ scores }: { scores?: RakMadnessScores }) {
@@ -25,7 +26,9 @@ function ScoresTable({ scores }: { scores?: RakMadnessScores }) {
                 {scores.scores.map((player: PlayerScore, index: number) => {
                     return <tr key={player.name}>
                         <td><b>{index + 1}</b></td>
-                        <td className="table__player-col">{player.name}</td>
+                        <td className={`table__player-col ${getClasses({
+                            "--knocked-out": player.isKnockedOut
+                        })}`}>{player.name}</td>
                         <td>{player.tiebreaker.pick ?? "N/A"}</td>
                         <td>{player.tiebreaker.distance ?? "N/A"}</td>
                         <td>{player.score.college}</td>

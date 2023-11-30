@@ -21,6 +21,14 @@
     left: 0;
 }
 
+.table .table__player-col.--knocked-out {
+    background-color: #fac99e;
+}
+
+.table tbody tr:nth-child(even) .table__player-col.--knocked-out {
+    background-color: #deaa7c;
+}
+
 .table th {
     color: white;
     background-color: black;

@@ -3,6 +3,7 @@ import { PlayerScore, RakMadnessScores } from "../../../types/RakMadnessScores";
 import "../Table.css";
 import "./ExplanationTable.css";
 import rangeWithPrefix from "../../../utils/rangeWithPrefix";
+import getClasses from "../../../utils/getClasses";
 
 function leagueHeaders(count: number, prefix: string) {
     return rangeWithPrefix(count, prefix).map(header => (
@@ -38,7 +39,9 @@ function ExplanationTable({ scores }: { scores?: RakMadnessScores }) {
                 {scores.scores.map((player: PlayerScore, index: number) => {
                     return <tr key={player.name}>
                         <td><b>{index + 1}</b></td>
-                        <td className="table__player-col">{player.name}</td>
+                        <td className={`table__player-col ${getClasses({
+                            "--knocked-out": player.isKnockedOut
+                        })}`}>{player.name}</td>
                         {player.college.map((result, index) =>
                             <td
                                 key={`${player.name}-C${index + 1}`}

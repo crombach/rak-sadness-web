@@ -164,6 +164,7 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
             },
             college: collegePicks.map((pick, index) => ({ pick, correct: getCorrectness(collegePickResults[index]) })),
             pro: proPicks.map((pick, index) => ({ pick, correct: getCorrectness(proPickResults[index]) })),
+            isKnockedOut: true,
         }
     });
 
@@ -196,8 +197,45 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
         return 0;
     });
 
+    // Loop over the results to calculate who can still win.
+    // This logic assumes the the team abbreviations are all correct.
+    // If they're not (or the games can't be found for some other reason), results will be wrong.
+    // Tiebreakers are not accounted for.
+    const topScore = sortedScores[0].score.total;
+    const remainingCollegeGames: Array<{ index: number; pick: string; }> = [];
+    sortedScores[0].college.forEach((pickResult, index) => {
+        if (pickResult.correct === "incomplete") {
+            remainingCollegeGames.push({ index, pick: pickResult.pick });
+        }
+    });
+    const remainingProGames: Array<{ index: number; pick: string; }> = [];
+    sortedScores[0].pro.forEach((pickResult, index) => {
+        if (pickResult.correct === "incomplete") {
+            remainingProGames.push({ index, pick: pickResult.pick });
+        }
+    });
+    const scoresWithKnockouts: Array<PlayerScore> = sortedScores.map((playerScore, index) => {
+        // The first player is the leader, so we can skip them.
+        if (index === 0) {
+            return { ...playerScore, isKnockedOut: false }
+        }
+
+        // A player is knocked out if the number of picks they have different from the leader
+        // is less than the score differential between them and the leader.
+        const differentCollegePicks = remainingCollegeGames.reduce((acc, { index, pick }) => {
+            return (playerScore.college[index].pick !== pick) ? acc + 1 : acc;
+        }, 0);
+        const differentProPicks = remainingProGames.reduce((acc, { index, pick }) => {
+            return (playerScore.pro[index].pick !== pick) ? acc + 1 : acc;
+        }, 0);
+        const scoreDiff = topScore - playerScore.score.total;
+        const totalDifferentPicks = differentCollegePicks + differentProPicks;
+        const isKnockedOut = totalDifferentPicks < scoreDiff;
+        return { ...playerScore, isKnockedOut };
+    });
+
     return {
         tiebreaker: tiebreakerScore,
-        scores: sortedScores,
+        scores: scoresWithKnockouts,
     };
 }
