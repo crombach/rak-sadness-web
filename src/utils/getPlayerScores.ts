@@ -219,6 +219,7 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
         return (pickResult.status === "incomplete") ? index : null;
     }).filter(it => it != null);
 
+    console.debug("==========");
     const cache: { [key: string]: { differentCollegePicks: number, differentProPicks: number, differentProPicksWithSpreads: number } } = {};
     const scoresWithKnockouts: Array<PlayerScore> = sortedScores.map((activeScore, activeIndex) => {
         // The first player is the leader, so we can skip them. They're not knocked out.
