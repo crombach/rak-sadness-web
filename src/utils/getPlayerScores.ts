@@ -11,7 +11,6 @@ const pickRegex = /([\S]+)(\s+([+-]?\d+(\.\d)?))?/;
 function parsePick(pickString: string) {
     const [, teamAbbreviation, , spreadText] = pickRegex.exec(pickString);
     const spread = spreadText != null ? Number(spreadText) : 0;
-    console.debug("spread text", spreadText);
     return { teamAbbreviation: teamAbbreviation.toUpperCase(), spread };
 }
 
@@ -214,7 +213,7 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
         return (pickResult.status === "incomplete") ? index : null;
     }).filter(it => it != null);
 
-    // TODO: We should probably memoize comparison results.
+    const cache: { [key: string]: { differentCollegePicks: number, differentProPicks: number, differentProPicksWithSpreads: number } } = {};
     const scoresWithKnockouts: Array<PlayerScore> = sortedScores.map((activeScore, activeIndex) => {
         // The first player is the leader, so we can skip them. They're not knocked out.
         if (activeIndex === 0) {
@@ -236,26 +235,39 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
 
             const oppScore = sortedScores[oppIndex];
 
-            // Figure out how many different college picks the players have made.
-            const differentCollegePicks = remainingCollegeIndices.reduce((sum, gameIndex) => {
-                const oppPick = oppScore.college[gameIndex].pick;
-                const activePick = activeScore.college[gameIndex].pick;
-                return (oppPick !== activePick) ? sum + 1 : sum;
-            }, 0);
-
-            // Figure out how many different pro picks the players have made.
+            // Used cached values or calculate new ones.
+            let differentCollegePicks = 0;
             let differentProPicks = 0;
             let differentProPicksWithSpreads = 0;
-            remainingProIndices.forEach((gameIndex) => {
-                const oppPick = oppScore.pro[gameIndex].pick;
-                const activePick = activeScore.pro[gameIndex].pick;
-                if (oppPick !== activePick) {
-                    differentProPicks += 1;
-                    if (parsePick(oppPick).spread !== 0) {
-                        differentProPicksWithSpreads += 1;
+            const cacheKey = `${Math.min(oppIndex, activeIndex)},${Math.max(oppIndex, activeIndex)}`;
+            const cachedValue = cache[cacheKey];
+            if (cachedValue != null) {
+                differentCollegePicks = cachedValue.differentCollegePicks;
+                differentProPicks = cachedValue.differentProPicks;
+                differentProPicksWithSpreads = cachedValue.differentProPicksWithSpreads;
+            } else {
+                // Figure out how many different college picks the players have made.
+                differentCollegePicks = remainingCollegeIndices.reduce((sum, gameIndex) => {
+                    const oppPick = oppScore.college[gameIndex].pick;
+                    const activePick = activeScore.college[gameIndex].pick;
+                    return (oppPick !== activePick) ? sum + 1 : sum;
+                }, 0);
+
+                // Figure out how many different pro picks the players have made.
+                remainingProIndices.forEach((gameIndex) => {
+                    const oppPick = oppScore.pro[gameIndex].pick;
+                    const activePick = activeScore.pro[gameIndex].pick;
+                    if (oppPick !== activePick) {
+                        differentProPicks += 1;
+                        if (parsePick(oppPick).spread !== 0) {
+                            differentProPicksWithSpreads += 1;
+                        }
                     }
-                }
-            });
+                });
+
+                // Store the values in the cache
+                cache[cacheKey] = { differentCollegePicks, differentProPicks, differentProPicksWithSpreads };
+            }
 
             const totalScoreDiff = oppScore.score.total - activeScore.score.total;
             const totalDifferentPicks = differentCollegePicks + differentProPicks;
