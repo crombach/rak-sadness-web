@@ -200,6 +200,12 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
         } else if (a.score.proAgainstTheSpread > b.score.proAgainstTheSpread) {
             return -1;
         }
+        // Player name
+        if (a.name < b.name) {
+            return 1;
+        } else if (a.name > b.name) {
+            return -1;
+        }
         return 0;
     });
 
