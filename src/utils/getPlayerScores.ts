@@ -15,7 +15,7 @@ function parsePick(pickString: string) {
 }
 
 function getStatus(score: GameScore): Status {
-    if (score.wasNotFound) { // TODO: Score should always be present.
+    if (score.wasNotFound) {
         return "error";
     } else if (!score.isCompleted) {
         return "incomplete";
