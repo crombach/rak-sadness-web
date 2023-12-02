@@ -7,9 +7,6 @@
     .table {
         font-size: 0.8rem;
     }
-    .table td {
-        height: 30px;
-    }
 }
 
 .table .table__header {
@@ -57,7 +54,6 @@
     min-width: max-content;
     padding: 2px 6px;
     border: 1px solid black;
-    height: 32px;
 }
 
 .table tbody tr:nth-child(odd) td {
