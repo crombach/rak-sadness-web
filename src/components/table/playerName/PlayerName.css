@@ -19,3 +19,9 @@
     width: 14px;
     height: 14px;
 }
+
+@media (max-width: 400px) {
+    .player-name .player-name__explanation-button:hover {
+        background-color: transparent;
+    }
+}
