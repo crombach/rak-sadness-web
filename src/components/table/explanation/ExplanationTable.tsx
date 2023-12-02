@@ -1,9 +1,9 @@
 import { memo } from "react";
 import { PlayerScore, RakMadnessScores } from "../../../types/RakMadnessScores";
+import rangeWithPrefix from "../../../utils/rangeWithPrefix";
+import PlayerName from "../playerName/PlayerName";
 import "../Table.css";
 import "./ExplanationTable.css";
-import rangeWithPrefix from "../../../utils/rangeWithPrefix";
-import getClasses from "../../../utils/getClasses";
 
 function leagueHeaders(count: number, prefix: string) {
     return rangeWithPrefix(count, prefix).map(header => (
@@ -39,9 +39,7 @@ function ExplanationTable({ scores }: { scores?: RakMadnessScores }) {
                 {scores.scores.map((player: PlayerScore, index: number) => {
                     return <tr key={player.name}>
                         <td><b>{index + 1}</b></td>
-                        <td className={`table__player-col ${getClasses({
-                            "--knocked-out": player.status.isKnockedOut
-                        })}`}>{player.name}</td>
+                        <PlayerName player={player} />
                         {player.college.map((result, index) =>
                             <td
                                 key={`${player.name}-C${index + 1}`}

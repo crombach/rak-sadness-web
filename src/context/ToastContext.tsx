@@ -20,20 +20,18 @@ type ToastContextData = {
     toasts: Array<Toast>;
     showToast: (toast: Toast) => void;
     removeToast: (toast: Toast) => void;
+    clearToasts: () => void;
 }
 
 const ToastContext = createContext<ToastContextData>({
     toasts: [],
     showToast: () => { /* Placeholder */ },
     removeToast: () => { /* Placeholder */ },
+    clearToasts: () => { /* Placeholder */ },
 });
 
 function useToastContextData(): ToastContextData {
     const [toasts, setToasts] = useState<Array<Toast>>([]);
-
-    const removeToast = useCallback((toast: Toast) => {
-        setToasts((oldToasts) => oldToasts.filter(it => it.id !== toast.id));
-    }, [toasts]);
 
     const showToast = useCallback((toast: Toast) => {
         // Limit to 3 toasts.
@@ -47,10 +45,19 @@ function useToastContextData(): ToastContextData {
         }, 5000);
     }, [toasts]);
 
+    const removeToast = useCallback((toast: Toast) => {
+        setToasts((oldToasts) => oldToasts.filter(it => it.id !== toast.id));
+    }, [toasts]);
+
+    const clearToasts = useCallback(() => {
+        setToasts([]);
+    }, []);
+
     const contextData = useMemo(() => ({
         toasts,
         showToast,
         removeToast,
+        clearToasts,
     }), [toasts]);
 
     return contextData;
