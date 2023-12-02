@@ -3,12 +3,6 @@
     margin: auto;
 }
 
-@media (max-width: 400px) {
-    .table {
-        font-size: 0.8rem;
-    }
-}
-
 .table .table__header {
     z-index: 20;
     position: sticky;
@@ -58,6 +52,7 @@
     min-width: max-content;
     padding: 2px 6px;
     border: 1px solid black;
+    height: 32px;
 }
 
 .table tbody tr:nth-child(odd) td {
@@ -66,4 +61,13 @@
 
 .table tbody tr:nth-child(even) td {
     background-color: #ededed;
+}
+
+@media (max-width: 400px) {
+    .table {
+        font-size: 0.8rem;
+    }
+    .table td {
+        height: 28px;
+    }
 }
