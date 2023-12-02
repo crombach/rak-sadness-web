@@ -1,4 +1,5 @@
 .toaster {
+    z-index: 100;
     display: flex;
     flex-direction: column-reverse;
     gap: 12px;
