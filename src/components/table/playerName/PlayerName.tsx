@@ -12,9 +12,10 @@ function PlayerName({ player }: { player: PlayerScore }) {
     const { showToast, clearToasts } = useToastContext();
 
     return (
-        <td className={`table__player-col player-name ${getClasses({
+        <td className={`table__player-col ${getClasses({
             "--knocked-out": player.status.isKnockedOut
         })}`}>
+            <div className="player-name">
                 <span>{player.name}</span>
                 {!!player.status.explanation && <Button
                     className="player-name__explanation-button"
@@ -27,6 +28,7 @@ function PlayerName({ player }: { player: PlayerScore }) {
                 >
                     <QuestionMark />
                 </Button>}
+            </div>
         </td>
     );
 }
