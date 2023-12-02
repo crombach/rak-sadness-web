@@ -9,7 +9,7 @@
 .player-name .player-name__explanation-button {
     min-height: 22px;
     min-width: 22px;
-    padding: 6px;
+    padding: 4px 8px;
 }
 .player-name .player-name__explanation-button:hover {
     background-color: rgba(255, 255, 255, 0.35);

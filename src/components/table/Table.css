@@ -5,7 +5,7 @@
 
 @media (max-width: 400px) {
     .table {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
     }
 }
 
@@ -19,6 +19,9 @@
 .table .table__player-col {
     position: sticky;
     left: 0;
+}
+.table td.table__player-col {
+    padding-right: 2px;
 }
 
 .table tbody .table__player-col.--knocked-out {
