@@ -279,7 +279,14 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
             const totalDifferentPicks = differentCollegePicks + differentProPicks;
             if (totalDifferentPicks < totalScoreDiff) {
                 // If the active player can't catch up on points, they're knocked out.
-                return { ...activeScore, status: { isKnockedOut: true, explanation: `${activeScore.name} knocked out on total score by ${oppScore.name}` } };
+                return {
+                    ...activeScore,
+                    status: {
+                        isKnockedOut: true,
+                        explanation: `${activeScore.name} knocked out on total score by ${oppScore.name}. ` +
+                            `Behind by ${totalScoreDiff} with ${totalDifferentPicks} different picks remaining.`
+                    }
+                };
             } else if (totalDifferentPicks === totalScoreDiff) {
                 // If the best a player can do is tie the opponent, check if they're knocked out on breakers.
                 if (oppScore.tiebreaker.pick === activeScore.tiebreaker.pick ||
@@ -288,19 +295,40 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
                     // If the opponent has a better college score, check if the active player can catch up.
                     const collegeScoreDiff = oppScore.score.college - activeScore.score.college;
                     if (collegeScoreDiff > 0 && differentCollegePicks < collegeScoreDiff) {
-                        return { ...activeScore, status: { isKnockedOut: true, explanation: `${activeScore.name} knocked out on college score by ${oppScore.name}` } };
+                        return {
+                            ...activeScore,
+                            status: {
+                                isKnockedOut: true,
+                                explanation: `${activeScore.name} knocked out on college score by ${oppScore.name}. ` +
+                                    `Behind by ${collegeScoreDiff} with ${differentCollegePicks} different picks remaining.`
+                            }
+                        };
                     }
                     // If college games are done and players are tied, check pro against the spread tiebreaker.
                     if (collegeScoreDiff === 0 && remainingCollegeIndices.length == 0) {
                         const proAgainstTheSpreadScoreDiff = oppScore.score.proAgainstTheSpread - activeScore.score.proAgainstTheSpread;
                         if (proAgainstTheSpreadScoreDiff > 0 && differentProPicksWithSpreads < proAgainstTheSpreadScoreDiff) {
-                            return { ...activeScore, status: { isKnockedOut: true, explanation: `${activeScore.name} knocked out on pro score against the spread by ${oppScore.name}` } };
+                            return {
+                                ...activeScore,
+                                status: {
+                                    isKnockedOut: true,
+                                    explanation: `${activeScore.name} knocked out on pro score against the spread by ${oppScore.name}. ` +
+                                        `Behind by ${proAgainstTheSpreadScoreDiff} with ${differentProPicksWithSpreads} different picks remaining.`
+                                }
+                            };
                         }
                     }
                 } else if (tiebreakerScore != null && oppScore.tiebreaker.distance - activeScore.tiebreaker.distance < 0) {
                     // If the tiebreaker score has been scraped, all games must be over.
                     // Unless the active player has tied the opponent, they are knocked out.
-                    return { ...activeScore, status: { isKnockedOut: true, explanation: `${activeScore.name} knocked out on MNF points total by ${oppScore.name}` } };
+                    return {
+                        ...activeScore,
+                        status: {
+                            isKnockedOut: true,
+                            explanation: `${activeScore.name} knocked out on MNF points total by ${oppScore.name}. ` +
+                                `${activeScore.name} is ${activeScore.tiebreaker.distance} points off, and ${oppScore.name} is ${oppScore.tiebreaker.distance} points off.`
+                        }
+                    };
                 }
             }
         }
