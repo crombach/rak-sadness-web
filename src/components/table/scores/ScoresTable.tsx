@@ -27,7 +27,7 @@ function ScoresTable({ scores }: { scores?: RakMadnessScores }) {
                     return <tr key={player.name}>
                         <td><b>{index + 1}</b></td>
                         <td className={`table__player-col ${getClasses({
-                            "--knocked-out": player.isKnockedOut
+                            "--knocked-out": player.status.isKnockedOut
                         })}`}>{player.name}</td>
                         <td>{player.tiebreaker.pick ?? "N/A"}</td>
                         <td>{player.tiebreaker.distance ?? "N/A"}</td>

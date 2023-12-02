@@ -40,7 +40,7 @@ function ExplanationTable({ scores }: { scores?: RakMadnessScores }) {
                     return <tr key={player.name}>
                         <td><b>{index + 1}</b></td>
                         <td className={`table__player-col ${getClasses({
-                            "--knocked-out": player.isKnockedOut
+                            "--knocked-out": player.status.isKnockedOut
                         })}`}>{player.name}</td>
                         {player.college.map((result, index) =>
                             <td
