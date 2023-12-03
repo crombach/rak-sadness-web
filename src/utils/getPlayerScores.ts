@@ -128,8 +128,12 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
 
     // Iterate over picks.
     const scores: Array<PlayerScore> = allPicks.map((playerRow: any) => {
-        // Score college picks
+        // Extract picks from the spreadsheet
         const collegePicks = collegeKeys.map(key => playerRow[key]);
+        const proPicks = proKeys.map(key => playerRow[key]);
+        const hasNoPicks = !collegePicks.some(it => it != null) && !proPicks.some(it => it != null);
+
+        // Score college picks
         const collegePickResults = getPickResults(collegePicks, collegeResults);
         const collegePickResultsCompleted = collegePickResults.filter(result => result.isCompleted);
         const scoreCollege = collegePickResultsCompleted.reduce((partialSum: number, score: GameScore) => {
@@ -137,7 +141,6 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
         }, 0);
 
         // Score pro picks
-        const proPicks = proKeys.map(key => playerRow[key]);
         const proPickResults = getPickResults(proPicks, proResults);
         const proPickResultsCompleted = proPickResults.filter(result => result.isCompleted);
         const scorePro = proPickResultsCompleted.reduce((partialSum: number, score: GameScore) => {
@@ -164,7 +167,8 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
             college: collegePicks.map((pick, index) => ({ pick, status: getStatus(collegePickResults[index]) })),
             pro: proPicks.map((pick, index) => ({ pick, status: getStatus(proPickResults[index]) })),
             status: {
-                isKnockedOut: false
+                isKnockedOut: hasNoPicks,
+                hasNoPicks,
             }
         }
     });
@@ -176,6 +180,12 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
     // 2. Number of college games picked correctly
     // 3. Number of NFL games with spreads picked correctly
     const sortedScores: Array<PlayerScore> = scores.sort((a, b) => {
+        // Players with no picks should always be sorted last.
+        if (a.status.hasNoPicks && !b.status.hasNoPicks) {
+            return 1;
+        } else if (!a.status.hasNoPicks && b.status.hasNoPicks) {
+            return -1;
+        }
         // Total score
         if (a.score.total < b.score.total) {
             return 1;
@@ -203,9 +213,9 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
             return -1;
         }
         // Player name
-        if (a.name > b.name) {
+        if (a.name.toUpperCase() > b.name.toUpperCase()) {
             return 1;
-        } else if (a.name < b.name) {
+        } else if (a.name.toUpperCase() < b.name.toUpperCase()) {
             return -1;
         }
         return 0;
@@ -223,29 +233,29 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
 
     const cache: { [key: string]: { differentCollegePicks: number, differentProPicks: number, differentProPicksWithSpreads: number } } = {};
     const scoresWithKnockouts: Array<PlayerScore> = sortedScores.map((activeScore, activeIndex) => {
+        // If a player has no picks, they're knocked out.
+        if (activeScore.status.hasNoPicks) {
+            return {
+                ...activeScore,
+                status: {
+                    ...activeScore.status,
+                    explanation: `${activeScore.name} knocked out due to having no picks.`
+                }
+            };
+        }
+
         // The first player is the leader, so we can skip them. They're not knocked out.
         if (activeIndex === 0) {
             return activeScore;
         }
 
-        // If a player has no picks, they're knocked out.
-        if (!activeScore.college.some(it => it.pick != null) && !activeScore.pro.some(it => it.pick != null)) {
-            return {
-                ...activeScore,
-                status: {
-                    isKnockedOut: true,
-                    explanation: `${activeScore.name} knocked out due to having no picks`
-                }
-            };
-        }
-
         // For each player with the same score or better, see if they have knocked the active player out.
         // We check players with the same score who are ranked lower in case the players have the same MNF tiebreaker pick.
         for (let oppIndex = 0; oppIndex < sortedScores.length && sortedScores[oppIndex].score.total >= activeScore.score.total; oppIndex++) {
-            // No use comparing a player to themself.
-            if (oppIndex === activeIndex) continue;
-
             const oppScore = sortedScores[oppIndex];
+
+            // No use comparing a player to themself or a player with no picks.
+            if (oppIndex === activeIndex || oppScore.status.hasNoPicks) continue;
 
             // Used cached values or calculate new ones.
             let differentCollegePicks = 0;
@@ -288,6 +298,7 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
                 return {
                     ...activeScore,
                     status: {
+                        ...activeScore.status,
                         isKnockedOut: true,
                         explanation: `${activeScore.name} knocked out on total score by ${oppScore.name}. ` +
                             `Behind by ${totalScoreDiff} with ${totalDifferentPicks} different pick(s) remaining.`
@@ -304,6 +315,7 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
                         return {
                             ...activeScore,
                             status: {
+                                ...activeScore.status,
                                 isKnockedOut: true,
                                 explanation: `${activeScore.name} knocked out on college score by ${oppScore.name}. ` +
                                     `Behind by ${collegeScoreDiff} with ${differentCollegePicks} different pick(s) remaining.`
@@ -317,6 +329,7 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
                             return {
                                 ...activeScore,
                                 status: {
+                                    ...activeScore.status,
                                     isKnockedOut: true,
                                     explanation: `${activeScore.name} knocked out on pro score against the spread by ${oppScore.name}. ` +
                                         `Behind by ${proAgainstTheSpreadScoreDiff} with ${differentProPicksWithSpreads} different pick(s) remaining.`
@@ -330,6 +343,7 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
                     return {
                         ...activeScore,
                         status: {
+                            ...activeScore.status,
                             isKnockedOut: true,
                             explanation: `${activeScore.name} knocked out on MNF points total by ${oppScore.name}. ` +
                                 `${activeScore.name} is ${activeScore.tiebreaker.distance} point(s) off, and ${oppScore.name} is ${oppScore.tiebreaker.distance} point(s) off.`

@@ -18,6 +18,7 @@ export type PlayerScore = {
         college: Array<PickResult>,
         pro: Array<PickResult>,
         status: {
+            hasNoPicks: boolean;
             isKnockedOut: boolean;
             explanation?: string;
         }

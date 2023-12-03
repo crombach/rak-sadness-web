@@ -11,7 +11,7 @@
     min-width: 20px;
     padding: 4px 8px;
 }
-.player-name .player-name__explanation-button:hover {
+.player-name .player-name__explanation-button:hover, .player-name .player-name__explanation-button:active {
     background-color: rgba(255, 255, 255, 0.35);
 }
 .player-name .player-name__explanation-button > svg {
@@ -21,7 +21,7 @@
 }
 
 @media (max-width: 400px) {
-    .player-name .player-name__explanation-button:hover {
+    .player-name .player-name__explanation-button:hover, .player-name .player-name__explanation-button:active {
         background-color: transparent;
     }
 }
