@@ -305,7 +305,7 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
                     status: {
                         ...activeScore.status,
                         isKnockedOut: true,
-                        explanation: `${activeScore.name} knocked out on total score by ${oppScore.name}. ` +
+                        explanation: `${activeScore.name} knocked out on Total Score by ${oppScore.name}. ` +
                             `Behind by ${totalScoreDiff} with ${totalDifferentPicks} different pick(s) remaining.`
                     }
                 };
@@ -322,8 +322,8 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
                             status: {
                                 ...activeScore.status,
                                 isKnockedOut: true,
-                                explanation: `${activeScore.name} knocked out on college score tiebreaker by ${oppScore.name}. ` +
-                                    `Behind by ${collegeScoreDiff} with ${differentCollegePicks} different pick(s) remaining.`
+                                explanation: `${activeScore.name} knocked out on College Score tiebreaker by ${oppScore.name}. ` +
+                                    `Behind by ${collegeScoreDiff} with ${differentCollegePicks} different college pick(s) remaining.`
                             }
                         };
                     }
@@ -336,8 +336,9 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
                                 status: {
                                     ...activeScore.status,
                                     isKnockedOut: true,
-                                    explanation: `${activeScore.name} knocked out on pro score against the spread tiebreaker by ${oppScore.name}. ` +
-                                        `Behind by ${proAgainstTheSpreadScoreDiff} with ${differentProPicksWithSpreads} different pick(s) remaining.`
+                                    explanation: `${activeScore.name} knocked out on Pro Score Against the Spread tiebreaker by ${oppScore.name}. ` +
+                                        `Behind by ${proAgainstTheSpreadScoreDiff} with ${differentProPicksWithSpreads} different pick(s) remaining ` +
+                                        `for pro games with spreads.`
                                 }
                             };
                         }
