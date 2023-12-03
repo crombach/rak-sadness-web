@@ -293,11 +293,6 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
 
             const totalScoreDiff = oppScore.score.total - activeScore.score.total;
             const totalDifferentPicks = differentCollegePicks + differentProPicks;
-            if (activeScore.name === "Fullbach") {
-                console.debug("opp name", oppScore.name);
-                console.debug("totalScoreDiff", totalScoreDiff);
-                console.debug("totalDifferentPicks", totalDifferentPicks);
-            }
             if (totalDifferentPicks < totalScoreDiff) {
                 // If the active player can't catch up on points, they're knocked out.
                 return {
