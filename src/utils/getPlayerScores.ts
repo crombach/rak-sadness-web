@@ -290,7 +290,7 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
                     status: {
                         isKnockedOut: true,
                         explanation: `${activeScore.name} knocked out on total score by ${oppScore.name}. ` +
-                            `Behind by ${totalScoreDiff} with ${totalDifferentPicks} different picks remaining.`
+                            `Behind by ${totalScoreDiff} with ${totalDifferentPicks} different pick(s) remaining.`
                     }
                 };
             } else if (totalDifferentPicks === totalScoreDiff) {
@@ -306,7 +306,7 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
                             status: {
                                 isKnockedOut: true,
                                 explanation: `${activeScore.name} knocked out on college score by ${oppScore.name}. ` +
-                                    `Behind by ${collegeScoreDiff} with ${differentCollegePicks} different picks remaining.`
+                                    `Behind by ${collegeScoreDiff} with ${differentCollegePicks} different pick(s) remaining.`
                             }
                         };
                     }
@@ -319,7 +319,7 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
                                 status: {
                                     isKnockedOut: true,
                                     explanation: `${activeScore.name} knocked out on pro score against the spread by ${oppScore.name}. ` +
-                                        `Behind by ${proAgainstTheSpreadScoreDiff} with ${differentProPicksWithSpreads} different picks remaining.`
+                                        `Behind by ${proAgainstTheSpreadScoreDiff} with ${differentProPicksWithSpreads} different pick(s) remaining.`
                                 }
                             };
                         }
@@ -332,7 +332,7 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
                         status: {
                             isKnockedOut: true,
                             explanation: `${activeScore.name} knocked out on MNF points total by ${oppScore.name}. ` +
-                                `${activeScore.name} is ${activeScore.tiebreaker.distance} points off, and ${oppScore.name} is ${oppScore.tiebreaker.distance} points off.`
+                                `${activeScore.name} is ${activeScore.tiebreaker.distance} point(s) off, and ${oppScore.name} is ${oppScore.tiebreaker.distance} point(s) off.`
                         }
                     };
                 }
