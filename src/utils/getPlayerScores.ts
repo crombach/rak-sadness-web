@@ -203,9 +203,9 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
             return -1;
         }
         // Player name
-        if (a.name < b.name) {
+        if (a.name > b.name) {
             return 1;
-        } else if (a.name > b.name) {
+        } else if (a.name < b.name) {
             return -1;
         }
         return 0;
@@ -230,7 +230,13 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
 
         // If a player has no picks, they're knocked out.
         if (!activeScore.college.some(it => it.pick != null) && !activeScore.pro.some(it => it.pick != null)) {
-            return { ...activeScore, status: { isKnockedOut: true, explanation: `${activeScore.name} knocked out due to having no picks` } };
+            return {
+                ...activeScore,
+                status: {
+                    isKnockedOut: true,
+                    explanation: `${activeScore.name} knocked out due to having no picks`
+                }
+            };
         }
 
         // For each player with the same score or better, see if they have knocked the active player out.
