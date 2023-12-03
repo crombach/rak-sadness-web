@@ -351,7 +351,8 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
                             ...activeScore.status,
                             isKnockedOut: true,
                             explanation: `${activeScore.name} knocked out on MNF points total tiebreaker by ${oppScore.name}. ` +
-                                `${activeScore.name} is ${activeScore.tiebreaker.distance} point(s) off, and ${oppScore.name} is ${oppScore.tiebreaker.distance} point(s) off.`
+                                `${activeScore.name} is ${activeScore.tiebreaker.distance} point(s) off, and ${oppScore.name} is ` +
+                                `${oppScore.tiebreaker.distance} point(s) off.`
                         }
                     };
                 }
