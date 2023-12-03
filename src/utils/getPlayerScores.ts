@@ -293,6 +293,11 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
 
             const totalScoreDiff = oppScore.score.total - activeScore.score.total;
             const totalDifferentPicks = differentCollegePicks + differentProPicks;
+            if (activeScore.name === "Fullbach") {
+                console.debug("opp name", oppScore.name);
+                console.debug("totalScoreDiff", totalScoreDiff);
+                console.debug("totalDifferentPicks", totalDifferentPicks);
+            }
             if (totalDifferentPicks < totalScoreDiff) {
                 // If the active player can't catch up on points, they're knocked out.
                 return {
@@ -317,7 +322,7 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
                             status: {
                                 ...activeScore.status,
                                 isKnockedOut: true,
-                                explanation: `${activeScore.name} knocked out on college score by ${oppScore.name}. ` +
+                                explanation: `${activeScore.name} knocked out on college score tiebreaker by ${oppScore.name}. ` +
                                     `Behind by ${collegeScoreDiff} with ${differentCollegePicks} different pick(s) remaining.`
                             }
                         };
@@ -331,7 +336,7 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
                                 status: {
                                     ...activeScore.status,
                                     isKnockedOut: true,
-                                    explanation: `${activeScore.name} knocked out on pro score against the spread by ${oppScore.name}. ` +
+                                    explanation: `${activeScore.name} knocked out on pro score against the spread tiebreaker by ${oppScore.name}. ` +
                                         `Behind by ${proAgainstTheSpreadScoreDiff} with ${differentProPicksWithSpreads} different pick(s) remaining.`
                                 }
                             };
@@ -345,7 +350,7 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
                         status: {
                             ...activeScore.status,
                             isKnockedOut: true,
-                            explanation: `${activeScore.name} knocked out on MNF points total by ${oppScore.name}. ` +
+                            explanation: `${activeScore.name} knocked out on MNF points total tiebreaker by ${oppScore.name}. ` +
                                 `${activeScore.name} is ${activeScore.tiebreaker.distance} point(s) off, and ${oppScore.name} is ${oppScore.tiebreaker.distance} point(s) off.`
                         }
                     };
