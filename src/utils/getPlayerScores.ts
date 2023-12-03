@@ -244,8 +244,8 @@ export default async function getPlayerScores(week: number, picksFile: File): Pr
             };
         }
 
-        // The first player is the leader, so we can skip them. They're not knocked out.
-        if (activeIndex === 0) {
+        // The first player is the leader, so we can skip them if the games are all over. They're not knocked out.
+        if (activeIndex === 0 && tiebreakerScore != null) {
             return activeScore;
         }
 
