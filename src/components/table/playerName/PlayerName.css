@@ -1,27 +1,29 @@
 .player-name {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .player-name .player-name__explanation-button {
-    min-height: 20px;
-    min-width: 20px;
-    padding: 4px 8px;
+  min-height: 20px;
+  min-width: 20px;
+  padding: 4px 8px;
 }
-.player-name .player-name__explanation-button:hover, .player-name .player-name__explanation-button:active {
-    background-color: rgba(255, 255, 255, 0.35);
+.player-name .player-name__explanation-button:hover,
+.player-name .player-name__explanation-button:active {
+  background-color: rgba(255, 255, 255, 0.35);
 }
 .player-name .player-name__explanation-button > svg {
-    fill: black;
-    width: 14px;
-    height: 14px;
+  fill: black;
+  width: 14px;
+  height: 14px;
 }
 
 @media (max-width: 400px) {
-    .player-name .player-name__explanation-button:hover, .player-name .player-name__explanation-button:active {
-        background-color: transparent;
-    }
+  .player-name .player-name__explanation-button:hover,
+  .player-name .player-name__explanation-button:active {
+    background-color: transparent;
+  }
 }

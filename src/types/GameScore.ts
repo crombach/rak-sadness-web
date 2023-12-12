@@ -1,6 +1,6 @@
 export type GameScore = {
-    pointValue: number;
-    wasNotFound: boolean;
-    isCompleted: boolean;
-    hasSpread: boolean;
+  pointValue: number;
+  wasNotFound: boolean;
+  isCompleted: boolean;
+  hasSpread: boolean;
 };

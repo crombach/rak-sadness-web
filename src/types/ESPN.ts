@@ -1,29 +1,29 @@
 export type EspnEvent = {
-    name: string;
-    shortName: string;
-    competitions: Array<EspnCompetition>;
-    status: EspnStatus;
+  name: string;
+  shortName: string;
+  competitions: Array<EspnCompetition>;
+  status: EspnStatus;
 };
 
 export type EspnStatus = {
-    type: {
-        completed: boolean;
-    }
+  type: {
+    completed: boolean;
+  };
 };
 
 export type EspnCompetition = {
-    competitors: Array<EspnCompetitor>;
+  competitors: Array<EspnCompetitor>;
 };
 
 export type EspnCompetitor = {
-    homeAway: "home" | "away";
-    winner: boolean;
-    team: EspnTeam;
-    score: string;
+  homeAway: "home" | "away";
+  winner: boolean;
+  team: EspnTeam;
+  score: string;
 };
 
 export type EspnTeam = {
-    displayName: string;
-    shortDisplayName: string;
-    abbreviation: string;
+  displayName: string;
+  shortDisplayName: string;
+  abbreviation: string;
 };

@@ -5,21 +5,21 @@ type WeekEntry = {
   value: string;
   startDate: string;
   endDate: string;
-}
+};
 
 type Calendar = {
   label: string;
   entries: WeekEntry[];
-}
+};
 
 type League = {
   abbreviation: string;
   calendar: Calendar[];
-}
+};
 
 type Scoreboard = {
   leagues: League[];
-}
+};
 
 /**
  * Fetches the regular season calendar from the NFL scoreboard endpoint and returns the week number based on the current date.
@@ -30,11 +30,11 @@ type Scoreboard = {
 export default async function getWeek(): Promise<number | null> {
   // Rak uses NFL weeks, so we can hardcode NFL here
   const response = await fetch(
-    "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
+    "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard",
   );
   if (!response.ok) {
     console.error(
-      `Error fetching data from scoreboard endpoint: ${response.status}`
+      `Error fetching data from scoreboard endpoint: ${response.status}`,
     );
     return null;
   }

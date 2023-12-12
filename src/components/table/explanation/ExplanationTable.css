@@ -1,36 +1,36 @@
 .table .table__pick-header {
-    display: inline-block;
-    min-width: 64px;
+  display: inline-block;
+  min-width: 64px;
 }
 
 .table .table__center {
-    text-align: center;
+  text-align: center;
 }
 
 .table .table__pick {
-    white-space: nowrap;
+  white-space: nowrap;
 }
 
 .table tbody td.table__pick.--yes {
-    background-color: #a3faa0;
+  background-color: #a3faa0;
 }
 
 .table tbody tr:nth-child(even) td.table__pick.--yes {
-    background-color: #7ede7c;
+  background-color: #7ede7c;
 }
 
 .table tbody td.table__pick.--no {
-    background-color: #faa0a0;
+  background-color: #faa0a0;
 }
 
 .table tbody tr:nth-child(even) td.table__pick.--no {
-    background-color: #de7c7c;
+  background-color: #de7c7c;
 }
 
 .table tbody td.table__pick.--error {
-    background-color: #edfaa0;
+  background-color: #edfaa0;
 }
 
 .table tbody tr:nth-child(even) td.table__pick.--error {
-    background-color: #cfde7c;
+  background-color: #cfde7c;
 }
