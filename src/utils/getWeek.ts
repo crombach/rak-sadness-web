@@ -1,4 +1,4 @@
-interface WeekEntry {
+type WeekEntry = {
   label: string;
   alternateLabel: string;
   detail: string;
@@ -7,17 +7,17 @@ interface WeekEntry {
   endDate: string;
 }
 
-interface Calendar {
+type Calendar = {
   label: string;
   entries: WeekEntry[];
 }
 
-interface League {
+type League = {
   abbreviation: string;
   calendar: Calendar[];
 }
 
-interface Scoreboard {
+type Scoreboard = {
   leagues: League[];
 }
 
@@ -27,7 +27,7 @@ interface Scoreboard {
  *
  * @returns Promise that resolves to the current week number (if found) or null (if not found)
  */
-export default async function getCurrentWeekNumber(): Promise<number | null> {
+export default async function getWeek(): Promise<number | null> {
   // Rak uses NFL weeks, so we can hardcode NFL here
   const response = await fetch(
     "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"

@@ -14,11 +14,11 @@ import Leaderboard from "@mui/icons-material/Leaderboard";
 import buildSpreadsheetBuffer from "../utils/buildSpreadsheetBuffer";
 import getClasses from "../utils/getClasses";
 import getPlayerScores from "../utils/getPlayerScores";
-import getCurrentWeekNumber from "../utils/getWeek";
-import "./RakSadness.css";
+import getWeek from "../utils/getWeek";
 import FloatingLabelInput from "./floatingLabelInput/FloatingLabelInput";
 import ScoresTable from "./table/scores/ScoresTable";
 import ExplanationTable from "./table/explanation/ExplanationTable";
+import "./RakSadness.css";
 
 export default function RakSadness() {
     const { showToast } = useToastContext();
@@ -26,31 +26,29 @@ export default function RakSadness() {
     // File input ref
     const fileInputRef = useRef(null);
 
+    // Calculated scores
+    const [scores, setScores] = useState<RakMadnessScores>();
+
+    // Loading flags
+    const [isWeekLoading, setWeekLoading] = useState(true);
+    const [isScoresLoading, setScoresLoading] = useState(false);
+    const [isExportLoading, setExportLoading] = useState(false);
+
     // User input state
     const [week, setWeek] = useState<string>("");
     // Query the API to get current week in background
     useEffect(() => {
         const getWeekAsync = async () => {
-            const currentWeek = await getCurrentWeekNumber();
-            if (currentWeek !== null) {
-                setWeek(currentWeek.toString());
-            }
+            const currentWeek = (await getWeek() ?? "").toString();
+            setWeek(currentWeek);
+            setWeekLoading(false);
         };
-
         getWeekAsync();
     }, []);
 
     const [showScores, setShowScores] = useState<
         "Leaderboard" | "Explanation" | false
     >(false);
-
-    // Calculated scores
-    const [scores, setScores] = useState<RakMadnessScores>();
-
-    // Loading flags
-    const [isScoresLoading, setScoresLoading] = useState(false);
-    const [isViewLoading /* , setViewLoading */] = useState(false);
-    const [isExportLoading, setExportLoading] = useState(false);
 
     const clickFileInput = useCallback(() => {
         fileInputRef.current?.click();
@@ -143,6 +141,7 @@ export default function RakSadness() {
                                 label="Week"
                                 placeholder="Rak Madness week number"
                                 value={week}
+                                disabled={isWeekLoading}
                                 onChange={(event) => {
                                     setScores(null);
                                     const digitsRegex = /^[0-9\b]+$/;
@@ -168,7 +167,7 @@ export default function RakSadness() {
                             })}`}
                             variant="solid"
                             onClick={clickFileInput}
-                            disabled={!week}
+                            disabled={isWeekLoading || !week}
                         >
                             Select Picks Spreadsheet
                         </Button>
@@ -178,9 +177,7 @@ export default function RakSadness() {
                             })}`}
                         >
                             <Button
-                                className={`home__actions-button ${getClasses({
-                                    "--loading-btn": isViewLoading,
-                                })}`}
+                                className="home__actions-button"
                                 disabled={!week || !scores || isScoresLoading}
                                 variant="solid"
                                 color="success"
