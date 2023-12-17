@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
   useEffect,
+  ChangeEvent,
 } from "react";
 import { Toast, useToastContext } from "../context/ToastContext";
 import { RakMadnessScores } from "../types/RakMadnessScores";
@@ -13,30 +14,39 @@ import Info from "@mui/icons-material/Info";
 import Leaderboard from "@mui/icons-material/Leaderboard";
 import buildSpreadsheetBuffer from "../utils/buildSpreadsheetBuffer";
 import getClasses from "../utils/getClasses";
-import getPlayerScores from "../utils/getPlayerScores";
+import { getPlayerScores, readFileToBuffer } from "../utils/getPlayerScores";
 import getWeek from "../utils/getWeek";
 import FloatingLabelInput from "./floatingLabelInput/FloatingLabelInput";
 import ScoresTable from "./table/scores/ScoresTable";
 import ExplanationTable from "./table/explanation/ExplanationTable";
 import "./RakSadness.css";
+import { useDebounce } from "usehooks-ts";
 
 export default function RakSadness() {
   const { showToast } = useToastContext();
 
   // File input ref
   const fileInputRef = useRef(null);
+  const clickFileInput = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
 
-  // Calculated scores
+  // Scores-related state
   const [scores, setScores] = useState<RakMadnessScores>();
+  const [showScores, setShowScores] = useState<
+    "Leaderboard" | "Explanation" | false
+  >(false);
 
   // Loading flags
   const [isWeekLoading, setWeekLoading] = useState(true);
-  const [isScoresLoading, setScoresLoading] = useState(false);
+  const [isScoresLoading, setScoresLoading] = useState(true);
   const [isExportLoading, setExportLoading] = useState(false);
 
-  // User input state
+  // Selected week
   const [week, setWeek] = useState<string>("");
-  // Query the API to get current week in background
+  const weekDebounced = useDebounce<string>(week, 300);
+
+  // Query the ESPN API to get the current NFL week
   useEffect(() => {
     const getWeekAsync = async () => {
       const currentWeek = ((await getWeek()) ?? "").toString();
@@ -46,14 +56,46 @@ export default function RakSadness() {
     getWeekAsync();
   }, []);
 
-  const [showScores, setShowScores] = useState<
-    "Leaderboard" | "Explanation" | false
-  >(false);
+  // When the week changes, attempt to fetch the picks spreadsheet from the API.
+  useEffect(() => {
+    const fetchPicksAsync = async () => {
+      if (weekDebounced) {
+        setScoresLoading(true);
+        try {
+          const response = await fetch(`/api/picks/${weekDebounced}`);
+          response.headers
+          const picksBuffer = await response.arrayBuffer();
+          const newScores = await getPlayerScores(
+            Number(weekDebounced),
+            picksBuffer,
+          );
+          setScores(newScores);
+        } catch (error) {
+          // If the picks spreadsheet doesn't exist yet, fail gracefully and log a message.
+          console.warn(
+            `Failed to load week ${week} picks spreadsheet from API. Has it been uploaded yet?`, error
+          );
+        } finally {
+          setScoresLoading(false);
+        }
+      }
+    };
+    fetchPicksAsync();
+  }, [weekDebounced]);
 
-  const clickFileInput = useCallback(() => {
-    fileInputRef.current?.click();
-  }, []);
+  // Whenever the week input value changes, update the component state.
+  const handleWeekInputChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setScores(null);
+      const digitsRegex = /^[0-9\b]+$/;
+      if (event.target.value === "" || digitsRegex.test(event.target.value)) {
+        setWeek(event.target.value);
+      }
+    },
+    [],
+  );
 
+  // When a user manually uploads a picks spreadsheet, parse and score it.
   const handleFileUpload: ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
       if (!week) {
@@ -78,7 +120,8 @@ export default function RakSadness() {
           return;
         }
 
-        const newScores = await getPlayerScores(Number(week), files[0]);
+        const picksBuffer = await readFileToBuffer(files[0]);
+        const newScores = await getPlayerScores(Number(week), picksBuffer);
         if (newScores) {
           setScores(newScores);
           setScoresLoading(false);
@@ -99,6 +142,7 @@ export default function RakSadness() {
     [week],
   );
 
+  // Export the current scores to an Excel spreadsheet file.
   const exportResults = useCallback(() => {
     if (!week) return;
     const exportResultsAsync = async () => {
@@ -136,24 +180,17 @@ export default function RakSadness() {
         <>
           {/* Input Controls */}
           <div className="home__controls">
+            {/* Week number input */}
             <div className="home__week-input">
               <FloatingLabelInput
                 label="Week"
                 placeholder="Rak Madness week number"
-                value={week}
                 disabled={isWeekLoading}
-                onChange={(event) => {
-                  setScores(null);
-                  const digitsRegex = /^[0-9\b]+$/;
-                  if (
-                    event.target.value === "" ||
-                    digitsRegex.test(event.target.value)
-                  ) {
-                    setWeek(event.target.value);
-                  }
-                }}
+                value={week}
+                onChange={handleWeekInputChange}
               />
             </div>
+            {/* Hidden file input */}
             <input
               ref={fileInputRef}
               className="home__file-input"
@@ -161,21 +198,23 @@ export default function RakSadness() {
               accept=".xlsx"
               onChange={handleFileUpload}
             />
+            {/* Upload picks file button */}
             <Button
               className={`home__submit-button ${getClasses({
                 "--loading-btn": isScoresLoading,
               })}`}
               variant="solid"
               onClick={clickFileInput}
-              disabled={isWeekLoading || !week}
+              disabled={isWeekLoading || isScoresLoading || !week}
             >
-              Select Picks Spreadsheet
+              Upload Picks Spreadsheet
             </Button>
             <div
               className={`home__actions ${getClasses({
                 "--expanded": !!week && !!scores,
               })}`}
             >
+              {/* Show scores button */}
               <Button
                 className="home__actions-button"
                 disabled={!week || !scores || isScoresLoading}
@@ -185,6 +224,7 @@ export default function RakSadness() {
               >
                 View Results
               </Button>
+              {/* Export results button */}
               <Button
                 className={`home__actions-button ${getClasses({
                   "--loading-btn": isExportLoading,

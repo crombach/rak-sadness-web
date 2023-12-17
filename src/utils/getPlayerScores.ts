@@ -50,7 +50,7 @@ function getPickResults(
       );
     });
     if (!gameResult) {
-      console.error(
+      console.warn(
         "FAILED to find game result for team abbreviation:",
         selectedTeam,
       );
@@ -124,7 +124,7 @@ function getPickResults(
   });
 }
 
-async function readFile(file: File): Promise<ArrayBuffer> {
+export async function readFileToBuffer(file: File): Promise<ArrayBuffer> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -135,15 +135,12 @@ async function readFile(file: File): Promise<ArrayBuffer> {
   });
 }
 
-export default async function getPlayerScores(
+export async function getPlayerScores(
   week: number,
-  picksFile: File,
+  picksBuffer: ArrayBuffer,
 ): Promise<RakMadnessScores> {
-  // Read the provided file into a buffer.
-  const buffer = await readFile(picksFile);
-
   // Parse the Excel spreadsheet.
-  const workbook = XLSX.read(buffer, { type: "array" });
+  const workbook = XLSX.read(picksBuffer, { type: "array" });
   const picksSheet = workbook.Sheets[Object.keys(workbook.Sheets)[0]];
   const allPicks: Array<any> = XLSX.utils.sheet_to_json(picksSheet);
 
