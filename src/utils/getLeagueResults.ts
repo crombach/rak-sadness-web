@@ -19,7 +19,7 @@ async function getLeagueEvents(
   // NFL regular season has 18 weeks.
   const adjustedWeek = league === League.COLLEGE ? (week + 1) % 15 : week % 18;
   const seasonType: SeasonType =
-    (league === League.COLLEGE && week <= 15) ||
+    (league === League.COLLEGE && week + 1 <= 15) ||
     (league === League.PRO && week <= 18)
       ? SeasonType.REGULAR
       : SeasonType.POST;
