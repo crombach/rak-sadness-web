@@ -87,6 +87,7 @@ export default function RakSadness() {
   const handleWeekInputChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       setScores(null);
+      setScoresLoading(true);
       const digitsRegex = /^[0-9\b]+$/;
       if (event.target.value === "" || digitsRegex.test(event.target.value)) {
         setWeek(event.target.value);
