@@ -1,16 +1,22 @@
 // ../.wrangler/tmp/bundle-3EEGai/checked-fetch.js
 var urls = /* @__PURE__ */ new Set();
 function checkURL(request, init) {
-  const url = request instanceof URL ? request : new URL(
-    (typeof request === "string" ? new Request(request, init) : request).url
-  );
+  const url =
+    request instanceof URL
+      ? request
+      : new URL(
+          (typeof request === "string"
+            ? new Request(request, init)
+            : request
+          ).url,
+        );
   if (url.port && url.port !== "443" && url.protocol === "https:") {
     if (!urls.has(url.toString())) {
       urls.add(url.toString());
       console.warn(
         `WARNING: known issue with \`fetch()\` requests to custom HTTPS ports in published Workers:
  - ${url.toString()} - the custom port will be ignored when the Worker is published using the \`wrangler deploy\` command.
-`
+`,
       );
     }
   }
@@ -20,7 +26,7 @@ globalThis.fetch = new Proxy(globalThis.fetch, {
     const [request, init] = argArray;
     checkURL(request, init);
     return Reflect.apply(target, thisArg, argArray);
-  }
+  },
 });
 
 // helloworld.ts
@@ -35,8 +41,8 @@ var routes = [
     mountPath: "/",
     method: "",
     middlewares: [],
-    modules: [onRequest]
-  }
+    modules: [onRequest],
+  },
 ];
 
 // ../node_modules/wrangler/templates/middleware/common.ts
@@ -50,14 +56,14 @@ function __facade_invokeChain__(request, env, ctx, dispatch, middlewareChain) {
     dispatch,
     next(newRequest, newEnv) {
       return __facade_invokeChain__(newRequest, newEnv, ctx, dispatch, tail);
-    }
+    },
   };
   return head(request, env, ctx, middlewareCtx);
 }
 function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
   return __facade_invokeChain__(request, env, ctx, dispatch, [
     ...__facade_middleware__,
-    finalMiddleware
+    finalMiddleware,
   ]);
 }
 
@@ -90,9 +96,9 @@ function lexer(str) {
         var code = str.charCodeAt(j);
         if (
           // `0-9`
-          code >= 48 && code <= 57 || // `A-Z`
-          code >= 65 && code <= 90 || // `a-z`
-          code >= 97 && code <= 122 || // `_`
+          (code >= 48 && code <= 57) || // `A-Z`
+          (code >= 65 && code <= 90) || // `a-z`
+          (code >= 97 && code <= 122) || // `_`
           code === 95
         ) {
           name += str[j++];
@@ -100,8 +106,7 @@ function lexer(str) {
         }
         break;
       }
-      if (!name)
-        throw new TypeError("Missing parameter name at ".concat(i));
+      if (!name) throw new TypeError("Missing parameter name at ".concat(i));
       tokens.push({ type: "NAME", index: i, value: name });
       i = j;
       continue;
@@ -127,15 +132,15 @@ function lexer(str) {
         } else if (str[j] === "(") {
           count++;
           if (str[j + 1] !== "?") {
-            throw new TypeError("Capturing groups are not allowed at ".concat(j));
+            throw new TypeError(
+              "Capturing groups are not allowed at ".concat(j),
+            );
           }
         }
         pattern += str[j++];
       }
-      if (count)
-        throw new TypeError("Unbalanced pattern at ".concat(i));
-      if (!pattern)
-        throw new TypeError("Missing pattern at ".concat(i));
+      if (count) throw new TypeError("Unbalanced pattern at ".concat(i));
+      if (!pattern) throw new TypeError("Missing pattern at ".concat(i));
       tokens.push({ type: "PATTERN", index: i, value: pattern });
       i = j;
       continue;
@@ -150,27 +155,36 @@ function parse(str, options) {
     options = {};
   }
   var tokens = lexer(str);
-  var _a = options.prefixes, prefixes = _a === void 0 ? "./" : _a;
-  var defaultPattern = "[^".concat(escapeString(options.delimiter || "/#?"), "]+?");
+  var _a = options.prefixes,
+    prefixes = _a === void 0 ? "./" : _a;
+  var defaultPattern = "[^".concat(
+    escapeString(options.delimiter || "/#?"),
+    "]+?",
+  );
   var result = [];
   var key = 0;
   var i = 0;
   var path = "";
-  var tryConsume = function(type) {
-    if (i < tokens.length && tokens[i].type === type)
-      return tokens[i++].value;
+  var tryConsume = function (type) {
+    if (i < tokens.length && tokens[i].type === type) return tokens[i++].value;
   };
-  var mustConsume = function(type) {
+  var mustConsume = function (type) {
     var value2 = tryConsume(type);
-    if (value2 !== void 0)
-      return value2;
-    var _a2 = tokens[i], nextType = _a2.type, index = _a2.index;
-    throw new TypeError("Unexpected ".concat(nextType, " at ").concat(index, ", expected ").concat(type));
+    if (value2 !== void 0) return value2;
+    var _a2 = tokens[i],
+      nextType = _a2.type,
+      index = _a2.index;
+    throw new TypeError(
+      "Unexpected "
+        .concat(nextType, " at ")
+        .concat(index, ", expected ")
+        .concat(type),
+    );
   };
-  var consumeText = function() {
+  var consumeText = function () {
     var result2 = "";
     var value2;
-    while (value2 = tryConsume("CHAR") || tryConsume("ESCAPED_CHAR")) {
+    while ((value2 = tryConsume("CHAR") || tryConsume("ESCAPED_CHAR"))) {
       result2 += value2;
     }
     return result2;
@@ -194,7 +208,7 @@ function parse(str, options) {
         prefix,
         suffix: "",
         pattern: pattern || defaultPattern,
-        modifier: tryConsume("MODIFIER") || ""
+        modifier: tryConsume("MODIFIER") || "",
       });
       continue;
     }
@@ -219,7 +233,7 @@ function parse(str, options) {
         pattern: name_1 && !pattern_1 ? defaultPattern : pattern_1,
         prefix,
         suffix,
-        modifier: tryConsume("MODIFIER") || ""
+        modifier: tryConsume("MODIFIER") || "",
       });
       continue;
     }
@@ -236,23 +250,28 @@ function regexpToFunction(re, keys, options) {
   if (options === void 0) {
     options = {};
   }
-  var _a = options.decode, decode = _a === void 0 ? function(x) {
-    return x;
-  } : _a;
-  return function(pathname) {
+  var _a = options.decode,
+    decode =
+      _a === void 0
+        ? function (x) {
+            return x;
+          }
+        : _a;
+  return function (pathname) {
     var m = re.exec(pathname);
-    if (!m)
-      return false;
-    var path = m[0], index = m.index;
+    if (!m) return false;
+    var path = m[0],
+      index = m.index;
     var params = /* @__PURE__ */ Object.create(null);
-    var _loop_1 = function(i2) {
-      if (m[i2] === void 0)
-        return "continue";
+    var _loop_1 = function (i2) {
+      if (m[i2] === void 0) return "continue";
       var key = keys[i2 - 1];
       if (key.modifier === "*" || key.modifier === "+") {
-        params[key.name] = m[i2].split(key.prefix + key.suffix).map(function(value) {
-          return decode(value, key);
-        });
+        params[key.name] = m[i2]
+          .split(key.prefix + key.suffix)
+          .map(function (value) {
+            return decode(value, key);
+          });
       } else {
         params[key.name] = decode(m[i2], key);
       }
@@ -270,8 +289,7 @@ function flags(options) {
   return options && options.sensitive ? "" : "i";
 }
 function regexpToRegexp(path, keys) {
-  if (!keys)
-    return path;
+  if (!keys) return path;
   var groupsRegex = /\((?:\?<(.*?)>)?(?!\?)/g;
   var index = 0;
   var execResult = groupsRegex.exec(path.source);
@@ -282,14 +300,14 @@ function regexpToRegexp(path, keys) {
       prefix: "",
       suffix: "",
       modifier: "",
-      pattern: ""
+      pattern: "",
     });
     execResult = groupsRegex.exec(path.source);
   }
   return path;
 }
 function arrayToRegexp(paths, keys, options) {
-  var parts = paths.map(function(path) {
+  var parts = paths.map(function (path) {
     return pathToRegexp(path, keys, options).source;
   });
   return new RegExp("(?:".concat(parts.join("|"), ")"), flags(options));
@@ -301,9 +319,23 @@ function tokensToRegexp(tokens, keys, options) {
   if (options === void 0) {
     options = {};
   }
-  var _a = options.strict, strict = _a === void 0 ? false : _a, _b = options.start, start = _b === void 0 ? true : _b, _c = options.end, end = _c === void 0 ? true : _c, _d = options.encode, encode = _d === void 0 ? function(x) {
-    return x;
-  } : _d, _e = options.delimiter, delimiter = _e === void 0 ? "/#?" : _e, _f = options.endsWith, endsWith = _f === void 0 ? "" : _f;
+  var _a = options.strict,
+    strict = _a === void 0 ? false : _a,
+    _b = options.start,
+    start = _b === void 0 ? true : _b,
+    _c = options.end,
+    end = _c === void 0 ? true : _c,
+    _d = options.encode,
+    encode =
+      _d === void 0
+        ? function (x) {
+            return x;
+          }
+        : _d,
+    _e = options.delimiter,
+    delimiter = _e === void 0 ? "/#?" : _e,
+    _f = options.endsWith,
+    endsWith = _f === void 0 ? "" : _f;
   var endsWithRe = "[".concat(escapeString(endsWith), "]|$");
   var delimiterRe = "[".concat(escapeString(delimiter), "]");
   var route = start ? "^" : "";
@@ -315,34 +347,51 @@ function tokensToRegexp(tokens, keys, options) {
       var prefix = escapeString(encode(token.prefix));
       var suffix = escapeString(encode(token.suffix));
       if (token.pattern) {
-        if (keys)
-          keys.push(token);
+        if (keys) keys.push(token);
         if (prefix || suffix) {
           if (token.modifier === "+" || token.modifier === "*") {
             var mod = token.modifier === "*" ? "?" : "";
-            route += "(?:".concat(prefix, "((?:").concat(token.pattern, ")(?:").concat(suffix).concat(prefix, "(?:").concat(token.pattern, "))*)").concat(suffix, ")").concat(mod);
+            route += "(?:"
+              .concat(prefix, "((?:")
+              .concat(token.pattern, ")(?:")
+              .concat(suffix)
+              .concat(prefix, "(?:")
+              .concat(token.pattern, "))*)")
+              .concat(suffix, ")")
+              .concat(mod);
           } else {
-            route += "(?:".concat(prefix, "(").concat(token.pattern, ")").concat(suffix, ")").concat(token.modifier);
+            route += "(?:"
+              .concat(prefix, "(")
+              .concat(token.pattern, ")")
+              .concat(suffix, ")")
+              .concat(token.modifier);
           }
         } else {
           if (token.modifier === "+" || token.modifier === "*") {
-            route += "((?:".concat(token.pattern, ")").concat(token.modifier, ")");
+            route += "((?:"
+              .concat(token.pattern, ")")
+              .concat(token.modifier, ")");
           } else {
             route += "(".concat(token.pattern, ")").concat(token.modifier);
           }
         }
       } else {
-        route += "(?:".concat(prefix).concat(suffix, ")").concat(token.modifier);
+        route += "(?:"
+          .concat(prefix)
+          .concat(suffix, ")")
+          .concat(token.modifier);
       }
     }
   }
   if (end) {
-    if (!strict)
-      route += "".concat(delimiterRe, "?");
+    if (!strict) route += "".concat(delimiterRe, "?");
     route += !options.endsWith ? "$" : "(?=".concat(endsWithRe, ")");
   } else {
     var endToken = tokens[tokens.length - 1];
-    var isEndDelimited = typeof endToken === "string" ? delimiterRe.indexOf(endToken[endToken.length - 1]) > -1 : endToken === void 0;
+    var isEndDelimited =
+      typeof endToken === "string"
+        ? delimiterRe.indexOf(endToken[endToken.length - 1]) > -1
+        : endToken === void 0;
     if (!strict) {
       route += "(?:".concat(delimiterRe, "(?=").concat(endsWithRe, "))?");
     }
@@ -353,10 +402,8 @@ function tokensToRegexp(tokens, keys, options) {
   return new RegExp(route, flags(options));
 }
 function pathToRegexp(path, keys, options) {
-  if (path instanceof RegExp)
-    return regexpToRegexp(path, keys);
-  if (Array.isArray(path))
-    return arrayToRegexp(path, keys, options);
+  if (path instanceof RegExp) return regexpToRegexp(path, keys);
+  if (Array.isArray(path)) return arrayToRegexp(path, keys, options);
   return stringToRegexp(path, keys, options);
 }
 
@@ -369,10 +416,10 @@ function* executeRequest(request) {
       continue;
     }
     const routeMatcher = match(route.routePath.replace(escapeRegex, "\\$&"), {
-      end: false
+      end: false,
     });
     const mountMatcher = match(route.mountPath.replace(escapeRegex, "\\$&"), {
-      end: false
+      end: false,
     });
     const matchResult = routeMatcher(requestPath);
     const mountMatchResult = mountMatcher(requestPath);
@@ -381,7 +428,7 @@ function* executeRequest(request) {
         yield {
           handler,
           params: matchResult.params,
-          path: mountMatchResult.path
+          path: mountMatchResult.path,
         };
       }
     }
@@ -391,10 +438,10 @@ function* executeRequest(request) {
       continue;
     }
     const routeMatcher = match(route.routePath.replace(escapeRegex, "\\$&"), {
-      end: true
+      end: true,
     });
     const mountMatcher = match(route.mountPath.replace(escapeRegex, "\\$&"), {
-      end: false
+      end: false,
     });
     const matchResult = routeMatcher(requestPath);
     const mountMatchResult = mountMatcher(requestPath);
@@ -403,7 +450,7 @@ function* executeRequest(request) {
         yield {
           handler,
           params: matchResult.params,
-          path: matchResult.path
+          path: matchResult.path,
         };
       }
       break;
@@ -445,7 +492,7 @@ var pages_template_worker_default = {
           waitUntil: workerContext.waitUntil.bind(workerContext),
           passThroughOnException: () => {
             isFailOpen = true;
-          }
+          },
         };
         const response = await handler(context);
         if (!(response instanceof Response)) {
@@ -469,15 +516,14 @@ var pages_template_worker_default = {
       }
       throw error;
     }
-  }
+  },
 };
-var cloneResponse = (response) => (
+var cloneResponse = (response) =>
   // https://fetch.spec.whatwg.org/#null-body-status
   new Response(
     [101, 204, 205, 304].includes(response.status) ? null : response.body,
-    response
-  )
-);
+    response,
+  );
 
 // ../node_modules/wrangler/templates/middleware/middleware-miniflare3-json-error.ts
 function reduceError(e) {
@@ -485,7 +531,7 @@ function reduceError(e) {
     name: e?.name,
     message: e?.message ?? String(e),
     stack: e?.stack,
-    cause: e?.cause === void 0 ? void 0 : reduceError(e.cause)
+    cause: e?.cause === void 0 ? void 0 : reduceError(e.cause),
   };
 }
 var jsonError = async (request, env, _ctx, middlewareCtx) => {
@@ -495,7 +541,7 @@ var jsonError = async (request, env, _ctx, middlewareCtx) => {
     const error = reduceError(e);
     return Response.json(error, {
       status: 500,
-      headers: { "MF-Experimental-Error-Stack": "true" }
+      headers: { "MF-Experimental-Error-Stack": "true" },
     });
   }
 };
@@ -509,8 +555,10 @@ var facade = {
   envWrappers,
   middleware: [
     middleware_miniflare3_json_error_default,
-    ...pages_template_worker_default.middleware ? pages_template_worker_default.middleware : []
-  ].filter(Boolean)
+    ...(pages_template_worker_default.middleware
+      ? pages_template_worker_default.middleware
+      : []),
+  ].filter(Boolean),
 };
 var middleware_insertion_facade_default = facade;
 
@@ -529,14 +577,17 @@ var __Facade_ScheduledController__ = class {
     this.#noRetry();
   }
 };
-var __facade_modules_fetch__ = function(request, env, ctx) {
+var __facade_modules_fetch__ = function (request, env, ctx) {
   if (middleware_insertion_facade_default.fetch === void 0)
     throw new Error("Handler does not export a fetch() function.");
   return middleware_insertion_facade_default.fetch(request, env, ctx);
 };
 function getMaskedEnv(rawEnv) {
   let env = rawEnv;
-  if (middleware_insertion_facade_default.envWrappers && middleware_insertion_facade_default.envWrappers.length > 0) {
+  if (
+    middleware_insertion_facade_default.envWrappers &&
+    middleware_insertion_facade_default.envWrappers.length > 0
+  ) {
     for (const wrapFn of middleware_insertion_facade_default.envWrappers) {
       env = wrapFn(env);
     }
@@ -545,42 +596,51 @@ function getMaskedEnv(rawEnv) {
 }
 var registeredMiddleware = false;
 var facade2 = {
-  ...middleware_insertion_facade_default.tail && {
-    tail: maskHandlerEnv(middleware_insertion_facade_default.tail)
-  },
-  ...middleware_insertion_facade_default.trace && {
-    trace: maskHandlerEnv(middleware_insertion_facade_default.trace)
-  },
-  ...middleware_insertion_facade_default.scheduled && {
-    scheduled: maskHandlerEnv(middleware_insertion_facade_default.scheduled)
-  },
-  ...middleware_insertion_facade_default.queue && {
-    queue: maskHandlerEnv(middleware_insertion_facade_default.queue)
-  },
-  ...middleware_insertion_facade_default.test && {
-    test: maskHandlerEnv(middleware_insertion_facade_default.test)
-  },
-  ...middleware_insertion_facade_default.email && {
-    email: maskHandlerEnv(middleware_insertion_facade_default.email)
-  },
+  ...(middleware_insertion_facade_default.tail && {
+    tail: maskHandlerEnv(middleware_insertion_facade_default.tail),
+  }),
+  ...(middleware_insertion_facade_default.trace && {
+    trace: maskHandlerEnv(middleware_insertion_facade_default.trace),
+  }),
+  ...(middleware_insertion_facade_default.scheduled && {
+    scheduled: maskHandlerEnv(middleware_insertion_facade_default.scheduled),
+  }),
+  ...(middleware_insertion_facade_default.queue && {
+    queue: maskHandlerEnv(middleware_insertion_facade_default.queue),
+  }),
+  ...(middleware_insertion_facade_default.test && {
+    test: maskHandlerEnv(middleware_insertion_facade_default.test),
+  }),
+  ...(middleware_insertion_facade_default.email && {
+    email: maskHandlerEnv(middleware_insertion_facade_default.email),
+  }),
   fetch(request, rawEnv, ctx) {
     const env = getMaskedEnv(rawEnv);
-    if (middleware_insertion_facade_default.middleware && middleware_insertion_facade_default.middleware.length > 0) {
+    if (
+      middleware_insertion_facade_default.middleware &&
+      middleware_insertion_facade_default.middleware.length > 0
+    ) {
       if (!registeredMiddleware) {
         registeredMiddleware = true;
         for (const middleware of middleware_insertion_facade_default.middleware) {
           __facade_register__(middleware);
         }
       }
-      const __facade_modules_dispatch__ = function(type, init) {
-        if (type === "scheduled" && middleware_insertion_facade_default.scheduled !== void 0) {
+      const __facade_modules_dispatch__ = function (type, init) {
+        if (
+          type === "scheduled" &&
+          middleware_insertion_facade_default.scheduled !== void 0
+        ) {
           const controller = new __Facade_ScheduledController__(
             Date.now(),
             init.cron ?? "",
-            () => {
-            }
+            () => {},
           );
-          return middleware_insertion_facade_default.scheduled(controller, env, ctx);
+          return middleware_insertion_facade_default.scheduled(
+            controller,
+            env,
+            ctx,
+          );
         }
       };
       return __facade_invoke__(
@@ -588,18 +648,16 @@ var facade2 = {
         env,
         ctx,
         __facade_modules_dispatch__,
-        __facade_modules_fetch__
+        __facade_modules_fetch__,
       );
     } else {
       return __facade_modules_fetch__(request, env, ctx);
     }
-  }
+  },
 };
 function maskHandlerEnv(handler) {
   return (data, env, ctx) => handler(data, getMaskedEnv(env), ctx);
 }
 var middleware_loader_entry_default = facade2;
-export {
-  middleware_loader_entry_default as default
-};
+export { middleware_loader_entry_default as default };
 //# sourceMappingURL=functionsWorker-0.6595955405050793.mjs.map
