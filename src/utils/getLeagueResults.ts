@@ -1,6 +1,6 @@
 import { LeagueResult } from "../types/LeagueResult";
 import { EspnCompetitor, EspnEvent } from "../types/ESPN";
-import { League } from "../types/League";
+import { League, SeasonType } from "../types/League";
 
 // You can find group IDs by looking at weekly scoreboards. Example:
 // https://www.espn.com/college-football/scoreboard/_/group/22
@@ -15,15 +15,22 @@ async function getLeagueEvents(
 ): Promise<Array<EspnEvent>> {
   // Week 1 of Rak Madness is week 1 in the NFL, but week 2 in the NCAA.
   // We account for this by adding 1 to the week if NCAA results have been requested.
-  const adjustedWeek = league === League.COLLEGE ? week + 1 : week;
+  // NCAA regular season has 15 weeks.
+  // NFL regular season has 18 weeks.
+  const adjustedWeek = league === League.COLLEGE ? (week + 1) % 15 : week % 18;
+  const seasonType: SeasonType =
+    (league === League.COLLEGE && week <= 15) ||
+    (league === League.PRO && week <= 18)
+      ? SeasonType.REGULAR
+      : SeasonType.POST;
 
   // Build final request URL.
-  const baseRequestUrl = `https://site.api.espn.com/apis/site/v2/sports/football/${league}/scoreboard?week=${adjustedWeek}`;
+  const baseRequestUrl = `https://site.api.espn.com/apis/site/v2/sports/football/${league}/scoreboard?week=${adjustedWeek}&seasontype=${seasonType}`;
 
   // For college, we need to concatenate multiple groups.
   if (league === League.COLLEGE) {
     const collegePromises = COLLEGE_GROUPS.map((groupId: number) => {
-      const requestUrl = `${baseRequestUrl}&limit=200&groups=${groupId}`;
+      const requestUrl = `${baseRequestUrl}&limit=400&groups=${groupId}`;
       return fetch(requestUrl).then((response) =>
         response.json().then((json) => json.events as Array<EspnEvent>),
       );
