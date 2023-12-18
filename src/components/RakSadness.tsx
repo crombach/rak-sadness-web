@@ -81,8 +81,12 @@ export default function RakSadness() {
             error,
           );
           showToast(
-          new Toast("warning", "Missing Picks", `Picks sheet for week ${week} is not yet in the database, but you can upload it manually.`),
-        );
+            new Toast(
+              "warning",
+              "Missing Picks",
+              `Picks sheet for week ${week} is not yet in the database, but you can upload it manually.`,
+            ),
+          );
         } finally {
           setScoresLoading(false);
         }
@@ -212,7 +216,7 @@ export default function RakSadness() {
             {/* Upload picks file button */}
             <Button
               className={`home__button ${getClasses({
-                "--show": !isWeekLoading && !isScoresLoading && !scores,
+                "--hide": isWeekLoading || isScoresLoading || !!scores,
                 "--loading-btn": isUploadLoading,
               })}`}
               variant="solid"
@@ -225,7 +229,6 @@ export default function RakSadness() {
             {/* Show scores button */}
             <Button
               className={`home__button ${getClasses({
-                "--show": !isFirstLoad || (!isScoresLoading && !!scores),
                 "--loading-btn": isScoresLoading,
               })}`}
               disabled={!week || isWeekLoading || !scores || isScoresLoading}
@@ -238,7 +241,6 @@ export default function RakSadness() {
             {/* Export results button */}
             <Button
               className={`home__button ${getClasses({
-                "--show": !isFirstLoad || (!isScoresLoading && !!scores),
                 "--loading-btn": isScoresLoading || isExportLoading,
               })}`}
               disabled={!week || isWeekLoading || !scores || isScoresLoading}
