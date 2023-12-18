@@ -33,7 +33,6 @@ export default function RakSadness() {
   const [isExportLoading, setExportLoading] = useState(false);
 
   // File upload stuff
-  const [showUploadButton, setShowUploadButton] = useState(false);
   const fileInputRef = useRef(null);
   const clickFileInput = useCallback(() => {
     fileInputRef.current?.click();
@@ -81,6 +80,9 @@ export default function RakSadness() {
             `Failed to load week ${week} picks spreadsheet from API. Has it been uploaded yet?`,
             error,
           );
+          showToast(
+          new Toast("warning", "Missing Picks", `Picks sheet for week ${week} is not yet in the database. You can uploaded it manually.`),
+        );
         } finally {
           setScoresLoading(false);
         }
