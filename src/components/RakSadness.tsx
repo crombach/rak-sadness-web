@@ -76,6 +76,7 @@ export default function RakSadness() {
             `Failed to load week ${week} picks spreadsheet from API. Has it been uploaded yet?`,
             error,
           );
+          setScores(null);
           showToast(
             new Toast(
               "warning",
