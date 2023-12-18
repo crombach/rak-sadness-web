@@ -81,7 +81,7 @@ export default function RakSadness() {
             error,
           );
           showToast(
-          new Toast("warning", "Missing Picks", `Picks sheet for week ${week} is not yet in the database. You can uploaded it manually.`),
+          new Toast("warning", "Missing Picks", `Picks sheet for week ${week} is not yet in the database, but you can upload it manually.`),
         );
         } finally {
           setScoresLoading(false);
