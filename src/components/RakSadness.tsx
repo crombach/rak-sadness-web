@@ -26,17 +26,14 @@ export default function RakSadness() {
   const { showToast } = useToastContext();
 
   // Loading flags
-  const [isFirstLoad, setFirstLoad] = useState(true);
   const [isWeekLoading, setWeekLoading] = useState(true);
   const [isScoresLoading, setScoresLoading] = useState(true);
-  const [isUploadLoading, setUploadLoading] = useState(false);
   const [isExportLoading, setExportLoading] = useState(false);
 
   // File upload stuff
   const fileInputRef = useRef(null);
   const clickFileInput = useCallback(() => {
     fileInputRef.current?.click();
-    setUploadLoading(true);
   }, []);
 
   // Scores-related state
@@ -73,7 +70,6 @@ export default function RakSadness() {
             picksBuffer,
           );
           setScores(newScores);
-          setFirstLoad(false);
         } catch (error) {
           // If the picks spreadsheet doesn't exist yet, fail gracefully and log a message.
           console.warn(
@@ -111,7 +107,6 @@ export default function RakSadness() {
   // When a user manually uploads a picks spreadsheet, parse and score it.
   const handleFileUpload: ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
-      setUploadLoading(false);
       if (!week) {
         return;
       }
@@ -139,7 +134,6 @@ export default function RakSadness() {
         if (newScores) {
           setScores(newScores);
           setScoresLoading(false);
-          setFirstLoad(false);
           showToast(
             new Toast(
               "success",
@@ -217,7 +211,6 @@ export default function RakSadness() {
             <Button
               className={`home__button ${getClasses({
                 "--hide": isWeekLoading || isScoresLoading || !!scores,
-                "--loading-btn": isUploadLoading,
               })}`}
               variant="solid"
               color="primary"
@@ -228,7 +221,7 @@ export default function RakSadness() {
             </Button>
             {/* Show scores button */}
             <Button
-              className={`home__button ${getClasses({
+              className={`home__button --scores ${getClasses({
                 "--loading-btn": isScoresLoading,
               })}`}
               disabled={!week || isWeekLoading || !scores || isScoresLoading}
@@ -240,7 +233,7 @@ export default function RakSadness() {
             </Button>
             {/* Export results button */}
             <Button
-              className={`home__button ${getClasses({
+              className={`home__button --export ${getClasses({
                 "--loading-btn": isScoresLoading || isExportLoading,
               })}`}
               disabled={!week || isWeekLoading || !scores || isScoresLoading}

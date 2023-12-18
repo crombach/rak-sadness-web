@@ -40,9 +40,9 @@
 .home .home__button {
   width: 100%;
   min-width: min-content;
-  transition-property: height, min-height, opacity;
+  transition-property: height, min-height, opacity, color, background-color;
   transition-duration: 300ms;
-  transition-timing-function: ease-out;
+  transition-timing-function: ease;
   height: 56px;
   min-height: 56px;
   margin-top: 12px;
@@ -77,6 +77,18 @@
     300% 100%,
     cover;
   animation: slide 1s linear infinite;
+}
+
+.--loading-btn:disabled::after {
+  background: linear-gradient(
+    to right,
+    transparent 30%,
+    rgba(128, 128, 128, 0.15),
+    transparent 70%
+  );
+  background-size:
+    300% 100%,
+    cover;
 }
 
 .home__scores {
