@@ -25,10 +25,19 @@ import { useDebounce } from "usehooks-ts";
 export default function RakSadness() {
   const { showToast } = useToastContext();
 
-  // File input ref
+  // Loading flags
+  const [isFirstLoad, setFirstLoad] = useState(true);
+  const [isWeekLoading, setWeekLoading] = useState(true);
+  const [isScoresLoading, setScoresLoading] = useState(true);
+  const [isUploadLoading, setUploadLoading] = useState(false);
+  const [isExportLoading, setExportLoading] = useState(false);
+
+  // File upload stuff
+  const [showUploadButton, setShowUploadButton] = useState(false);
   const fileInputRef = useRef(null);
   const clickFileInput = useCallback(() => {
     fileInputRef.current?.click();
+    setUploadLoading(true);
   }, []);
 
   // Scores-related state
@@ -37,14 +46,9 @@ export default function RakSadness() {
     "Leaderboard" | "Explanation" | false
   >(false);
 
-  // Loading flags
-  const [isWeekLoading, setWeekLoading] = useState(true);
-  const [isScoresLoading, setScoresLoading] = useState(true);
-  const [isExportLoading, setExportLoading] = useState(false);
-
   // Selected week
   const [week, setWeek] = useState<string>("");
-  const weekDebounced = useDebounce<string>(week, 300);
+  const weekDebounced = useDebounce<string>(week, 500);
 
   // Query the ESPN API to get the current NFL week
   useEffect(() => {
@@ -63,17 +67,19 @@ export default function RakSadness() {
         setScoresLoading(true);
         try {
           const response = await fetch(`/api/picks/${weekDebounced}`);
-          response.headers
+          response.headers;
           const picksBuffer = await response.arrayBuffer();
           const newScores = await getPlayerScores(
             Number(weekDebounced),
             picksBuffer,
           );
           setScores(newScores);
+          setFirstLoad(false);
         } catch (error) {
           // If the picks spreadsheet doesn't exist yet, fail gracefully and log a message.
           console.warn(
-            `Failed to load week ${week} picks spreadsheet from API. Has it been uploaded yet?`, error
+            `Failed to load week ${week} picks spreadsheet from API. Has it been uploaded yet?`,
+            error,
           );
         } finally {
           setScoresLoading(false);
@@ -99,6 +105,7 @@ export default function RakSadness() {
   // When a user manually uploads a picks spreadsheet, parse and score it.
   const handleFileUpload: ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
+      setUploadLoading(false);
       if (!week) {
         return;
       }
@@ -126,6 +133,7 @@ export default function RakSadness() {
         if (newScores) {
           setScores(newScores);
           setScoresLoading(false);
+          setFirstLoad(false);
           showToast(
             new Toast(
               "success",
@@ -191,7 +199,7 @@ export default function RakSadness() {
                 onChange={handleWeekInputChange}
               />
             </div>
-            {/* Hidden file input */}
+            {/* Hidden picks file input */}
             <input
               ref={fileInputRef}
               className="home__file-input"
@@ -201,43 +209,43 @@ export default function RakSadness() {
             />
             {/* Upload picks file button */}
             <Button
-              className={`home__submit-button ${getClasses({
-                "--loading-btn": isScoresLoading,
+              className={`home__button ${getClasses({
+                "--show": !isWeekLoading && !isScoresLoading && !scores,
+                "--loading-btn": isUploadLoading,
               })}`}
               variant="solid"
+              color="primary"
               onClick={clickFileInput}
-              disabled={isWeekLoading || isScoresLoading || !week}
+              disabled={!week || isWeekLoading || isScoresLoading}
             >
               Upload Picks Spreadsheet
             </Button>
-            <div
-              className={`home__actions ${getClasses({
-                "--expanded": !!week && !!scores,
+            {/* Show scores button */}
+            <Button
+              className={`home__button ${getClasses({
+                "--show": !isFirstLoad || (!isScoresLoading && !!scores),
+                "--loading-btn": isScoresLoading,
               })}`}
+              disabled={!week || isWeekLoading || !scores || isScoresLoading}
+              variant="solid"
+              color="success"
+              onClick={() => setShowScores("Leaderboard")}
             >
-              {/* Show scores button */}
-              <Button
-                className="home__actions-button"
-                disabled={!week || !scores || isScoresLoading}
-                variant="solid"
-                color="success"
-                onClick={() => setShowScores("Leaderboard")}
-              >
-                View Results
-              </Button>
-              {/* Export results button */}
-              <Button
-                className={`home__actions-button ${getClasses({
-                  "--loading-btn": isExportLoading,
-                })}`}
-                disabled={!week || !scores || isScoresLoading}
-                variant="solid"
-                color="danger"
-                onClick={exportResults}
-              >
-                Export Results
-              </Button>
-            </div>
+              View Results
+            </Button>
+            {/* Export results button */}
+            <Button
+              className={`home__button ${getClasses({
+                "--show": !isFirstLoad || (!isScoresLoading && !!scores),
+                "--loading-btn": isScoresLoading || isExportLoading,
+              })}`}
+              disabled={!week || isWeekLoading || !scores || isScoresLoading}
+              variant="solid"
+              color="danger"
+              onClick={exportResults}
+            >
+              Export Results
+            </Button>
           </div>
 
           {/* Footer */}
