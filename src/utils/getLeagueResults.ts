@@ -21,12 +21,14 @@ async function getLeagueEvents(
   // Week 1 of Rak Madness is week 1 in the NFL, but week 2 in the NCAA.
   // We account for this by adding 1 to the week if NCAA results have been requested.
   // After the regular season is over, ESPN resets the week counter to 1 for the postseason.
+  // For college games, the postseason is all week 1
+  // because EPSN considers the entire postseasn to be "the bowl week".
   const adjustedWeek =
     league === League.COLLEGE
-      ? (week + 1) % COLLEGE_REGULAR_SEASON_WEEKS
+      ? (week + 1 <= COLLEGE_REGULAR_SEASON_WEEKS) ? week + 1 : 1
       : week % PRO_REGULAR_SEASON_WEEKS;
   const seasonType: SeasonType =
-    (league === League.COLLEGE && week + 1 <= COLLEGE_REGULAR_SEASON_WEEKS) ||
+    (league === League.COLLEGE && adjustedWeek <= COLLEGE_REGULAR_SEASON_WEEKS) ||
     (league === League.PRO && week <= PRO_REGULAR_SEASON_WEEKS)
       ? SeasonType.REGULAR
       : SeasonType.POST;
