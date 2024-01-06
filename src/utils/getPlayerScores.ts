@@ -10,7 +10,6 @@ import {
 import { getLeagueResults } from "./getLeagueResults";
 
 const tiebreakerPickKey = "Pts";
-const totalKey = "Total";
 
 // Capture group 1 is team abbreviation, capture group 3 is spread (if present)
 const pickRegex = /([\S]+)(\s+([+-]?\d+(\.\d)?))?/;
