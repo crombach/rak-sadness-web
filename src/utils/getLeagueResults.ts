@@ -1,7 +1,6 @@
 import { LeagueResult } from "../types/LeagueResult";
 import { EspnCompetitor, EspnEvent } from "../types/ESPN";
 import { League, SeasonType } from "../types/League";
-import getCurrentWeekInfo from "./getCurrentWeekInfo";
 
 // You can find group IDs by looking at weekly scoreboards. Example:
 // https://www.espn.com/college-football/scoreboard/_/group/22
