@@ -15,12 +15,13 @@ import Leaderboard from "@mui/icons-material/Leaderboard";
 import buildSpreadsheetBuffer from "../utils/buildSpreadsheetBuffer";
 import getClasses from "../utils/getClasses";
 import { getPlayerScores, readFileToBuffer } from "../utils/getPlayerScores";
-import getWeek from "../utils/getWeek";
+import getCurrentWeekInfo from "../utils/getCurrentWeekInfo";
 import FloatingLabelInput from "./floatingLabelInput/FloatingLabelInput";
 import ScoresTable from "./table/scores/ScoresTable";
 import ExplanationTable from "./table/explanation/ExplanationTable";
 import "./RakSadness.css";
 import { useDebounce } from "usehooks-ts";
+import { League } from "../types/League";
 
 export default function RakSadness() {
   const { showToast } = useToastContext();
@@ -49,7 +50,8 @@ export default function RakSadness() {
   // Query the ESPN API to get the current NFL week
   useEffect(() => {
     const getWeekAsync = async () => {
-      const currentWeek = ((await getWeek()) ?? "").toString();
+      const currentWeek =
+        (await getCurrentWeekInfo(League.PRO))?.value?.toString() || "";
       setWeek(currentWeek);
       setWeekLoading(false);
     };

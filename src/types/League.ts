@@ -8,3 +8,11 @@ export enum SeasonType {
   POST = 3,
   OFF = 4,
 }
+
+export type WeekInfo = {
+  league: League;
+  seasonType: SeasonType;
+  value: number;
+  startDate: Date;
+  endDate: Date;
+};

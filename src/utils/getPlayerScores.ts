@@ -152,9 +152,7 @@ export async function getPlayerScores(
 
   // Determine property keys for different game types.
   const allKeys = Object.keys(allPicks[0]);
-  const collegeKeys = allKeys.filter((key) =>
-    key.startsWith("C"),
-  );
+  const collegeKeys = allKeys.filter((key) => key.startsWith("C"));
   const proKeys = allKeys.filter(
     (key) => key.startsWith("P") && key !== tiebreakerPickKey,
   );
