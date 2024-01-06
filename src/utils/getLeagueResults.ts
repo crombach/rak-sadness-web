@@ -24,17 +24,21 @@ async function getLeagueEvents(
   let adjustedWeek =
     league === League.COLLEGE
       ? week + 1
-      : week % PRO_REGULAR_SEASON_WEEKS;
+      : week > PRO_REGULAR_SEASON_WEEKS ? week % PRO_REGULAR_SEASON_WEEKS : week;
   const seasonType: SeasonType =
     (league === League.COLLEGE && adjustedWeek <= COLLEGE_REGULAR_SEASON_WEEKS) ||
     (league === League.PRO && week <= PRO_REGULAR_SEASON_WEEKS)
       ? SeasonType.REGULAR
       : SeasonType.POST;
   // For college games, the postseason is all week 1
-  // because EPSN considers the entire postseasn to be "the bowl week".
+  // because EPSN considers the entire postseason to be "the bowl week".
   if (league === League.COLLEGE && seasonType === SeasonType.POST) {
     adjustedWeek = 1;
   }
+
+  console.debug("league:", league);
+  console.debug("adjusted week:", adjustedWeek);
+  console.debug("seasonType:", seasonType);
 
   // Build final request URL.
   const baseRequestUrl = `https://site.api.espn.com/apis/site/v2/sports/football/${league}/scoreboard?week=${adjustedWeek}&seasontype=${seasonType}`;
