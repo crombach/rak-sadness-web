@@ -9,6 +9,9 @@ import {
 } from "../types/RakMadnessScores";
 import { getLeagueResults } from "./getLeagueResults";
 
+const tiebreakerPickKey = "Pts";
+const totalKey = "Total";
+
 // Capture group 1 is team abbreviation, capture group 3 is spread (if present)
 const pickRegex = /([\S]+)(\s+([+-]?\d+(\.\d)?))?/;
 
@@ -149,13 +152,15 @@ export async function getPlayerScores(
   const proResults = await getLeagueResults(League.PRO, week);
 
   // Determine property keys for different game types.
-  const collegeKeys = Object.keys(allPicks[0]).filter((key) =>
+  const allKeys = Object.keys(allPicks[0]);
+  const collegeKeys = allKeys.filter((key) =>
     key.startsWith("C"),
   );
-  const proKeys = Object.keys(allPicks[0]).filter(
-    (key) => key.startsWith("P") && key !== "Pts",
+  const proKeys = allKeys.filter(
+    (key) => key.startsWith("P") && key !== tiebreakerPickKey,
   );
-  const tiebreakerGameKey = proKeys[proKeys.length - 1];
+  // The tiebreaker game key should always be the last one before the tiebreaker score pick.
+  const tiebreakerGameKey = allKeys[allKeys.indexOf(tiebreakerPickKey) - 1];
 
   // Determine MNF tiebreaker score.
   const { teamAbbreviation: tiebreakerTeam } = parsePick(
@@ -220,10 +225,10 @@ export async function getPlayerScores(
         proAgainstTheSpread: scoreProAgainstTheSpread,
       },
       tiebreaker: {
-        pick: playerRow.Pts,
+        pick: playerRow[tiebreakerPickKey],
         distance:
-          playerRow.Pts != null && tiebreakerScore != null
-            ? Math.abs(playerRow.Pts - tiebreakerScore)
+          playerRow[tiebreakerPickKey] != null && tiebreakerScore != null
+            ? Math.abs(playerRow[tiebreakerPickKey] - tiebreakerScore)
             : undefined,
       },
       college: collegePicks.map((pick, index) => ({
