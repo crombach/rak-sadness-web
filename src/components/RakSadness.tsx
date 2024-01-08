@@ -185,13 +185,10 @@ export default function RakSadness() {
     exportResultsAsync();
   }, [scores, week]);
 
-  // Skip input flickering when week number loads. Blank page is fine.
-  if (isWeekLoading) return;
-
   return (
     <Sheet className="home" variant="plain" color="neutral">
       {/* Home Page */}
-      {!showScores && (
+      {!showScores && !isWeekLoading && (
         <>
           {/* Input Controls */}
           <div className="home__controls">
