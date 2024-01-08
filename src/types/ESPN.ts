@@ -13,6 +13,7 @@ export type EspnStatus = {
 
 export type EspnCompetition = {
   competitors: Array<EspnCompetitor>;
+  date: string;
 };
 
 export type EspnCompetitor = {

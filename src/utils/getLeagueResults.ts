@@ -50,10 +50,14 @@ async function getLeagueEvents(
         response.json().then((json) => json.events as Array<EspnEvent>),
       );
     });
-    // We reverse the array here because ESPN jams the entire college postseason into one week
-    // and puts the most recent games at the end of the array, and we want to look at the most
-    // recent games first.
-    return (await Promise.all(collegePromises)).flat(1).reverse();
+    // ESPN jams the entire college postseason into one week.
+    // Sort by competition date so most recent games come first.
+    return (await Promise.all(collegePromises)).flat(1).sort((a, b) => {
+      return (
+        new Date(b.competitions[0].date).getTime() -
+        new Date(a.competitions[0].date).getTime()
+      );
+    });
   }
 
   // For pro, we can just return the raw events list fetched from the API.
