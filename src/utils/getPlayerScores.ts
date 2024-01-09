@@ -265,7 +265,7 @@ export async function getPlayerScores(
       return -1;
     }
     // Tiebreaker distance
-    if (a.tiebreaker.distance && b.tiebreaker.distance) {
+    if (a.tiebreaker.distance != null && b.tiebreaker.distance != null) {
       if (a.tiebreaker.distance > b.tiebreaker.distance) {
         return 1;
       } else if (a.tiebreaker.distance < b.tiebreaker.distance) {
