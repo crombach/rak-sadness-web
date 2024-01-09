@@ -163,7 +163,7 @@ export async function getPlayerScores(
   const { teamAbbreviation: tiebreakerTeam } = parsePick(
     allPicks[0][tiebreakerGameKey],
   );
-  const tiebreakerScore = proResults
+  const tiebreakerScore = (tiebreakerGameKey.startsWith("P") ? proResults : collegeResults)
     .filter((result) => result.isCompleted)
     .find((result) => {
       return (
