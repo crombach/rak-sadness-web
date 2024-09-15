@@ -12,7 +12,7 @@ import { getLeagueResults } from "./getLeagueResults";
 const tiebreakerPickKey = "Pts";
 
 // Capture group 1 is team abbreviation, capture group 3 is spread (if present)
-const pickRegex = /([\S]+)(\s+([+-]?\d+(\.\d)?))?/;
+const pickRegex = /([^\s+-]+)(\s*([+-]?\d+(\.\d)?))?/;
 
 function parsePick(pickString: string) {
   const [, teamAbbreviation, , spreadText] = pickRegex.exec(pickString);
