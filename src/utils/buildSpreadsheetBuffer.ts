@@ -138,11 +138,11 @@ export default function buildSpreadsheetBuffer(
     [
       headerCell("Rank"),
       headerCell("Player"),
-      headerCell("Tiebreaker Pick"),
-      headerCell("Tiebreaker Distance"),
+      headerCell("MNF Points Pick"),
+      headerCell("MNF Points Distance"),
       headerCell("College Score"),
       headerCell("Pro Score"),
-      headerCell("Pro Score Against the Spread"),
+      headerCell("Pro Score ATS"),
       headerCell("Total Score"),
     ],
     // Data rows

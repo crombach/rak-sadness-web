@@ -14,11 +14,11 @@ function ScoresTable({ scores }: { scores?: RakMadnessScores }) {
         <tr>
           <th>Rank</th>
           <th className="table__player-col">Player</th>
-          <th>Tiebreaker Pick</th>
-          <th>Tiebreaker Distance</th>
+          <th>MNF Points Pick</th>
+          <th>MNF Points Distance</th>
           <th>College Score</th>
           <th>Pro Score</th>
-          <th>Pro Score Against the Spread</th>
+          <th>Pro Score ATS</th>
           <th>Total Score</th>
         </tr>
       </thead>
