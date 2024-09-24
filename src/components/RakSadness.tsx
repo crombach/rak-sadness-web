@@ -9,7 +9,6 @@ import {
 } from "react";
 import { Toast, useToastContext } from "../context/ToastContext";
 import { RakMadnessScores } from "../types/RakMadnessScores";
-import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import Info from "@mui/icons-material/Info";
 import Leaderboard from "@mui/icons-material/Leaderboard";
 import buildSpreadsheetBuffer from "../utils/buildSpreadsheetBuffer";
@@ -22,6 +21,7 @@ import ExplanationTable from "./table/explanation/ExplanationTable";
 import "./RakSadness.css";
 import { League } from "../types/League";
 import Navbar from "./navbar/Navbar";
+import Home from "@mui/icons-material/Home";
 
 export default function RakSadness() {
   const { showToast } = useToastContext();
@@ -277,7 +277,7 @@ export default function RakSadness() {
                   color="primary"
                   onClick={() => setShowScores(false)}
                 >
-                  <ChevronLeft />
+                  <Home />
                 </Button>
                 <span>{showScores}</span>
               </>
