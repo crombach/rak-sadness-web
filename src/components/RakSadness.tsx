@@ -27,8 +27,8 @@ export default function RakSadness() {
 
   // Loading flags
   const [isCurrentWeekLoading, setCurrentWeekLoading] = useState(true);
-  const [isPicksLoading, setPicksLoading] = useState(false);
-  const [isScoresLoading, setScoresLoading] = useState(false);
+  const [isPicksLoading, setPicksLoading] = useState(true);
+  const [isScoresLoading, setScoresLoading] = useState(true);
   const [isExportLoading, setExportLoading] = useState(false);
 
   // File upload stuff
@@ -105,7 +105,6 @@ export default function RakSadness() {
 
   // Whenever the week input value changes, update the component state.
   const handleWeekChange = useCallback((value: number) => {
-    setScores(null);
     setSelectedWeek(value);
   }, []);
 
@@ -300,13 +299,20 @@ export default function RakSadness() {
               {/* Upload picks file button */}
               <Button
                 className={`home__button ${getClasses({
-                  "--hide": isCurrentWeekLoading || isScoresLoading || !!scores,
+                  "--hide":
+                    isCurrentWeekLoading ||
+                    isPicksLoading ||
+                    isScoresLoading ||
+                    !!scores,
                 })}`}
                 variant="solid"
                 color="primary"
                 onClick={clickFileInput}
                 disabled={
-                  !selectedWeek || isCurrentWeekLoading || isScoresLoading
+                  !selectedWeek ||
+                  isCurrentWeekLoading ||
+                  isPicksLoading ||
+                  isScoresLoading
                 }
               >
                 Upload Picks Spreadsheet
