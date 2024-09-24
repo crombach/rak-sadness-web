@@ -14,6 +14,10 @@ const tiebreakerPickKey = "Pts";
 // Capture group 1 is team abbreviation, capture group 3 is spread (if present)
 const pickRegex = /([^\s+-]+)(\s*([+-]?\d+(\.\d)?))?/;
 
+function ifNotOne(num: number, otherwise: string): string {
+  return num !== 1 ? otherwise: "";
+}
+
 function parsePick(pickString: string) {
   const [, teamAbbreviation, , spreadText] = pickRegex.exec(pickString);
   const spread = spreadText != null ? Number(spreadText) : 0;
@@ -401,7 +405,7 @@ export async function getPlayerScores(
               isKnockedOut: true,
               explanation:
                 `${activeScore.name} knocked out on Total Score by ${oppScore.name}. ` +
-                `Behind by ${totalScoreDiff} with ${totalDifferentPicks} different pick(s) remaining.`,
+                `Behind by ${totalScoreDiff} with ${totalDifferentPicks} different pick${ifNotOne(totalDifferentPicks, "s")} remaining.`,
             },
           };
         } else if (totalDifferentPicks === totalScoreDiff) {
@@ -426,7 +430,7 @@ export async function getPlayerScores(
                   isKnockedOut: true,
                   explanation:
                     `${activeScore.name} knocked out on College Score tiebreaker by ${oppScore.name}. ` +
-                    `Behind by ${collegeScoreDiff} with ${differentCollegePicks} different college pick(s) remaining.`,
+                    `Behind by ${collegeScoreDiff} with ${differentCollegePicks} different college pick${ifNotOne(differentCollegePicks, "s")} remaining.`,
                 },
               };
             }
@@ -446,7 +450,7 @@ export async function getPlayerScores(
                     isKnockedOut: true,
                     explanation:
                       `${activeScore.name} knocked out on Pro Score Against the Spread tiebreaker by ${oppScore.name}. ` +
-                      `Behind by ${proAgainstTheSpreadScoreDiff} with ${differentProPicksWithSpreads} different pick(s) remaining ` +
+                      `Behind by ${proAgainstTheSpreadScoreDiff} with ${differentProPicksWithSpreads} different pick${ifNotOne(differentProPicksWithSpreads, "s")} remaining ` +
                       `for pro games with spreads.`,
                   },
                 };
@@ -464,9 +468,9 @@ export async function getPlayerScores(
                 ...activeScore.status,
                 isKnockedOut: true,
                 explanation:
-                  `${activeScore.name} knocked out on MNF points total tiebreaker by ${oppScore.name}. ` +
-                  `${activeScore.name} is ${activeScore.tiebreaker.distance} point(s) off, and ${oppScore.name} is ` +
-                  `${oppScore.tiebreaker.distance} point(s) off.`,
+                  `${activeScore.name} knocked out on MNF Points tiebreaker by ${oppScore.name}. ` +
+                  `${activeScore.name} is ${activeScore.tiebreaker.distance} point${ifNotOne(activeScore.tiebreaker.distance, "s")} off, and ${oppScore.name} is ` +
+                  `${oppScore.tiebreaker.distance} point${ifNotOne(oppScore.tiebreaker.distance, "s")} off.`,
               },
             };
           }
