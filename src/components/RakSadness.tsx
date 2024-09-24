@@ -61,7 +61,7 @@ export default function RakSadness() {
   // When the week changes, attempt to fetch the picks spreadsheet from the API.
   useEffect(() => {
     const fetchPicksAsync = async () => {
-      if (week) {
+      if (week && !isWeekLoading) {
         setScoresLoading(true);
         try {
           const response = await fetch(`/api/picks/${week}`);
@@ -89,7 +89,7 @@ export default function RakSadness() {
       }
     };
     fetchPicksAsync();
-  }, [week]);
+  }, [week, isWeekLoading]);
 
   // Whenever the week input value changes, update the component state.
   const handleWeekInputChange = useCallback(
