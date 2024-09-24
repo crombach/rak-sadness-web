@@ -220,7 +220,7 @@ export default function RakSadness() {
           color="primary"
           onClick={() => setShowScores("Scoreboard")}
           className={`home__scores-header-button ${getClasses({
-            "--selected": showScores === "Scoreboard",
+            "--active": showScores === "Scoreboard",
           })}`}
         >
           <Leaderboard />
@@ -230,7 +230,7 @@ export default function RakSadness() {
           color="primary"
           onClick={() => setShowScores("Explanation")}
           className={`home__scores-header-button ${getClasses({
-            "--selected": showScores === "Explanation",
+            "--active": showScores === "Explanation",
           })}`}
         >
           <Info />

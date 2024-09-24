@@ -21,17 +21,18 @@
 }
 
 .home__content {
+  flex: 1;
   width: min(1024px, 100%);
   max-width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+  overflow: auto;
 }
 
 .home__content.--unbounded {
-  width: min-content;
+  width: max-content;
 }
 
 .home__controls {
@@ -111,17 +112,16 @@
     cover;
 }
 
-.home__scores-header-button.--selected {
-  background-color: var(--joy-palette-primary-600);
-}
-
 .home__scores {
   display: flex;
   flex-direction: column;
-  height: 100%;
   width: 100%;
+  height: 100%;
   margin: 0;
-  overflow: auto;
+}
+
+.home__scores-header-button.--active {
+  background-color: var(--joy-palette-primary-600);
 }
 
 .home__footer {
