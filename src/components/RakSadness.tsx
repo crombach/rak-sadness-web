@@ -20,8 +20,9 @@ import FloatingLabelInput from "./floatingLabelInput/FloatingLabelInput";
 import ScoresTable from "./table/scores/ScoresTable";
 import ExplanationTable from "./table/explanation/ExplanationTable";
 import "./RakSadness.css";
-import { useDebounceValue } from "usehooks-ts";
 import { League } from "../types/League";
+import Navbar from "./navbar/Navbar";
+import { useDebounceValue } from "usehooks-ts";
 
 export default function RakSadness() {
   const { showToast } = useToastContext();
@@ -44,7 +45,7 @@ export default function RakSadness() {
   >(false);
 
   // Selected week
-  const [week, setWeek] = useDebounceValue<string>("", 500);
+  const [week, setWeek] = useState<string>("");
 
   // Query the ESPN API to get the current NFL week
   useEffect(() => {
@@ -66,10 +67,7 @@ export default function RakSadness() {
           const response = await fetch(`/api/picks/${week}`);
           response.headers;
           const picksBuffer = await response.arrayBuffer();
-          const newScores = await getPlayerScores(
-            Number(week),
-            picksBuffer,
-          );
+          const newScores = await getPlayerScores(Number(week), picksBuffer);
           setScores(newScores);
         } catch (error) {
           // If the picks spreadsheet doesn't exist yet, fail gracefully and log a message.
@@ -189,6 +187,16 @@ export default function RakSadness() {
       {/* Home Page */}
       {!showScores && !isWeekLoading && (
         <>
+          {/* Navbar */}
+          <Navbar
+            left={
+              <>
+                <img className="navbar__logo" src="/logo192.png" />
+                <span>Rak Madness Scores</span>
+              </>
+            }
+          />
+
           {/* Input Controls */}
           <div className="home__controls">
             {/* Week number input */}
@@ -261,14 +269,10 @@ export default function RakSadness() {
       {/* Scores Viewer */}
       {showScores && scores && (
         <div className="home__scores">
-          {/* Header */}
-          <Sheet
-            className="home__scores-header"
-            variant="solid"
-            color="primary"
-          >
-            <div className="home__scores-header-content">
-              <div className="home__scores-header-left">
+          {/* Navbar */}
+          <Navbar
+            left={
+              <>
                 <Button
                   variant="solid"
                   color="primary"
@@ -277,8 +281,10 @@ export default function RakSadness() {
                   <ChevronLeft />
                 </Button>
                 <span>{showScores}</span>
-              </div>
-              <div className="home__scores-header-right">
+              </>
+            }
+            right={
+              <>
                 <Button
                   variant="solid"
                   color="primary"
@@ -299,9 +305,9 @@ export default function RakSadness() {
                 >
                   <Info />
                 </Button>
-              </div>
-            </div>
-          </Sheet>
+              </>
+            }
+          />
 
           {/* Table */}
           <div className="home__scores-content">

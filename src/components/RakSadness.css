@@ -11,10 +11,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+}
+
+.navbar__logo {
+  width: 52px;
+  height: 28px;
+  padding: 0 12px;
 }
 
 .home__controls {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -96,38 +102,6 @@
   flex-direction: column;
   width: 100%;
   height: 100%;
-}
-
-.home__scores-header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-}
-
-.home__scores-header-content {
-  width: min(1400px, 100%);
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  display: flex;
-  gap: 12px;
-  padding: 12px 16px;
-}
-
-.home__scores-header-left {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 12px;
-  font-weight: bold;
-}
-
-.home__scores-header-right {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 12px;
 }
 
 .home__scores-header-button.--selected {
