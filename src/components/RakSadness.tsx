@@ -273,7 +273,7 @@ export default function RakSadness() {
                 onChange={(_, value) => handleWeekChange(value)}
                 disabled={isCurrentWeekLoading}
               >
-                {Array.from({ length: currentWeek }, (_, i) => i + 1).map(
+                {Array.from({ length: currentWeek }, (_, i) => i + 1).reverse().map(
                   (weekNumber) => {
                     return (
                       <Option key={weekNumber} value={weekNumber}>Week {weekNumber}</Option>
