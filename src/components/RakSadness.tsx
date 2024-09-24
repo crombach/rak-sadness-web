@@ -27,7 +27,8 @@ export default function RakSadness() {
 
   // Loading flags
   const [isCurrentWeekLoading, setCurrentWeekLoading] = useState(true);
-  const [isScoresLoading, setScoresLoading] = useState(true);
+  const [isPicksLoading, setPicksLoading] = useState(false);
+  const [isScoresLoading, setScoresLoading] = useState(false);
   const [isExportLoading, setExportLoading] = useState(false);
 
   // File upload stuff
@@ -67,11 +68,13 @@ export default function RakSadness() {
   useEffect(() => {
     const fetchPicksAsync = async () => {
       if (selectedWeek && !isCurrentWeekLoading) {
-        setScoresLoading(true);
+        setPicksLoading(true);
         try {
           const response = await fetch(`/api/picks/${selectedWeek}`);
           response.headers;
           const picksBuffer = await response.arrayBuffer();
+          setPicksLoading(false);
+          setScoresLoading(true);
           const newScores = await getPlayerScores(
             Number(selectedWeek),
             picksBuffer,
@@ -92,6 +95,7 @@ export default function RakSadness() {
             ),
           );
         } finally {
+          setPicksLoading(false);
           setScoresLoading(false);
         }
       }
@@ -102,7 +106,6 @@ export default function RakSadness() {
   // Whenever the week input value changes, update the component state.
   const handleWeekChange = useCallback((value: number) => {
     setScores(null);
-    setScoresLoading(true);
     setSelectedWeek(value);
   }, []);
 
@@ -311,11 +314,12 @@ export default function RakSadness() {
               {/* Show scores button */}
               <Button
                 className={`home__button --scores ${getClasses({
-                  "--loading-btn": isScoresLoading,
+                  "--loading-btn": isCurrentWeekLoading || isPicksLoading || isScoresLoading,
                 })}`}
                 disabled={
                   !selectedWeek ||
                   isCurrentWeekLoading ||
+                  isPicksLoading ||
                   !scores ||
                   isScoresLoading
                 }
@@ -328,13 +332,15 @@ export default function RakSadness() {
               {/* Export results button */}
               <Button
                 className={`home__button --export ${getClasses({
-                  "--loading-btn": isScoresLoading || isExportLoading,
+                  "--loading-btn": isCurrentWeekLoading || isPicksLoading || isScoresLoading || isExportLoading,
                 })}`}
                 disabled={
                   !selectedWeek ||
                   isCurrentWeekLoading ||
+                  isPicksLoading ||
                   !scores ||
-                  isScoresLoading
+                  isScoresLoading ||
+                  isExportLoading
                 }
                 variant="solid"
                 color="danger"
