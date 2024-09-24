@@ -1,29 +1,26 @@
-import { Button, Select, Option, Sheet } from "@mui/joy";
+import Home from "@mui/icons-material/Home";
+import Info from "@mui/icons-material/Info";
+import Leaderboard from "@mui/icons-material/Leaderboard";
+import { Button, Option, Select, Sheet } from "@mui/joy";
 import {
   ChangeEventHandler,
   useCallback,
+  useEffect,
+  useMemo,
   useRef,
   useState,
-  useEffect,
-  MouseEvent,
-  KeyboardEvent,
-  FocusEvent,
-  useMemo,
 } from "react";
 import { Toast, useToastContext } from "../context/ToastContext";
+import { League, SeasonType } from "../types/League";
 import { RakMadnessScores } from "../types/RakMadnessScores";
-import Info from "@mui/icons-material/Info";
-import Leaderboard from "@mui/icons-material/Leaderboard";
 import buildSpreadsheetBuffer from "../utils/buildSpreadsheetBuffer";
 import getClasses from "../utils/getClasses";
-import { getPlayerScores, readFileToBuffer } from "../utils/getPlayerScores";
 import getCurrentWeekInfo from "../utils/getCurrentWeekInfo";
-import ScoresTable from "./table/scores/ScoresTable";
-import ExplanationTable from "./table/explanation/ExplanationTable";
-import "./RakSadness.css";
-import { League, SeasonType } from "../types/League";
+import { getPlayerScores, readFileToBuffer } from "../utils/getPlayerScores";
 import Navbar from "./navbar/Navbar";
-import Home from "@mui/icons-material/Home";
+import "./RakSadness.css";
+import ExplanationTable from "./table/explanation/ExplanationTable";
+import ScoresTable from "./table/scores/ScoresTable";
 
 export default function RakSadness() {
   const { showToast } = useToastContext();
@@ -55,7 +52,10 @@ export default function RakSadness() {
       const weekInfo = await getCurrentWeekInfo(League.PRO);
       // There are 18 weeks in the NFL regular season, so limit to 18 weeks in Rak Madness.
       // If it's the offseason, show weeks 1 through 18.
-      const week = Number(weekInfo.seasonType) === SeasonType.REGULAR ? weekInfo.value : 18;
+      const week =
+        Number(weekInfo.seasonType) === SeasonType.REGULAR
+          ? weekInfo.value
+          : 18;
       setCurrentWeek(week);
       setSelectedWeek(week);
       setCurrentWeekLoading(false);
@@ -276,13 +276,15 @@ export default function RakSadness() {
                 onChange={(_, value) => handleWeekChange(value)}
                 disabled={isCurrentWeekLoading}
               >
-                {Array.from({ length: currentWeek }, (_, i) => i + 1).reverse().map(
-                  (weekNumber) => {
+                {Array.from({ length: currentWeek }, (_, i) => i + 1)
+                  .reverse()
+                  .map((weekNumber) => {
                     return (
-                      <Option key={weekNumber} value={weekNumber}>Week {weekNumber}</Option>
+                      <Option key={weekNumber} value={weekNumber}>
+                        Week {weekNumber}
+                      </Option>
                     );
-                  },
-                )}
+                  })}
               </Select>
               {/* Hidden picks file input */}
               <input
