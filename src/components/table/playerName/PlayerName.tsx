@@ -2,7 +2,7 @@ import { memo } from "react";
 import { PlayerScore } from "../../../types/RakMadnessScores";
 import getClasses from "../../../utils/getClasses";
 import Button from "@mui/joy/Button";
-import { QuestionMark } from "@mui/icons-material";
+import { SentimentVeryDissatisfied } from "@mui/icons-material";
 import { useToastContext, Toast } from "../../../context/ToastContext";
 import "./PlayerName.css";
 
@@ -27,7 +27,7 @@ function PlayerName({ player }: { player: PlayerScore }) {
               showToast(new Toast("neutral", null, player.status.explanation));
             }}
           >
-            <QuestionMark />
+            <SentimentVeryDissatisfied />
           </Button>
         )}
       </div>
