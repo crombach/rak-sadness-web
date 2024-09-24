@@ -15,7 +15,7 @@ const tiebreakerPickKey = "Pts";
 const pickRegex = /([^\s+-]+)(\s*([+-]?\d+(\.\d)?))?/;
 
 function ifNotOne(num: number, otherwise: string): string {
-  return num !== 1 ? otherwise: "";
+  return num !== 1 ? otherwise : "";
 }
 
 function parsePick(pickString: string) {

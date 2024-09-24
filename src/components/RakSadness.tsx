@@ -251,9 +251,13 @@ export default function RakSadness() {
       <Navbar left={navbarLeft} right={navbarRight} />
 
       {/* Main Content */}
-      <Sheet className={`home__content ${getClasses({
-        "--unbounded": !!showScores && !!scores
-      })}`} variant="plain" color="neutral">
+      <Sheet
+        className={`home__content ${getClasses({
+          "--unbounded": !!showScores && !!scores,
+        })}`}
+        variant="plain"
+        color="neutral"
+      >
         {/* Home Page */}
         {!showScores && !isWeekLoading && (
           <>
