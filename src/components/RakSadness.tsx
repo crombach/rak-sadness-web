@@ -21,7 +21,7 @@ import getCurrentWeekInfo from "../utils/getCurrentWeekInfo";
 import ScoresTable from "./table/scores/ScoresTable";
 import ExplanationTable from "./table/explanation/ExplanationTable";
 import "./RakSadness.css";
-import { League } from "../types/League";
+import { League, SeasonType } from "../types/League";
 import Navbar from "./navbar/Navbar";
 import Home from "@mui/icons-material/Home";
 
@@ -52,7 +52,10 @@ export default function RakSadness() {
   // Query the ESPN API to get the current NFL week
   useEffect(() => {
     const getWeekAsync = async () => {
-      const week = (await getCurrentWeekInfo(League.PRO))?.value;
+      const weekInfo = await getCurrentWeekInfo(League.PRO);
+      // There are 18 weeks in the NFL regular season, so limit to 18 weeks in Rak Madness.
+      // If it's the offseason, show weeks 1 through 18.
+      const week = Number(weekInfo.seasonType) === SeasonType.REGULAR ? weekInfo.value : 18;
       setCurrentWeek(week);
       setSelectedWeek(week);
       setCurrentWeekLoading(false);
