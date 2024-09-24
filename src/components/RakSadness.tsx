@@ -103,11 +103,6 @@ export default function RakSadness() {
     fetchPicksAsync();
   }, [selectedWeek, isCurrentWeekLoading]);
 
-  // Whenever the week input value changes, update the component state.
-  const handleWeekChange = useCallback((value: number) => {
-    setSelectedWeek(value);
-  }, []);
-
   // When a user manually uploads a picks spreadsheet, parse and score it.
   const handleFileUpload: ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
@@ -275,7 +270,7 @@ export default function RakSadness() {
                 className="home__week-input"
                 placeholder="Select a week..."
                 value={selectedWeek}
-                onChange={(_, value) => handleWeekChange(value)}
+                onChange={(_, value) => setSelectedWeek(value)}
                 disabled={isCurrentWeekLoading}
               >
                 {Array.from({ length: currentWeek }, (_, i) => i + 1)
