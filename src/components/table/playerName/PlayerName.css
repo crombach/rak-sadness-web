@@ -10,11 +10,16 @@
   min-height: 20px;
   min-width: 20px;
   padding: 4px 8px;
+  background-color: rgba(255, 255, 255, 0.2);
 }
-.player-name .player-name__explanation-button:hover,
+.player-name .player-name__explanation-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
 .player-name .player-name__explanation-button:active {
-  background-color: rgba(255, 255, 255, 0.35);
+  background-color: rgba(0, 0, 0, 0.15);
 }
+
 .player-name .player-name__explanation-button > svg {
   fill: black;
   width: 14px;
