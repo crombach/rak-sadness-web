@@ -1,3 +1,9 @@
+:root {
+  --color-brand-light: #6eaad9;
+  --color-brand: #375267;
+  --color-brand-dark: #2f4557;
+}
+
 #root {
   min-width: 100vw;
   min-height: 100vh;
