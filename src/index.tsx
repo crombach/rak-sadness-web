@@ -10,7 +10,7 @@ import "./index.css";
 const root = createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <CssVarsProvider disableNestedContext defaultMode="system">
+    <CssVarsProvider disableNestedContext>
       <ToastContextProvider>
         <CssBaseline />
         <RakSadness />
