@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
   ChangeEvent,
+  useMemo,
 } from "react";
 import { Toast, useToastContext } from "../context/ToastContext";
 import { RakMadnessScores } from "../types/RakMadnessScores";
@@ -181,142 +182,158 @@ export default function RakSadness() {
     exportResultsAsync();
   }, [scores, week]);
 
+  const navbarLeft = useMemo(() => {
+    <>
+      <Button
+        variant="solid"
+        color="primary"
+        onClick={() => setShowScores(false)}
+      >
+        <Home />
+      </Button>
+      <span>{showScores}</span>
+    </>;
+    return !!showScores && !!scores ? (
+      <>
+        <Button
+          variant="solid"
+          color="primary"
+          onClick={() => setShowScores(false)}
+        >
+          <Home />
+        </Button>
+        <span>{showScores}</span>
+      </>
+    ) : (
+      <>
+        <img className="navbar__logo" src="/logo192.png" />
+        <span>Rak Madness Scoreboard</span>
+      </>
+    );
+  }, [showScores, scores]);
+
+  const navbarRight = useMemo(() => {
+    return !!showScores && !!scores ? (
+      <>
+        <Button
+          variant="solid"
+          color="primary"
+          onClick={() => setShowScores("Scoreboard")}
+          className={`home__scores-header-button ${getClasses({
+            "--selected": showScores === "Scoreboard",
+          })}`}
+        >
+          <Leaderboard />
+        </Button>
+        <Button
+          variant="solid"
+          color="primary"
+          onClick={() => setShowScores("Explanation")}
+          className={`home__scores-header-button ${getClasses({
+            "--selected": showScores === "Explanation",
+          })}`}
+        >
+          <Info />
+        </Button>
+      </>
+    ) : null;
+  }, [showScores, scores]);
+
   return (
-    <Sheet className="home" variant="plain" color="neutral">
-      {/* Home Page */}
-      {!showScores && !isWeekLoading && (
-        <>
-          {/* Navbar */}
-          <Navbar
-            left={
-              <>
-                <img className="navbar__logo" src="/logo192.png" />
-                <span>Rak Madness Scoreboard</span>
-              </>
-            }
-          />
+    <div
+      className="home"
+      style={{
+        backgroundImage: "url(/logo512.png)",
+        backgroundColor: "#6eaad9",
+      }}
+    >
+      {/* Navbar */}
+      <Navbar left={navbarLeft} right={navbarRight} />
 
-          {/* Input Controls */}
-          <div className="home__controls">
-            {/* Week number input */}
-            <div className="home__week-input">
-              <FloatingLabelInput
-                label="Week"
-                placeholder="Rak Madness week number"
-                disabled={isWeekLoading}
-                value={week}
-                onChange={handleWeekInputChange}
+      {/* Main Content */}
+      <Sheet className="home__content" variant="plain" color="neutral">
+        {/* Home Page */}
+        {!showScores && !isWeekLoading && (
+          <>
+            {/* Input Controls */}
+            <div className="home__controls">
+              {/* Week number input */}
+              <div className="home__week-input">
+                <FloatingLabelInput
+                  label="Week"
+                  placeholder="Rak Madness week number"
+                  disabled={isWeekLoading}
+                  value={week}
+                  onChange={handleWeekInputChange}
+                />
+              </div>
+              {/* Hidden picks file input */}
+              <input
+                ref={fileInputRef}
+                className="home__file-input"
+                type="file"
+                accept=".xlsx"
+                onChange={handleFileUpload}
               />
+              {/* Upload picks file button */}
+              <Button
+                className={`home__button ${getClasses({
+                  "--hide": isWeekLoading || isScoresLoading || !!scores,
+                })}`}
+                variant="solid"
+                color="primary"
+                onClick={clickFileInput}
+                disabled={!week || isWeekLoading || isScoresLoading}
+              >
+                Upload Picks Spreadsheet
+              </Button>
+              {/* Show scores button */}
+              <Button
+                className={`home__button --scores ${getClasses({
+                  "--loading-btn": isScoresLoading,
+                })}`}
+                disabled={!week || isWeekLoading || !scores || isScoresLoading}
+                variant="solid"
+                color="success"
+                onClick={() => setShowScores("Scoreboard")}
+              >
+                View Results
+              </Button>
+              {/* Export results button */}
+              <Button
+                className={`home__button --export ${getClasses({
+                  "--loading-btn": isScoresLoading || isExportLoading,
+                })}`}
+                disabled={!week || isWeekLoading || !scores || isScoresLoading}
+                variant="solid"
+                color="danger"
+                onClick={exportResults}
+              >
+                Export Results
+              </Button>
             </div>
-            {/* Hidden picks file input */}
-            <input
-              ref={fileInputRef}
-              className="home__file-input"
-              type="file"
-              accept=".xlsx"
-              onChange={handleFileUpload}
-            />
-            {/* Upload picks file button */}
-            <Button
-              className={`home__button ${getClasses({
-                "--hide": isWeekLoading || isScoresLoading || !!scores,
-              })}`}
-              variant="solid"
-              color="primary"
-              onClick={clickFileInput}
-              disabled={!week || isWeekLoading || isScoresLoading}
-            >
-              Upload Picks Spreadsheet
-            </Button>
-            {/* Show scores button */}
-            <Button
-              className={`home__button --scores ${getClasses({
-                "--loading-btn": isScoresLoading,
-              })}`}
-              disabled={!week || isWeekLoading || !scores || isScoresLoading}
-              variant="solid"
-              color="success"
-              onClick={() => setShowScores("Scoreboard")}
-            >
-              View Results
-            </Button>
-            {/* Export results button */}
-            <Button
-              className={`home__button --export ${getClasses({
-                "--loading-btn": isScoresLoading || isExportLoading,
-              })}`}
-              disabled={!week || isWeekLoading || !scores || isScoresLoading}
-              variant="solid"
-              color="danger"
-              onClick={exportResults}
-            >
-              Export Results
-            </Button>
-          </div>
 
-          {/* Footer */}
-          <a
-            className="home__footer"
-            href="https://give.translifeline.org/give/461718/#!/donation/checkout"
-            target="_blank"
-          >
-            Trans rights are human rights 🏳️‍⚧️
-          </a>
-        </>
-      )}
+            {/* Footer */}
+            <a
+              className="home__footer"
+              href="https://give.translifeline.org/give/461718/#!/donation/checkout"
+              target="_blank"
+            >
+              Trans rights are human rights 🏳️‍⚧️
+            </a>
+          </>
+        )}
 
-      {/* Scores Viewer */}
-      {showScores && scores && (
-        <div className="home__scores">
-          {/* Navbar */}
-          <Navbar
-            left={
-              <>
-                <Button
-                  variant="solid"
-                  color="primary"
-                  onClick={() => setShowScores(false)}
-                >
-                  <Home />
-                </Button>
-                <span>{showScores}</span>
-              </>
-            }
-            right={
-              <>
-                <Button
-                  variant="solid"
-                  color="primary"
-                  onClick={() => setShowScores("Scoreboard")}
-                  className={`home__scores-header-button ${getClasses({
-                    "--selected": showScores === "Scoreboard",
-                  })}`}
-                >
-                  <Leaderboard />
-                </Button>
-                <Button
-                  variant="solid"
-                  color="primary"
-                  onClick={() => setShowScores("Explanation")}
-                  className={`home__scores-header-button ${getClasses({
-                    "--selected": showScores === "Explanation",
-                  })}`}
-                >
-                  <Info />
-                </Button>
-              </>
-            }
-          />
-
-          {/* Table */}
-          <div className="home__scores-content">
+        {/* Scores Viewer */}
+        {showScores && scores && (
+          <div className="home__scores">
             {showScores === "Scoreboard" && <ScoresTable scores={scores} />}
             {showScores === "Explanation" && (
               <ExplanationTable scores={scores} />
             )}
           </div>
-        </div>
-      )}
-    </Sheet>
+        )}
+      </Sheet>
+    </div>
   );
 }

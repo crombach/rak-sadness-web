@@ -1,13 +1,15 @@
 .navbar {
   width: 100%;
-  height: 60px;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  z-index: 999;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
 }
 
 .navbar__content {
+  height: 60px;
   width: min(1024px, 100%);
   flex-direction: row;
   align-items: center;
