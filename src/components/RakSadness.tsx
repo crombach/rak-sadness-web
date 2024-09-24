@@ -22,7 +22,6 @@ import ExplanationTable from "./table/explanation/ExplanationTable";
 import "./RakSadness.css";
 import { League } from "../types/League";
 import Navbar from "./navbar/Navbar";
-import { useDebounceValue } from "usehooks-ts";
 
 export default function RakSadness() {
   const { showToast } = useToastContext();
