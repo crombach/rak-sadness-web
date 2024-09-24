@@ -314,7 +314,8 @@ export default function RakSadness() {
               {/* Show scores button */}
               <Button
                 className={`home__button --scores ${getClasses({
-                  "--loading-btn": isCurrentWeekLoading || isPicksLoading || isScoresLoading,
+                  "--loading-btn":
+                    isCurrentWeekLoading || isPicksLoading || isScoresLoading,
                 })}`}
                 disabled={
                   !selectedWeek ||
@@ -332,7 +333,11 @@ export default function RakSadness() {
               {/* Export results button */}
               <Button
                 className={`home__button --export ${getClasses({
-                  "--loading-btn": isCurrentWeekLoading || isPicksLoading || isScoresLoading || isExportLoading,
+                  "--loading-btn":
+                    isCurrentWeekLoading ||
+                    isPicksLoading ||
+                    isScoresLoading ||
+                    isExportLoading,
                 })}`}
                 disabled={
                   !selectedWeek ||
