@@ -40,7 +40,7 @@ export default function RakSadness() {
   // Scores-related state
   const [scores, setScores] = useState<RakMadnessScores>();
   const [showScores, setShowScores] = useState<
-    "Leaderboard" | "Explanation" | false
+    "Scoreboard" | "Explanation" | false
   >(false);
 
   // Selected week
@@ -191,7 +191,7 @@ export default function RakSadness() {
             left={
               <>
                 <img className="navbar__logo" src="/logo192.png" />
-                <span>Rak Madness Scores</span>
+                <span>Rak Madness Scoreboard</span>
               </>
             }
           />
@@ -236,7 +236,7 @@ export default function RakSadness() {
               disabled={!week || isWeekLoading || !scores || isScoresLoading}
               variant="solid"
               color="success"
-              onClick={() => setShowScores("Leaderboard")}
+              onClick={() => setShowScores("Scoreboard")}
             >
               View Results
             </Button>
@@ -287,9 +287,9 @@ export default function RakSadness() {
                 <Button
                   variant="solid"
                   color="primary"
-                  onClick={() => setShowScores("Leaderboard")}
+                  onClick={() => setShowScores("Scoreboard")}
                   className={`home__scores-header-button ${getClasses({
-                    "--selected": showScores === "Leaderboard",
+                    "--selected": showScores === "Scoreboard",
                   })}`}
                 >
                   <Leaderboard />
@@ -310,7 +310,7 @@ export default function RakSadness() {
 
           {/* Table */}
           <div className="home__scores-content">
-            {showScores === "Leaderboard" && <ScoresTable scores={scores} />}
+            {showScores === "Scoreboard" && <ScoresTable scores={scores} />}
             {showScores === "Explanation" && (
               <ExplanationTable scores={scores} />
             )}
