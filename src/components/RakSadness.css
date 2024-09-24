@@ -45,13 +45,8 @@
 }
 
 .home__week-input {
-  display: flex;
-  flex-direction: row;
   width: 100%;
-}
-
-.home__week-input > * {
-  width: 100%;
+  height: 56px;
 }
 
 .home__file-input {
