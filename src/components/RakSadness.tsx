@@ -20,7 +20,7 @@ import FloatingLabelInput from "./floatingLabelInput/FloatingLabelInput";
 import ScoresTable from "./table/scores/ScoresTable";
 import ExplanationTable from "./table/explanation/ExplanationTable";
 import "./RakSadness.css";
-import { useDebounce } from "usehooks-ts";
+import { useDebounceValue } from "usehooks-ts";
 import { League } from "../types/League";
 
 export default function RakSadness() {
@@ -44,8 +44,7 @@ export default function RakSadness() {
   >(false);
 
   // Selected week
-  const [week, setWeek] = useState<string>("");
-  const weekDebounced = useDebounce<string>(week, 500);
+  const [week, setWeek] = useDebounceValue<string>("", 500);
 
   // Query the ESPN API to get the current NFL week
   useEffect(() => {
@@ -61,14 +60,14 @@ export default function RakSadness() {
   // When the week changes, attempt to fetch the picks spreadsheet from the API.
   useEffect(() => {
     const fetchPicksAsync = async () => {
-      if (weekDebounced) {
+      if (week) {
         setScoresLoading(true);
         try {
-          const response = await fetch(`/api/picks/${weekDebounced}`);
+          const response = await fetch(`/api/picks/${week}`);
           response.headers;
           const picksBuffer = await response.arrayBuffer();
           const newScores = await getPlayerScores(
-            Number(weekDebounced),
+            Number(week),
             picksBuffer,
           );
           setScores(newScores);
@@ -92,7 +91,7 @@ export default function RakSadness() {
       }
     };
     fetchPicksAsync();
-  }, [weekDebounced]);
+  }, [week]);
 
   // Whenever the week input value changes, update the component state.
   const handleWeekInputChange = useCallback(
