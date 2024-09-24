@@ -1,6 +1,6 @@
 # Rak Sadness
 
-Simple auto-scoring web application for [Rak Madness](https://rakmadness.net/). The [public site](https://rak-sadness-web.pages.dev/) is hosted on CloudFlare Pages.
+Simple auto-scoring web application for [Rak Madness](https://rakmadness.net/). The [public site](https://rak.cullenrombach.com/) is hosted on CloudFlare Pages.
 
 Results are viewable on the web and can be exported to an XLSX spreadsheet.
 
