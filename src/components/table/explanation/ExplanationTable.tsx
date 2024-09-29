@@ -2,7 +2,7 @@ import { memo } from "react";
 import { PlayerScore, RakMadnessScores } from "../../../types/RakMadnessScores";
 import rangeWithPrefix from "../../../utils/rangeWithPrefix";
 import PlayerName from "../playerName/PlayerName";
-import "../Table.css";
+import "../Table.scss";
 import "./ExplanationTable.css";
 
 function leagueHeaders(count: number, prefix: string) {

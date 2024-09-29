@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { PlayerScore, RakMadnessScores } from "../../../types/RakMadnessScores";
 import PlayerName from "../playerName/PlayerName";
-import "../Table.css";
+import "../Table.scss";
 
 function ScoresTable({ scores }: { scores?: RakMadnessScores }) {
   if (scores == null) {
