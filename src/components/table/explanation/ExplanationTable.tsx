@@ -3,7 +3,7 @@ import { PlayerScore, RakMadnessScores } from "../../../types/RakMadnessScores";
 import rangeWithPrefix from "../../../utils/rangeWithPrefix";
 import PlayerName from "../playerName/PlayerName";
 import "../Table.scss";
-import "./ExplanationTable.css";
+import "./ExplanationTable.scss";
 
 function leagueHeaders(count: number, prefix: string) {
   return rangeWithPrefix(count, prefix).map((header) => (

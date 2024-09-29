@@ -34,20 +34,20 @@
       cursor: pointer;
       transition: filter 150ms;
 
-      &.--knocked-out {
-        background-color: #fac99e;
-      }
-
-      &:not(.--knocked-out) {
-        background-color: #9edbfa;
-      }
-
       &:hover {
         filter: brightness(0.85);
       }
 
       &:active {
         filter: brightness(0.7);
+      }
+
+      &.--knocked-out {
+        background-color: #fac99e;
+      }
+
+      &:not(.--knocked-out) {
+        background-color: #9edbfa;
       }
     }
 

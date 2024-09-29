@@ -1,0 +1,51 @@
+.table {
+  .table__pick-header {
+    display: inline-block;
+    min-width: 64px;
+  }
+
+  .table__center {
+    text-align: center;
+  }
+
+  tbody {
+    .table__pick {
+      white-space: nowrap;
+      // transition: filter 150ms;
+
+      // &:hover {
+      //   filter: brightness(0.85);
+      // }
+
+      // &:active {
+      //   filter: brightness(0.7);
+      // }
+
+      &.--yes {
+        background-color: #a3faa0;
+      }
+
+      &.--no {
+        background-color: #faa0a0;
+      }
+
+      &.--error {
+        background-color: #edfaa0;
+      }
+    }
+
+    tr:nth-child(even) .table__pick {
+      &.--yes {
+        background-color: #7ede7c;
+      }
+
+      &.--no {
+        background-color: #de7c7c;
+      }
+
+      &.--error {
+        background-color: #cfde7c;
+      }
+    }
+  }
+}
