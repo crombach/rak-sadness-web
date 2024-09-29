@@ -7,12 +7,14 @@
     top: 0;
     background-color: black;
 
+    // Style header cells
     th {
       color: white;
       background-color: black;
       min-width: max-content;
       padding: 2px 8px;
 
+      // Add white border between header cells
       &:not(:last-child) {
         border-right: 1px solid white;
       }
@@ -29,7 +31,8 @@
   tbody {
     // Style non-header player cells
     .table__player-col {
-      padding-right: 2px;
+      cursor: pointer;
+      transition: filter 150ms;
 
       &.--knocked-out {
         background-color: #fac99e;
@@ -37,6 +40,14 @@
 
       &:not(.--knocked-out) {
         background-color: #9edbfa;
+      }
+
+      &:hover {
+        filter: brightness(0.85);
+      }
+
+      &:active {
+        filter: brightness(0.7);
       }
     }
 

@@ -1,0 +1,19 @@
+.player-name {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  .player-name__status-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    > svg {
+      fill: black;
+      width: 15px;
+      height: 15px;
+    }
+  }
+}

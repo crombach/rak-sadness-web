@@ -1,10 +1,12 @@
 import { memo } from "react";
 import { PlayerScore } from "../../../types/RakMadnessScores";
 import getClasses from "../../../utils/getClasses";
-import Button from "@mui/joy/Button";
-import { SentimentVeryDissatisfied } from "@mui/icons-material";
+import {
+  SentimentVeryDissatisfied,
+  SentimentVerySatisfied,
+} from "@mui/icons-material";
 import { useToastContext, Toast } from "../../../context/ToastContext";
-import "./PlayerName.css";
+import "./PlayerName.scss";
 
 function PlayerName({ player }: { player: PlayerScore }) {
   const { showToast, clearToasts } = useToastContext();
@@ -14,22 +16,21 @@ function PlayerName({ player }: { player: PlayerScore }) {
       className={`table__player-col ${getClasses({
         "--knocked-out": player.status.isKnockedOut,
       })}`}
+      role="button"
+      onClick={() => {
+        clearToasts();
+        showToast(new Toast("neutral", null, player.status.explanation));
+      }}
     >
       <div className="player-name">
         <span>{player.name}</span>
-        {!!player.status.explanation && (
-          <Button
-            className="player-name__explanation-button"
-            variant="plain"
-            color="neutral"
-            onClick={() => {
-              clearToasts();
-              showToast(new Toast("neutral", null, player.status.explanation));
-            }}
-          >
+        <span className="player-name__status-icon">
+          {player.status.isKnockedOut ? (
             <SentimentVeryDissatisfied />
-          </Button>
-        )}
+          ) : (
+            <SentimentVerySatisfied />
+          )}
+        </span>
       </div>
     </td>
   );

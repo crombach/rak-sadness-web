@@ -477,7 +477,14 @@ export async function getPlayerScores(
         }
       }
 
-      return activeScore;
+      return {
+        ...activeScore,
+        status: {
+          ...activeScore.status,
+          isKnockedOut: false,
+          explanation: `${activeScore.name} is not knocked out!`,
+        },
+      };
     },
   );
 
