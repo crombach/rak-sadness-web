@@ -32,9 +32,6 @@
 
   &.--scores {
     width: max-content;
-    // Attempt to disable pull-to-refresh behavior on mobile devices.
-    // See https://stackoverflow.com/questions/29008194/disabling-androids-chrome-pull-down-to-refresh-feature
-    overscroll-behavior: contain;
   }
 }
 .home__controls {
