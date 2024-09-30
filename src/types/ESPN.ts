@@ -1,3 +1,14 @@
+export enum HomeAway {
+  HOME = "home",
+  AWAY = "away",
+}
+
+export enum GameStatus {
+  UPCOMING = "1",
+  LIVE = "2",
+  FINAL = "3",
+}
+
 export type EspnEvent = {
   name: string;
   shortName: string;
@@ -7,7 +18,7 @@ export type EspnEvent = {
 
 export type EspnStatus = {
   type: {
-    completed: boolean;
+    id: GameStatus;
   };
 };
 
@@ -17,7 +28,7 @@ export type EspnCompetition = {
 };
 
 export type EspnCompetitor = {
-  homeAway: "home" | "away";
+  homeAway: HomeAway;
   winner: boolean;
   team: EspnTeam;
   score: string;

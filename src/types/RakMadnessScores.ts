@@ -27,6 +27,10 @@ export type PlayerScore = {
 export type PickResult = {
   pick: string;
   status: Status;
+  explanation: {
+    header: string;
+    message: string;
+  };
 };
 
 export type Status = "yes" | "no" | "incomplete" | "error";

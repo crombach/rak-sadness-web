@@ -8,6 +8,7 @@ import {
   RakMadnessScores,
 } from "../types/RakMadnessScores";
 import { getLeagueResults } from "./getLeagueResults";
+import { GameStatus } from "../types/ESPN";
 
 const tiebreakerPickKey = "Pts";
 
@@ -62,6 +63,10 @@ function getPickResults(
       );
       return {
         pointValue: 0,
+        explanation: {
+          header: "Missing Game",
+          message: "Unable to find game result",
+        },
         wasNotFound: true,
         isCompleted: false,
         hasSpread,
@@ -121,10 +126,33 @@ function getPickResults(
       }
     }
 
+    let explanationHeader: string;
+    switch (gameResult.status) {
+      case GameStatus.FINAL: {
+        explanationHeader = "Final Score";
+        break;
+      }
+      case GameStatus.LIVE: {
+        explanationHeader = "Live Score";
+        break;
+      }
+      default: {
+        explanationHeader = "Upcoming Game";
+        break;
+      }
+    }
+
     return {
       pointValue,
+      explanation: {
+        header: explanationHeader,
+        message:
+          gameResult.status === GameStatus.UPCOMING
+            ? "There is no score for this game yet."
+            : `${gameResult.home.team.abbreviation} ${gameResult.home.score} - ${gameResult.away.score} ${gameResult.away.team.abbreviation}`,
+      },
       wasNotFound: false,
-      isCompleted: gameResult.isCompleted,
+      isCompleted: gameResult.status === GameStatus.FINAL,
       hasSpread,
     };
   });
@@ -170,7 +198,7 @@ export async function getPlayerScores(
   const tiebreakerScore = (
     tiebreakerGameKey.startsWith("P") ? proResults : collegeResults
   )
-    .filter((result) => result.isCompleted)
+    .filter((result) => result.status === GameStatus.FINAL)
     .find((result) => {
       return (
         result.home.team.abbreviation === tiebreakerTeam ||
@@ -237,10 +265,12 @@ export async function getPlayerScores(
       college: collegePicks.map((pick, index) => ({
         pick,
         status: getStatus(collegePickResults[index]),
+        explanation: collegePickResults[index].explanation,
       })),
       pro: proPicks.map((pick, index) => ({
         pick,
         status: getStatus(proPickResults[index]),
+        explanation: proPickResults[index].explanation,
       })),
       status: {
         isKnockedOut: hasNoPicks,

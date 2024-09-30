@@ -1,3 +1,5 @@
+import { GameStatus, HomeAway } from "./ESPN";
+
 type Team = {
   name: string;
   abbreviation: string;
@@ -6,7 +8,7 @@ type Team = {
 export type LeagueResult = {
   name: string;
   shortName: string;
-  isCompleted: boolean;
+  status: GameStatus;
   home: {
     team: Team;
     score: number;
@@ -17,6 +19,12 @@ export type LeagueResult = {
   };
   winner: {
     team: Team | null;
+    homeAway: HomeAway | null;
+    by: number;
+  };
+  loser: {
+    team: Team | null;
+    homeAway: HomeAway | null;
     by: number;
   };
   totalScore: number;

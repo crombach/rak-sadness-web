@@ -1,5 +1,5 @@
 import { LeagueResult } from "../types/LeagueResult";
-import { EspnCompetitor, EspnEvent } from "../types/ESPN";
+import { GameStatus, HomeAway, EspnCompetitor, EspnEvent } from "../types/ESPN";
 import { League, SeasonType } from "../types/League";
 
 // You can find group IDs by looking at weekly scoreboards. Example:
@@ -78,8 +78,9 @@ export async function getLeagueResults(
   week: number,
 ): Promise<Array<LeagueResult>> {
   const events = await getLeagueEvents(league, week);
+  console.debug("=EVENTS=", events);
   return events.map((event: EspnEvent) => {
-    const isCompleted = event.status.type.completed;
+    const status: GameStatus = event.status.type.id;
     const home = event.competitions[0].competitors.find(
       (competitor: EspnCompetitor) => {
         return competitor.homeAway === "home";
@@ -94,12 +95,21 @@ export async function getLeagueResults(
     const homeScore = Number(home.score);
     const awayScore = Number(away.score);
 
-    let winner = null;
-    if (isCompleted) {
+    let winner: EspnCompetitor | null = null;
+    let loser: EspnCompetitor | null = null;
+    let winnerHomeAway: HomeAway | null = null;
+    let loserHomeAway: HomeAway | null = null;
+    if (status === GameStatus.FINAL) {
       if (homeScore > awayScore) {
         winner = home;
+        loser = away;
+        winnerHomeAway = HomeAway.HOME;
+        loserHomeAway = HomeAway.AWAY;
       } else if (awayScore > homeScore) {
         winner = away;
+        loser = home;
+        winnerHomeAway = HomeAway.AWAY;
+        loserHomeAway = HomeAway.HOME;
       }
     }
 
@@ -109,7 +119,7 @@ export async function getLeagueResults(
     return {
       name: event.name,
       shortName: event.shortName,
-      isCompleted,
+      status,
       home: {
         team: {
           name: home.team.displayName,
@@ -129,6 +139,15 @@ export async function getLeagueResults(
           name: winner.team.displayName,
           abbreviation: winner.team.abbreviation?.toUpperCase(),
         },
+        homeAway: winnerHomeAway,
+        by: winnerScore - loserScore,
+      },
+      loser: {
+        team: loser && {
+          name: loser.team.displayName,
+          abbreviation: loser.team.abbreviation?.toUpperCase(),
+        },
+        homeAway: loserHomeAway,
         by: winnerScore - loserScore,
       },
       totalScore: winnerScore + loserScore,

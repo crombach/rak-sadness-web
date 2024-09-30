@@ -1,9 +1,14 @@
-import { memo } from "react";
-import { PlayerScore, RakMadnessScores } from "../../../types/RakMadnessScores";
+import { memo, useCallback } from "react";
+import {
+  PickResult,
+  PlayerScore,
+  RakMadnessScores,
+} from "../../../types/RakMadnessScores";
 import rangeWithPrefix from "../../../utils/rangeWithPrefix";
 import PlayerName from "../playerName/PlayerName";
 import "../Table.scss";
 import "./ExplanationTable.scss";
+import { useToastContext, Toast } from "../../../context/ToastContext";
 
 function leagueHeaders(count: number, prefix: string) {
   return rangeWithPrefix(count, prefix).map((header) => (
@@ -18,9 +23,22 @@ function ExplanationTable({ scores }: { scores?: RakMadnessScores }) {
     return null;
   }
 
+  const { showToast, clearToasts } = useToastContext();
+
   const firstPlayer = scores.scores[0];
   const collegeHeaders = leagueHeaders(firstPlayer.college.length, "C");
   const proHeaders = leagueHeaders(firstPlayer.pro.length, "P");
+
+  const handlePickResultClick = useCallback((result: PickResult) => {
+    clearToasts();
+    showToast(
+      new Toast(
+        "neutral",
+        result.explanation.header,
+        result.explanation.message,
+      ),
+    );
+  }, []);
 
   return (
     <table className="table" cellSpacing="0">
@@ -47,6 +65,8 @@ function ExplanationTable({ scores }: { scores?: RakMadnessScores }) {
                 <td
                   key={`${player.name}-C${index + 1}`}
                   className={`table__center table__pick --${result.status}`}
+                  role="button"
+                  onClick={() => handlePickResultClick(result)}
                 >
                   {result.pick || "N/A"}
                 </td>
@@ -56,6 +76,8 @@ function ExplanationTable({ scores }: { scores?: RakMadnessScores }) {
                 <td
                   key={`${player.name}-P${index + 1}`}
                   className={`table__center table__pick --${result.status}`}
+                  role="button"
+                  onClick={() => handlePickResultClick(result)}
                 >
                   {result.pick || "N/A"}
                 </td>

@@ -11,15 +11,16 @@
   tbody {
     .table__pick {
       white-space: nowrap;
-      // transition: filter 150ms;
+      cursor: pointer;
+      transition: filter 150ms;
 
-      // &:hover {
-      //   filter: brightness(0.85);
-      // }
+      &:hover {
+        filter: brightness(0.85);
+      }
 
-      // &:active {
-      //   filter: brightness(0.7);
-      // }
+      &:active {
+        filter: brightness(0.7);
+      }
 
       &.--yes {
         background-color: #a3faa0;
