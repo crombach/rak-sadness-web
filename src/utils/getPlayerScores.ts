@@ -65,7 +65,7 @@ function getPickResults(
         pointValue: 0,
         explanation: {
           header: "Missing Game",
-          message: `Unable to find game result for team ${selectedTeam}`,
+          message: `Unable to find game result for team with abbreviation ${selectedTeam}`,
         },
         wasNotFound: true,
         isCompleted: false,
