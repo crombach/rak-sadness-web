@@ -65,7 +65,7 @@ function getPickResults(
         pointValue: 0,
         explanation: {
           header: "Missing Game",
-          message: "Unable to find game result",
+          message: `Unable to find game result for team ${selectedTeam}`,
         },
         wasNotFound: true,
         isCompleted: false,
@@ -148,7 +148,7 @@ function getPickResults(
         header: explanationHeader,
         message:
           gameResult.status === GameStatus.UPCOMING
-            ? "There is no score for this game yet."
+            ? `There is no score for the ${gameResult.away.team.abbreviation} @ ${gameResult.home.team.abbreviation} game yet.`
             : `${gameResult.home.team.abbreviation} ${gameResult.home.score} - ${gameResult.away.score} ${gameResult.away.team.abbreviation}`,
       },
       wasNotFound: false,
