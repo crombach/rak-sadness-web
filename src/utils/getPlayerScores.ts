@@ -149,7 +149,7 @@ function getPickResults(
         message:
           gameResult.status === GameStatus.UPCOMING
             ? `The ${gameResult.away.team.abbreviation} @ ${gameResult.home.team.abbreviation} game hasn't started yet.`
-            : `${gameResult.away.score} ${gameResult.away.team.abbreviation} - ${gameResult.home.team.abbreviation} ${gameResult.home.score}`,
+            : `${gameResult.away.team.abbreviation} ${gameResult.away.score} - ${gameResult.home.score} ${gameResult.home.team.abbreviation}`,
       },
       wasNotFound: false,
       isCompleted: gameResult.status === GameStatus.FINAL,
