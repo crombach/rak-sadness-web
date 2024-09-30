@@ -133,7 +133,7 @@ function getPickResults(
         break;
       }
       case GameStatus.UPCOMING: {
-        explanationHeader = "Upcoming Game";
+        explanationHeader = "Upcoming";
         break;
       }
       default: {
