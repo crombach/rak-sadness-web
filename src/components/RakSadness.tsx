@@ -18,7 +18,7 @@ import getClasses from "../utils/getClasses";
 import getCurrentWeekInfo from "../utils/getCurrentWeekInfo";
 import { getPlayerScores, readFileToBuffer } from "../utils/getPlayerScores";
 import Navbar from "./navbar/Navbar";
-import "./RakSadness.css";
+import "./RakSadness.scss";
 import ExplanationTable from "./table/explanation/ExplanationTable";
 import ScoresTable from "./table/scores/ScoresTable";
 
@@ -255,7 +255,7 @@ export default function RakSadness() {
       {/* Main Content */}
       <Sheet
         className={`home__content ${getClasses({
-          "--unbounded": !!showScores && !!scores,
+          "--scores": !!showScores && !!scores,
         })}`}
         variant="plain"
         color="neutral"

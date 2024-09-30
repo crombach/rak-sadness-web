@@ -46,7 +46,11 @@ export default function Toaster() {
             }
           >
             <div>
-              <Typography level="title-md" color={toast.type} className="toast__header">
+              <Typography
+                level="title-md"
+                color={toast.type}
+                className="toast__header"
+              >
                 {toast.header}
               </Typography>
               <Typography level="body-md" color={toast.type}>
