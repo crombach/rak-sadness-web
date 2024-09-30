@@ -6,11 +6,12 @@ import { CssVarsProvider, CssBaseline } from "@mui/joy";
 import { ToastContextProvider } from "./context/ToastContext";
 import Toaster from "./components/toaster/Toaster";
 import "./index.scss";
+import theme from "./theme";
 
 const root = createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <CssVarsProvider disableNestedContext>
+    <CssVarsProvider disableNestedContext theme={theme} defaultMode="dark">
       <ToastContextProvider>
         <CssBaseline />
         <RakSadness />
