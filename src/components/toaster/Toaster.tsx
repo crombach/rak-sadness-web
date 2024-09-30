@@ -6,7 +6,7 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { Alert, IconButton, Typography } from "@mui/joy";
 import React from "react";
 import { Toast, useToastContext } from "../../context/ToastContext";
-import "./Toaster.css";
+import "./Toaster.scss";
 
 export default function Toaster() {
   const { toasts, removeToast } = useToastContext();
@@ -46,8 +46,10 @@ export default function Toaster() {
             }
           >
             <div>
-              <div>{toast.header}</div>
-              <Typography level="body-sm" color={toast.type}>
+              <Typography level="title-md" color={toast.type} className="toast__header">
+                {toast.header}
+              </Typography>
+              <Typography level="body-md" color={toast.type}>
                 {toast.message}
               </Typography>
             </div>
