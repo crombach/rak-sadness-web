@@ -148,7 +148,7 @@ function getPickResults(
         header: explanationHeader,
         message:
           gameResult.status === GameStatus.UPCOMING
-            ? `There is no score for the ${gameResult.away.team.abbreviation} @ ${gameResult.home.team.abbreviation} game yet.`
+            ? `The ${gameResult.away.team.abbreviation} @ ${gameResult.home.team.abbreviation} game hasn't started yet.`
             : `${gameResult.away.score} ${gameResult.away.team.abbreviation} - ${gameResult.home.team.abbreviation} ${gameResult.home.score}`,
       },
       wasNotFound: false,
