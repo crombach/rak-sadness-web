@@ -11,7 +11,7 @@ import theme from "./theme";
 const root = createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <CssVarsProvider disableNestedContext theme={theme} defaultMode="dark">
+    <CssVarsProvider disableNestedContext theme={theme}>
       <ToastContextProvider>
         <CssBaseline />
         <RakSadness />
