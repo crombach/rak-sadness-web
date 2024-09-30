@@ -78,7 +78,6 @@ export async function getLeagueResults(
   week: number,
 ): Promise<Array<LeagueResult>> {
   const events = await getLeagueEvents(league, week);
-  console.debug("=EVENTS=", events);
   return events.map((event: EspnEvent) => {
     const status: GameStatus = event.status.type.id;
     const home = event.competitions[0].competitors.find(

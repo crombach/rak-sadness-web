@@ -132,12 +132,12 @@ function getPickResults(
         explanationHeader = "Final Score";
         break;
       }
-      case GameStatus.LIVE: {
-        explanationHeader = "Live Score";
+      case GameStatus.UPCOMING: {
+        explanationHeader = "Upcoming Game";
         break;
       }
       default: {
-        explanationHeader = "Upcoming Game";
+        explanationHeader = "Live Score";
         break;
       }
     }
