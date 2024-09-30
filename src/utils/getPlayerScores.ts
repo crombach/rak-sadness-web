@@ -356,7 +356,7 @@ export async function getPlayerScores(
           ...activeScore,
           status: {
             ...activeScore.status,
-            explanation: `${activeScore.name} knocked out due to having no picks.`,
+            explanation: `Knocked out due to having no picks.`,
           },
         };
       }
@@ -434,7 +434,7 @@ export async function getPlayerScores(
               ...activeScore.status,
               isKnockedOut: true,
               explanation:
-                `${activeScore.name} knocked out on Total Score by ${oppScore.name}. ` +
+                `Knocked out on Total Score by ${oppScore.name}. ` +
                 `Behind by ${totalScoreDiff} with ${totalDifferentPicks} different pick${ifNotOne(totalDifferentPicks, "s")} remaining.`,
             },
           };
@@ -459,7 +459,7 @@ export async function getPlayerScores(
                   ...activeScore.status,
                   isKnockedOut: true,
                   explanation:
-                    `${activeScore.name} knocked out on College Score tiebreaker by ${oppScore.name}. ` +
+                    `Knocked out on College Score tiebreaker by ${oppScore.name}. ` +
                     `Behind by ${collegeScoreDiff} with ${differentCollegePicks} different college pick${ifNotOne(differentCollegePicks, "s")} remaining.`,
                 },
               };
@@ -479,7 +479,7 @@ export async function getPlayerScores(
                     ...activeScore.status,
                     isKnockedOut: true,
                     explanation:
-                      `${activeScore.name} knocked out on Pro Score Against the Spread tiebreaker by ${oppScore.name}. ` +
+                      `Knocked out on Pro Score Against the Spread tiebreaker by ${oppScore.name}. ` +
                       `Behind by ${proAgainstTheSpreadScoreDiff} with ${differentProPicksWithSpreads} different pick${ifNotOne(differentProPicksWithSpreads, "s")} remaining ` +
                       `for pro games with spreads.`,
                   },
@@ -498,7 +498,7 @@ export async function getPlayerScores(
                 ...activeScore.status,
                 isKnockedOut: true,
                 explanation:
-                  `${activeScore.name} knocked out on MNF Points tiebreaker by ${oppScore.name}. ` +
+                  `Knocked out on MNF Points tiebreaker by ${oppScore.name}. ` +
                   `${activeScore.name} is ${activeScore.tiebreaker.distance} point${ifNotOne(activeScore.tiebreaker.distance, "s")} off, and ${oppScore.name} is ` +
                   `${oppScore.tiebreaker.distance} point${ifNotOne(oppScore.tiebreaker.distance, "s")} off.`,
               },
@@ -512,7 +512,7 @@ export async function getPlayerScores(
         status: {
           ...activeScore.status,
           isKnockedOut: false,
-          explanation: `${activeScore.name} is not knocked out!`,
+          explanation: `Not knocked out!`,
         },
       };
     },

@@ -19,7 +19,7 @@ function PlayerName({ player }: { player: PlayerScore }) {
       role="button"
       onClick={() => {
         clearToasts();
-        showToast(new Toast("neutral", null, player.status.explanation));
+        showToast(new Toast("neutral", player.name, player.status.explanation));
       }}
     >
       <div className="player-name">
