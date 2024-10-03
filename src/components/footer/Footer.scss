@@ -1,0 +1,22 @@
+.footer {
+  position: fixed;
+  bottom: 0;
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  padding: 16px;
+  text-align: center;
+  color: #999999;
+  opacity: 0.8;
+
+  > * {
+    color: #999999;
+    text-decoration: none;
+  }
+}
+
+@media (max-height: 460px) {
+  .footer {
+    display: none;
+  }
+}

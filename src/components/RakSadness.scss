@@ -119,19 +119,3 @@
 .home__scores-header-button.--active {
   background-color: var(--joy-palette-primary-600);
 }
-
-.home__footer {
-  position: fixed;
-  bottom: 0;
-  padding: 16px;
-  color: #888888;
-  text-decoration: none;
-  text-align: center;
-  opacity: 0.5;
-}
-
-@media (max-height: 400px) {
-  .home__footer {
-    display: none;
-  }
-}

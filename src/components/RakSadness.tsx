@@ -18,9 +18,10 @@ import getClasses from "../utils/getClasses";
 import getCurrentWeekInfo from "../utils/getCurrentWeekInfo";
 import { getPlayerScores, readFileToBuffer } from "../utils/getPlayerScores";
 import Navbar from "./navbar/Navbar";
-import "./RakSadness.scss";
 import ExplanationTable from "./table/explanation/ExplanationTable";
 import ScoresTable from "./table/scores/ScoresTable";
+import Footer from "./footer/Footer";
+import "./RakSadness.scss";
 
 export default function RakSadness() {
   const { showToast } = useToastContext();
@@ -357,13 +358,7 @@ export default function RakSadness() {
             </div>
 
             {/* Footer */}
-            <a
-              className="home__footer"
-              href="https://give.translifeline.org/give/461718/#!/donation/checkout"
-              target="_blank"
-            >
-              Trans rights are human rights 🏳️‍⚧️
-            </a>
+            <Footer />
           </>
         )}
 

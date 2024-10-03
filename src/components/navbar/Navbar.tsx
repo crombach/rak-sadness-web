@@ -1,5 +1,5 @@
 import React, { ReactElement } from "react";
-import "./Navbar.css";
+import "./Navbar.scss";
 import { Sheet } from "@mui/joy";
 
 export default function Navbar({
