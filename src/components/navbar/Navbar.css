@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   z-index: 999;
-  box-shadow: var(--joy-shadow-lg);
+  box-shadow: var(--joy-shadow-md);
 }
 
 .navbar__content {
