@@ -10,7 +10,7 @@ $toasterWidth: min(calc(100% - 48px), 400px);
   right: calc(50% - $toasterWidth / 2 - 24px);
   margin: 24px;
   width: $toasterWidth;
-  box-shadow: var(--joy-shadow-md);
+  box-shadow: var(--joy-shadow-lg);
   border-radius: var(--joy-radius-lg);
 }
 
