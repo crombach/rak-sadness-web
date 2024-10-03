@@ -41,6 +41,17 @@ function ScoresTable({ scores }: { scores?: RakMadnessScores }) {
             </tr>
           );
         })}
+        {/* Empty last row */}
+        <tr className="table__last-row">
+          <td />
+          <td />
+          <td />
+          <td />
+          <td />
+          <td />
+          <td />
+          <td />
+        </tr>
       </tbody>
     </table>
   );

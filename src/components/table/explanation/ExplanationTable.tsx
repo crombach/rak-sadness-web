@@ -89,6 +89,16 @@ function ExplanationTable({ scores }: { scores?: RakMadnessScores }) {
             </tr>
           );
         })}
+        {/* Empty last row */}
+        <tr className="table__last-row">
+          <td />
+          <td />
+          {scores.scores[0].college.map((_, index) => <td key={`C${index + 1}-empty`} />)}
+          <td />
+          {scores.scores[0].pro.map((_, index) => <td key={`P${index + 1}-empty`} />)}
+          <td />
+          <td />
+        </tr>
       </tbody>
     </table>
   );
