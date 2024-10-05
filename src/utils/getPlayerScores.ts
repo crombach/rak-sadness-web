@@ -511,7 +511,7 @@ export async function getPlayerScores(
         status: {
           ...activeScore.status,
           isKnockedOut: false,
-          explanation: tiebreakerScore !== null ? "Winner!" : "Not knocked out!",
+          explanation: tiebreakerScore != null ? "Winner!" : "Not knocked out!",
         },
       };
     },
