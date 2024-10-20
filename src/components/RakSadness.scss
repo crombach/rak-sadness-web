@@ -14,14 +14,6 @@
   overflow: hidden;
 }
 
-.navbar__logo {
-  width: 52px;
-  height: 28px;
-  padding: 0 12px;
-  filter: drop-shadow(0.25px 0.25px 0 white) drop-shadow(-0.25px 0.25px 0 white)
-    drop-shadow(0.25px -0.25px 0 white) drop-shadow(-0.25px -0.25px 0 white);
-}
-
 .home__content {
   flex: 1;
   width: min(1024px, 100%);

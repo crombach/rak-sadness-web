@@ -1,6 +1,6 @@
-import React, { ReactElement } from "react";
-import "./Navbar.scss";
+import { ReactElement } from "react";
 import { Sheet } from "@mui/joy";
+import "./Navbar.scss";
 
 export default function Navbar({
   left,

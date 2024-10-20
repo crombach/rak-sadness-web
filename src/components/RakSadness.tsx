@@ -1,4 +1,3 @@
-import Home from "@mui/icons-material/Home";
 import Info from "@mui/icons-material/Info";
 import Leaderboard from "@mui/icons-material/Leaderboard";
 import { Button, Option, Select, Sheet } from "@mui/joy";
@@ -22,6 +21,7 @@ import ExplanationTable from "./table/explanation/ExplanationTable";
 import ScoresTable from "./table/scores/ScoresTable";
 import Footer from "./footer/Footer";
 import "./RakSadness.scss";
+import LogoButton from "./navbar/LogoButton/LogoButton";
 
 export default function RakSadness() {
   const { showToast } = useToastContext();
@@ -187,29 +187,17 @@ export default function RakSadness() {
 
   const navbarLeft = useMemo(() => {
     <>
-      <Button
-        variant="solid"
-        color="primary"
-        onClick={() => setShowScores(false)}
-      >
-        <Home />
-      </Button>
+      <LogoButton onClick={() => setShowScores(false)} />
       <span>{showScores}</span>
     </>;
     return !!showScores && !!scores ? (
       <>
-        <Button
-          variant="solid"
-          color="primary"
-          onClick={() => setShowScores(false)}
-        >
-          <Home />
-        </Button>
+        <LogoButton onClick={() => setShowScores(false)} />
         <span>{showScores}</span>
       </>
     ) : (
       <>
-        <img className="navbar__logo" src="/logo192.png" />
+        <LogoButton onClick={() => setShowScores(false)} />
         <span>Rak Madness Scoreboard</span>
       </>
     );

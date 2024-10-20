@@ -4,17 +4,11 @@ import "./Footer.scss";
 export default function Footer() {
   return (
     <div className="footer">
-      <a
-        href="https://rakmadness.net/standings-pickem"
-        target="_blank"
-      >
+      <a href="https://rakmadness.net/standings-pickem" target="_blank">
         🏆 Standings
       </a>
       |
-      <a
-        href="https://github.com/crombach/rak-sadness-web"
-        target="_blank"
-      >
+      <a href="https://github.com/crombach/rak-sadness-web" target="_blank">
         🖥️ GitHub
       </a>
       |

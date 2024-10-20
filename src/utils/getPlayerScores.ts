@@ -148,7 +148,7 @@ function getPickResults(
         header: explanationHeader,
         message:
           gameResult.status === GameStatus.UPCOMING
-            ? `${gameResult.away.team.abbreviation} @ ${gameResult.home.team.abbreviation} begins at ${gameResult.date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} on ${gameResult.date.toLocaleDateString("en-US", {month: "short", day: "numeric"})}.`
+            ? `${gameResult.away.team.abbreviation} @ ${gameResult.home.team.abbreviation} begins at ${gameResult.date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} on ${gameResult.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}.`
             : `${gameResult.away.team.abbreviation} ${gameResult.away.score} - ${gameResult.home.score} ${gameResult.home.team.abbreviation}`,
       },
       wasNotFound: false,
@@ -361,7 +361,7 @@ export async function getPlayerScores(
           },
         };
       }
-      
+
       // The first player is the leader, so we can skip them if the games are all over. They're not knocked out.
       // For each player with the same score or better, see if they have knocked the active player out.
       // We check players with the same score who are ranked lower in case the players have the same MNF tiebreaker pick.
@@ -441,7 +441,8 @@ export async function getPlayerScores(
             if (
               oppScore.tiebreaker.pick === activeScore.tiebreaker.pick ||
               (tiebreakerScore != null &&
-                oppScore.tiebreaker.distance === activeScore.tiebreaker.distance)
+                oppScore.tiebreaker.distance ===
+                  activeScore.tiebreaker.distance)
             ) {
               // If the active player has the same tiebreaker pick as the opponent, run through the list of other tiebreakers.
               // If the opponent has a better college score, check if the active player can catch up.
@@ -463,7 +464,10 @@ export async function getPlayerScores(
                 };
               }
               // If college games are done and players are tied, check pro against the spread tiebreaker.
-              if (collegeScoreDiff === 0 && remainingCollegeIndices.length == 0) {
+              if (
+                collegeScoreDiff === 0 &&
+                remainingCollegeIndices.length == 0
+              ) {
                 const proAgainstTheSpreadScoreDiff =
                   oppScore.score.proAgainstTheSpread -
                   activeScore.score.proAgainstTheSpread;
