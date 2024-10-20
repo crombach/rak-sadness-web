@@ -19,6 +19,8 @@ export type EspnEvent = {
 export type EspnStatus = {
   type: {
     id: GameStatus;
+    detail: string;
+    shortDetail: string;
   };
 };
 

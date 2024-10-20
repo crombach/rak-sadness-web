@@ -78,8 +78,10 @@ export async function getLeagueResults(
   week: number,
 ): Promise<Array<LeagueResult>> {
   const events = await getLeagueEvents(league, week);
+  console.debug("events", events);
   return events.map((event: EspnEvent) => {
     const status: GameStatus = event.status.type.id;
+    const detailMessage: string = event.status.type.shortDetail;
     const home = event.competitions[0].competitors.find(
       (competitor: EspnCompetitor) => {
         return competitor.homeAway === "home";
@@ -119,6 +121,7 @@ export async function getLeagueResults(
       name: event.name,
       shortName: event.shortName,
       status,
+      detailMessage,
       home: {
         team: {
           name: home.team.displayName,

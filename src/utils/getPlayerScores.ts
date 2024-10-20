@@ -137,7 +137,7 @@ function getPickResults(
         break;
       }
       default: {
-        explanationHeader = "Live Score";
+        explanationHeader = `Live Score | ${gameResult.detailMessage}`;
         break;
       }
     }

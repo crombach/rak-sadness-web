@@ -9,6 +9,7 @@ export type LeagueResult = {
   name: string;
   shortName: string;
   status: GameStatus;
+  detailMessage: string;
   home: {
     team: Team;
     score: number;
