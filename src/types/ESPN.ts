@@ -12,6 +12,7 @@ export enum GameStatus {
 export type EspnEvent = {
   name: string;
   shortName: string;
+  date: string;
   competitions: Array<EspnCompetition>;
   status: EspnStatus;
 };

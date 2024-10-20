@@ -148,7 +148,7 @@ function getPickResults(
         header: explanationHeader,
         message:
           gameResult.status === GameStatus.UPCOMING
-            ? `The ${gameResult.away.team.abbreviation} @ ${gameResult.home.team.abbreviation} game hasn't started yet.`
+            ? `${gameResult.away.team.abbreviation} @ ${gameResult.home.team.abbreviation} begins at ${gameResult.date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} on ${gameResult.date.toLocaleDateString("en-US", {month: "short", day: "numeric"})}.`
             : `${gameResult.away.team.abbreviation} ${gameResult.away.score} - ${gameResult.home.score} ${gameResult.home.team.abbreviation}`,
       },
       wasNotFound: false,
