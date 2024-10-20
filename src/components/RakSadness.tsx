@@ -22,9 +22,14 @@ import ScoresTable from "./table/scores/ScoresTable";
 import Footer from "./footer/Footer";
 import "./RakSadness.scss";
 import LogoButton from "./navbar/LogoButton/LogoButton";
+import { Refresh } from "@mui/icons-material";
+import throttle from "lodash.throttle";
 
 export default function RakSadness() {
-  const { showToast } = useToastContext();
+  const { showToast, clearToasts } = useToastContext();
+
+  // Refs
+  const refreshButtonRef = useRef<HTMLButtonElement>(null);
 
   // Loading flags
   const [isCurrentWeekLoading, setCurrentWeekLoading] = useState(true);
@@ -39,6 +44,7 @@ export default function RakSadness() {
   }, []);
 
   // Scores-related state
+  const [picksBuffer, setPicksBuffer] = useState<ArrayBuffer>();
   const [scores, setScores] = useState<RakMadnessScores>();
   const [showScores, setShowScores] = useState<
     "Scoreboard" | "Explanation" | false
@@ -65,43 +71,68 @@ export default function RakSadness() {
     getWeekAsync();
   }, []);
 
+  const fetchPicksBuffer = async () => {
+    setPicksLoading(true);
+    try {
+      // Hack to disable this feature on localhost.
+      if (window.location.host.includes("localhost")) {
+        throw new Error("Can't fetch picks in development environment");
+      }
+      const response = await fetch(`/api/picks/${selectedWeek}`);
+      return response.arrayBuffer();
+    } catch (error) {
+      // If the picks spreadsheet doesn't exist yet, fail gracefully and log a message.
+      console.warn(
+        `Failed to load week ${selectedWeek} picks spreadsheet from API. Has it been uploaded yet?`,
+        error,
+      );
+      setScores(null);
+      showToast(
+        new Toast(
+          "warning",
+          "Missing Picks",
+          `Picks sheet for week ${selectedWeek} is not yet in the database, but you can upload it manually.`,
+        ),
+      );
+      return null;
+    } finally {
+      setScoresLoading(false);
+      setPicksLoading(false);
+    }
+  };
+
+  const calculateScores = async (picksBuffer: ArrayBuffer) => {
+    setScoresLoading(true);
+    try {
+      setScores(await getPlayerScores(Number(selectedWeek), picksBuffer));
+    } catch (error) {
+      // If the scores failed to calculate, fail gracefully and log a message.
+      console.error("Failed to calculate scores", error);
+      setScores(null);
+      showToast(
+        new Toast(
+          "danger",
+          "Error",
+          `Failed to calculate scores for week ${selectedWeek}.`,
+        ),
+      );
+    } finally {
+      setScoresLoading(false);
+    }
+  };
+
   // When the week changes, attempt to fetch the picks spreadsheet from the API.
   useEffect(() => {
-    const fetchPicksAsync = async () => {
-      if (selectedWeek && !isCurrentWeekLoading) {
-        setPicksLoading(true);
-        try {
-          const response = await fetch(`/api/picks/${selectedWeek}`);
-          response.headers;
-          const picksBuffer = await response.arrayBuffer();
-          setPicksLoading(false);
-          setScoresLoading(true);
-          const newScores = await getPlayerScores(
-            Number(selectedWeek),
-            picksBuffer,
-          );
-          setScores(newScores);
-        } catch (error) {
-          // If the picks spreadsheet doesn't exist yet, fail gracefully and log a message.
-          console.warn(
-            `Failed to load week ${selectedWeek} picks spreadsheet from API. Has it been uploaded yet?`,
-            error,
-          );
-          setScores(null);
-          showToast(
-            new Toast(
-              "warning",
-              "Missing Picks",
-              `Picks sheet for week ${selectedWeek} is not yet in the database, but you can upload it manually.`,
-            ),
-          );
-        } finally {
-          setPicksLoading(false);
-          setScoresLoading(false);
+    if (selectedWeek && !isCurrentWeekLoading) {
+      const getDataAsync = async () => {
+        const picksBuffer = await fetchPicksBuffer();
+        if (picksBuffer != null) {
+          setPicksBuffer(picksBuffer);
+          await calculateScores(picksBuffer);
         }
-      }
-    };
-    fetchPicksAsync();
+      };
+      getDataAsync();
+    }
   }, [selectedWeek, isCurrentWeekLoading]);
 
   // When a user manually uploads a picks spreadsheet, parse and score it.
@@ -128,8 +159,8 @@ export default function RakSadness() {
           abort();
           return;
         }
-
         const picksBuffer = await readFileToBuffer(files[0]);
+        setPicksBuffer(picksBuffer);
         const newScores = await getPlayerScores(
           Number(selectedWeek),
           picksBuffer,
@@ -153,6 +184,24 @@ export default function RakSadness() {
     },
     [selectedWeek],
   );
+
+  // Refresh the score data. Throttle so user can't spam clicks.
+  // Wrapped by handleRefresh to avoid sending multiple requests
+  // if first one is taking a long time.
+  const doRefreshThrottled = useCallback(throttle(async () => {
+      refreshButtonRef.current?.classList.add("--spinning");
+      clearToasts();
+      await calculateScores(picksBuffer);
+      showToast(
+        new Toast("success", "Success", "Results successfully updated"),
+      );
+      refreshButtonRef.current?.classList.remove("--spinning");
+    }, 500), [picksBuffer]);
+  const handleRefresh = useCallback(async () => {
+    // Short-circuit if scores are already loading.
+    if (isScoresLoading) return;
+    await doRefreshThrottled();
+  }, [isScoresLoading, doRefreshThrottled]);
 
   // Export the current scores to an Excel spreadsheet file.
   const exportResults = useCallback(() => {
@@ -225,6 +274,16 @@ export default function RakSadness() {
           })}`}
         >
           <Info />
+        </Button>
+        <div className="home__scores-header-divider" />
+        <Button
+          ref={refreshButtonRef}
+          variant="solid"
+          color="primary"
+          onClick={handleRefresh}
+          className="home__scores-header-button"
+        >
+          <Refresh />
         </Button>
       </>
     ) : null;

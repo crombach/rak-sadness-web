@@ -1,6 +1,13 @@
-.logo {
-  width: 20px;
-  height: 20px;
-  filter: drop-shadow(0.25px 0.25px 0 white) drop-shadow(-0.25px 0.25px 0 white)
-    drop-shadow(0.25px -0.25px 0 white) drop-shadow(-0.25px -0.25px 0 white);
+.logo-button {
+  @media (max-width: 400px) {
+    padding-inline: 12px !important;
+  }
+
+  &__logo {
+    width: 20px;
+    height: 20px;
+    filter: drop-shadow(0.25px 0.25px 0 white)
+      drop-shadow(-0.25px 0.25px 0 white) drop-shadow(0.25px -0.25px 0 white)
+      drop-shadow(-0.25px -0.25px 0 white);
+  }
 }

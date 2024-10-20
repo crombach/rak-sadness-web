@@ -100,14 +100,42 @@
     cover;
 }
 
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .home__scores {
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
   margin: 0;
-}
 
-.home__scores-header-button.--active {
-  background-color: var(--joy-palette-primary-600);
+  &-header {
+    &-button {
+      @media (max-width: 400px) {
+        padding-inline: 12px !important;
+      }
+
+      &.--active {
+        background-color: var(--joy-palette-primary-600);
+      }
+
+      &.--spinning svg {
+        animation: spin 0.5s infinite linear;
+      }
+    }
+
+    &-divider {
+      width: 2px;
+      height: 1.5rem;
+      margin: 0 6px;
+      background-color: white;
+    }
+  }
 }
