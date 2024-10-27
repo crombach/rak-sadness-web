@@ -151,9 +151,9 @@ function getPickResults(
             ? `${gameResult.away.team.abbreviation} @ ${gameResult.home.team.abbreviation}` +
               ` begins at ${gameResult.date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}` +
               ` on ${gameResult.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}.`
-            : `${gameResult.possession.homeAway === HomeAway.AWAY ? "▸" : ""}${gameResult.away.team.abbreviation} ${gameResult.away.score}` +
+            : `${gameResult.possession.homeAway === HomeAway.AWAY ? "▸ " : ""}${gameResult.away.team.abbreviation} ${gameResult.away.score}` +
               ` - ` +
-              `${gameResult.home.score} ${gameResult.home.team.abbreviation}${gameResult.possession.homeAway === HomeAway.HOME ? "◂" : ""}`,
+              `${gameResult.home.score} ${gameResult.home.team.abbreviation}${gameResult.possession.homeAway === HomeAway.HOME ? " ◂" : ""}`,
         downDistanceText:
           gameResult.possession.homeAway != null
             ? gameResult.possession.downDistanceText
