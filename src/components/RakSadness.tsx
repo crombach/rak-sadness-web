@@ -79,7 +79,11 @@ export default function RakSadness() {
         throw new Error("Can't fetch picks in development environment");
       }
       const response = await fetch(`/api/picks/${selectedWeek}`);
-      return response.arrayBuffer();
+      const arrayBuffer = await response.arrayBuffer();
+      if (!arrayBuffer?.byteLength) {
+        throw new Error("Empty picks buffer");
+      }
+      return arrayBuffer;
     } catch (error) {
       // If the picks spreadsheet doesn't exist yet, fail gracefully and log a message.
       console.warn(
