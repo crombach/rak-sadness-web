@@ -79,6 +79,9 @@ export default function RakSadness() {
         throw new Error("Can't fetch picks in development environment");
       }
       const response = await fetch(`/api/picks/${selectedWeek}`);
+      if (response.status === 404) {
+        throw new Error("Picks spreadsheet is missing from database");
+      }
       const arrayBuffer = await response.arrayBuffer();
       if (!arrayBuffer?.byteLength) {
         throw new Error("Empty picks buffer");
