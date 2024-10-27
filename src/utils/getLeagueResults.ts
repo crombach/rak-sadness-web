@@ -1,4 +1,4 @@
-import { LeagueResult } from "../types/LeagueResult";
+import { LeagueResult, Possession } from "../types/LeagueResult";
 import { GameStatus, HomeAway, EspnCompetitor, EspnEvent } from "../types/ESPN";
 import { League, SeasonType } from "../types/League";
 
@@ -81,16 +81,13 @@ export async function getLeagueResults(
   console.debug("events", events);
   return events.map((event: EspnEvent) => {
     const status: GameStatus = event.status.type.id;
-    const home = event.competitions[0].competitors.find(
-      (competitor: EspnCompetitor) => {
-        return competitor.homeAway === "home";
-      },
-    );
-    const away = event.competitions[0].competitors.find(
-      (competitor: EspnCompetitor) => {
-        return competitor.homeAway === "away";
-      },
-    );
+    const competition = event.competitions[0];
+    const home = competition.competitors.find((competitor: EspnCompetitor) => {
+      return competitor.homeAway === "home";
+    });
+    const away = competition.competitors.find((competitor: EspnCompetitor) => {
+      return competitor.homeAway === "away";
+    });
 
     const homeScore = Number(home.score);
     const awayScore = Number(away.score);
@@ -116,6 +113,16 @@ export async function getLeagueResults(
     const winnerScore = winner === home ? homeScore : awayScore;
     const loserScore = winner === home ? awayScore : homeScore;
 
+    // Calculate possession object
+    const possession: Possession = {
+      downDistanceText: competition.situation?.downDistanceText,
+    };
+    if (competition.situation?.possession === home.id) {
+      possession.homeAway = HomeAway.HOME;
+    } else if (competition.situation?.possession === away.id) {
+      possession.homeAway = HomeAway.AWAY;
+    }
+
     return {
       name: event.name,
       shortName: event.shortName,
@@ -136,6 +143,7 @@ export async function getLeagueResults(
         },
         score: awayScore,
       },
+      possession,
       winner: {
         team: winner && {
           name: winner.team.displayName,

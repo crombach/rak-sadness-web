@@ -1,6 +1,7 @@
 import { ColorPaletteProp } from "@mui/joy";
 import {
   PropsWithChildren,
+  ReactElement,
   createContext,
   useCallback,
   useContext,
@@ -13,9 +14,13 @@ export class Toast {
   id: string;
   type: ColorPaletteProp;
   header: string;
-  message: string;
+  message: string | ReactElement;
 
-  constructor(type: ColorPaletteProp, header: string, message: string) {
+  constructor(
+    type: ColorPaletteProp,
+    header: string,
+    message: string | ReactElement,
+  ) {
     this.id = uuidv4();
     this.type = type;
     this.header = header;

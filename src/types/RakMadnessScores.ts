@@ -30,6 +30,7 @@ export type PickResult = {
   explanation: {
     header: string;
     message: string;
+    downDistanceText?: string;
   };
 };
 

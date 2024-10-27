@@ -3,6 +3,7 @@ export type GameScore = {
   explanation: {
     header: string;
     message: string;
+    downDistanceText?: string;
   };
   wasNotFound: boolean;
   isCompleted: boolean;

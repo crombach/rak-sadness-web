@@ -188,7 +188,8 @@ export default function RakSadness() {
   // Refresh the score data. Throttle so user can't spam clicks.
   // Wrapped by handleRefresh to avoid sending multiple requests
   // if first one is taking a long time.
-  const doRefreshThrottled = useCallback(throttle(async () => {
+  const doRefreshThrottled = useCallback(
+    throttle(async () => {
       refreshButtonRef.current?.classList.add("--spinning");
       clearToasts();
       await calculateScores(picksBuffer);
@@ -196,7 +197,9 @@ export default function RakSadness() {
         new Toast("success", "Success", "Results successfully updated"),
       );
       refreshButtonRef.current?.classList.remove("--spinning");
-    }, 500), [picksBuffer]);
+    }, 500),
+    [picksBuffer],
+  );
   const handleRefresh = useCallback(async () => {
     // Short-circuit if scores are already loading.
     if (isScoresLoading) return;

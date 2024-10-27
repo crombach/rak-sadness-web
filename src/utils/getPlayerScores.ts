@@ -8,7 +8,7 @@ import {
   RakMadnessScores,
 } from "../types/RakMadnessScores";
 import { getLeagueResults } from "./getLeagueResults";
-import { GameStatus } from "../types/ESPN";
+import { GameStatus, HomeAway } from "../types/ESPN";
 
 const tiebreakerPickKey = "Pts";
 
@@ -148,8 +148,16 @@ function getPickResults(
         header: explanationHeader,
         message:
           gameResult.status === GameStatus.UPCOMING
-            ? `${gameResult.away.team.abbreviation} @ ${gameResult.home.team.abbreviation} begins at ${gameResult.date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} on ${gameResult.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}.`
-            : `${gameResult.away.team.abbreviation} ${gameResult.away.score} - ${gameResult.home.score} ${gameResult.home.team.abbreviation}`,
+            ? `${gameResult.away.team.abbreviation} @ ${gameResult.home.team.abbreviation}` +
+              ` begins at ${gameResult.date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}` +
+              ` on ${gameResult.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}.`
+            : `${gameResult.possession.homeAway === HomeAway.AWAY ? "▸" : ""}${gameResult.away.team.abbreviation} ${gameResult.away.score}` +
+              ` - ` +
+              `${gameResult.home.score} ${gameResult.home.team.abbreviation}${gameResult.possession.homeAway === HomeAway.HOME ? "◂" : ""}`,
+        downDistanceText:
+          gameResult.possession.homeAway != null
+            ? gameResult.possession.downDistanceText
+            : "",
       },
       wasNotFound: false,
       isCompleted: gameResult.status === GameStatus.FINAL,
@@ -180,7 +188,9 @@ export async function getPlayerScores(
 
   // Fetch game results.
   const collegeResults = await getLeagueResults(League.COLLEGE, week);
+  console.debug("college results", collegeResults);
   const proResults = await getLeagueResults(League.PRO, week);
+  console.debug("pro results", proResults);
 
   // Determine property keys for different game types.
   const allKeys = Object.keys(allPicks[0]);

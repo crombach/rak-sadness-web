@@ -5,6 +5,11 @@ type Team = {
   abbreviation: string;
 };
 
+export type Possession = {
+  homeAway?: HomeAway;
+  downDistanceText?: string;
+};
+
 export type LeagueResult = {
   name: string;
   shortName: string;
@@ -19,6 +24,7 @@ export type LeagueResult = {
     team: Team;
     score: number;
   };
+  possession: Possession;
   winner: {
     team: Team | null;
     homeAway: HomeAway | null;

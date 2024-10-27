@@ -27,14 +27,21 @@ export type EspnStatus = {
 
 export type EspnCompetition = {
   competitors: Array<EspnCompetitor>;
+  situation: EspnSituation;
   date: string;
 };
 
 export type EspnCompetitor = {
+  id: string;
   homeAway: HomeAway;
   winner: boolean;
   team: EspnTeam;
   score: string;
+};
+
+export type EspnSituation = {
+  downDistanceText?: string;
+  possession: string; // Team ID
 };
 
 export type EspnTeam = {
