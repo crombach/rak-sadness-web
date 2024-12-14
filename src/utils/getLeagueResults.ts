@@ -9,8 +9,8 @@ const COLLEGE_GROUPS = [
   22, // Ivy League (occasionally appears in Rak Madness)
 ];
 
-// NCAA regular season has 15 weeks.
-const COLLEGE_REGULAR_SEASON_WEEKS = 15;
+// NCAA regular season has 16 weeks.
+const COLLEGE_REGULAR_SEASON_WEEKS = 16;
 // NFL regular season has 18 weeks.
 const PRO_REGULAR_SEASON_WEEKS = 18;
 
