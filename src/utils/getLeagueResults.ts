@@ -9,9 +9,16 @@ const COLLEGE_GROUPS = [
   22, // Ivy League (occasionally appears in Rak Madness)
 ];
 
-// NCAA regular season has 16 weeks.
-const COLLEGE_REGULAR_SEASON_WEEKS = 16;
-// NFL regular season has 18 weeks.
+/**
+ * NCAA regular season has 16 weeks in 2024 (Army/Navy is its own week for some reason).
+ * Usually, this number will be 15.
+ */
+const COLLEGE_REGULAR_SEASON_WEEKS =
+  new Date().getFullYear() === 2024 ? 16 : 15;
+
+/**
+ * NFL regular season has 18 weeks.
+ */
 const PRO_REGULAR_SEASON_WEEKS = 18;
 
 async function getLeagueEvents(
