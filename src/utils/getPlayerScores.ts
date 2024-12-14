@@ -22,7 +22,13 @@ function ifNotOne(num: number, otherwise: string): string {
 function parsePick(pickString: string) {
   const [, teamAbbreviation, , spreadText] = pickRegex.exec(pickString);
   const spread = spreadText != null ? Number(spreadText) : 0;
-  return { teamAbbreviation: teamAbbreviation.toUpperCase(), spread };
+  return {
+    teamAbbreviation:
+      teamAbbreviation !== "undefined"
+        ? teamAbbreviation.toUpperCase()
+        : undefined,
+    spread,
+  };
 }
 
 function getStatus(score: GameScore): Status {
@@ -64,8 +70,10 @@ function getPickResults(
       return {
         pointValue: 0,
         explanation: {
-          header: "Missing Game",
-          message: `Unable to find game result for team with abbreviation ${selectedTeam}`,
+          header: selectedTeam ? "Missing Game" : "Missing Pick",
+          message: selectedTeam
+            ? `Unable to find game result for team with abbreviation ${selectedTeam}`
+            : "No selection was made for this game.",
         },
         wasNotFound: true,
         isCompleted: false,
