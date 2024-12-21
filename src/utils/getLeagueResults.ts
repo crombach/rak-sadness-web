@@ -75,6 +75,7 @@ async function getLeagueEvents(
 
 /**
  * Get the results for a given league in a given week.
+ * Output is sorted by date (earliest date first).
  *
  * @param league league for which to get results
  * @param week week in the season (week 1 is the first NFL week)
@@ -169,5 +170,6 @@ export async function getLeagueResults(
       },
       totalScore: winnerScore + loserScore,
     };
-  });
+  })
+  .sort((a, b) => a.date.valueOf() - b.date.valueOf());
 }
