@@ -12,13 +12,12 @@ import {
   useState,
 } from "react";
 import { Toast, useToastContext } from "../context/ToastContext";
-import { League, SeasonType, WeekInfo } from "../types/League";
+import { League, WeekInfo } from "../types/League";
 import { RakMadnessScores } from "../types/RakMadnessScores";
 import buildSpreadsheetBuffer from "../utils/buildSpreadsheetBuffer";
 import getClasses from "../utils/getClasses";
 import getLeagueInfo from "../utils/getLeagueInfo";
 import { getPlayerScores, readFileToBuffer } from "../utils/getPlayerScores";
-import { WEEKS_PRO_REGULAR_SEASON } from "../utils/weeks";
 import Footer from "./footer/Footer";
 import LogoButton from "./navbar/LogoButton/LogoButton";
 import Navbar from "./navbar/Navbar";
@@ -53,7 +52,7 @@ export default function RakSadness() {
 
   // Week state
   const [weeks, setWeeks] = useState<Array<WeekInfo>>();
-  const [currentWeek, setCurrentWeek] = useState<WeekInfo>();
+  const [currentWeek, setCurrentWeek] = useState<number>();
   const [selectedWeek, setSelectedWeek] = useState<WeekInfo>();
 
   // Query the ESPN API to get the current NFL week
@@ -61,17 +60,9 @@ export default function RakSadness() {
     const getLeagueInfoAsync = async () => {
       const proLeagueInfo = await getLeagueInfo(League.PRO);
       // Set to the current regular season week, or the max if it's the post- or off-season.
-      if (
-        proLeagueInfo.activeCalendar &&
-        proLeagueInfo.activeCalendar.seasonType === SeasonType.REGULAR
-      ) {
-      }
-      const week =
-        proLeagueInfo.activeWeek.value ||
-        proLeagueInfo.activeCalendar?.weeks.length ||
-        WEEKS_PRO_REGULAR_SEASON;
-      const week = setCurrentWeek(proLeagueInfo.activeWeek);
-      setSelectedWeek(week);
+      setWeeks(proLeagueInfo.activeCalendar.weeks);
+      setCurrentWeek(proLeagueInfo.activeWeek.value);
+      setSelectedWeek(proLeagueInfo.activeWeek);
       setCurrentWeekLoading(false);
     };
     getLeagueInfoAsync();
@@ -84,7 +75,7 @@ export default function RakSadness() {
       if (window.location.host.includes("localhost")) {
         throw new Error("Can't fetch picks in development environment");
       }
-      const response = await fetch(`/api/picks/${selectedWeek}`);
+      const response = await fetch(`/api/picks/${selectedWeek.value}`);
       if (response.status === 404) {
         throw new Error("Picks spreadsheet is missing from database");
       }
@@ -96,7 +87,7 @@ export default function RakSadness() {
     } catch (error) {
       // If the picks spreadsheet doesn't exist yet, fail gracefully and log a message.
       console.warn(
-        `Failed to load week ${selectedWeek} picks spreadsheet from API. Has it been uploaded yet?`,
+        `Failed to load week ${selectedWeek.value} picks spreadsheet from API. Has it been uploaded yet?`,
         error,
       );
       setScores(null);
@@ -104,7 +95,7 @@ export default function RakSadness() {
         new Toast(
           "warning",
           "Missing Picks",
-          `The picks spreadsheet for week ${selectedWeek} is not yet in the database, but you can use a local spreadsheet if you have one.`,
+          `The picks spreadsheet for week ${selectedWeek.value} is not yet in the database, but you can use a local spreadsheet if you have one.`,
         ),
       );
       return null;
@@ -117,7 +108,7 @@ export default function RakSadness() {
   const calculateScores = async (picksBuffer: ArrayBuffer) => {
     setScoresLoading(true);
     try {
-      setScores(await getPlayerScores(Number(selectedWeek), picksBuffer));
+      setScores(await getPlayerScores(selectedWeek, picksBuffer));
     } catch (error) {
       // If the scores failed to calculate, fail gracefully and log a message.
       console.error("Failed to calculate scores", error);
@@ -126,7 +117,7 @@ export default function RakSadness() {
         new Toast(
           "danger",
           "Error",
-          `Failed to calculate scores for week ${selectedWeek}.`,
+          `Failed to calculate scores for week ${selectedWeek.value}.`,
         ),
       );
     } finally {
@@ -174,10 +165,7 @@ export default function RakSadness() {
         }
         const picksBuffer = await readFileToBuffer(files[0]);
         setPicksBuffer(picksBuffer);
-        const newScores = await getPlayerScores(
-          Number(selectedWeek),
-          picksBuffer,
-        );
+        const newScores = await getPlayerScores(selectedWeek, picksBuffer);
         if (newScores) {
           setScores(newScores);
           setScoresLoading(false);
@@ -228,7 +216,7 @@ export default function RakSadness() {
       // Build the spreadsheet buffer.
       const spreadsheetBuffer = await buildSpreadsheetBuffer(
         scores,
-        Number(selectedWeek),
+        selectedWeek.value,
       );
 
       // Download the spreadsheet to the user's computer.
@@ -337,12 +325,13 @@ export default function RakSadness() {
                 onChange={(_, value) => setSelectedWeek(value)}
                 disabled={isCurrentWeekLoading}
               >
-                {Array.from({ length: currentWeek }, (_, i) => i + 1)
+                {weeks
+                  .slice(0, currentWeek)
                   .reverse()
-                  .map((weekNumber) => {
+                  .map((week) => {
                     return (
-                      <Option key={weekNumber} value={weekNumber}>
-                        Week {weekNumber}
+                      <Option key={week.value} value={week}>
+                        {week.label}
                       </Option>
                     );
                   })}

@@ -1,14 +1,14 @@
 import * as XLSX from "xlsx-js-style";
+import { GameStatus, HomeAway } from "../types/ESPN";
 import { GameScore } from "../types/GameScore";
-import { League } from "../types/League";
+import { League, WeekInfo } from "../types/League";
 import { LeagueResult } from "../types/LeagueResult";
 import {
-  Status,
   PlayerScore,
   RakMadnessScores,
+  Status,
 } from "../types/RakMadnessScores";
 import { getLeagueResults } from "./getLeagueResults";
-import { GameStatus, HomeAway } from "../types/ESPN";
 
 const tiebreakerPickKey = "Pts";
 
@@ -188,7 +188,7 @@ export async function readFileToBuffer(file: File): Promise<ArrayBuffer> {
 }
 
 export async function getPlayerScores(
-  week: number,
+  week: WeekInfo,
   picksBuffer: ArrayBuffer,
 ): Promise<RakMadnessScores> {
   // Parse the Excel spreadsheet.

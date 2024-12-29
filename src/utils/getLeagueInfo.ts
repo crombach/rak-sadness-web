@@ -71,17 +71,25 @@ export default async function getLeagueInfo(
 
   // Find the active calendar for the current league and date/time.
   // For the NFL, we always want to use the regular season calendar.
-  // For the NCAA, we go by date.
+  // For the NCAA, we go by date because we cross into the postseason.
+  // Fall back to the last calendar.
   const activeCalendar =
     league === League.PRO
       ? calendars.find((cal) => cal.seasonType === SeasonType.REGULAR)
-      : calendars.find((cal) => {
-          return cal.startDate <= now && cal.endDate >= now;
+      : calendars.find((cal, index) => {
+          return (
+            (cal.startDate <= now && cal.endDate >= now) ||
+            index === calendars.length - 1
+          );
         });
 
-  // Find the active week for the current date/time if applicable.
-  const activeWeek = activeCalendar?.weeks.find((week) => {
-    return week.startDate <= now && week.endDate >= now;
+  // Find the active week for the current date/time, if applicable.
+  // Fall back to the last week in the active calendar.
+  const activeWeek = activeCalendar?.weeks.find((week, index) => {
+    return (
+      (week.startDate <= now && week.endDate >= now) ||
+      index === activeCalendar.weeks.length - 1
+    );
   });
 
   return {
