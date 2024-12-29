@@ -1,7 +1,18 @@
+import { EspnCompetitor, EspnEvent, GameStatus, HomeAway } from "../types/ESPN";
+import { League, SeasonType, WeekInfo } from "../types/League";
 import { LeagueResult, Possession } from "../types/LeagueResult";
-import { GameStatus, HomeAway, EspnCompetitor, EspnEvent } from "../types/ESPN";
-import { League, SeasonType } from "../types/League";
-import { WEEKS_PRO_REGULAR_SEASON, WEEKS_COLLEGE_REGULAR_SEASON } from "./weeks";
+
+/**
+ * NCAA regular season has 16 weeks in 2024 (Army/Navy is its own week for some reason).
+ * In the past, this number was 15. Check back in 2025.
+ * TODO: Use the LeagueInfo construct to work around hard-coding this value.
+ */
+const WEEKS_COLLEGE_REGULAR_SEASON = 16;
+
+/**
+ * NFL regular season has 18 weeks.
+ */
+const WEEKS_PRO_REGULAR_SEASON = 18;
 
 // You can find group IDs by looking at weekly scoreboards. Example:
 // https://www.espn.com/college-football/scoreboard/_/group/22
@@ -12,47 +23,56 @@ const COLLEGE_GROUPS = [
 
 async function getLeagueEvents(
   league: League,
-  weekNumber: number, // Rak Madness week, corresponds with NFL regular season week
+  week: WeekInfo, // Rak Madness week, corresponds with NFL regular season week
 ): Promise<Array<EspnEvent>> {
   // Week 1 of Rak Madness is week 1 in the NFL, but week 2 in the NCAA.
   // We account for this by adding 1 to the week if NCAA results have been requested.
   // After the regular season is over, ESPN resets the week counter to 1 for the postseason.
-  let adjustedWeek =
+  let adjustedWeekNumber =
     league === League.COLLEGE
-      ? weekNumber + 1
-      : weekNumber > WEEKS_PRO_REGULAR_SEASON
-        ? weekNumber % WEEKS_PRO_REGULAR_SEASON
-        : weekNumber;
+      ? week.value + 1
+      : week.value > WEEKS_PRO_REGULAR_SEASON
+        ? week.value % WEEKS_PRO_REGULAR_SEASON
+        : week.value;
   const seasonType: SeasonType =
     (league === League.COLLEGE &&
-      adjustedWeek <= WEEKS_COLLEGE_REGULAR_SEASON) ||
-    (league === League.PRO && weekNumber <= WEEKS_PRO_REGULAR_SEASON)
+      adjustedWeekNumber <= WEEKS_COLLEGE_REGULAR_SEASON) ||
+    (league === League.PRO && week.value <= WEEKS_PRO_REGULAR_SEASON)
       ? SeasonType.REGULAR
       : SeasonType.POST;
   // For college games, the postseason is all week 1
   // because EPSN considers the entire postseason to be "the bowl week".
   if (league === League.COLLEGE && seasonType === SeasonType.POST) {
-    adjustedWeek = 1;
+    adjustedWeekNumber = 1;
   }
 
   // Build final request URL.
-  const baseRequestUrl = `https://site.api.espn.com/apis/site/v2/sports/football/${league}/scoreboard?week=${adjustedWeek}&seasontype=${seasonType}`;
+  const baseRequestUrl = `https://site.api.espn.com/apis/site/v2/sports/football/${league}/scoreboard?week=${adjustedWeekNumber}&seasontype=${seasonType}`;
 
   // For college, we need to concatenate multiple groups.
   if (league === League.COLLEGE) {
     const collegePromises = COLLEGE_GROUPS.map((groupId: number) => {
       const requestUrl = `${baseRequestUrl}&limit=400&groups=${groupId}`;
-      return fetch(requestUrl).then((response) =>
-        response.json().then((json) => json.events as Array<EspnEvent>),
-      );
+      return fetch(requestUrl)
+        .then((response) =>
+          response.json().then((json) => json.events as Array<EspnEvent>),
+        )
+        .then((events) => {
+          // ESPN jams the entire college postseason into one week.
+          // So, we need to remove events that happen outside the given NFL week.
+          return events.filter((event) => {
+            const eventDate = new Date(event.date);
+            return (
+              eventDate.valueOf() >= week.startDate.valueOf() &&
+              eventDate.valueOf() <= week.endDate.valueOf()
+            );
+          });
+        });
     });
-    // ESPN jams the entire college postseason into one week.
-    // Sort by competition date so most recent games come first.
+
+    // Sort by competition date so later games come first in the array.
     return (await Promise.all(collegePromises)).flat(1).sort((a, b) => {
-      return (
-        new Date(b.competitions[0].date).getTime() -
-        new Date(a.competitions[0].date).getTime()
-      );
+      return new Date(b.date).valueOf() - new Date(a.date).valueOf();
     });
   }
 
@@ -72,10 +92,11 @@ async function getLeagueEvents(
  */
 export async function getLeagueResults(
   league: League,
-  week: number,
+  week: WeekInfo,
 ): Promise<Array<LeagueResult>> {
   const events = await getLeagueEvents(league, week);
-  console.debug("events", events);
+  console.log(`${league} events`, events);
+
   return events.map((event: EspnEvent) => {
     const status: GameStatus = event.status.type.id;
     const competition = event.competitions[0];
@@ -159,6 +180,6 @@ export async function getLeagueResults(
       },
       totalScore: winnerScore + loserScore,
     };
-  })
-  .sort((a, b) => a.date.valueOf() - b.date.valueOf());
+  });
+  //.sort((a, b) => a.date.valueOf() - b.date.valueOf());
 }
