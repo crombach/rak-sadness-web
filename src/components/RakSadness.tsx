@@ -32,7 +32,7 @@ export default function RakSadness() {
   const refreshButtonRef = useRef<HTMLButtonElement>(null);
 
   // Loading flags
-  const [isCurrentWeekLoading, setCurrentWeekLoading] = useState(true);
+  const [isWeekInfoLoading, setWeekInfoLoading] = useState(true);
   const [isPicksLoading, setPicksLoading] = useState(true);
   const [isScoresLoading, setScoresLoading] = useState(true);
   const [isExportLoading, setExportLoading] = useState(false);
@@ -63,7 +63,7 @@ export default function RakSadness() {
       setWeeks(proLeagueInfo.activeCalendar.weeks);
       setCurrentWeek(proLeagueInfo.activeWeek.value);
       setSelectedWeek(proLeagueInfo.activeWeek);
-      setCurrentWeekLoading(false);
+      setWeekInfoLoading(false);
     };
     getLeagueInfoAsync();
   }, []);
@@ -127,7 +127,7 @@ export default function RakSadness() {
 
   // When the week changes, attempt to fetch the picks spreadsheet from the API.
   useEffect(() => {
-    if (selectedWeek && !isCurrentWeekLoading) {
+    if (selectedWeek && !isWeekInfoLoading) {
       const getDataAsync = async () => {
         const picksBuffer = await fetchPicksBuffer();
         if (picksBuffer != null) {
@@ -137,7 +137,7 @@ export default function RakSadness() {
       };
       getDataAsync();
     }
-  }, [selectedWeek, isCurrentWeekLoading]);
+  }, [selectedWeek, isWeekInfoLoading]);
 
   // When a user manually uploads a picks spreadsheet, parse and score it.
   const handleFileUpload: ChangeEventHandler<HTMLInputElement> = useCallback(
@@ -313,7 +313,7 @@ export default function RakSadness() {
         color="neutral"
       >
         {/* Home Page */}
-        {!showScores && !isCurrentWeekLoading && (
+        {!showScores && !isWeekInfoLoading && (
           <>
             {/* Input Controls */}
             <div className="home__controls">
@@ -323,7 +323,7 @@ export default function RakSadness() {
                 placeholder="Select a week..."
                 value={selectedWeek}
                 onChange={(_, value) => setSelectedWeek(value)}
-                disabled={isCurrentWeekLoading}
+                disabled={isWeekInfoLoading}
               >
                 {weeks
                   .slice(0, currentWeek)
@@ -348,7 +348,7 @@ export default function RakSadness() {
               <Button
                 className={`home__button ${getClasses({
                   "--hide":
-                    isCurrentWeekLoading ||
+                    isWeekInfoLoading ||
                     isPicksLoading ||
                     isScoresLoading ||
                     !!scores,
@@ -358,7 +358,7 @@ export default function RakSadness() {
                 onClick={clickFileInput}
                 disabled={
                   !selectedWeek ||
-                  isCurrentWeekLoading ||
+                  isWeekInfoLoading ||
                   isPicksLoading ||
                   isScoresLoading
                 }
@@ -369,11 +369,11 @@ export default function RakSadness() {
               <Button
                 className={`home__button --scores ${getClasses({
                   "--loading-btn":
-                    isCurrentWeekLoading || isPicksLoading || isScoresLoading,
+                    isWeekInfoLoading || isPicksLoading || isScoresLoading,
                 })}`}
                 disabled={
                   !selectedWeek ||
-                  isCurrentWeekLoading ||
+                  isWeekInfoLoading ||
                   isPicksLoading ||
                   !scores ||
                   isScoresLoading
@@ -388,14 +388,14 @@ export default function RakSadness() {
               <Button
                 className={`home__button --export ${getClasses({
                   "--loading-btn":
-                    isCurrentWeekLoading ||
+                    isWeekInfoLoading ||
                     isPicksLoading ||
                     isScoresLoading ||
                     isExportLoading,
                 })}`}
                 disabled={
                   !selectedWeek ||
-                  isCurrentWeekLoading ||
+                  isWeekInfoLoading ||
                   isPicksLoading ||
                   !scores ||
                   isScoresLoading ||
