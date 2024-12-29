@@ -1,7 +1,10 @@
-import { LeagueResult, Possession } from "../types/LeagueResult";
-import { GameStatus, HomeAway, EspnCompetitor, EspnEvent } from "../types/ESPN";
+import { EspnCompetitor, EspnEvent, GameStatus, HomeAway } from "../types/ESPN";
 import { League, SeasonType } from "../types/League";
-import { WEEKS_PRO_REGULAR_SEASON, WEEKS_COLLEGE_REGULAR_SEASON } from "./weeks";
+import { LeagueResult, Possession } from "../types/LeagueResult";
+import {
+  WEEKS_COLLEGE_REGULAR_SEASON,
+  WEEKS_PRO_REGULAR_SEASON,
+} from "./weeks";
 
 // You can find group IDs by looking at weekly scoreboards. Example:
 // https://www.espn.com/college-football/scoreboard/_/group/22
@@ -49,10 +52,7 @@ async function getLeagueEvents(
     // ESPN jams the entire college postseason into one week.
     // Sort by competition date so most recent games come first.
     return (await Promise.all(collegePromises)).flat(1).sort((a, b) => {
-      return (
-        new Date(b.competitions[0].date).getTime() -
-        new Date(a.competitions[0].date).getTime()
-      );
+      return new Date(b.date).valueOf() - new Date(a.date).valueOf();
     });
   }
 
@@ -75,7 +75,7 @@ export async function getLeagueResults(
   week: number,
 ): Promise<Array<LeagueResult>> {
   const events = await getLeagueEvents(league, week);
-  console.debug("events", events);
+  console.log(`${league} events`, events);
   return events.map((event: EspnEvent) => {
     const status: GameStatus = event.status.type.id;
     const competition = event.competitions[0];
@@ -159,6 +159,6 @@ export async function getLeagueResults(
       },
       totalScore: winnerScore + loserScore,
     };
-  })
-  .sort((a, b) => a.date.valueOf() - b.date.valueOf());
+  });
+  //.sort((a, b) => a.date.valueOf() - b.date.valueOf());
 }

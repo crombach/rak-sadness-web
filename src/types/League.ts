@@ -10,9 +10,27 @@ export enum SeasonType {
 }
 
 export type WeekInfo = {
-  league: League;
-  seasonType: SeasonType;
   value: number;
+  label: string;
   startDate: Date;
   endDate: Date;
+};
+
+export type LeagueCalendar = {
+  seasonType: SeasonType;
+  startDate: Date;
+  endDate: Date;
+  weeks: Array<{
+    value: number;
+    label: string;
+    startDate: Date;
+    endDate: Date;
+  }>;
+};
+
+export type LeagueInfo = {
+  league: League;
+  activeCalendar: LeagueCalendar;
+  activeWeek: WeekInfo;
+  calendars: LeagueCalendar[];
 };
