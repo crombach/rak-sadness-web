@@ -63,10 +63,12 @@ function getPickResults(
       );
     });
     if (!gameResult) {
-      console.warn(
-        "FAILED to find game result for team abbreviation:",
-        selectedTeam,
-      );
+      if (selectedTeam) {
+        console.warn(
+          "FAILED to find game result for team abbreviation:",
+          selectedTeam,
+        );
+      }
       return {
         pointValue: 0,
         explanation: {

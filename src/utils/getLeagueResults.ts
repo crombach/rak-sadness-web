@@ -1,6 +1,7 @@
 import { LeagueResult, Possession } from "../types/LeagueResult";
 import { GameStatus, HomeAway, EspnCompetitor, EspnEvent } from "../types/ESPN";
 import { League, SeasonType } from "../types/League";
+import { WEEKS_PRO_REGULAR_SEASON, WEEKS_COLLEGE_REGULAR_SEASON } from "./weeks";
 
 // You can find group IDs by looking at weekly scoreboards. Example:
 // https://www.espn.com/college-football/scoreboard/_/group/22
@@ -8,18 +9,6 @@ const COLLEGE_GROUPS = [
   80, // Division 1
   22, // Ivy League (occasionally appears in Rak Madness)
 ];
-
-/**
- * NCAA regular season has 16 weeks in 2024 (Army/Navy is its own week for some reason).
- * Usually, this number will be 15.
- */
-const COLLEGE_REGULAR_SEASON_WEEKS =
-  new Date().getFullYear() === 2024 ? 16 : 15;
-
-/**
- * NFL regular season has 18 weeks.
- */
-const PRO_REGULAR_SEASON_WEEKS = 18;
 
 async function getLeagueEvents(
   league: League,
@@ -31,13 +20,13 @@ async function getLeagueEvents(
   let adjustedWeek =
     league === League.COLLEGE
       ? weekNumber + 1
-      : weekNumber > PRO_REGULAR_SEASON_WEEKS
-        ? weekNumber % PRO_REGULAR_SEASON_WEEKS
+      : weekNumber > WEEKS_PRO_REGULAR_SEASON
+        ? weekNumber % WEEKS_PRO_REGULAR_SEASON
         : weekNumber;
   const seasonType: SeasonType =
     (league === League.COLLEGE &&
-      adjustedWeek <= COLLEGE_REGULAR_SEASON_WEEKS) ||
-    (league === League.PRO && weekNumber <= PRO_REGULAR_SEASON_WEEKS)
+      adjustedWeek <= WEEKS_COLLEGE_REGULAR_SEASON) ||
+    (league === League.PRO && weekNumber <= WEEKS_PRO_REGULAR_SEASON)
       ? SeasonType.REGULAR
       : SeasonType.POST;
   // For college games, the postseason is all week 1

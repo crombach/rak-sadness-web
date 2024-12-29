@@ -1,6 +1,8 @@
+import { Refresh } from "@mui/icons-material";
 import Info from "@mui/icons-material/Info";
 import Leaderboard from "@mui/icons-material/Leaderboard";
 import { Button, Option, Select, Sheet } from "@mui/joy";
+import throttle from "lodash.throttle";
 import {
   ChangeEventHandler,
   useCallback,
@@ -14,16 +16,15 @@ import { League, SeasonType } from "../types/League";
 import { RakMadnessScores } from "../types/RakMadnessScores";
 import buildSpreadsheetBuffer from "../utils/buildSpreadsheetBuffer";
 import getClasses from "../utils/getClasses";
-import getCurrentWeekInfo from "../utils/getCurrentWeekInfo";
 import { getPlayerScores, readFileToBuffer } from "../utils/getPlayerScores";
+import getWeekInfo from "../utils/getWeekInfo";
+import { WEEKS_PRO_REGULAR_SEASON } from "../utils/weeks";
+import Footer from "./footer/Footer";
+import LogoButton from "./navbar/LogoButton/LogoButton";
 import Navbar from "./navbar/Navbar";
+import "./RakSadness.scss";
 import ExplanationTable from "./table/explanation/ExplanationTable";
 import ScoresTable from "./table/scores/ScoresTable";
-import Footer from "./footer/Footer";
-import "./RakSadness.scss";
-import LogoButton from "./navbar/LogoButton/LogoButton";
-import { Refresh } from "@mui/icons-material";
-import throttle from "lodash.throttle";
 
 export default function RakSadness() {
   const { showToast, clearToasts } = useToastContext();
@@ -56,19 +57,18 @@ export default function RakSadness() {
 
   // Query the ESPN API to get the current NFL week
   useEffect(() => {
-    const getWeekAsync = async () => {
-      const weekInfo = await getCurrentWeekInfo(League.PRO);
-      // There are 18 weeks in the NFL regular season, so limit to 18 weeks in Rak Madness.
-      // If it's the offseason, show weeks 1 through 18.
+    const getWeekInfoAsync = async () => {
+      const weekInfo = await getWeekInfo(League.PRO);
+      // Set to the current regular season week, or the max if it's the post- or off-season.
       const week =
         Number(weekInfo.seasonType) === SeasonType.REGULAR
           ? weekInfo.value
-          : 18;
+          : WEEKS_PRO_REGULAR_SEASON;
       setCurrentWeek(week);
       setSelectedWeek(week);
       setCurrentWeekLoading(false);
     };
-    getWeekAsync();
+    getWeekInfoAsync();
   }, []);
 
   const fetchPicksBuffer = async () => {

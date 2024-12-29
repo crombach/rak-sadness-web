@@ -16,25 +16,25 @@ type Calendar = {
   entries: WeekEntry[];
 };
 
-type LeagueInfo = {
+type LeagueMetadata = {
   slug: string;
   calendar: Calendar[];
 };
 
 type Scoreboard = {
-  leagues: LeagueInfo[];
+  leagues: LeagueMetadata[];
 };
 
 /**
- * Fetches the regular season calendar from the NFL scoreboard endpoint and returns the week number based on the current date.
+ * Fetches the regular season calendar from the NFL scoreboard endpoint and returns information about the current week,
+ * as well as the league's calendar in general.
  * NFL weeks usually run from Wednesday to Wednesday. For example: 2023-09-13T07:00Z to 2023-09-20T06:59Z
  *
  * @returns Promise that resolves to the current week number (if found) or null (if not found)
  */
-export default async function getCurrentWeekInfo(
+export default async function getWeekInfo(
   league: League,
 ): Promise<WeekInfo | null> {
-  // Rak uses NFL weeks, so we can hardcode NFL here
   const response = await fetch(
     `https://site.api.espn.com/apis/site/v2/sports/football/${league}/scoreboard`,
   );
