@@ -368,7 +368,7 @@ export default function RakSadness() {
                   isScoresLoading
                 }
               >
-                Test Local Spreadsheet
+                Use Local Spreadsheet
               </Button>
               {/* Show scores button */}
               <Button
