@@ -98,7 +98,7 @@ export default function RakSadness() {
         new Toast(
           "warning",
           "Missing Picks",
-          `Picks sheet for week ${selectedWeek} is not yet in the database, but you can upload it manually.`,
+          `Picks sheet for week ${selectedWeek} is not yet in the database, but you can test a local copy if you have one.`,
         ),
       );
       return null;
@@ -368,7 +368,7 @@ export default function RakSadness() {
                   isScoresLoading
                 }
               >
-                Upload Picks Spreadsheet
+                Test Local Spreadsheet
               </Button>
               {/* Show scores button */}
               <Button
