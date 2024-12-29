@@ -98,7 +98,7 @@ export default function RakSadness() {
         new Toast(
           "warning",
           "Missing Picks",
-          `Picks sheet for week ${selectedWeek} is not yet in the database, but you can test a local copy if you have one.`,
+          `Picks sheet for week ${selectedWeek} is not yet in the database, but you can check scores with a local copy if you have one.`,
         ),
       );
       return null;
