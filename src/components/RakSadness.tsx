@@ -12,7 +12,7 @@ import {
   useState,
 } from "react";
 import { Toast, useToastContext } from "../context/ToastContext";
-import { League } from "../types/League";
+import { League, SeasonType, WeekInfo } from "../types/League";
 import { RakMadnessScores } from "../types/RakMadnessScores";
 import buildSpreadsheetBuffer from "../utils/buildSpreadsheetBuffer";
 import getClasses from "../utils/getClasses";
@@ -52,19 +52,25 @@ export default function RakSadness() {
   >(false);
 
   // Week state
-  const [currentWeek, setCurrentWeek] = useState<number>();
-  const [selectedWeek, setSelectedWeek] = useState<number>();
+  const [weeks, setWeeks] = useState<Array<WeekInfo>>();
+  const [currentWeek, setCurrentWeek] = useState<WeekInfo>();
+  const [selectedWeek, setSelectedWeek] = useState<WeekInfo>();
 
   // Query the ESPN API to get the current NFL week
   useEffect(() => {
     const getLeagueInfoAsync = async () => {
-      const leagueInfo = await getLeagueInfo(League.PRO);
+      const proLeagueInfo = await getLeagueInfo(League.PRO);
       // Set to the current regular season week, or the max if it's the post- or off-season.
+      if (
+        proLeagueInfo.activeCalendar &&
+        proLeagueInfo.activeCalendar.seasonType === SeasonType.REGULAR
+      ) {
+      }
       const week =
-        leagueInfo.activeWeek.value ||
-        leagueInfo.activeCalendar?.weeks.length ||
+        proLeagueInfo.activeWeek.value ||
+        proLeagueInfo.activeCalendar?.weeks.length ||
         WEEKS_PRO_REGULAR_SEASON;
-      setCurrentWeek(week);
+      const week = setCurrentWeek(proLeagueInfo.activeWeek);
       setSelectedWeek(week);
       setCurrentWeekLoading(false);
     };

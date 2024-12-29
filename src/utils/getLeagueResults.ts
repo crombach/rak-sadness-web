@@ -52,7 +52,7 @@ async function getLeagueEvents(
     // ESPN jams the entire college postseason into one week.
     // Sort by competition date so most recent games come first.
     return (await Promise.all(collegePromises)).flat(1).sort((a, b) => {
-      return new Date(b.date).valueOf() - new Date(a.date).valueOf();
+      return new Date(a.date).valueOf() - new Date(b.date).valueOf();
     });
   }
 
@@ -76,6 +76,7 @@ export async function getLeagueResults(
 ): Promise<Array<LeagueResult>> {
   const events = await getLeagueEvents(league, week);
   console.log(`${league} events`, events);
+
   return events.map((event: EspnEvent) => {
     const status: GameStatus = event.status.type.id;
     const competition = event.competitions[0];
