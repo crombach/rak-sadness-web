@@ -59,12 +59,14 @@ async function getLeagueEvents(
         )
         .then((events) => {
           // ESPN jams the entire college postseason into one week.
-          // So, we need to remove events that happen outside the given NFL week.
+          // So, we need to remove events that happen before the given NFL week.
+          // We'd also like to remove events that happen after, but Rak has (once)
+          // put a game in the picks sheet outside the NFL week. Nice.
           return events.filter((event) => {
             const eventDate = new Date(event.date);
             return (
-              eventDate.valueOf() >= week.startDate.valueOf() &&
-              eventDate.valueOf() <= week.endDate.valueOf()
+              eventDate.valueOf() >= week.startDate.valueOf()
+              // && eventDate.valueOf() <= week.endDate.valueOf()
             );
           });
         });
@@ -93,93 +95,118 @@ async function getLeagueEvents(
 export async function getLeagueResults(
   league: League,
   week: WeekInfo,
+  matchups: Array<Set<string>>,
 ): Promise<Array<LeagueResult>> {
   const events = await getLeagueEvents(league, week);
   console.log(`${league} events`, events);
 
-  return events.map((event: EspnEvent) => {
-    const status: GameStatus = event.status.type.id;
-    const competition = event.competitions[0];
-    const home = competition.competitors.find((competitor: EspnCompetitor) => {
-      return competitor.homeAway === "home";
-    });
-    const away = competition.competitors.find((competitor: EspnCompetitor) => {
-      return competitor.homeAway === "away";
-    });
+  return events
+    .map((event: EspnEvent) => {
+      const status: GameStatus = event.status.type.id;
+      const competition = event.competitions[0];
+      const home = competition.competitors.find(
+        (competitor: EspnCompetitor) => {
+          return competitor.homeAway === "home";
+        },
+      );
+      const away = competition.competitors.find(
+        (competitor: EspnCompetitor) => {
+          return competitor.homeAway === "away";
+        },
+      );
 
-    const homeScore = Number(home.score);
-    const awayScore = Number(away.score);
-
-    let winner: EspnCompetitor | null = null;
-    let loser: EspnCompetitor | null = null;
-    let winnerHomeAway: HomeAway | null = null;
-    let loserHomeAway: HomeAway | null = null;
-    if (status === GameStatus.FINAL) {
-      if (homeScore > awayScore) {
-        winner = home;
-        loser = away;
-        winnerHomeAway = HomeAway.HOME;
-        loserHomeAway = HomeAway.AWAY;
-      } else if (awayScore > homeScore) {
-        winner = away;
-        loser = home;
-        winnerHomeAway = HomeAway.AWAY;
-        loserHomeAway = HomeAway.HOME;
+      // If the event isn't in the matchups for the week, skip it.
+      const isInMatchups = matchups.some((teams) => {
+        if (teams.size == 2) {
+          return (
+            teams.has(home.team.abbreviation) &&
+            teams.has(away.team.abbreviation)
+          );
+        } else if (teams.size == 1) {
+          return (
+            teams.has(home.team.abbreviation) ||
+            teams.has(away.team.abbreviation)
+          );
+        }
+        return false;
+      });
+      if (!isInMatchups) {
+        return null;
       }
-    }
 
-    const winnerScore = winner === home ? homeScore : awayScore;
-    const loserScore = winner === home ? awayScore : homeScore;
+      const homeScore = Number(home.score);
+      const awayScore = Number(away.score);
 
-    // Calculate possession object
-    const possession: Possession = {
-      downDistanceText: competition.situation?.downDistanceText,
-    };
-    if (competition.situation?.possession === home.id) {
-      possession.homeAway = HomeAway.HOME;
-    } else if (competition.situation?.possession === away.id) {
-      possession.homeAway = HomeAway.AWAY;
-    }
+      let winner: EspnCompetitor | null = null;
+      let loser: EspnCompetitor | null = null;
+      let winnerHomeAway: HomeAway | null = null;
+      let loserHomeAway: HomeAway | null = null;
+      if (status === GameStatus.FINAL) {
+        if (homeScore > awayScore) {
+          winner = home;
+          loser = away;
+          winnerHomeAway = HomeAway.HOME;
+          loserHomeAway = HomeAway.AWAY;
+        } else if (awayScore > homeScore) {
+          winner = away;
+          loser = home;
+          winnerHomeAway = HomeAway.AWAY;
+          loserHomeAway = HomeAway.HOME;
+        }
+      }
 
-    return {
-      name: event.name,
-      shortName: event.shortName,
-      date: new Date(event.date),
-      status,
-      detailMessage: event.status.type.shortDetail,
-      home: {
-        team: {
-          name: home.team.displayName,
-          abbreviation: home.team.abbreviation?.toUpperCase(),
+      const winnerScore = winner === home ? homeScore : awayScore;
+      const loserScore = winner === home ? awayScore : homeScore;
+
+      // Calculate possession object
+      const possession: Possession = {
+        downDistanceText: competition.situation?.downDistanceText,
+      };
+      if (competition.situation?.possession === home.id) {
+        possession.homeAway = HomeAway.HOME;
+      } else if (competition.situation?.possession === away.id) {
+        possession.homeAway = HomeAway.AWAY;
+      }
+
+      return {
+        name: event.name,
+        shortName: event.shortName,
+        date: new Date(event.date),
+        status,
+        detailMessage: event.status.type.shortDetail,
+        home: {
+          team: {
+            name: home.team.displayName,
+            abbreviation: home.team.abbreviation?.toUpperCase(),
+          },
+          score: homeScore,
         },
-        score: homeScore,
-      },
-      away: {
-        team: {
-          name: away.team.displayName,
-          abbreviation: away.team.abbreviation?.toUpperCase(),
+        away: {
+          team: {
+            name: away.team.displayName,
+            abbreviation: away.team.abbreviation?.toUpperCase(),
+          },
+          score: awayScore,
         },
-        score: awayScore,
-      },
-      possession,
-      winner: {
-        team: winner && {
-          name: winner.team.displayName,
-          abbreviation: winner.team.abbreviation?.toUpperCase(),
+        possession,
+        winner: {
+          team: winner && {
+            name: winner.team.displayName,
+            abbreviation: winner.team.abbreviation?.toUpperCase(),
+          },
+          homeAway: winnerHomeAway,
+          by: winnerScore - loserScore,
         },
-        homeAway: winnerHomeAway,
-        by: winnerScore - loserScore,
-      },
-      loser: {
-        team: loser && {
-          name: loser.team.displayName,
-          abbreviation: loser.team.abbreviation?.toUpperCase(),
+        loser: {
+          team: loser && {
+            name: loser.team.displayName,
+            abbreviation: loser.team.abbreviation?.toUpperCase(),
+          },
+          homeAway: loserHomeAway,
+          by: winnerScore - loserScore,
         },
-        homeAway: loserHomeAway,
-        by: winnerScore - loserScore,
-      },
-      totalScore: winnerScore + loserScore,
-    };
-  });
-  //.sort((a, b) => a.date.valueOf() - b.date.valueOf());
+        totalScore: winnerScore + loserScore,
+      };
+    })
+    .filter((it) => it != null);
 }

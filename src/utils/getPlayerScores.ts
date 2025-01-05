@@ -196,12 +196,6 @@ export async function getPlayerScores(
   const picksSheet = workbook.Sheets[Object.keys(workbook.Sheets)[0]];
   const allPicks: Array<any> = XLSX.utils.sheet_to_json(picksSheet);
 
-  // Fetch game results.
-  const collegeResults = await getLeagueResults(League.COLLEGE, week);
-  console.debug("college results", collegeResults);
-  const proResults = await getLeagueResults(League.PRO, week);
-  console.debug("pro results", proResults);
-
   // Determine property keys for different game types.
   const allKeys = Object.keys(allPicks[0]);
   const collegeKeys = allKeys.filter((key) => key.startsWith("C"));
@@ -210,6 +204,40 @@ export async function getPlayerScores(
   );
   // The tiebreaker game key should always be the last one before the tiebreaker score pick.
   const tiebreakerGameKey = allKeys[allKeys.indexOf(tiebreakerPickKey) - 1];
+
+  // Determine team matchups.
+  const matchups: { [gameKey: string]: Set<string> } = {};
+  allPicks.forEach((playerRow: any) => {
+    const addToMatchups = (key: string) => {
+      if (playerRow[key]) {
+        const { teamAbbreviation } = parsePick(playerRow[key]);
+        if (!matchups[key]) {
+          matchups[key] = new Set<string>();
+        }
+        matchups[key].add(teamAbbreviation);
+      }
+    };
+    collegeKeys.forEach(addToMatchups);
+    proKeys.forEach(addToMatchups);
+  });
+  const collegeMatchups: Array<Set<string>> = Object.keys(matchups)
+    .filter((key) => key.startsWith("C"))
+    .map((key) => matchups[key]);
+  const proMatchups: Array<Set<string>> = Object.keys(matchups)
+    .filter((key) => key.startsWith("P"))
+    .map((key) => matchups[key]);
+  console.log("college matchups", collegeMatchups);
+  console.log("pro matchups", proMatchups);
+
+  // Fetch game results.
+  const collegeResults = await getLeagueResults(
+    League.COLLEGE,
+    week,
+    collegeMatchups,
+  );
+  console.debug("college results", collegeResults);
+  const proResults = await getLeagueResults(League.PRO, week, proMatchups);
+  console.debug("pro results", proResults);
 
   // Determine MNF tiebreaker score.
   const { teamAbbreviation: tiebreakerTeam } = parsePick(
