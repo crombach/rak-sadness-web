@@ -225,7 +225,7 @@ export default function RakSadness() {
       });
       const link = document.createElement("a");
       link.href = window.URL.createObjectURL(blob);
-      link.download = `rak-madness_week-${selectedWeek}_scores.xlsx`;
+      link.download = `rak-madness_week-${selectedWeek.value}_scores.xlsx`;
       link.click();
       link.remove();
 
