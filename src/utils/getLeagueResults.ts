@@ -14,6 +14,12 @@ const WEEKS_COLLEGE_REGULAR_SEASON = 16;
  */
 const WEEKS_PRO_REGULAR_SEASON = 18;
 
+/**
+ * Week 1 of Rak Madness is week 1 in the NFL, but week 2 in the NCAA.
+ * We account for this by adding 1 to the week if NCAA results have been requested.
+ */
+const WEEK_OFFSET_COLLEGE = 1;
+
 // You can find group IDs by looking at weekly scoreboards. Example:
 // https://www.espn.com/college-football/scoreboard/_/group/22
 const COLLEGE_GROUPS = [
@@ -25,12 +31,10 @@ async function getLeagueEvents(
   league: League,
   week: WeekInfo, // Rak Madness week, corresponds with NFL regular season week
 ): Promise<Array<EspnEvent>> {
-  // Week 1 of Rak Madness is week 1 in the NFL, but week 2 in the NCAA.
-  // We account for this by adding 1 to the week if NCAA results have been requested.
   // After the regular season is over, ESPN resets the week counter to 1 for the postseason.
   let adjustedWeekNumber =
     league === League.COLLEGE
-      ? week.value + 1
+      ? week.value + WEEK_OFFSET_COLLEGE
       : week.value > WEEKS_PRO_REGULAR_SEASON
         ? week.value % WEEKS_PRO_REGULAR_SEASON
         : week.value;
