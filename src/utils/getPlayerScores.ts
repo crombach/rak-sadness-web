@@ -445,7 +445,7 @@ export async function getPlayerScores(
               (sum, gameIndex) => {
                 const oppPick = oppScore.college[gameIndex].pick;
                 const activePick = activeScore.college[gameIndex].pick;
-                return oppPick !== activePick ? sum + 1 : sum;
+                return oppPick != null && activePick!= null && oppPick !== activePick ? sum + 1 : sum;
               },
               0,
             );
@@ -454,7 +454,7 @@ export async function getPlayerScores(
             remainingProIndices.forEach((gameIndex) => {
               const oppPick = oppScore.pro[gameIndex].pick;
               const activePick = activeScore.pro[gameIndex].pick;
-              if (oppPick !== activePick) {
+              if (oppPick != null && activePick != null && oppPick !== activePick) {
                 differentProPicks += 1;
                 if (parsePick(oppPick).spread !== 0) {
                   differentProPicksWithSpreads += 1;
@@ -472,6 +472,12 @@ export async function getPlayerScores(
 
           const totalScoreDiff = oppScore.score.total - activeScore.score.total;
           const totalDifferentPicks = differentCollegePicks + differentProPicks;
+          if (activeScore.name === "Miami Fixinator") {
+            console.debug("active:", activeScore);
+            console.debug("opponent:", oppScore);
+            console.debug("totalScoreDiff", totalScoreDiff);
+            console.debug("totalDifferentPicks", totalDifferentPicks);
+          }
           if (totalDifferentPicks < totalScoreDiff) {
             // If the active player can't catch up on points, they're knocked out.
             return {
