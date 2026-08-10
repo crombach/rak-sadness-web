@@ -6,3 +6,4 @@ Table.scss: shared `.table` styles (sticky header/player col, pick status colors
 
 - [`explanation/`](explanation/CLAUDE.md) — explanation-view table with pick toasts
 - [`playerName/`](playerName/CLAUDE.md) — player name cell with knocked-out icon
+- [`scores/`](scores/CLAUDE.md) — ranked score table, the default results view

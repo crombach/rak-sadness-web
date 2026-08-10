@@ -1,50 +1,7 @@
 import { GameStatus, HomeAway } from "../types/ESPN";
 import { LeagueResult } from "../types/LeagueResult";
+import { finalGame } from "./leagueResultFixtures";
 import { getPickResults } from "./getPlayerScores";
-
-const NO_POSSESSION = {};
-
-/**
- * A completed game. `by` is the winner's margin, which is what the spread is
- * compared against, so it is stated explicitly rather than derived from scores.
- */
-function finalGame({
-  home,
-  away,
-  homeScore,
-  awayScore,
-}: {
-  home: string;
-  away: string;
-  homeScore: number;
-  awayScore: number;
-}): LeagueResult {
-  const homeTeam = { name: home, abbreviation: home };
-  const awayTeam = { name: away, abbreviation: away };
-  const isTie = homeScore === awayScore;
-  const homeWon = homeScore > awayScore;
-  return {
-    name: `${away} at ${home}`,
-    shortName: `${away} @ ${home}`,
-    date: new Date("2024-10-06T17:00:00Z"),
-    status: GameStatus.FINAL,
-    detailMessage: "Final",
-    home: { team: homeTeam, score: homeScore },
-    away: { team: awayTeam, score: awayScore },
-    possession: NO_POSSESSION,
-    winner: {
-      team: isTie ? null : homeWon ? homeTeam : awayTeam,
-      homeAway: isTie ? null : homeWon ? HomeAway.HOME : HomeAway.AWAY,
-      by: Math.abs(homeScore - awayScore),
-    },
-    loser: {
-      team: isTie ? null : homeWon ? awayTeam : homeTeam,
-      homeAway: isTie ? null : homeWon ? HomeAway.AWAY : HomeAway.HOME,
-      by: Math.abs(homeScore - awayScore),
-    },
-    totalScore: homeScore + awayScore,
-  };
-}
 
 // BUF beat KC by 10.
 const bufBeatKcBy10 = finalGame({
