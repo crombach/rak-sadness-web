@@ -5,6 +5,10 @@
   // Read back by useFillerRows, which needs a row height to work out how many
   // rows fit below the real ones.
   --rak-table-row-height: 32px;
+  // The line box a header cell's text makes, plus its padding. Named and applied
+  // so the wireframe's header, which has no text in it, is the same height as this
+  // one. Assumes the inherited line-height of 1.5.
+  --rak-table-header-height: calc(1.5em + 4px);
 
   .table__header {
     z-index: 20;
@@ -17,6 +21,7 @@
       color: white;
       background-color: var(--rak-primary-800);
       min-width: max-content;
+      height: var(--rak-table-header-height);
       padding: 2px 8px;
       // Named even on the edges that carry no border, because a zero-width border
       // takes `currentColor`, which is white here. Dark Reader forces borders
