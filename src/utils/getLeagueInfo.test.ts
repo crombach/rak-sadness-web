@@ -33,7 +33,24 @@ const POST_SEASON = {
   entries: [week("1", "2025-01-01T00:00Z", "2025-01-08T00:00Z")],
 };
 
-function scoreboard(slug: string, calendar = [REGULAR_SEASON, POST_SEASON]) {
+// ESPN sends the off-season calendar with no `entries` key at all.
+const OFF_SEASON = {
+  value: String(SeasonType.OFF),
+  startDate: "2025-02-16T00:00Z",
+  endDate: "2025-08-01T00:00Z",
+};
+
+type CalendarFixture = {
+  value: string;
+  startDate: string;
+  endDate: string;
+  entries?: Array<ReturnType<typeof week>>;
+};
+
+function scoreboard(
+  slug: string,
+  calendar: Array<CalendarFixture> = [REGULAR_SEASON, POST_SEASON],
+) {
   return { leagues: [{ slug, calendar }] };
 }
 
@@ -120,6 +137,28 @@ describe("getLeagueInfo, calendar mapping", () => {
     mockFetch(scoreboard(League.COLLEGE));
     const info = await infoFor(League.COLLEGE);
     expect(info.activeCalendar.seasonType).toBe(SeasonType.REGULAR);
+  });
+
+  it("survives a calendar that has no entries key", async () => {
+    mockFetch(
+      scoreboard(League.PRO, [REGULAR_SEASON, POST_SEASON, OFF_SEASON]),
+    );
+    const info = await infoFor(League.PRO);
+    expect(info.calendars.map((cal) => cal.seasonType)).toEqual([
+      SeasonType.REGULAR,
+      SeasonType.POST,
+      SeasonType.OFF,
+    ]);
+    expect(info.calendars[2].weeks).toEqual([]);
+    expect(info.activeCalendar.seasonType).toBe(SeasonType.REGULAR);
+  });
+
+  it("never treats a calendar with no weeks as the active one", async () => {
+    mockFetch(scoreboard(League.COLLEGE, [REGULAR_SEASON, OFF_SEASON]));
+    vi.setSystemTime(new Date("2025-05-01T00:00Z"));
+    const info = await infoFor(League.COLLEGE);
+    expect(info.activeCalendar.seasonType).toBe(SeasonType.REGULAR);
+    expect(info.activeWeek.value).toBe(18);
   });
 
   it("falls back to the last college calendar outside every date range", async () => {
