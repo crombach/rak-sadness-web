@@ -460,6 +460,26 @@ describe("the app, week routes", () => {
     expect(await screen.findByText("MNF Points Pick")).toBeInTheDocument();
   });
 
+  it("shows a wireframe table until the results are ready", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    expect(document.querySelector(".table.--skeleton")).toBeInTheDocument();
+
+    await screen.findByText("MNF Points Pick");
+    expect(document.querySelector(".table.--skeleton")).not.toBeInTheDocument();
+  });
+
+  it("fills the wireframe with rows down to the bottom of the viewport", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    // jsdom reports no layout, so every measurement is zero and the whole
+    // viewport counts as spare. That still exercises the row count for real.
+    const rows = document.querySelectorAll(".table__filler-row");
+    expect(rows.length).toBe(Math.floor(window.innerHeight / 32));
+  });
+
   it("opens a week's explanation from its URL", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
     await mountApp(`/week/${CURRENT_WEEK}/explanation`);

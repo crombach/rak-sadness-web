@@ -4,6 +4,7 @@ import useWeekRouteGuard from "../../hooks/useWeekRouteGuard";
 import LogoButton from "../navbar/LogoButton/LogoButton";
 import ScoresNavbar, { ScoresView } from "../navbar/ScoresNavbar";
 import PageLayout from "../PageLayout";
+import SkeletonTable from "../table/SkeletonTable";
 import "./ResultsLayout.scss";
 
 /**
@@ -50,11 +51,9 @@ export default function ResultsLayout() {
         )
       }
     >
-      {isReady && (
-        <div className="home__scores">
-          <Outlet />
-        </div>
-      )}
+      <div className="home__scores">
+        {isReady ? <Outlet /> : <SkeletonTable />}
+      </div>
     </PageLayout>
   );
 }

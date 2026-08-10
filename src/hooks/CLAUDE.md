@@ -15,3 +15,6 @@ pipeline lives here, so components only render. The first two are mounted once, 
 - `useExportScores`: downloads the current scores as a workbook.
 - `useWeekRouteGuard`: whether a `/week/:week` URL has anything to show, and the
   redirect home when it does not.
+- `useFillerRows`: how many empty rows a table needs to reach the bottom of the
+  viewport. `fillerRowCount` is the measurement on its own, which is where the
+  behavior is tested.
