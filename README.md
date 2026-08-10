@@ -16,7 +16,7 @@ This was thrown together using KISS principles for a small, family-and-friends f
 
 Built with [Vite](https://vite.dev/), React 19, TypeScript, [react-router](https://reactrouter.com/), and [Base UI](https://base-ui.com/). Base UI ships unstyled primitives, so the look lives in SCSS with design tokens in `src/index.scss`.
 
-The home page is `/`. A week's results live at `/week/:week/scoreboard` and `/week/:week/explanation`, so they can be linked and reloaded. Picks come from `/api/picks/:week` first, then from a per-week cache of anything uploaded in that browser. A week with no picks either way sends you home with an explanation. Requires Node `v22` (`.nvmrc`). Run `nvm use` first.
+The home page is `/`. A week's results live at `/week/:week/scoreboard` and `/week/:week/picks`, so they can be linked and reloaded. Picks come from `/api/picks/:week` first, then from a per-week cache of anything uploaded in that browser. A week with no picks either way sends you home with an explanation. Requires Node `v22` (`.nvmrc`). Run `nvm use` first.
 
 ```
 make setup   # install dependencies from the lockfile

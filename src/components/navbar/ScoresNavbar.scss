@@ -15,9 +15,9 @@
   }
 }
 
-@include narrow-screen {
-  // A phone has room for three icons and nothing else, so the icon carries the
-  // button on its own there.
+@include crowded-navbar {
+  // The icon carries the button on its own here, so the app name beside it keeps
+  // to two lines. Labelled buttons squeeze it to three.
   .home__scores-header-label {
     display: none;
   }
