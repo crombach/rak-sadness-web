@@ -10,7 +10,7 @@ description: How to build, run, and test this repo. Read before any npm, make, t
 ## Toolchain
 
 - Vite 8, React 19, TypeScript 6, Vitest 4, ESLint 9 flat config, wrangler 4.
-- Base UI for behavior, react-router 7 for routing, SCSS for looks. Base UI ships no styles, so every visual lives in SCSS against the `--rak-*` tokens in `src/index.scss`. There is no theme provider. `@mui/icons-material` is for icons only.
+- Base UI for behavior, react-router 7 for routing, SCSS for looks. Base UI ships no styles, so every visual lives in SCSS against the `--rak-*` tokens in `src/index.scss`. There is no theme provider. Icons are inlined SVGs in `src/components/icon/`, with the path data copied from Material Design.
 - Node `v22` (`.nvmrc`), npm 10 (`lockfileVersion: 3`). `nvm use` before anything. wrangler 4 refuses to run on Node 20, and jsdom 30 needs `>=22.22.2`. `make setup` fails with an actionable message on a major mismatch.
 - Three CI signals on a PR: `check` (`.github/workflows/check.yml`) runs the same `make check` you run locally, `conventional-commit-title` (`.github/workflows/pr-title.yml`) matches the title format, and `Cloudflare Pages` builds from git using the dashboard's own settings. Break `make check` locally and CI breaks the same way.
 
@@ -22,7 +22,7 @@ From a clean checkout: `make setup`, `make build`, `make run`, `make test`, `mak
 
 ## Tests
 
-187 cases, 15 suites, all offline. `npm test` is `vitest run`; `npm run test:watch` watches.
+188 cases, 15 suites, all offline. `npm test` is `vitest run`; `npm run test:watch` watches.
 
 - `src/utils/scoring/getPickResults.test.ts` — spread scoring (favorite covers / fails to cover, underdog, push, tie, half-point spread, missing pick vs missing game, live and upcoming state). Also pins the statuses `GameStatus` does not model: ESPN sends type ids for postponed and canceled, they land in the same branch as a live game, and a canceled game has no winner so every pick scores a point.
 - `src/utils/scoring/getPlayerScores.test.ts` — workbook parsing, matchup derivation, per-league scoring, tiebreaker distance, the whole sort order, every knockout branch. Builds a real workbook with `xlsx-js-style` and mocks `getLeagueResults`.
