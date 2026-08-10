@@ -22,24 +22,13 @@ From a clean checkout: `make setup`, `make build`, `make run`, `make test`, `mak
 
 ## Tests
 
-217 cases, 17 suites, all offline. `npm test` is `vitest run`; `npm run test:watch` watches.
-
-- `src/utils/scoring/getPickResults.test.ts` — spread scoring (favorite covers / fails to cover, underdog, push, tie, half-point spread, missing pick vs missing game, live and upcoming state). Also pins the statuses `GameStatus` does not model: ESPN sends type ids for postponed and canceled, they land in the same branch as a live game, and a canceled game has no winner so every pick scores a point.
-- `src/utils/scoring/getPlayerScores.test.ts` — workbook parsing, matchup derivation, per-league scoring, tiebreaker distance, the whole sort order, every knockout branch. Builds a real workbook with `xlsx-js-style` and mocks `getLeagueResults`.
-- `src/utils/buildSpreadsheetBuffer.test.ts` — writes a workbook, reads it back, asserts both sheets, headers, rows, and per-status fill colors. Reading a workbook back flattens the fill onto `cell.s`, so it is `cell.s.fgColor.rgb`, not `cell.s.fill.fgColor.rgb`.
-- `src/utils/getLeagueInfo.test.ts` — endpoint URLs, calendar and week mapping, active-calendar choice per league, the off-season calendar that arrives with no `entries`.
-- `src/utils/getLeagueResults.test.ts` — pro and college request URLs, the college week offset, the postseason collapse to week 1, event mapping, matchup filtering.
-- `src/utils/scoring/applyKnockouts.test.ts` — knockouts from plain `PlayerScore` objects, including the college and against-the-spread tiebreakers.
-- `src/utils/scoring/validateSpreads.test.ts` — the rule that a spread belongs to the game: same side means the same number, opposite sides mean opposite numbers. A game whose rows disagree scores for nobody, so this is what stops one typo from deciding the pool.
-- `src/hooks/useFillerRows.test.ts` — the row count that pads a table to the bottom of the viewport, fed measurements directly. jsdom reports no layout, so the arithmetic is tested apart from the hook.
-- `src/utils/picksCache.test.ts` — round trip, per-week keys, the size cap, and a corrupt or rejected entry counting as a miss.
-- `src/context/ToastContext.test.tsx` — queue cap of 3, removal by id, 5-second auto-dismiss, plus render counts proving an actions-only consumer does not re-render.
-- `src/App.test.tsx` — week lookup, the picks fetch, upload, both results routes, refresh, export, and every branch of the week route guard. Mounts the routed app in a `MemoryRouter`, with the entry URL as a parameter.
-- `ExplanationTable`, `ScoresTable`, `Navbar`, `LogoButton`, `Footer`, `Toaster` each have their own suite.
+Every suite sits beside the module it covers, and they all run offline. `npm test` is `vitest run`; `npm run test:watch` watches. `src/App.test.tsx` is the widest one: it mounts the routed app and covers the week lookup, the picks fetch, upload, both results views, refresh, export, and the week route guard.
 
 Writing a test here:
 
 - Fixture games come from `src/utils/leagueResultFixtures.ts` (`finalGame`, `upcomingGame`). Use them instead of hand-rolling a `LeagueResult`.
+- Reading an exported workbook back flattens the fill onto `cell.s`, so assert `cell.s.fgColor.rgb`, not `cell.s.fill.fgColor.rgb`.
+- jsdom reports no layout: every rect is zero and `window.innerHeight` is 768. Anything that measures the page has its arithmetic tested apart from the hook that feeds it.
 - Mount `App` the way `index.tsx` does: inside `MemoryRouter`, `ToastContextProvider`, and `AppDataContextProvider`, with `Toaster` beside it. Toasts render in `Toaster`, so without it no toast assertion can pass.
 - Clear `localStorage` in `beforeEach` for anything that uploads. An upload caches its workbook per week, and jsdom keeps storage between cases, so a later case would find picks an earlier one left behind.
 - `mountLoadedApp` waits for the home controls, so it only works for URLs that land on `/`. Deep-link cases use `mountApp` and await something on the results route.
@@ -54,6 +43,7 @@ The scoring path logs through `src/utils/debugLog.ts`, which is silent when the 
 
 ## Gotchas
 
+- `GameStatus` models only upcoming, live, and final, but `status` is assigned straight from ESPN's `status.type.id`, which also has ids for postponed and canceled. Those reach the same branch as a live game, so the header reads "Live Score" and ESPN's detail message is what tells the reader otherwise. A canceled game has no winner, so every pick on it scores a point.
 - Vite does not open a browser, so there is no `BROWSER=none` to set. `make run PORT=3001` moves the port, which is how you get two dev servers side by side. `strictPort` is on, so a busy port fails instead of silently sliding to the next one.
 - Sass prints deprecation warnings on compile. Noise, not breakage.
 - The narrow-screen breakpoint is a Sass mixin in `src/styles/_breakpoints.scss`, not a custom property, because custom properties do not work inside a media query. `@use "…/styles/breakpoints" as *;` then `@include narrow-screen { … }`.
