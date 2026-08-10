@@ -4,23 +4,6 @@ What is left. Everything below was recommended but not applied, with the reason.
 
 ## Build
 
-### Three dependencies are held back by peer conflicts
-
-Everything else is on its latest version and `npm audit` reports 0
-vulnerabilities, down from 34. These three cannot move yet:
-
-- **eslint 10 / @eslint/js 10.** `eslint-plugin-jsx-a11y` 6.10.2 declares support
-  through eslint 9 only, so npm fails the install with `ERESOLVE`. Unblocks when
-  jsx-a11y ships an eslint 10 range, or if you drop the plugin.
-- **typescript 7.** `typescript-eslint` 8.67 throws `typescript-eslint does not
-support TS 7.0` on load. Tracked upstream in typescript-eslint#10940. There is
-  a documented side-by-side setup that typechecks on 7 while linting through the
-  TS 6 API, at the cost of a second compiler in the tree.
-- **@types/node 26.** Pinned to 22 on purpose, to match the Node the app runs on.
-
-**Suggested action:** recheck after typescript-eslint lands TS 7 support. Nothing
-here is urgent.
-
 ### `pages:deploy` has not been run against `wrangler.toml`
 
 `wrangler.toml` declares `name = "rak-sadness"`, `compatibility_date`, and the
