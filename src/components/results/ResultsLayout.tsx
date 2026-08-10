@@ -31,6 +31,9 @@ export default function ResultsLayout() {
   return (
     <PageLayout
       showingScores={isReady}
+      // The loaded picks table is wider than the content column, so its
+      // wireframe spans the screen rather than snapping wider on arrival.
+      fillsWidth={!isReady && view === "Picks"}
       navbarLeft={<LogoButton onClick={() => navigate("/")} />}
       navbarRight={
         // Rendered while the week loads, so the navbar does not change shape

@@ -514,6 +514,31 @@ describe("the app, week routes", () => {
     expect(rows.length).toBe(Math.floor(window.innerHeight / 32));
   });
 
+  it("widens the content area for the picks wireframe only", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    mountApp(`/week/${CURRENT_WEEK}/picks`);
+
+    // The loaded picks table is wider than the content column, so its wireframe
+    // starts out that wide too.
+    expect(document.querySelector(".home__content")).toHaveClass(
+      "--full-width",
+    );
+
+    await screen.findByText("College Score");
+    expect(document.querySelector(".home__content")).not.toHaveClass(
+      "--full-width",
+    );
+  });
+
+  it("keeps the content area narrow for the scoreboard wireframe", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    expect(document.querySelector(".home__content")).not.toHaveClass(
+      "--full-width",
+    );
+  });
+
   it("opens a week's picks from its URL", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
     await mountApp(`/week/${CURRENT_WEEK}/picks`);
