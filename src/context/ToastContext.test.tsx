@@ -37,7 +37,9 @@ function Harness() {
 function mountHarness() {
   // Advancing fake timers is what dismisses toasts, so user-event must not
   // wait on the real clock.
-  const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+  const user = userEvent.setup({
+    advanceTimers: (ms: number) => vi.advanceTimersByTime(ms),
+  });
   render(
     <ToastContextProvider>
       <Harness />
@@ -53,12 +55,12 @@ function headers(): Array<string> {
 }
 
 beforeEach(() => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 });
 
 afterEach(() => {
-  jest.runOnlyPendingTimers();
-  jest.useRealTimers();
+  vi.runOnlyPendingTimers();
+  vi.useRealTimers();
 });
 
 describe("Toast", () => {
@@ -120,12 +122,12 @@ describe("ToastContextProvider", () => {
     expect(headers()).toEqual(["A"]);
 
     act(() => {
-      jest.advanceTimersByTime(TOAST_LIFETIME_MS - 1);
+      vi.advanceTimersByTime(TOAST_LIFETIME_MS - 1);
     });
     expect(headers()).toEqual(["A"]);
 
     act(() => {
-      jest.advanceTimersByTime(1);
+      vi.advanceTimersByTime(1);
     });
     expect(headers()).toEqual([]);
   });
@@ -135,19 +137,19 @@ describe("ToastContextProvider", () => {
     await user.click(screen.getByText("show A"));
 
     act(() => {
-      jest.advanceTimersByTime(TOAST_LIFETIME_MS / 2);
+      vi.advanceTimersByTime(TOAST_LIFETIME_MS / 2);
     });
     await user.click(screen.getByText("show B"));
     expect(headers()).toEqual(["A", "B"]);
 
     // A's lifetime is up, B's is not.
     act(() => {
-      jest.advanceTimersByTime(TOAST_LIFETIME_MS / 2);
+      vi.advanceTimersByTime(TOAST_LIFETIME_MS / 2);
     });
     expect(headers()).toEqual(["B"]);
 
     act(() => {
-      jest.advanceTimersByTime(TOAST_LIFETIME_MS / 2);
+      vi.advanceTimersByTime(TOAST_LIFETIME_MS / 2);
     });
     expect(headers()).toEqual([]);
   });
@@ -158,7 +160,7 @@ describe("ToastContextProvider", () => {
     await user.click(screen.getByText("clear"));
 
     act(() => {
-      jest.advanceTimersByTime(TOAST_LIFETIME_MS);
+      vi.advanceTimersByTime(TOAST_LIFETIME_MS);
     });
     expect(headers()).toEqual([]);
   });
@@ -171,7 +173,7 @@ describe("ToastContextProvider", () => {
     await user.click(screen.getByText("show D"));
 
     act(() => {
-      jest.advanceTimersByTime(TOAST_LIFETIME_MS);
+      vi.advanceTimersByTime(TOAST_LIFETIME_MS);
     });
     expect(headers()).toEqual([]);
   });
@@ -179,7 +181,9 @@ describe("ToastContextProvider", () => {
 
 describe("useToastContext outside a provider", () => {
   it("falls back to no-ops rather than throwing", async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({
+      advanceTimers: (ms: number) => vi.advanceTimersByTime(ms),
+    });
     render(<Harness />);
     await user.click(screen.getByText("show A"));
     expect(headers()).toEqual([]);

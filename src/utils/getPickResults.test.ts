@@ -1,50 +1,7 @@
 import { GameStatus, HomeAway } from "../types/ESPN";
 import { LeagueResult } from "../types/LeagueResult";
+import { finalGame } from "./leagueResultFixtures";
 import { getPickResults } from "./getPlayerScores";
-
-const NO_POSSESSION = {};
-
-/**
- * A completed game. `by` is the winner's margin, which is what the spread is
- * compared against, so it is stated explicitly rather than derived from scores.
- */
-function finalGame({
-  home,
-  away,
-  homeScore,
-  awayScore,
-}: {
-  home: string;
-  away: string;
-  homeScore: number;
-  awayScore: number;
-}): LeagueResult {
-  const homeTeam = { name: home, abbreviation: home };
-  const awayTeam = { name: away, abbreviation: away };
-  const isTie = homeScore === awayScore;
-  const homeWon = homeScore > awayScore;
-  return {
-    name: `${away} at ${home}`,
-    shortName: `${away} @ ${home}`,
-    date: new Date("2024-10-06T17:00:00Z"),
-    status: GameStatus.FINAL,
-    detailMessage: "Final",
-    home: { team: homeTeam, score: homeScore },
-    away: { team: awayTeam, score: awayScore },
-    possession: NO_POSSESSION,
-    winner: {
-      team: isTie ? null : homeWon ? homeTeam : awayTeam,
-      homeAway: isTie ? null : homeWon ? HomeAway.HOME : HomeAway.AWAY,
-      by: Math.abs(homeScore - awayScore),
-    },
-    loser: {
-      team: isTie ? null : homeWon ? awayTeam : homeTeam,
-      homeAway: isTie ? null : homeWon ? HomeAway.AWAY : HomeAway.HOME,
-      by: Math.abs(homeScore - awayScore),
-    },
-    totalScore: homeScore + awayScore,
-  };
-}
 
 // BUF beat KC by 10.
 const bufBeatKcBy10 = finalGame({
@@ -186,6 +143,44 @@ describe("getPickResults, game state", () => {
     expect(result.isCompleted).toBe(false);
     expect(result.explanation.header).toBe("Upcoming");
     expect(result.explanation.message).toContain("KC @ BUF begins at");
+  });
+});
+
+// GameStatus models only UPCOMING, LIVE, and FINAL, but `status` is assigned
+// straight from ESPN's `status.type.id`, which has ids for postponed, canceled,
+// and other states. Those reach the same default branch as a live game, so the
+// header reads "Live Score" and ESPN's own detail message is what tells the
+// reader the game is not being played.
+describe("getPickResults, statuses outside the enum", () => {
+  const POSTPONED = "6" as GameStatus;
+  const CANCELED = "5" as GameStatus;
+
+  it("labels a postponed game with the live header and ESPN's detail message", () => {
+    const postponed: LeagueResult = {
+      ...bufBeatKcBy10,
+      status: POSTPONED,
+      detailMessage: "Postponed",
+    };
+    const result = getPickResults(["BUF"], [postponed])[0];
+    expect(result.isCompleted).toBe(false);
+    expect(result.explanation.header).toBe("Live Score | Postponed");
+  });
+
+  it("awards a point to every pick in a canceled game, because it has no winner", () => {
+    const canceled: LeagueResult = {
+      ...bufBeatKcBy10,
+      status: CANCELED,
+      detailMessage: "Canceled",
+      home: { team: bufBeatKcBy10.home.team, score: 0 },
+      away: { team: bufBeatKcBy10.away.team, score: 0 },
+      winner: { team: null, homeAway: null, by: 0 },
+      loser: { team: null, homeAway: null, by: 0 },
+      totalScore: 0,
+    };
+    const results = getPickResults(["BUF", "KC"], [canceled]);
+    expect(results.map((result) => result.pointValue)).toEqual([1, 1]);
+    expect(results[0].isCompleted).toBe(false);
+    expect(results[0].explanation.header).toBe("Live Score | Canceled");
   });
 });
 

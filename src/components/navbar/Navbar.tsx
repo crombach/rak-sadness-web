@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import { ReactNode } from "react";
 import { Sheet } from "@mui/joy";
 import "./Navbar.scss";
 
@@ -6,8 +6,8 @@ export default function Navbar({
   left,
   right,
 }: {
-  left?: ReactElement;
-  right?: ReactElement;
+  left?: ReactNode;
+  right?: ReactNode;
 }) {
   return (
     <Sheet className="navbar" variant="solid" color="primary">

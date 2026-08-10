@@ -38,7 +38,7 @@ export default function RakSadness() {
   const [isExportLoading, setExportLoading] = useState(false);
 
   // File upload stuff
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const clickFileInput = useCallback(() => {
     fileInputRef.current?.click();
   }, []);
@@ -59,6 +59,13 @@ export default function RakSadness() {
   useEffect(() => {
     const getLeagueInfoAsync = async () => {
       const proLeagueInfo = await getLeagueInfo(League.PRO);
+      if (proLeagueInfo == null) {
+        setWeekInfoLoading(false);
+        showToast(
+          new Toast("danger", "Error", "Failed to load the NFL schedule."),
+        );
+        return;
+      }
       // Set to the current regular season week, or the max if it's the post- or off-season.
       setWeeks(proLeagueInfo.activeCalendar.weeks);
       setCurrentWeek(proLeagueInfo.activeWeek.value);
@@ -66,9 +73,10 @@ export default function RakSadness() {
       setWeekInfoLoading(false);
     };
     getLeagueInfoAsync();
-  }, []);
+  }, [showToast]);
 
   const fetchPicksBuffer = useCallback(async () => {
+    if (!selectedWeek) return null;
     setPicksLoading(true);
     try {
       // Hack to disable this feature on localhost.
@@ -90,7 +98,7 @@ export default function RakSadness() {
         `Failed to load week ${selectedWeek.value} picks spreadsheet from API. Has it been uploaded yet?`,
         error,
       );
-      setScores(null);
+      setScores(undefined);
       showToast(
         new Toast(
           "warning",
@@ -107,13 +115,14 @@ export default function RakSadness() {
 
   const calculateScores = useCallback(
     async (picksBuffer: ArrayBuffer) => {
+      if (!selectedWeek) return;
       setScoresLoading(true);
       try {
         setScores(await getPlayerScores(selectedWeek, picksBuffer));
       } catch (error) {
         // If the scores failed to calculate, fail gracefully and log a message.
         console.error("Failed to calculate scores", error);
-        setScores(null);
+        setScores(undefined);
         showToast(
           new Toast(
             "danger",
@@ -150,7 +159,7 @@ export default function RakSadness() {
       }
 
       const abort = () => {
-        setScores(null);
+        setScores(undefined);
         setScoresLoading(false);
         showToast(
           new Toast("neutral", "Info", "Aborted picks shreadsheet selection"),
@@ -161,7 +170,7 @@ export default function RakSadness() {
         setScoresLoading(true);
 
         // Get buffer from file.
-        const files = Array.from(event.target.files);
+        const files = Array.from(event.target.files ?? []);
         if (!files.length || !files[0]) {
           abort();
           return;
@@ -196,9 +205,13 @@ export default function RakSadness() {
   // function literal, so useCallback cannot see its dependencies.
   const doRefreshThrottled = useMemo(
     () =>
+      // throttle() only stores the callback here. It runs from handleRefresh,
+      // never during render, so reading the ref inside it is safe.
+      // eslint-disable-next-line react-hooks/refs
       throttle(async () => {
         refreshButtonRef.current?.classList.add("--spinning");
         clearToasts();
+        if (picksBuffer == null) return;
         await calculateScores(picksBuffer);
         showToast(
           new Toast("success", "Success", "Results successfully updated"),
@@ -215,7 +228,7 @@ export default function RakSadness() {
 
   // Export the current scores to an Excel spreadsheet file.
   const exportResults = useCallback(() => {
-    if (!selectedWeek) return;
+    if (!selectedWeek || !scores) return;
     const exportResultsAsync = async () => {
       setExportLoading(true);
 
@@ -245,10 +258,6 @@ export default function RakSadness() {
   }, [scores, selectedWeek, showToast]);
 
   const navbarLeft = useMemo(() => {
-    <>
-      <LogoButton onClick={() => setShowScores(false)} />
-      <span>{showScores}</span>
-    </>;
     return !!showScores && !!scores ? (
       <>
         <LogoButton onClick={() => setShowScores(false)} />
@@ -328,10 +337,10 @@ export default function RakSadness() {
                 className="home__week-input"
                 placeholder="Select a week..."
                 value={selectedWeek}
-                onChange={(_, value) => setSelectedWeek(value)}
+                onChange={(_, value) => setSelectedWeek(value ?? undefined)}
                 disabled={isWeekInfoLoading}
               >
-                {weeks
+                {(weeks ?? [])
                   .slice(0, currentWeek)
                   .reverse()
                   .map((week) => {

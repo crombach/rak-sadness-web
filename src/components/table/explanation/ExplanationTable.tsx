@@ -18,7 +18,7 @@ function leagueHeaders(count: number, prefix: string) {
   ));
 }
 
-function ExplanationTable({ scores }: { scores?: RakMadnessScores }) {
+function ExplanationTable({ scores }: { scores?: RakMadnessScores | null }) {
   const { showToast, clearToasts } = useToastContext();
 
   const handlePickResultClick = useCallback(
@@ -28,13 +28,11 @@ function ExplanationTable({ scores }: { scores?: RakMadnessScores }) {
         new Toast(
           "neutral",
           result.explanation.header,
-          (
-            <>
-              {result.explanation.message}
-              {result.explanation.downDistanceText && <br />}
-              {result.explanation.downDistanceText}
-            </>
-          ),
+          <>
+            {result.explanation.message}
+            {result.explanation.downDistanceText && <br />}
+            {result.explanation.downDistanceText}
+          </>,
         ),
       );
     },

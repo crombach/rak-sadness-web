@@ -14,21 +14,28 @@ This was thrown together using KISS principles for a small, family-and-friends f
 
 ## Development
 
-Requires Node `v20.8` (`.nvmrc`). Run `nvm use` first.
+Built with [Vite](https://vite.dev/), React 19, TypeScript, and MUI Joy. Requires Node `v22` (`.nvmrc`). Run `nvm use` first.
 
 ```
 make setup   # install dependencies from the lockfile
 make run     # dev server on http://localhost:3000 (make run PORT=3001 to move it)
 make build   # production build into ./build
-make test    # Jest, once, no watch mode
+make test    # Vitest, once, no watch mode
 make check   # lint, typecheck, test, prettier
 make format  # eslint --fix, then prettier
 ```
 
 `make help` lists every target.
 
-`npm run pages:dev` runs the full Pages stack instead: wrangler proxies on port 3000 with the dev server behind it on 3001. The `/api/picks/:week` route is a Cloudflare Pages Function reading `picks/<week>.xlsx` from the `RAK_SADNESS_BUCKET` binding declared in `wrangler.toml`. Locally that bucket is simulated and starts empty, so the route returns 404 and the app falls back to manual spreadsheet upload. Seed it with:
+`npm run pages:dev` builds first, then serves `./build` through wrangler on port 3000. Use it to exercise the Cloudflare side; use `make run` for hot reload. The `/api/picks/:week` route is a Pages Function reading `picks/<week>.xlsx` from the `RAK_SADNESS_BUCKET` binding declared in `wrangler.toml`. Locally that bucket is simulated and starts empty, so the route returns 404 and the app falls back to manual spreadsheet upload. Seed it with:
 
 ```
 npx wrangler r2 object put rak-sadness/picks/1.xlsx --file <path> --local
 ```
+
+## Deploying
+
+Cloudflare Pages builds from git on its own, using the build settings in the
+Cloudflare dashboard. Push to `main` for production, push any other branch for a
+preview. wrangler is here for local testing only, so there is deliberately no
+deploy script to run.

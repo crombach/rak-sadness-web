@@ -20,7 +20,8 @@ function ifNotOne(num: number, otherwise: string): string {
 }
 
 function parsePick(pickString: string) {
-  const [, teamAbbreviation, , spreadText] = pickRegex.exec(pickString);
+  const match = pickRegex.exec(pickString);
+  const [, teamAbbreviation, , spreadText] = match ?? [];
   const spread = spreadText != null ? Number(spreadText) : 0;
   return {
     teamAbbreviation:
@@ -214,7 +215,11 @@ export async function getPlayerScores(
         if (!matchups[key]) {
           matchups[key] = new Set<string>();
         }
-        matchups[key].add(teamAbbreviation);
+        // A cell reading "undefined" parses to no team. Adding it would make the
+        // matchup look like it has two sides, so the real game never matches.
+        if (teamAbbreviation != null) {
+          matchups[key].add(teamAbbreviation);
+        }
       }
     };
     collegeKeys.forEach(addToMatchups);
@@ -493,12 +498,14 @@ export async function getPlayerScores(
               },
             };
           } else if (totalDifferentPicks === totalScoreDiff) {
+            // Either distance is absent when that player left the Monday night
+            // points cell blank, even once the game itself is final.
+            const oppDistance = oppScore.tiebreaker.distance;
+            const activeDistance = activeScore.tiebreaker.distance;
             // If the best a player can do is tie the opponent, check if they're knocked out on breakers.
             if (
               oppScore.tiebreaker.pick === activeScore.tiebreaker.pick ||
-              (tiebreakerScore != null &&
-                oppScore.tiebreaker.distance ===
-                  activeScore.tiebreaker.distance)
+              (tiebreakerScore != null && oppDistance === activeDistance)
             ) {
               // If the active player has the same tiebreaker pick as the opponent, run through the list of other tiebreakers.
               // If the opponent has a better college score, check if the active player can catch up.
@@ -546,7 +553,9 @@ export async function getPlayerScores(
               }
             } else if (
               tiebreakerScore != null &&
-              oppScore.tiebreaker.distance - activeScore.tiebreaker.distance < 0
+              oppDistance != null &&
+              activeDistance != null &&
+              oppDistance - activeDistance < 0
             ) {
               // If the tiebreaker score has been scraped, all games must be over.
               // Unless the active player has tied the opponent, they are knocked out.
@@ -557,8 +566,8 @@ export async function getPlayerScores(
                   isKnockedOut: true,
                   explanation:
                     `Knocked out on MNF Points tiebreaker by ${oppScore.name}. ` +
-                    `${activeScore.name} is ${activeScore.tiebreaker.distance} point${ifNotOne(activeScore.tiebreaker.distance, "s")} off, and ${oppScore.name} is ` +
-                    `${oppScore.tiebreaker.distance} point${ifNotOne(oppScore.tiebreaker.distance, "s")} off.`,
+                    `${activeScore.name} is ${activeDistance} point${ifNotOne(activeDistance, "s")} off, and ${oppScore.name} is ` +
+                    `${oppDistance} point${ifNotOne(oppDistance, "s")} off.`,
                 },
               };
             }
