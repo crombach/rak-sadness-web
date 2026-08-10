@@ -65,7 +65,7 @@ function explanationCell(pick: string, isCorrect: Status) {
     cellColor = Color.GREEN;
   } else if (isCorrect === "no") {
     cellColor = Color.RED;
-  } else if (isCorrect == "error") {
+  } else if (isCorrect === "error") {
     cellColor = Color.YELLOW;
   }
 

@@ -68,7 +68,7 @@ export default function RakSadness() {
     getLeagueInfoAsync();
   }, []);
 
-  const fetchPicksBuffer = async () => {
+  const fetchPicksBuffer = useCallback(async () => {
     setPicksLoading(true);
     try {
       // Hack to disable this feature on localhost.
@@ -103,27 +103,30 @@ export default function RakSadness() {
       setScoresLoading(false);
       setPicksLoading(false);
     }
-  };
+  }, [selectedWeek, showToast]);
 
-  const calculateScores = async (picksBuffer: ArrayBuffer) => {
-    setScoresLoading(true);
-    try {
-      setScores(await getPlayerScores(selectedWeek, picksBuffer));
-    } catch (error) {
-      // If the scores failed to calculate, fail gracefully and log a message.
-      console.error("Failed to calculate scores", error);
-      setScores(null);
-      showToast(
-        new Toast(
-          "danger",
-          "Error",
-          `Failed to calculate scores for week ${selectedWeek.value}.`,
-        ),
-      );
-    } finally {
-      setScoresLoading(false);
-    }
-  };
+  const calculateScores = useCallback(
+    async (picksBuffer: ArrayBuffer) => {
+      setScoresLoading(true);
+      try {
+        setScores(await getPlayerScores(selectedWeek, picksBuffer));
+      } catch (error) {
+        // If the scores failed to calculate, fail gracefully and log a message.
+        console.error("Failed to calculate scores", error);
+        setScores(null);
+        showToast(
+          new Toast(
+            "danger",
+            "Error",
+            `Failed to calculate scores for week ${selectedWeek.value}.`,
+          ),
+        );
+      } finally {
+        setScoresLoading(false);
+      }
+    },
+    [selectedWeek, showToast],
+  );
 
   // When the week changes, attempt to fetch the picks spreadsheet from the API.
   useEffect(() => {
@@ -137,7 +140,7 @@ export default function RakSadness() {
       };
       getDataAsync();
     }
-  }, [selectedWeek, isWeekInfoLoading]);
+  }, [selectedWeek, isWeekInfoLoading, fetchPicksBuffer, calculateScores]);
 
   // When a user manually uploads a picks spreadsheet, parse and score it.
   const handleFileUpload: ChangeEventHandler<HTMLInputElement> = useCallback(
@@ -183,23 +186,26 @@ export default function RakSadness() {
 
       scoreSpreadsheetAsync();
     },
-    [selectedWeek],
+    [selectedWeek, showToast],
   );
 
   // Refresh the score data. Throttle so user can't spam clicks.
   // Wrapped by handleRefresh to avoid sending multiple requests
   // if first one is taking a long time.
-  const doRefreshThrottled = useCallback(
-    throttle(async () => {
-      refreshButtonRef.current?.classList.add("--spinning");
-      clearToasts();
-      await calculateScores(picksBuffer);
-      showToast(
-        new Toast("success", "Success", "Results successfully updated"),
-      );
-      refreshButtonRef.current?.classList.remove("--spinning");
-    }, 500),
-    [picksBuffer],
+  // useMemo, not useCallback: the value is throttle()'s wrapper, not the
+  // function literal, so useCallback cannot see its dependencies.
+  const doRefreshThrottled = useMemo(
+    () =>
+      throttle(async () => {
+        refreshButtonRef.current?.classList.add("--spinning");
+        clearToasts();
+        await calculateScores(picksBuffer);
+        showToast(
+          new Toast("success", "Success", "Results successfully updated"),
+        );
+        refreshButtonRef.current?.classList.remove("--spinning");
+      }, 500),
+    [picksBuffer, calculateScores, clearToasts, showToast],
   );
   const handleRefresh = useCallback(async () => {
     // Short-circuit if scores are already loading.
@@ -236,7 +242,7 @@ export default function RakSadness() {
       );
     };
     exportResultsAsync();
-  }, [scores, selectedWeek]);
+  }, [scores, selectedWeek, showToast]);
 
   const navbarLeft = useMemo(() => {
     <>
@@ -291,7 +297,7 @@ export default function RakSadness() {
         </Button>
       </>
     ) : null;
-  }, [showScores, scores]);
+  }, [showScores, scores, handleRefresh]);
 
   return (
     <div
