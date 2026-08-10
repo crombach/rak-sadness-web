@@ -16,7 +16,7 @@ description: How to build, run, and test this repo. Read before any npm, make, t
 
 ## Verified
 
-From a clean checkout: `make setup`, `make build`, `make run`, `make test`, `make check` all green. `make run` serves `http://localhost:3000`, HTTP 200, `<title>Rak Madness Scoreboard</title>`. `npm audit` reports 0 vulnerabilities.
+From a clean checkout: `make setup`, `make build`, `make run`, `make test`, `make check` all green. `make run` serves `http://localhost:3000`, HTTP 200, `<title>Rak Madness Calculator</title>`. `npm audit` reports 0 vulnerabilities.
 
 `npm run build` runs `npm run typecheck` first, so a type error fails the Cloudflare build too. The build does not lint. Lint reaches CI through the `check` workflow calling `make check`.
 
@@ -46,7 +46,7 @@ The scoring path logs through `src/utils/debugLog.ts`, which is silent when the 
 - `GameStatus` models only upcoming, live, and final, but `status` is assigned straight from ESPN's `status.type.id`, which also has ids for postponed and canceled. Those reach the same branch as a live game, so the header reads "Live Score" and ESPN's detail message is what tells the reader otherwise. A canceled game has no winner, so every pick on it scores a point.
 - Vite does not open a browser, so there is no `BROWSER=none` to set. `make run PORT=3001` moves the port, which is how you get two dev servers side by side. `strictPort` is on, so a busy port fails instead of silently sliding to the next one.
 - Sass prints deprecation warnings on compile. Noise, not breakage.
-- The narrow-screen breakpoint is a Sass mixin in `src/styles/_breakpoints.scss`, not a custom property, because custom properties do not work inside a media query. `@use "…/styles/breakpoints" as *;` then `@include narrow-screen { … }`.
+- Breakpoints are Sass mixins in `src/styles/_breakpoints.scss`, not custom properties, because custom properties do not work inside a media query. `@use "…/styles/breakpoints" as *;` then `@include narrow-screen { … }` for phone width, or `@include crowded-navbar { … }` for the wider point where the navbar stops labelling its buttons.
 - `index.html` asks for `viewport-fit=cover`, which is what makes `env(safe-area-inset-*)` non-zero. The table's trailing row sizes itself from the bottom inset; `PageLayout.scss` holds back the other three sides. Removing `viewport-fit=cover` silently collapses all of that to zero.
 - One ESLint config: `eslint.config.js` (flat). It names its plugins directly. `package.json` has no `eslintConfig` key and there is no `.eslintrc.json`.
 - `import/no-unresolved` is off. `tsc` already resolves modules for both tsconfigs, and the import plugin misreads ESM exports maps without its own resolver.
@@ -63,9 +63,9 @@ The scoring path logs through `src/utils/debugLog.ts`, which is silent when the 
 - `npm run pages:dev` builds, then runs `wrangler pages dev ./build --port 3000`. Verified on wrangler 4: `/` serves 200, the Pages Function executes, assets serve. This is the supported form; the older `pages dev -- <command>` proxy form is deprecated and gone from this repo.
 - `pages:dev` serves a build, so there is no hot reload. Two workflows, on purpose: `make run` for iterating on the UI, `pages:dev` for anything touching the Function or the binding. Rerun it to pick up a code change.
 - No make target wraps `pages:dev` because it needs Cloudflare context that `make` targets deliberately stay out of.
-- `wrangler.toml` holds `name = "rak-sadness"` (the real Pages project), `compatibility_date`, and the `RAK_SADNESS_BUCKET` R2 binding pointing at the `rak-sadness` bucket. It configures `pages dev` and nothing else.
+- `wrangler.toml` holds `name = "rak-sadness"` (the real Pages project, which Cloudflare cannot rename), `compatibility_date`, and the `RAK_MADNESS_BUCKET` R2 binding pointing at the `rak-madness-calculator` bucket. It configures `pages dev` and nothing else. The same binding has to exist on the Pages project itself, for preview and production both.
 - **Do not add `pages_build_output_dir` to `wrangler.toml`.** Its absence is what keeps the file local-development-only. Adding it makes wrangler.toml the source of truth for production builds and overrides the dashboard settings the real build uses.
-- `functions/api/picks/[week].ts` reads `picks/<week>.xlsx` from the binding. Locally the bucket is simulated and empty, so `/api/picks/:week` returns 404 until seeded: `wrangler r2 object put rak-sadness/picks/1.xlsx --file <path> --local`.
+- `functions/api/picks/[week].ts` reads `picks/<week>.xlsx` from the binding. Locally the bucket is simulated and empty, so `/api/picks/:week` returns 404 until seeded: `wrangler r2 object put rak-madness-calculator/picks/1.xlsx --file <path> --local`.
 - The client checks the response's content type before parsing it, because `make run` has no Function behind it and answers `/api/picks/:week` with the app's own HTML at 200. So the API path works for real under `pages:dev` with a seeded bucket, and falls back to manual upload under `make run`.
 - `wrangler *` and `npx wrangler *` sit in `ask`, because seeding a bucket or reading account state is not an agent action to take unattended.
 

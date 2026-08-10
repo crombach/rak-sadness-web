@@ -29,10 +29,10 @@ make format  # eslint --fix, then prettier
 
 `make help` lists every target.
 
-`npm run pages:dev` builds first, then serves `./build` through wrangler on port 3000. Use it to exercise the Cloudflare side; use `make run` for hot reload. The `/api/picks/:week` route is a Pages Function reading `picks/<week>.xlsx` from the `RAK_SADNESS_BUCKET` binding declared in `wrangler.toml`. Locally that bucket is simulated and starts empty, so the route returns 404 and the app falls back to manual spreadsheet upload. Seed it with:
+`npm run pages:dev` builds first, then serves `./build` through wrangler on port 3000. Use it to exercise the Cloudflare side; use `make run` for hot reload. The `/api/picks/:week` route is a Pages Function reading `picks/<week>.xlsx` from the `RAK_MADNESS_BUCKET` binding declared in `wrangler.toml`. Locally that bucket is simulated and starts empty, so the route returns 404 and the app falls back to manual spreadsheet upload. Seed it with:
 
 ```
-npx wrangler r2 object put rak-sadness/picks/1.xlsx --file <path> --local
+npx wrangler r2 object put rak-madness-calculator/picks/1.xlsx --file <path> --local
 ```
 
 ## Deploying
