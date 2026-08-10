@@ -1,3 +1,5 @@
+@use "../../styles/breakpoints" as *;
+
 .table {
   margin: auto;
 
@@ -106,7 +108,7 @@
   }
 }
 
-@media (max-width: 400px) {
+@include narrow-screen {
   .table {
     font-size: 0.8rem;
   }

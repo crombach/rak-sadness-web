@@ -8,10 +8,6 @@
 }
 
 .home__scores-header-button {
-  @media (max-width: 400px) {
-    padding-inline: 12px !important;
-  }
-
   &.--active {
     background-color: var(--rak-primary-600);
   }

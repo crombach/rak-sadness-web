@@ -1,0 +1,12 @@
+// Sass rather than a custom property, because custom properties do not work
+// inside a media query. Variables and mixins only, so this emits no CSS of its
+// own however many files pull it in.
+
+$breakpoint-narrow: 400px;
+
+/** Phone-width screens, where the tables and navbar tighten up. */
+@mixin narrow-screen {
+  @media (max-width: $breakpoint-narrow) {
+    @content;
+  }
+}
