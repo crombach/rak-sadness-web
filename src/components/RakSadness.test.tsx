@@ -8,11 +8,13 @@ import RakSadness from "./RakSadness";
 import Toaster from "./toaster/Toaster";
 
 vi.mock("../utils/getLeagueInfo");
-vi.mock("../utils/getPlayerScores");
+vi.mock("../utils/readFileToBuffer");
+vi.mock("../utils/scoring/getPlayerScores");
 vi.mock("../utils/buildSpreadsheetBuffer");
 
 import getLeagueInfo from "../utils/getLeagueInfo";
-import { getPlayerScores, readFileToBuffer } from "../utils/getPlayerScores";
+import { readFileToBuffer } from "../utils/readFileToBuffer";
+import { getPlayerScores } from "../utils/scoring/getPlayerScores";
 import buildSpreadsheetBuffer from "../utils/buildSpreadsheetBuffer";
 
 const getLeagueInfoMock = getLeagueInfo as MockedFunction<typeof getLeagueInfo>;

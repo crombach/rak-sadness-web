@@ -1,11 +1,11 @@
 import * as XLSX from "xlsx-js-style";
-import { League, WeekInfo } from "../types/League";
-import { LeagueResult } from "../types/LeagueResult";
-import { getLeagueResults } from "./getLeagueResults";
+import { League, WeekInfo } from "../../types/League";
+import { LeagueResult } from "../../types/LeagueResult";
+import { getLeagueResults } from "../getLeagueResults";
 import { getPlayerScores } from "./getPlayerScores";
-import { finalGame, upcomingGame } from "./leagueResultFixtures";
+import { finalGame, upcomingGame } from "../leagueResultFixtures";
 
-vi.mock("./getLeagueResults");
+vi.mock("../getLeagueResults");
 
 const mockGetLeagueResults = vi.mocked(getLeagueResults);
 

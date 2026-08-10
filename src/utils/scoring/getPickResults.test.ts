@@ -1,7 +1,7 @@
-import { GameStatus, HomeAway } from "../types/ESPN";
-import { LeagueResult } from "../types/LeagueResult";
-import { finalGame } from "./leagueResultFixtures";
-import { getPickResults } from "./getPlayerScores";
+import { GameStatus, HomeAway } from "../../types/ESPN";
+import { LeagueResult } from "../../types/LeagueResult";
+import { finalGame } from "../leagueResultFixtures";
+import { getPickResults } from "./getPickResults";
 
 // BUF beat KC by 10.
 const bufBeatKcBy10 = finalGame({
