@@ -43,10 +43,32 @@ function getStatus(score: GameScore): Status {
   return "no";
 }
 
+/**
+ * Indexes both sides of every game by team abbreviation. First result wins, so a
+ * team appearing twice resolves to its earliest game, the way a linear scan did.
+ */
+function indexResultsByTeam(
+  leagueResults: Array<LeagueResult>,
+): Map<string, LeagueResult> {
+  const byTeam = new Map<string, LeagueResult>();
+  leagueResults.forEach((result) => {
+    [result.home.team.abbreviation, result.away.team.abbreviation].forEach(
+      (abbreviation) => {
+        if (!byTeam.has(abbreviation)) {
+          byTeam.set(abbreviation, result);
+        }
+      },
+    );
+  });
+  return byTeam;
+}
+
 export function getPickResults(
   picks: Array<string>,
   leagueResults: Array<LeagueResult>,
 ): Array<GameScore> {
+  const resultsByTeam = indexResultsByTeam(leagueResults);
+
   return picks.map((pick: string) => {
     console.debug("==========");
 
@@ -57,12 +79,8 @@ export function getPickResults(
     const hasSpread = spread !== 0;
 
     // Find the game result matching the selected team.
-    const gameResult = leagueResults.find((result) => {
-      return (
-        result.home.team.abbreviation === selectedTeam ||
-        result.away.team.abbreviation === selectedTeam
-      );
-    });
+    const gameResult =
+      selectedTeam != null ? resultsByTeam.get(selectedTeam) : undefined;
     if (!gameResult) {
       if (selectedTeam) {
         console.warn(
