@@ -59,9 +59,11 @@ Tests print a lot of `console.debug` from the scoring path. Expected, not a fail
 
 ## Cloudflare Pages, not wrapped in make
 
-- `npm run pages:dev` works on wrangler 4: wrangler proxies on 3000, Vite runs on 3001 (`PORT=3001` in the script). Verified serving `/` 200 and executing the Pages Function. No make target wraps it because wrangler still warns the `-- <command>` form is deprecated, so this script is on borrowed time.
+- `npm run pages:dev` builds, then runs `wrangler pages dev ./build --port 3000`. Verified on wrangler 4: `/` serves 200, the Pages Function executes, assets serve. This is the supported form; the older `pages dev -- <command>` proxy form is deprecated and gone from this repo.
+- `pages:dev` serves a build, so there is no hot reload. Two workflows, on purpose: `make run` for iterating on the UI, `pages:dev` for anything touching the Function or the binding. Rerun it to pick up a code change.
+- No make target wraps `pages:dev` because it needs Cloudflare context that `make` targets deliberately stay out of.
 - `wrangler.toml` holds `name = "rak-sadness"` (the real Pages project), `compatibility_date`, and the `RAK_SADNESS_BUCKET` R2 binding pointing at the `rak-sadness` bucket.
-- **Do not add `pages_build_output_dir` to `wrangler.toml`.** It makes `pages:dev` fail with `Specify either a directory OR a proxy command, not both`, because that script uses proxy mode to keep hot reload. Its absence is deliberate.
+- **Do not add `pages_build_output_dir` to `wrangler.toml`.** Its absence is what keeps the file local-development-only. Adding it makes wrangler.toml the source of truth for production builds and overrides the dashboard's own build settings, which is where this project's real config lives.
 - `functions/api/picks/[week].ts` reads `picks/<week>.xlsx` from the binding. Locally the bucket is simulated and empty, so `/api/picks/:week` returns 404 until seeded: `wrangler r2 object put rak-sadness/picks/1.xlsx --file <path> --local`.
 - The Cloudflare Pages build passed on the branch that added this `wrangler.toml`. `npm run pages:deploy` from a laptop has still never run against it.
 - Not a blocker for local work: `src/components/RakSadness.tsx` deliberately skips that fetch on localhost and falls back to manual spreadsheet upload.

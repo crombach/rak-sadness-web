@@ -15,7 +15,7 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p functions/tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "pages:dev": "PORT=3001 wrangler pages dev --port 3000 -- npm start",
+    "pages:dev": "npm run build && wrangler pages dev ./build --port 3000",
     "pages:deploy": "npm run build && wrangler pages deploy ./build",
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix",

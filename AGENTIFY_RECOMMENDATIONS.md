@@ -14,26 +14,15 @@ The `Cloudflare Pages` check also passed on the PR that added the file.
 What is still untested is `npm run pages:deploy` from a laptop. It is auth-gated
 and production-affecting, and `wrangler *` sits in `ask`, so it was not run.
 
-The file omits `pages_build_output_dir` on purpose: that key makes `pages:dev`
-fail with `Specify either a directory OR a proxy command, not both`, and hot
-reload is worth more.
+The file omits `pages_build_output_dir` on purpose. Without it, wrangler treats the
+file as local-development-only; with it, the file becomes the source of truth for
+production builds and overrides the dashboard settings this project actually uses.
 
-**Suggested action:** if a Cloudflare build ever does ask for that key, add
-`pages_build_output_dir = "build"` and change `pages:dev` to
-`npm run build && wrangler pages dev --port 3000`, giving up hot reload.
+**Suggested action:** only add that key as part of deliberately moving build
+config out of the dashboard and into the repo.
 
 To make `/api/picks/:week` return a real spreadsheet locally:
 `wrangler r2 object put rak-sadness/picks/1.xlsx --file <path> --local`.
-
-### `pages:dev` still uses a deprecated wrangler form
-
-Verified working on wrangler 4.120, but it warns that `pages dev -- <command>` is
-deprecated and will be removed.
-
-**Suggested action:** when it does break, either move to
-`wrangler pages dev ./build` against a built directory (losing hot reload) or
-migrate the project from Pages to Workers static assets, where the Vite plugin
-gives you bindings in the dev server directly.
 
 ### Nothing gates the tests on a PR
 
