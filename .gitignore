@@ -24,3 +24,9 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Personal Claude Code settings (never checked in)
+**/.claude/settings.local.json
+
+# Python bytecode caches, the checked-in Claude Code hooks' included
+__pycache__/
