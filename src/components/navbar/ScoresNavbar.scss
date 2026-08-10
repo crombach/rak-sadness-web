@@ -46,6 +46,7 @@
 .home__scores-header-divider {
   width: 2px;
   height: 1.5rem;
-  margin: 0 6px;
+  // No margin, so the navbar's own gap is the only spacing on the right side and
+  // every item there is evenly spaced.
   background-color: white;
 }
