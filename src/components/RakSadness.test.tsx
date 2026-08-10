@@ -14,6 +14,7 @@ vi.mock("../utils/buildSpreadsheetBuffer");
 
 import getLeagueInfo from "../utils/getLeagueInfo";
 import { readFileToBuffer } from "../utils/readFileToBuffer";
+import { XLSX_CONTENT_TYPE } from "../utils/buildSpreadsheetBuffer";
 import { getPlayerScores } from "../utils/scoring/getPlayerScores";
 import buildSpreadsheetBuffer from "../utils/buildSpreadsheetBuffer";
 
@@ -119,6 +120,26 @@ function scoresHeaderButtons(): Array<HTMLElement> {
   );
 }
 
+let fetchMock: MockedFunction<typeof fetch>;
+
+function notFoundResponse(): Response {
+  return new Response(null, { status: 404 });
+}
+
+function htmlResponse(): Response {
+  return new Response("<!doctype html><title>Rak Madness Scoreboard</title>", {
+    status: 200,
+    headers: { "content-type": "text/html" },
+  });
+}
+
+function spreadsheetResponse(): Response {
+  return new Response(new ArrayBuffer(8), {
+    status: 200,
+    headers: { "content-type": XLSX_CONTENT_TYPE },
+  });
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   // An upload caches its workbook, and jsdom keeps localStorage between cases,
@@ -128,7 +149,8 @@ beforeEach(() => {
   getPlayerScoresMock.mockResolvedValue(scores);
   readFileToBufferMock.mockResolvedValue(new ArrayBuffer(8));
   buildSpreadsheetBufferMock.mockResolvedValue(new ArrayBuffer(8));
-  global.fetch = vi.fn();
+  fetchMock = vi.fn().mockResolvedValue(notFoundResponse());
+  global.fetch = fetchMock;
   window.URL.createObjectURL = vi.fn(() => "blob:fake");
   vi.spyOn(console, "warn").mockImplementation(() => undefined);
   vi.spyOn(console, "error").mockImplementation(() => undefined);
@@ -179,17 +201,43 @@ describe("RakSadness, first load", () => {
 });
 
 describe("RakSadness, automatic picks fetch", () => {
-  it("skips the API on localhost and invites a local spreadsheet", async () => {
+  it("asks the API for the selected week's picks", async () => {
+    await mountLoadedApp();
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(`/api/picks/${CURRENT_WEEK}`);
+    });
+  });
+
+  it("invites a local spreadsheet when the API has no picks", async () => {
+    fetchMock.mockResolvedValue(notFoundResponse());
     await mountLoadedApp();
     await waitFor(() => {
       expect(screen.getByText("Missing Picks")).toBeInTheDocument();
     });
-    expect(global.fetch).not.toHaveBeenCalled();
     expect(
       screen.getByText(
         `The picks spreadsheet for week ${CURRENT_WEEK} is not yet in the database, but you can use a local spreadsheet if you have one.`,
       ),
     ).toBeInTheDocument();
+  });
+
+  it("ignores a response that is not a spreadsheet", async () => {
+    // A bare dev server answers this path with the app's own HTML at 200.
+    fetchMock.mockResolvedValue(htmlResponse());
+    await mountLoadedApp();
+    await waitFor(() => {
+      expect(screen.getByText("Missing Picks")).toBeInTheDocument();
+    });
+    expect(getPlayerScoresMock).not.toHaveBeenCalled();
+  });
+
+  it("scores the picks the API returns", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountLoadedApp();
+    await waitFor(() => {
+      expect(getPlayerScoresMock).toHaveBeenCalledTimes(1);
+    });
+    expect(screen.getByText("View Results")).toBeEnabled();
   });
 
   it("does not score anything when no picks were fetched", async () => {

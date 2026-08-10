@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Toast, useToastActions } from "../context/ToastContext";
 import { WeekInfo } from "../types/League";
 import { RakMadnessScores } from "../types/RakMadnessScores";
+import { XLSX_CONTENT_TYPE } from "../utils/buildSpreadsheetBuffer";
 import { readCachedPicks, writeCachedPicks } from "../utils/picksCache";
 import { readFileToBuffer } from "../utils/readFileToBuffer";
 import { getPlayerScores } from "../utils/scoring/getPlayerScores";
@@ -91,13 +92,17 @@ export default function usePlayerScores(selectedWeek?: WeekInfo) {
   // for a week that was only ever uploaded locally would find nothing.
   const loadStoredPicks = useCallback(async (week: WeekInfo) => {
     try {
-      // Hack to disable this feature on localhost.
-      if (window.location.host.includes("localhost")) {
-        throw new Error("Can't fetch picks in development environment");
-      }
       const response = await fetch(`/api/picks/${week.value}`);
       if (response.status === 404) {
         throw new Error("Picks spreadsheet is missing from database");
+      }
+      // `make run` is a bare dev server with no Pages Function behind it, so it
+      // answers this path with the app's own HTML at 200. Checking the type
+      // keeps that page out of the workbook parser, and lets the real fetch work
+      // against `npm run pages:dev`.
+      const contentType = response.headers.get("content-type") ?? "";
+      if (!contentType.startsWith(XLSX_CONTENT_TYPE)) {
+        throw new Error(`Picks response was ${contentType}, not a spreadsheet`);
       }
       const arrayBuffer = await response.arrayBuffer();
       if (!arrayBuffer?.byteLength) {
