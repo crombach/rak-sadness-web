@@ -51,6 +51,11 @@ const ToastContext = createContext<ToastContextData>({
 function useToastContextData(): ToastContextData {
   const [toasts, setToasts] = useState<Array<Toast>>([]);
 
+  // Declared before showToast, which schedules it.
+  const removeToast = useCallback((toast: Toast) => {
+    setToasts((oldToasts) => oldToasts.filter((it) => it.id !== toast.id));
+  }, []);
+
   const showToast = useCallback(
     (toast: Toast) => {
       // Limit to 3 toasts.
@@ -63,14 +68,7 @@ function useToastContextData(): ToastContextData {
         removeToast(toast);
       }, 5000);
     },
-    [toasts],
-  );
-
-  const removeToast = useCallback(
-    (toast: Toast) => {
-      setToasts((oldToasts) => oldToasts.filter((it) => it.id !== toast.id));
-    },
-    [toasts],
+    [removeToast],
   );
 
   const clearToasts = useCallback(() => {
@@ -84,7 +82,7 @@ function useToastContextData(): ToastContextData {
       removeToast,
       clearToasts,
     }),
-    [toasts],
+    [toasts, showToast, removeToast, clearToasts],
   );
 
   return contextData;

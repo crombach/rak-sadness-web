@@ -121,12 +121,12 @@ export async function getLeagueResults(
 
       // If the event isn't in the matchups for the week, skip it.
       const isInMatchups = matchups.some((teams) => {
-        if (teams.size == 2) {
+        if (teams.size === 2) {
           return (
             teams.has(home.team.abbreviation) &&
             teams.has(away.team.abbreviation)
           );
-        } else if (teams.size == 1) {
+        } else if (teams.size === 1) {
           return (
             teams.has(home.team.abbreviation) ||
             teams.has(away.team.abbreviation)

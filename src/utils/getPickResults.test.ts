@@ -1,0 +1,197 @@
+import { GameStatus, HomeAway } from "../types/ESPN";
+import { LeagueResult } from "../types/LeagueResult";
+import { getPickResults } from "./getPlayerScores";
+
+const NO_POSSESSION = {};
+
+/**
+ * A completed game. `by` is the winner's margin, which is what the spread is
+ * compared against, so it is stated explicitly rather than derived from scores.
+ */
+function finalGame({
+  home,
+  away,
+  homeScore,
+  awayScore,
+}: {
+  home: string;
+  away: string;
+  homeScore: number;
+  awayScore: number;
+}): LeagueResult {
+  const homeTeam = { name: home, abbreviation: home };
+  const awayTeam = { name: away, abbreviation: away };
+  const isTie = homeScore === awayScore;
+  const homeWon = homeScore > awayScore;
+  return {
+    name: `${away} at ${home}`,
+    shortName: `${away} @ ${home}`,
+    date: new Date("2024-10-06T17:00:00Z"),
+    status: GameStatus.FINAL,
+    detailMessage: "Final",
+    home: { team: homeTeam, score: homeScore },
+    away: { team: awayTeam, score: awayScore },
+    possession: NO_POSSESSION,
+    winner: {
+      team: isTie ? null : homeWon ? homeTeam : awayTeam,
+      homeAway: isTie ? null : homeWon ? HomeAway.HOME : HomeAway.AWAY,
+      by: Math.abs(homeScore - awayScore),
+    },
+    loser: {
+      team: isTie ? null : homeWon ? awayTeam : homeTeam,
+      homeAway: isTie ? null : homeWon ? HomeAway.AWAY : HomeAway.HOME,
+      by: Math.abs(homeScore - awayScore),
+    },
+    totalScore: homeScore + awayScore,
+  };
+}
+
+// BUF beat KC by 10.
+const bufBeatKcBy10 = finalGame({
+  home: "BUF",
+  away: "KC",
+  homeScore: 30,
+  awayScore: 20,
+});
+
+function scoreOf(pick: string, results = [bufBeatKcBy10]): number {
+  return getPickResults([pick], results)[0].pointValue;
+}
+
+describe("getPickResults, no spread", () => {
+  it("awards a point for picking the winner", () => {
+    expect(scoreOf("BUF")).toBe(1);
+  });
+
+  it("awards nothing for picking the loser", () => {
+    expect(scoreOf("KC")).toBe(0);
+  });
+
+  it("is case-insensitive", () => {
+    expect(scoreOf("buf")).toBe(1);
+  });
+
+  it("awards a point to both sides of a tie", () => {
+    const tie = finalGame({
+      home: "BUF",
+      away: "KC",
+      homeScore: 20,
+      awayScore: 20,
+    });
+    expect(scoreOf("BUF", [tie])).toBe(1);
+    expect(scoreOf("KC", [tie])).toBe(1);
+  });
+});
+
+describe("getPickResults, favored pick (negative spread)", () => {
+  it("awards a point when the favorite covers", () => {
+    expect(scoreOf("BUF -7")).toBe(1);
+  });
+
+  it("awards nothing when the favorite wins but fails to cover", () => {
+    expect(scoreOf("BUF -14")).toBe(0);
+  });
+
+  it("treats an exact-margin spread as a push and awards a point", () => {
+    expect(scoreOf("BUF -10")).toBe(1);
+  });
+
+  it("awards nothing when the favorite loses outright", () => {
+    expect(scoreOf("KC -7")).toBe(0);
+  });
+});
+
+describe("getPickResults, underdog pick (positive spread)", () => {
+  it("awards a point when the underdog wins outright", () => {
+    expect(
+      scoreOf("KC +7", [
+        finalGame({ home: "BUF", away: "KC", homeScore: 20, awayScore: 30 }),
+      ]),
+    ).toBe(1);
+  });
+
+  it("awards a point when the underdog loses by less than the spread", () => {
+    expect(scoreOf("KC +14")).toBe(1);
+  });
+
+  it("awards nothing when the underdog loses by more than the spread", () => {
+    expect(scoreOf("KC +7")).toBe(0);
+  });
+
+  it("treats an exact-margin spread as a push and awards a point", () => {
+    expect(scoreOf("KC +10")).toBe(1);
+  });
+});
+
+describe("getPickResults, spread parsing", () => {
+  it("accepts a half-point spread", () => {
+    expect(scoreOf("BUF -9.5")).toBe(1);
+    expect(scoreOf("BUF -10.5")).toBe(0);
+  });
+
+  it("accepts a spread with no space before the sign", () => {
+    expect(scoreOf("BUF-7")).toBe(1);
+  });
+
+  it("reports hasSpread only when a spread was given", () => {
+    expect(getPickResults(["BUF"], [bufBeatKcBy10])[0].hasSpread).toBe(false);
+    expect(getPickResults(["BUF -7"], [bufBeatKcBy10])[0].hasSpread).toBe(true);
+  });
+});
+
+describe("getPickResults, missing data", () => {
+  it("flags a pick whose game is absent", () => {
+    const result = getPickResults(["MIA"], [bufBeatKcBy10])[0];
+    expect(result.pointValue).toBe(0);
+    expect(result.wasNotFound).toBe(true);
+    expect(result.explanation.header).toBe("Missing Game");
+  });
+
+  it("flags an empty pick as a missing pick, not a missing game", () => {
+    const result = getPickResults(["undefined"], [bufBeatKcBy10])[0];
+    expect(result.pointValue).toBe(0);
+    expect(result.wasNotFound).toBe(true);
+    expect(result.explanation.header).toBe("Missing Pick");
+  });
+});
+
+describe("getPickResults, game state", () => {
+  it("marks a final game completed", () => {
+    const result = getPickResults(["BUF"], [bufBeatKcBy10])[0];
+    expect(result.isCompleted).toBe(true);
+    expect(result.explanation.header).toBe("Final Score");
+    expect(result.explanation.message).toBe("KC 20 - 30 BUF");
+  });
+
+  it("marks a live game incomplete and shows the possession arrow", () => {
+    const live: LeagueResult = {
+      ...bufBeatKcBy10,
+      status: GameStatus.LIVE,
+      detailMessage: "3rd Quarter",
+      possession: { homeAway: HomeAway.AWAY, downDistanceText: "2nd & 7" },
+    };
+    const result = getPickResults(["BUF"], [live])[0];
+    expect(result.isCompleted).toBe(false);
+    expect(result.explanation.header).toBe("Live Score | 3rd Quarter");
+    expect(result.explanation.message).toBe("▸ KC 20 - 30 BUF");
+    expect(result.explanation.downDistanceText).toBe("2nd & 7");
+  });
+
+  it("marks an upcoming game incomplete", () => {
+    const upcoming: LeagueResult = {
+      ...bufBeatKcBy10,
+      status: GameStatus.UPCOMING,
+    };
+    const result = getPickResults(["BUF"], [upcoming])[0];
+    expect(result.isCompleted).toBe(false);
+    expect(result.explanation.header).toBe("Upcoming");
+    expect(result.explanation.message).toContain("KC @ BUF begins at");
+  });
+});
+
+describe("getPickResults, ordering", () => {
+  it("returns one result per pick, in order", () => {
+    const results = getPickResults(["KC", "BUF"], [bufBeatKcBy10]);
+    expect(results.map((result) => result.pointValue)).toEqual([0, 1]);
+  });
+});

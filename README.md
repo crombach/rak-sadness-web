@@ -1,6 +1,6 @@
 # Rak Sadness
 
-Simple auto-scoring web application for [Rak Madness](https://rakmadness.net/). The [public site](https://rak.cullenrombach.com/) is hosted on CloudFlare Pages.
+Simple auto-scoring web application for [Rak Madness](https://rakmadness.net/). The [public site](https://rak.cullenrombach.com/) is hosted on [CloudFlare Pages](https://developers.cloudflare.com/pages/).
 
 Results are viewable on the web and can be exported to an XLSX spreadsheet.
 
@@ -11,3 +11,24 @@ Here is a [spreadsheet for team abbreviations](https://docs.google.com/spreadshe
 Here is a link to [the Google Drive folder containing historical picks and scores spreadsheets](https://drive.google.com/drive/folders/1oHVWKoAbDtT2vJLU3yBP9ofEOPEzNrqi?usp=sharing).
 
 This was thrown together using KISS principles for a small, family-and-friends football pool. It is not intended for public (or at-scale) use and, as such, should not be judged too harshly.
+
+## Development
+
+Requires Node `v20.8` (`.nvmrc`). Run `nvm use` first.
+
+```
+make setup   # install dependencies from the lockfile
+make run     # dev server on http://localhost:3000 (make run PORT=3001 to move it)
+make build   # production build into ./build
+make test    # Jest, once, no watch mode
+make check   # lint, typecheck, test, prettier
+make format  # eslint --fix, then prettier
+```
+
+`make help` lists every target.
+
+`npm run pages:dev` runs the full Pages stack instead: wrangler proxies on port 3000 with the dev server behind it on 3001. The `/api/picks/:week` route is a Cloudflare Pages Function reading `picks/<week>.xlsx` from the `RAK_SADNESS_BUCKET` binding declared in `wrangler.toml`. Locally that bucket is simulated and starts empty, so the route returns 404 and the app falls back to manual spreadsheet upload. Seed it with:
+
+```
+npx wrangler r2 object put rak-sadness/picks/1.xlsx --file <path> --local
+```

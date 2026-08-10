@@ -10,6 +10,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   console.log(`Fetching picks for week ${week} from ${filePath}`);
   try {
     const spreadsheet = await context.env.RAK_SADNESS_BUCKET.get(filePath);
+    if (!spreadsheet) {
+      return new Response("Not Found", { status: 404 });
+    }
 
     // Create an identity TransformStream (a.k.a. a pipe).
     // The readable side will become our new response body.

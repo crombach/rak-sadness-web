@@ -1,0 +1,9 @@
+name = "rak-sadness"
+compatibility_date = "2023-10-30"
+
+# Serves picks/<week>.xlsx to functions/api/picks/[week].ts.
+# Simulated locally by `wrangler pages dev`; seed it with
+# `wrangler r2 object put rak-sadness/picks/1.xlsx --file <path> --local`.
+[[r2_buckets]]
+binding = "RAK_SADNESS_BUCKET"
+bucket_name = "rak-sadness"

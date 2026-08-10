@@ -42,7 +42,7 @@ function getStatus(score: GameScore): Status {
   return "no";
 }
 
-function getPickResults(
+export function getPickResults(
   picks: Array<string>,
   leagueResults: Array<LeagueResult>,
 ): Array<GameScore> {
@@ -445,7 +445,11 @@ export async function getPlayerScores(
               (sum, gameIndex) => {
                 const oppPick = oppScore.college[gameIndex].pick;
                 const activePick = activeScore.college[gameIndex].pick;
-                return oppPick != null && activePick!= null && oppPick !== activePick ? sum + 1 : sum;
+                return oppPick != null &&
+                  activePick != null &&
+                  oppPick !== activePick
+                  ? sum + 1
+                  : sum;
               },
               0,
             );
@@ -454,7 +458,11 @@ export async function getPlayerScores(
             remainingProIndices.forEach((gameIndex) => {
               const oppPick = oppScore.pro[gameIndex].pick;
               const activePick = activeScore.pro[gameIndex].pick;
-              if (oppPick != null && activePick != null && oppPick !== activePick) {
+              if (
+                oppPick != null &&
+                activePick != null &&
+                oppPick !== activePick
+              ) {
                 differentProPicks += 1;
                 if (parsePick(oppPick).spread !== 0) {
                   differentProPicksWithSpreads += 1;
@@ -514,7 +522,7 @@ export async function getPlayerScores(
               // If college games are done and players are tied, check pro against the spread tiebreaker.
               if (
                 collegeScoreDiff === 0 &&
-                remainingCollegeIndices.length == 0
+                remainingCollegeIndices.length === 0
               ) {
                 const proAgainstTheSpreadScoreDiff =
                   oppScore.score.proAgainstTheSpread -

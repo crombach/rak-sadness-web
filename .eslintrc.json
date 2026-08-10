@@ -11,10 +11,20 @@
     "plugin:import/recommended",
     "plugin:import/electron",
     "plugin:import/typescript",
+    "react-app",
+    "react-app/jest",
     "prettier"
   ],
   "parser": "@typescript-eslint/parser",
   "rules": {
     "@typescript-eslint/no-explicit-any": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx"],
+      "rules": {
+        "testing-library/no-node-access": "off"
+      }
+    }
+  ]
 }

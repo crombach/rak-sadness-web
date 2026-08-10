@@ -19,32 +19,35 @@ function leagueHeaders(count: number, prefix: string) {
 }
 
 function ExplanationTable({ scores }: { scores?: RakMadnessScores }) {
+  const { showToast, clearToasts } = useToastContext();
+
+  const handlePickResultClick = useCallback(
+    (result: PickResult) => {
+      clearToasts();
+      showToast(
+        new Toast(
+          "neutral",
+          result.explanation.header,
+          (
+            <>
+              {result.explanation.message}
+              {result.explanation.downDistanceText && <br />}
+              {result.explanation.downDistanceText}
+            </>
+          ),
+        ),
+      );
+    },
+    [clearToasts, showToast],
+  );
+
   if (scores == null) {
     return null;
   }
 
-  const { showToast, clearToasts } = useToastContext();
-
   const firstPlayer = scores.scores[0];
   const collegeHeaders = leagueHeaders(firstPlayer.college.length, "C");
   const proHeaders = leagueHeaders(firstPlayer.pro.length, "P");
-
-  const handlePickResultClick = useCallback((result: PickResult) => {
-    clearToasts();
-    showToast(
-      new Toast(
-        "neutral",
-        result.explanation.header,
-        (
-          <>
-            {result.explanation.message}
-            {result.explanation.downDistanceText && <br />}
-            {result.explanation.downDistanceText}
-          </>
-        ),
-      ),
-    );
-  }, []);
 
   return (
     <table className="table" cellSpacing="0">

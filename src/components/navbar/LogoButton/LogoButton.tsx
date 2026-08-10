@@ -9,7 +9,7 @@ export default function LogoButton({ onClick }: { onClick: () => void }) {
       onClick={onClick}
       className="logo-button"
     >
-      <img className="logo-button__logo" src="/logo192.png" />
+      <img className="logo-button__logo" src="/logo192.png" alt="" />
     </Button>
   );
 }
