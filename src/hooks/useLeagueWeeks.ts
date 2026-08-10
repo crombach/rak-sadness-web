@@ -9,14 +9,18 @@ import getLeagueInfo from "../utils/getLeagueInfo";
  * `selectableWeeks` holds the very objects the calendar returned. The week picker
  * compares its options by reference, so copying or rebuilding a `WeekInfo`
  * anywhere downstream leaves the picker unable to show a selection.
+ *
+ * `initialWeek` wins over the season's active week when the season has such a
+ * week. A results URL names the week it wants, and without this the current week
+ * would be selected and scored first, only to be replaced.
  */
-export default function useLeagueWeeks() {
+export default function useLeagueWeeks(initialWeek?: number) {
   const { showToast } = useToastActions();
 
   const [weeks, setWeeks] = useState<Array<WeekInfo>>();
   const [currentWeek, setCurrentWeek] = useState<number>();
   const [selectedWeek, setSelectedWeek] = useState<WeekInfo>();
-  const [isLoading, setLoading] = useState(true);
+  const [isWeekInfoLoading, setLoading] = useState(true);
 
   useEffect(() => {
     const getLeagueInfoAsync = async () => {
@@ -29,13 +33,17 @@ export default function useLeagueWeeks() {
         return;
       }
       // Set to the current regular season week, or the max if it's the post- or off-season.
-      setWeeks(proLeagueInfo.activeCalendar.weeks);
+      const calendarWeeks = proLeagueInfo.activeCalendar.weeks;
+      setWeeks(calendarWeeks);
       setCurrentWeek(proLeagueInfo.activeWeek.value);
-      setSelectedWeek(proLeagueInfo.activeWeek);
+      setSelectedWeek(
+        calendarWeeks.find((week) => week.value === initialWeek) ??
+          proLeagueInfo.activeWeek,
+      );
       setLoading(false);
     };
     getLeagueInfoAsync();
-  }, [showToast]);
+  }, [showToast, initialWeek]);
 
   // Newest first, and never a week the season has not reached.
   const selectableWeeks = useMemo(
@@ -49,6 +57,6 @@ export default function useLeagueWeeks() {
     currentWeek,
     selectedWeek,
     setSelectedWeek,
-    isLoading,
+    isWeekInfoLoading,
   };
 }

@@ -1,23 +1,25 @@
 import { MockedFunction } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { ToastContextProvider } from "../context/ToastContext";
-import { League, LeagueInfo, SeasonType, WeekInfo } from "../types/League";
-import { RakMadnessScores } from "../types/RakMadnessScores";
-import RakSadness from "./RakSadness";
-import Toaster from "./toaster/Toaster";
+import { MemoryRouter } from "react-router";
+import { AppDataContextProvider } from "./context/AppDataContext";
+import { ToastContextProvider } from "./context/ToastContext";
+import { League, LeagueInfo, SeasonType, WeekInfo } from "./types/League";
+import { RakMadnessScores } from "./types/RakMadnessScores";
+import App from "./App";
+import Toaster from "./components/toaster/Toaster";
 
-vi.mock("../utils/getLeagueInfo");
-vi.mock("../utils/readFileToBuffer");
-vi.mock("../utils/scoring/getPlayerScores");
-vi.mock("../utils/buildSpreadsheetBuffer");
+vi.mock("./utils/getLeagueInfo");
+vi.mock("./utils/readFileToBuffer");
+vi.mock("./utils/scoring/getPlayerScores");
+vi.mock("./utils/buildSpreadsheetBuffer");
 
-import getLeagueInfo from "../utils/getLeagueInfo";
-import { readFileToBuffer } from "../utils/readFileToBuffer";
+import getLeagueInfo from "./utils/getLeagueInfo";
+import { readFileToBuffer } from "./utils/readFileToBuffer";
 import buildSpreadsheetBuffer, {
   XLSX_CONTENT_TYPE,
-} from "../utils/buildSpreadsheetBuffer";
-import { getPlayerScores } from "../utils/scoring/getPlayerScores";
+} from "./utils/buildSpreadsheetBuffer";
+import { getPlayerScores } from "./utils/scoring/getPlayerScores";
 
 const getLeagueInfoMock = getLeagueInfo as MockedFunction<typeof getLeagueInfo>;
 const getPlayerScoresMock = getPlayerScores as MockedFunction<
@@ -83,21 +85,25 @@ const scores: RakMadnessScores = {
   ],
 };
 
-/** Mirrors index.tsx: toasts only appear if Toaster is mounted beside the app. */
-function mountApp() {
+/** Mirrors index.tsx, with the entry URL as a parameter. */
+function mountApp(path = "/") {
   const user = userEvent.setup();
   render(
-    <ToastContextProvider>
-      <RakSadness />
-      <Toaster />
-    </ToastContextProvider>,
+    <MemoryRouter initialEntries={[path]}>
+      <ToastContextProvider>
+        <AppDataContextProvider>
+          <App />
+        </AppDataContextProvider>
+        <Toaster />
+      </ToastContextProvider>
+    </MemoryRouter>,
   );
   return user;
 }
 
 /** The app only renders its controls once the ESPN week lookup resolves. */
-async function mountLoadedApp() {
-  const user = mountApp();
+async function mountLoadedApp(path = "/") {
+  const user = mountApp(path);
   await screen.findByText("Use Local Spreadsheet");
   return user;
 }
@@ -161,7 +167,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("RakSadness, first load", () => {
+describe("the app, first load", () => {
   it("asks ESPN for the pro league calendar", async () => {
     await mountLoadedApp();
     expect(getLeagueInfoMock).toHaveBeenCalledWith(League.PRO);
@@ -201,7 +207,7 @@ describe("RakSadness, first load", () => {
   });
 });
 
-describe("RakSadness, automatic picks fetch", () => {
+describe("the app, automatic picks fetch", () => {
   it("asks the API for the selected week's picks", async () => {
     await mountLoadedApp();
     await waitFor(() => {
@@ -278,7 +284,7 @@ describe("RakSadness, automatic picks fetch", () => {
   });
 });
 
-describe("RakSadness, manual spreadsheet upload", () => {
+describe("the app, manual spreadsheet upload", () => {
   it("scores the uploaded file for the selected week", async () => {
     const user = await mountLoadedApp();
     await uploadSpreadsheet(user);
@@ -348,7 +354,7 @@ describe("RakSadness, manual spreadsheet upload", () => {
   });
 });
 
-describe("RakSadness, results views", () => {
+describe("the app, results views", () => {
   async function mountWithScores() {
     const user = await mountLoadedApp();
     await uploadSpreadsheet(user);
@@ -418,7 +424,7 @@ describe("RakSadness, results views", () => {
   });
 });
 
-describe("RakSadness, export", () => {
+describe("the app, export", () => {
   it("builds and downloads a spreadsheet for the selected week", async () => {
     const user = await mountLoadedApp();
     await uploadSpreadsheet(user);
@@ -441,5 +447,88 @@ describe("RakSadness, export", () => {
         screen.getByText("Exported results spreadsheet"),
       ).toBeInTheDocument();
     });
+  });
+});
+
+describe("the app, week routes", () => {
+  it("opens a week's scoreboard from its URL", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    expect(await screen.findByText("MNF Points Pick")).toBeInTheDocument();
+  });
+
+  it("opens a week's explanation from its URL", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountApp(`/week/${CURRENT_WEEK}/explanation`);
+
+    expect(await screen.findByText("College Score")).toBeInTheDocument();
+  });
+
+  it("scores the week named in the URL, not the current one", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountApp("/week/1/scoreboard");
+
+    await waitFor(() => {
+      expect(getPlayerScoresMock).toHaveBeenCalled();
+    });
+    expect(getPlayerScoresMock.mock.calls[0][0]).toEqual(week(1));
+  });
+
+  it("scores the week named in the URL exactly once", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+    await screen.findByText("MNF Points Pick");
+
+    expect(getPlayerScoresMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("sends a week with no picks home, explaining why", async () => {
+    await mountLoadedApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    expect(await screen.findByText("No Results")).toBeInTheDocument();
+    expect(screen.getByText("Use Local Spreadsheet")).toBeInTheDocument();
+  });
+
+  it("does not judge a week before the schedule has loaded", async () => {
+    let resolve: (info: LeagueInfo) => void = () => undefined;
+    getLeagueInfoMock.mockReturnValue(
+      new Promise<LeagueInfo>((r) => {
+        resolve = r;
+      }),
+    );
+    mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    expect(screen.queryByText("No Results")).not.toBeInTheDocument();
+    expect(screen.queryByText("Unknown Week")).not.toBeInTheDocument();
+    resolve(leagueInfo);
+    expect(await screen.findByText("No Results")).toBeInTheDocument();
+  });
+
+  it("sends a week beyond the season home", async () => {
+    await mountLoadedApp("/week/99/scoreboard");
+
+    expect(await screen.findByText("Unknown Week")).toBeInTheDocument();
+    expect(getPlayerScoresMock).not.toHaveBeenCalled();
+  });
+
+  it("sends a week that is not a number home", async () => {
+    await mountLoadedApp("/week/abc/scoreboard");
+
+    expect(await screen.findByText("Unknown Week")).toBeInTheDocument();
+    expect(getPlayerScoresMock).not.toHaveBeenCalled();
+  });
+
+  it("shows the scoreboard for a bare week URL", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountApp(`/week/${CURRENT_WEEK}`);
+
+    expect(await screen.findByText("MNF Points Pick")).toBeInTheDocument();
+  });
+
+  it("sends an unknown path home", async () => {
+    await mountLoadedApp("/nonsense");
+
+    expect(screen.getByText("Use Local Spreadsheet")).toBeInTheDocument();
   });
 });

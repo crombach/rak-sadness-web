@@ -1,7 +1,9 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import RakSadness from "./components/RakSadness";
+import { BrowserRouter } from "react-router";
+import App from "./App";
 import "@fontsource-variable/inter";
+import { AppDataContextProvider } from "./context/AppDataContext";
 import { ToastContextProvider } from "./context/ToastContext";
 import Toaster from "./components/toaster/Toaster";
 import "./index.scss";
@@ -14,9 +16,13 @@ if (!container) {
 const root = createRoot(container);
 root.render(
   <React.StrictMode>
-    <ToastContextProvider>
-      <RakSadness />
-      <Toaster />
-    </ToastContextProvider>
+    <BrowserRouter>
+      <ToastContextProvider>
+        <AppDataContextProvider>
+          <App />
+        </AppDataContextProvider>
+        <Toaster />
+      </ToastContextProvider>
+    </BrowserRouter>
   </React.StrictMode>,
 );

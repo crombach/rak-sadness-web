@@ -24,9 +24,10 @@ type ScoringRequest = {
  * The scores for a week, however the picks arrive: from the API, from this
  * browser's cache of an earlier upload, or from a file the user just chose.
  *
- * `scoresWeek` says which week `scores` describes. Switching weeks leaves the
- * old scores in place for a moment, so anything rendering them needs to know
- * whether they are the week it asked for.
+ * `scoresWeek` says which week `scores` describes, and `settledWeek` says which
+ * week this hook has finished trying. Switching weeks leaves the old values in
+ * place for a moment, so anything reacting to a missing score has to wait for
+ * `settledWeek` to catch up or it will act on the previous week's outcome.
  */
 export default function usePlayerScores(selectedWeek?: WeekInfo) {
   const { showToast, clearToasts } = useToastActions();
@@ -37,6 +38,7 @@ export default function usePlayerScores(selectedWeek?: WeekInfo) {
   const [isPicksLoading, setPicksLoading] = useState(true);
   const [isScoresLoading, setScoresLoading] = useState(true);
   const [isRefreshing, setRefreshing] = useState(false);
+  const [settledWeek, setSettledWeek] = useState<number>();
 
   // Every path into the scores runs through here, so the loading flags and the
   // failure toasts cannot drift between them.
@@ -56,6 +58,7 @@ export default function usePlayerScores(selectedWeek?: WeekInfo) {
         buffer = await loadPicks();
         setPicksBuffer(buffer);
       } catch (error) {
+        setSettledWeek(selectedWeek.value);
         console.warn(
           `Failed to load week ${selectedWeek.value} picks spreadsheet. Has it been uploaded yet?`,
           error,
@@ -82,6 +85,7 @@ export default function usePlayerScores(selectedWeek?: WeekInfo) {
         showToast(onScoreFailure);
       } finally {
         setScoresLoading(false);
+        setSettledWeek(selectedWeek.value);
       }
     },
     [selectedWeek, showToast],
@@ -216,6 +220,7 @@ export default function usePlayerScores(selectedWeek?: WeekInfo) {
   return {
     scores,
     scoresWeek,
+    settledWeek,
     isPicksLoading,
     isScoresLoading,
     isRefreshing,
