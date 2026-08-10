@@ -14,13 +14,13 @@ This was thrown together using KISS principles for a small, family-and-friends f
 
 ## Development
 
-Requires Node `v20.8` (`.nvmrc`). Run `nvm use` first.
+Built with [Vite](https://vite.dev/), React 19, TypeScript, and MUI Joy. Requires Node `v22` (`.nvmrc`). Run `nvm use` first.
 
 ```
 make setup   # install dependencies from the lockfile
 make run     # dev server on http://localhost:3000 (make run PORT=3001 to move it)
 make build   # production build into ./build
-make test    # Jest, once, no watch mode
+make test    # Vitest, once, no watch mode
 make check   # lint, typecheck, test, prettier
 make format  # eslint --fix, then prettier
 ```
