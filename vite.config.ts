@@ -5,8 +5,14 @@ const DEV_PORT = Number(process.env.PORT ?? 3000);
 
 export default defineConfig({
   plugins: [react()],
-  // The Cloudflare Pages build serves ./build, and `pages:dev` serves it locally.
-  build: { outDir: "build" },
+  build: {
+    // The Cloudflare Pages build serves ./build, and `pages:dev` serves it locally.
+    outDir: "build",
+    // Above the `xlsx-js-style` chunk, which is large on purpose and fetched only
+    // when a workbook is read or written. Low enough to still complain if the
+    // chunk the app loads up front grows towards it.
+    chunkSizeWarningLimit: 900,
+  },
   // Fail loudly on a busy port rather than sliding to the next one.
   server: { port: DEV_PORT, strictPort: true },
   preview: { port: DEV_PORT, strictPort: true },

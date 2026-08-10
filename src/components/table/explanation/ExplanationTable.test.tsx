@@ -7,7 +7,7 @@ import {
   RakMadnessScores,
   Status,
 } from "../../../types/RakMadnessScores";
-import { Toast, useToastContext } from "../../../context/ToastContext";
+import { Toast, useToastActions } from "../../../context/ToastContext";
 import ExplanationTable from "./ExplanationTable";
 
 const showToast = vi.fn();
@@ -16,7 +16,7 @@ const clearToasts = vi.fn();
 vi.mock("../../../context/ToastContext", async (importOriginal) => {
   const actual =
     await importOriginal<typeof import("../../../context/ToastContext")>();
-  return { ...actual, useToastContext: vi.fn() };
+  return { ...actual, useToastActions: vi.fn() };
 });
 
 function pick(
@@ -67,8 +67,7 @@ const scores: RakMadnessScores = {
 beforeEach(() => {
   showToast.mockClear();
   clearToasts.mockClear();
-  (useToastContext as Mock).mockReturnValue({
-    toasts: [],
+  (useToastActions as Mock).mockReturnValue({
     showToast,
     removeToast: vi.fn(),
     clearToasts,

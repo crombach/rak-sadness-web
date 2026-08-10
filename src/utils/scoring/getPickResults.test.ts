@@ -1,7 +1,11 @@
-import { GameStatus, HomeAway } from "../types/ESPN";
-import { LeagueResult } from "../types/LeagueResult";
-import { finalGame } from "./leagueResultFixtures";
-import { getPickResults } from "./getPlayerScores";
+import { GameStatus, HomeAway } from "../../types/ESPN";
+import { LeagueResult } from "../../types/LeagueResult";
+import { finalGame } from "../leagueResultFixtures";
+import {
+  getPickResults,
+  getStatus,
+  indexResultsByTeam,
+} from "./getPickResults";
 
 // BUF beat KC by 10.
 const bufBeatKcBy10 = finalGame({
@@ -12,7 +16,7 @@ const bufBeatKcBy10 = finalGame({
 });
 
 function scoreOf(pick: string, results = [bufBeatKcBy10]): number {
-  return getPickResults([pick], results)[0].pointValue;
+  return getPickResults([pick], indexResultsByTeam(results))[0].pointValue;
 }
 
 describe("getPickResults, no spread", () => {
@@ -91,30 +95,44 @@ describe("getPickResults, spread parsing", () => {
   });
 
   it("reports hasSpread only when a spread was given", () => {
-    expect(getPickResults(["BUF"], [bufBeatKcBy10])[0].hasSpread).toBe(false);
-    expect(getPickResults(["BUF -7"], [bufBeatKcBy10])[0].hasSpread).toBe(true);
+    expect(
+      getPickResults(["BUF"], indexResultsByTeam([bufBeatKcBy10]))[0].hasSpread,
+    ).toBe(false);
+    expect(
+      getPickResults(["BUF -7"], indexResultsByTeam([bufBeatKcBy10]))[0]
+        .hasSpread,
+    ).toBe(true);
   });
 });
 
 describe("getPickResults, missing data", () => {
   it("flags a pick whose game is absent", () => {
-    const result = getPickResults(["MIA"], [bufBeatKcBy10])[0];
+    const result = getPickResults(
+      ["MIA"],
+      indexResultsByTeam([bufBeatKcBy10]),
+    )[0];
     expect(result.pointValue).toBe(0);
-    expect(result.wasNotFound).toBe(true);
+    expect(result.isInvalid).toBe(true);
     expect(result.explanation.header).toBe("Missing Game");
   });
 
   it("flags an empty pick as a missing pick, not a missing game", () => {
-    const result = getPickResults(["undefined"], [bufBeatKcBy10])[0];
+    const result = getPickResults(
+      ["undefined"],
+      indexResultsByTeam([bufBeatKcBy10]),
+    )[0];
     expect(result.pointValue).toBe(0);
-    expect(result.wasNotFound).toBe(true);
+    expect(result.isInvalid).toBe(true);
     expect(result.explanation.header).toBe("Missing Pick");
   });
 });
 
 describe("getPickResults, game state", () => {
   it("marks a final game completed", () => {
-    const result = getPickResults(["BUF"], [bufBeatKcBy10])[0];
+    const result = getPickResults(
+      ["BUF"],
+      indexResultsByTeam([bufBeatKcBy10]),
+    )[0];
     expect(result.isCompleted).toBe(true);
     expect(result.explanation.header).toBe("Final Score");
     expect(result.explanation.message).toBe("KC 20 - 30 BUF");
@@ -127,7 +145,7 @@ describe("getPickResults, game state", () => {
       detailMessage: "3rd Quarter",
       possession: { homeAway: HomeAway.AWAY, downDistanceText: "2nd & 7" },
     };
-    const result = getPickResults(["BUF"], [live])[0];
+    const result = getPickResults(["BUF"], indexResultsByTeam([live]))[0];
     expect(result.isCompleted).toBe(false);
     expect(result.explanation.header).toBe("Live Score | 3rd Quarter");
     expect(result.explanation.message).toBe("▸ KC 20 - 30 BUF");
@@ -139,7 +157,7 @@ describe("getPickResults, game state", () => {
       ...bufBeatKcBy10,
       status: GameStatus.UPCOMING,
     };
-    const result = getPickResults(["BUF"], [upcoming])[0];
+    const result = getPickResults(["BUF"], indexResultsByTeam([upcoming]))[0];
     expect(result.isCompleted).toBe(false);
     expect(result.explanation.header).toBe("Upcoming");
     expect(result.explanation.message).toContain("KC @ BUF begins at");
@@ -161,7 +179,7 @@ describe("getPickResults, statuses outside the enum", () => {
       status: POSTPONED,
       detailMessage: "Postponed",
     };
-    const result = getPickResults(["BUF"], [postponed])[0];
+    const result = getPickResults(["BUF"], indexResultsByTeam([postponed]))[0];
     expect(result.isCompleted).toBe(false);
     expect(result.explanation.header).toBe("Live Score | Postponed");
   });
@@ -177,7 +195,10 @@ describe("getPickResults, statuses outside the enum", () => {
       loser: { team: null, homeAway: null, by: 0 },
       totalScore: 0,
     };
-    const results = getPickResults(["BUF", "KC"], [canceled]);
+    const results = getPickResults(
+      ["BUF", "KC"],
+      indexResultsByTeam([canceled]),
+    );
     expect(results.map((result) => result.pointValue)).toEqual([1, 1]);
     expect(results[0].isCompleted).toBe(false);
     expect(results[0].explanation.header).toBe("Live Score | Canceled");
@@ -186,7 +207,46 @@ describe("getPickResults, statuses outside the enum", () => {
 
 describe("getPickResults, ordering", () => {
   it("returns one result per pick, in order", () => {
-    const results = getPickResults(["KC", "BUF"], [bufBeatKcBy10]);
+    const results = getPickResults(
+      ["KC", "BUF"],
+      indexResultsByTeam([bufBeatKcBy10]),
+    );
     expect(results.map((result) => result.pointValue)).toEqual([0, 1]);
+  });
+});
+
+describe("getPickResults, unscoreable games", () => {
+  const reason = 'Picks disagree about the spread: "BUF +7" and "KC -8".';
+
+  function scoreFirstOfTwo(pick: string) {
+    return getPickResults(
+      [pick, "BUF"],
+      indexResultsByTeam([bufBeatKcBy10]),
+      new Map([[0, reason]]),
+    );
+  }
+
+  it("scores nothing for a game the workbook describes two ways", () => {
+    const [unscoreable] = scoreFirstOfTwo("BUF +7");
+
+    expect(unscoreable.pointValue).toBe(0);
+    expect(unscoreable.isInvalid).toBe(true);
+    expect(unscoreable.isCompleted).toBe(false);
+    expect(getStatus(unscoreable)).toBe("error");
+  });
+
+  it("explains itself with the disagreement", () => {
+    const [unscoreable] = scoreFirstOfTwo("BUF +7");
+
+    expect(unscoreable.explanation.header).toBe("Invalid Spread");
+    expect(unscoreable.explanation.message).toBe(reason);
+  });
+
+  it("withholds the point even from the pick that would have won", () => {
+    expect(scoreFirstOfTwo("BUF -3")[0].pointValue).toBe(0);
+  });
+
+  it("leaves the other games on the row alone", () => {
+    expect(scoreFirstOfTwo("BUF +7")[1].pointValue).toBe(1);
   });
 });

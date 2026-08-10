@@ -2,14 +2,14 @@ import { memo } from "react";
 import { PlayerScore } from "../../../types/RakMadnessScores";
 import getClasses from "../../../utils/getClasses";
 import {
-  SentimentVeryDissatisfied,
-  SentimentVerySatisfied,
-} from "@mui/icons-material";
-import { useToastContext, Toast } from "../../../context/ToastContext";
+  SentimentVeryDissatisfiedIcon,
+  SentimentVerySatisfiedIcon,
+} from "../../icon/Icon";
+import { useToastActions, Toast } from "../../../context/ToastContext";
 import "./PlayerName.scss";
 
 function PlayerName({ player }: { player: PlayerScore }) {
-  const { showToast, clearToasts } = useToastContext();
+  const { showToast, clearToasts } = useToastActions();
 
   return (
     <td
@@ -28,9 +28,9 @@ function PlayerName({ player }: { player: PlayerScore }) {
         <span>{player.name}</span>
         <span className="player-name__status-icon">
           {player.status.isKnockedOut ? (
-            <SentimentVeryDissatisfied />
+            <SentimentVeryDissatisfiedIcon />
           ) : (
-            <SentimentVerySatisfied />
+            <SentimentVerySatisfiedIcon />
           )}
         </span>
       </div>

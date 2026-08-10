@@ -1,3 +1,5 @@
+@use "../../styles/breakpoints" as *;
+
 .table {
   margin: auto;
 
@@ -13,8 +15,12 @@
       background-color: var(--rak-primary-800);
       min-width: max-content;
       padding: 2px 8px;
+      // Named even on the edges that carry no border, because a zero-width border
+      // takes `currentColor`, which is white here. Dark Reader forces borders
+      // visible and draws that white against the dividers below.
+      border-color: var(--rak-primary-600);
 
-      // Add white border between header cells
+      // Add a border between header cells
       &:not(:last-child) {
         border-right: 2px solid var(--rak-primary-600);
       }
@@ -90,14 +96,23 @@
       background-color: var(--rak-neutral-200);
     }
 
-    // Empty last row
+    // Keeps the last real row clear of a phone's rounded corners and home
+    // indicator. Sized from the device's own inset, so it has no height at all
+    // on a screen that does not report one. `index.html` asks for
+    // `viewport-fit=cover`, without which the inset is always zero.
     tr:last-child.table__last-row td {
+      height: env(safe-area-inset-bottom, 0px);
+      min-height: 0;
+      padding: 0;
+      // Without this the row still draws its borders at zero height, and the
+      // last real row already carries the table's bottom edge.
+      border: none;
       background-color: var(--rak-primary-800);
     }
   }
 }
 
-@media (max-width: 400px) {
+@include narrow-screen {
   .table {
     font-size: 0.8rem;
   }

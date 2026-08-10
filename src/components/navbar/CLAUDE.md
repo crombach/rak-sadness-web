@@ -1,6 +1,9 @@
 # navbar
 
-`Navbar`: `<header>` with `left`/`right` `ReactNode` slots, solid primary fill from `Navbar.scss`.
+`Navbar`: `<header>` with `left`/`right` `ReactNode` slots, solid primary fill.
+Owns the narrow-screen padding for every button it contains.
+`ScoresNavbar`: the scoreboard/explanation switch plus the refresh button, for the
+results routes.
 
 ## Subdirectories
 

@@ -1,10 +1,12 @@
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import InfoIcon from "@mui/icons-material/Info";
-import ReportIcon from "@mui/icons-material/Report";
-import WarningIcon from "@mui/icons-material/Warning";
+import {
+  CheckCircleIcon,
+  CloseRoundedIcon,
+  InfoIcon,
+  ReportIcon,
+  WarningIcon,
+} from "../icon/Icon";
 import Button from "../button/Button";
-import { Toast, useToastContext } from "../../context/ToastContext";
+import { Toast, useToastActions, useToasts } from "../../context/ToastContext";
 import "./Toaster.scss";
 
 function startIconFor(type: Toast["type"]) {
@@ -21,7 +23,8 @@ function startIconFor(type: Toast["type"]) {
 }
 
 export default function Toaster() {
-  const { toasts, removeToast } = useToastContext();
+  const toasts = useToasts();
+  const { removeToast } = useToastActions();
 
   return (
     <div className="toaster">

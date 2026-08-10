@@ -1,19 +1,25 @@
 import { MockedFunction } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { ToastContextProvider } from "../context/ToastContext";
-import { League, LeagueInfo, SeasonType, WeekInfo } from "../types/League";
-import { RakMadnessScores } from "../types/RakMadnessScores";
-import RakSadness from "./RakSadness";
-import Toaster from "./toaster/Toaster";
+import { MemoryRouter } from "react-router";
+import { AppDataContextProvider } from "./context/AppDataContext";
+import { ToastContextProvider } from "./context/ToastContext";
+import { League, LeagueInfo, SeasonType, WeekInfo } from "./types/League";
+import { RakMadnessScores } from "./types/RakMadnessScores";
+import App from "./App";
+import Toaster from "./components/toaster/Toaster";
 
-vi.mock("../utils/getLeagueInfo");
-vi.mock("../utils/getPlayerScores");
-vi.mock("../utils/buildSpreadsheetBuffer");
+vi.mock("./utils/getLeagueInfo");
+vi.mock("./utils/readFileToBuffer");
+vi.mock("./utils/scoring/getPlayerScores");
+vi.mock("./utils/buildSpreadsheetBuffer");
 
-import getLeagueInfo from "../utils/getLeagueInfo";
-import { getPlayerScores, readFileToBuffer } from "../utils/getPlayerScores";
-import buildSpreadsheetBuffer from "../utils/buildSpreadsheetBuffer";
+import getLeagueInfo from "./utils/getLeagueInfo";
+import { readFileToBuffer } from "./utils/readFileToBuffer";
+import buildSpreadsheetBuffer, {
+  XLSX_CONTENT_TYPE,
+} from "./utils/buildSpreadsheetBuffer";
+import { getPlayerScores } from "./utils/scoring/getPlayerScores";
 
 const getLeagueInfoMock = getLeagueInfo as MockedFunction<typeof getLeagueInfo>;
 const getPlayerScoresMock = getPlayerScores as MockedFunction<
@@ -79,21 +85,25 @@ const scores: RakMadnessScores = {
   ],
 };
 
-/** Mirrors index.tsx: toasts only appear if Toaster is mounted beside the app. */
-function mountApp() {
+/** Mirrors index.tsx, with the entry URL as a parameter. */
+function mountApp(path = "/") {
   const user = userEvent.setup();
   render(
-    <ToastContextProvider>
-      <RakSadness />
-      <Toaster />
-    </ToastContextProvider>,
+    <MemoryRouter initialEntries={[path]}>
+      <ToastContextProvider>
+        <AppDataContextProvider>
+          <App />
+        </AppDataContextProvider>
+        <Toaster />
+      </ToastContextProvider>
+    </MemoryRouter>,
   );
   return user;
 }
 
 /** The app only renders its controls once the ESPN week lookup resolves. */
-async function mountLoadedApp() {
-  const user = mountApp();
+async function mountLoadedApp(path = "/") {
+  const user = mountApp(path);
   await screen.findByText("Use Local Spreadsheet");
   return user;
 }
@@ -117,13 +127,37 @@ function scoresHeaderButtons(): Array<HTMLElement> {
   );
 }
 
+let fetchMock: MockedFunction<typeof fetch>;
+
+function notFoundResponse(): Response {
+  return new Response(null, { status: 404 });
+}
+
+function htmlResponse(): Response {
+  return new Response("<!doctype html><title>Rak Madness Scoreboard</title>", {
+    status: 200,
+    headers: { "content-type": "text/html" },
+  });
+}
+
+function spreadsheetResponse(): Response {
+  return new Response(new ArrayBuffer(8), {
+    status: 200,
+    headers: { "content-type": XLSX_CONTENT_TYPE },
+  });
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
+  // An upload caches its workbook, and jsdom keeps localStorage between cases,
+  // so without this a later case finds picks an earlier one left behind.
+  localStorage.clear();
   getLeagueInfoMock.mockResolvedValue(leagueInfo);
   getPlayerScoresMock.mockResolvedValue(scores);
   readFileToBufferMock.mockResolvedValue(new ArrayBuffer(8));
   buildSpreadsheetBufferMock.mockResolvedValue(new ArrayBuffer(8));
-  global.fetch = vi.fn();
+  fetchMock = vi.fn().mockResolvedValue(notFoundResponse());
+  global.fetch = fetchMock;
   window.URL.createObjectURL = vi.fn(() => "blob:fake");
   vi.spyOn(console, "warn").mockImplementation(() => undefined);
   vi.spyOn(console, "error").mockImplementation(() => undefined);
@@ -133,7 +167,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("RakSadness, first load", () => {
+describe("the app, first load", () => {
   it("asks ESPN for the pro league calendar", async () => {
     await mountLoadedApp();
     expect(getLeagueInfoMock).toHaveBeenCalledWith(League.PRO);
@@ -161,9 +195,11 @@ describe("RakSadness, first load", () => {
   it("offers only weeks up to the current one, newest first", async () => {
     const user = await mountLoadedApp();
     await user.click(screen.getByRole("combobox"));
-    const options = screen
-      .getAllByRole("option")
-      .map((option) => option.textContent);
+    // The popup lands in a portal a frame after the click, so this has to wait
+    // for it. Reading it synchronously passed most of the time and not always.
+    const options = (await screen.findAllByRole("option")).map(
+      (option) => option.textContent,
+    );
     expect(options).toEqual(["Week 3", "Week 2", "Week 1"]);
   });
 
@@ -173,18 +209,44 @@ describe("RakSadness, first load", () => {
   });
 });
 
-describe("RakSadness, automatic picks fetch", () => {
-  it("skips the API on localhost and invites a local spreadsheet", async () => {
+describe("the app, automatic picks fetch", () => {
+  it("asks the API for the selected week's picks", async () => {
+    await mountLoadedApp();
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(`/api/picks/${CURRENT_WEEK}`);
+    });
+  });
+
+  it("invites a local spreadsheet when the API has no picks", async () => {
+    fetchMock.mockResolvedValue(notFoundResponse());
     await mountLoadedApp();
     await waitFor(() => {
       expect(screen.getByText("Missing Picks")).toBeInTheDocument();
     });
-    expect(global.fetch).not.toHaveBeenCalled();
     expect(
       screen.getByText(
         `The picks spreadsheet for week ${CURRENT_WEEK} is not yet in the database, but you can use a local spreadsheet if you have one.`,
       ),
     ).toBeInTheDocument();
+  });
+
+  it("ignores a response that is not a spreadsheet", async () => {
+    // A bare dev server answers this path with the app's own HTML at 200.
+    fetchMock.mockResolvedValue(htmlResponse());
+    await mountLoadedApp();
+    await waitFor(() => {
+      expect(screen.getByText("Missing Picks")).toBeInTheDocument();
+    });
+    expect(getPlayerScoresMock).not.toHaveBeenCalled();
+  });
+
+  it("scores the picks the API returns", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountLoadedApp();
+    await waitFor(() => {
+      expect(getPlayerScoresMock).toHaveBeenCalledTimes(1);
+    });
+    expect(screen.getByText("View Results")).toBeEnabled();
   });
 
   it("does not score anything when no picks were fetched", async () => {
@@ -224,7 +286,7 @@ describe("RakSadness, automatic picks fetch", () => {
   });
 });
 
-describe("RakSadness, manual spreadsheet upload", () => {
+describe("the app, manual spreadsheet upload", () => {
   it("scores the uploaded file for the selected week", async () => {
     const user = await mountLoadedApp();
     await uploadSpreadsheet(user);
@@ -283,18 +345,18 @@ describe("RakSadness, manual spreadsheet upload", () => {
   it("reports an aborted selection when no file is chosen", async () => {
     await mountLoadedApp();
     // userEvent.upload with an empty list fires no change event, which is what
-    // a cancelled file dialog looks like to the DOM. Fire it directly.
+    // a canceled file dialog looks like to the DOM. Fire it directly.
     fireEvent.change(fileInput(), { target: { files: [] } });
     await waitFor(() => {
       expect(
-        screen.getByText("Aborted picks shreadsheet selection"),
+        screen.getByText("Aborted picks spreadsheet selection"),
       ).toBeInTheDocument();
     });
     expect(getPlayerScoresMock).not.toHaveBeenCalled();
   });
 });
 
-describe("RakSadness, results views", () => {
+describe("the app, results views", () => {
   async function mountWithScores() {
     const user = await mountLoadedApp();
     await uploadSpreadsheet(user);
@@ -364,7 +426,7 @@ describe("RakSadness, results views", () => {
   });
 });
 
-describe("RakSadness, export", () => {
+describe("the app, export", () => {
   it("builds and downloads a spreadsheet for the selected week", async () => {
     const user = await mountLoadedApp();
     await uploadSpreadsheet(user);
@@ -387,5 +449,88 @@ describe("RakSadness, export", () => {
         screen.getByText("Exported results spreadsheet"),
       ).toBeInTheDocument();
     });
+  });
+});
+
+describe("the app, week routes", () => {
+  it("opens a week's scoreboard from its URL", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    expect(await screen.findByText("MNF Points Pick")).toBeInTheDocument();
+  });
+
+  it("opens a week's explanation from its URL", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountApp(`/week/${CURRENT_WEEK}/explanation`);
+
+    expect(await screen.findByText("College Score")).toBeInTheDocument();
+  });
+
+  it("scores the week named in the URL, not the current one", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountApp("/week/1/scoreboard");
+
+    await waitFor(() => {
+      expect(getPlayerScoresMock).toHaveBeenCalled();
+    });
+    expect(getPlayerScoresMock.mock.calls[0][0]).toEqual(week(1));
+  });
+
+  it("scores the week named in the URL exactly once", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+    await screen.findByText("MNF Points Pick");
+
+    expect(getPlayerScoresMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("sends a week with no picks home, explaining why", async () => {
+    await mountLoadedApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    expect(await screen.findByText("No Results")).toBeInTheDocument();
+    expect(screen.getByText("Use Local Spreadsheet")).toBeInTheDocument();
+  });
+
+  it("does not judge a week before the schedule has loaded", async () => {
+    let resolve: (info: LeagueInfo) => void = () => undefined;
+    getLeagueInfoMock.mockReturnValue(
+      new Promise<LeagueInfo>((r) => {
+        resolve = r;
+      }),
+    );
+    mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    expect(screen.queryByText("No Results")).not.toBeInTheDocument();
+    expect(screen.queryByText("Unknown Week")).not.toBeInTheDocument();
+    resolve(leagueInfo);
+    expect(await screen.findByText("No Results")).toBeInTheDocument();
+  });
+
+  it("sends a week beyond the season home", async () => {
+    await mountLoadedApp("/week/99/scoreboard");
+
+    expect(await screen.findByText("Unknown Week")).toBeInTheDocument();
+    expect(getPlayerScoresMock).not.toHaveBeenCalled();
+  });
+
+  it("sends a week that is not a number home", async () => {
+    await mountLoadedApp("/week/abc/scoreboard");
+
+    expect(await screen.findByText("Unknown Week")).toBeInTheDocument();
+    expect(getPlayerScoresMock).not.toHaveBeenCalled();
+  });
+
+  it("shows the scoreboard for a bare week URL", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountApp(`/week/${CURRENT_WEEK}`);
+
+    expect(await screen.findByText("MNF Points Pick")).toBeInTheDocument();
+  });
+
+  it("sends an unknown path home", async () => {
+    await mountLoadedApp("/nonsense");
+
+    expect(screen.getByText("Use Local Spreadsheet")).toBeInTheDocument();
   });
 });

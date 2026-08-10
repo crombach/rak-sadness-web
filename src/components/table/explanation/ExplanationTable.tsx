@@ -6,9 +6,12 @@ import {
 } from "../../../types/RakMadnessScores";
 import rangeWithPrefix from "../../../utils/rangeWithPrefix";
 import PlayerName from "../playerName/PlayerName";
-import "../Table.scss";
+import TableShell, { RankCell } from "../TableShell";
 import "./ExplanationTable.scss";
-import { useToastContext, Toast } from "../../../context/ToastContext";
+import { useToastActions, Toast } from "../../../context/ToastContext";
+
+/** Rank, player, college score, pro score, and total score. */
+const FIXED_COLUMN_COUNT = 5;
 
 function leagueHeaders(count: number, prefix: string) {
   return rangeWithPrefix(count, prefix).map((header) => (
@@ -19,7 +22,7 @@ function leagueHeaders(count: number, prefix: string) {
 }
 
 function ExplanationTable({ scores }: { scores?: RakMadnessScores | null }) {
-  const { showToast, clearToasts } = useToastContext();
+  const { showToast, clearToasts } = useToastActions();
 
   const handlePickResultClick = useCallback(
     (result: PickResult) => {
@@ -44,74 +47,59 @@ function ExplanationTable({ scores }: { scores?: RakMadnessScores | null }) {
   }
 
   const firstPlayer = scores.scores[0];
-  const collegeHeaders = leagueHeaders(firstPlayer.college.length, "C");
-  const proHeaders = leagueHeaders(firstPlayer.pro.length, "P");
+  const collegeCount = firstPlayer.college.length;
+  const proCount = firstPlayer.pro.length;
+  const columnCount = FIXED_COLUMN_COUNT + collegeCount + proCount;
 
   return (
-    <table className="table" cellSpacing="0">
-      <thead className="table__header">
-        <tr>
+    <TableShell
+      columnCount={columnCount}
+      header={
+        <>
           <th>Rank</th>
           <th className="table__player-col">Player</th>
-          {collegeHeaders}
+          {leagueHeaders(collegeCount, "C")}
           <th>College Score</th>
-          {proHeaders}
+          {leagueHeaders(proCount, "P")}
           <th>Pro Score</th>
           <th>Total Score</th>
-        </tr>
-      </thead>
-      <tbody>
-        {scores.scores.map((player: PlayerScore, index: number) => {
-          return (
-            <tr key={player.name}>
-              <td>
-                <b>{index + 1}</b>
+        </>
+      }
+    >
+      {scores.scores.map((player: PlayerScore, index: number) => {
+        return (
+          <tr key={player.name}>
+            <RankCell rank={index + 1} />
+            <PlayerName player={player} />
+            {player.college.map((result, index) => (
+              <td
+                key={`${player.name}-C${index + 1}`}
+                className={`table__center table__pick --${result.status}`}
+                role="button"
+                onClick={() => handlePickResultClick(result)}
+              >
+                {result.pick || "N/A"}
               </td>
-              <PlayerName player={player} />
-              {player.college.map((result, index) => (
-                <td
-                  key={`${player.name}-C${index + 1}`}
-                  className={`table__center table__pick --${result.status}`}
-                  role="button"
-                  onClick={() => handlePickResultClick(result)}
-                >
-                  {result.pick || "N/A"}
-                </td>
-              ))}
-              <td className="table__center">{player.score.college}</td>
-              {player.pro.map((result, index) => (
-                <td
-                  key={`${player.name}-P${index + 1}`}
-                  className={`table__center table__pick --${result.status}`}
-                  role="button"
-                  onClick={() => handlePickResultClick(result)}
-                >
-                  {result.pick || "N/A"}
-                </td>
-              ))}
-              <td className="table__center">{player.score.pro}</td>
-              <td className="table__center">
-                <b>{player.score.total}</b>
+            ))}
+            <td className="table__center">{player.score.college}</td>
+            {player.pro.map((result, index) => (
+              <td
+                key={`${player.name}-P${index + 1}`}
+                className={`table__center table__pick --${result.status}`}
+                role="button"
+                onClick={() => handlePickResultClick(result)}
+              >
+                {result.pick || "N/A"}
               </td>
-            </tr>
-          );
-        })}
-        {/* Empty last row */}
-        <tr className="table__last-row">
-          <td />
-          <td />
-          {scores.scores[0].college.map((_, index) => (
-            <td key={`C${index + 1}-empty`} />
-          ))}
-          <td />
-          {scores.scores[0].pro.map((_, index) => (
-            <td key={`P${index + 1}-empty`} />
-          ))}
-          <td />
-          <td />
-        </tr>
-      </tbody>
-    </table>
+            ))}
+            <td className="table__center">{player.score.pro}</td>
+            <td className="table__center">
+              <b>{player.score.total}</b>
+            </td>
+          </tr>
+        );
+      })}
+    </TableShell>
   );
 }
 
