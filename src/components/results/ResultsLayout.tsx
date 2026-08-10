@@ -1,6 +1,7 @@
 import { Outlet, useMatch, useNavigate, useParams } from "react-router";
 import { useAppData } from "../../context/AppDataContext";
 import useWeekRouteGuard from "../../hooks/useWeekRouteGuard";
+import getClasses from "../../utils/getClasses";
 import LogoButton from "../navbar/LogoButton/LogoButton";
 import ScoresNavbar, { ScoresView } from "../navbar/ScoresNavbar";
 import PageLayout from "../PageLayout";
@@ -51,7 +52,7 @@ export default function ResultsLayout() {
         )
       }
     >
-      <div className="home__scores">
+      <div className={`home__scores ${getClasses({ "--loading": !isReady })}`}>
         {isReady ? <Outlet /> : <SkeletonTable />}
       </div>
     </PageLayout>
