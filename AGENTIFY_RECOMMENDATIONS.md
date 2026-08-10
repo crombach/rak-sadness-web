@@ -141,6 +141,5 @@ to fit a convention, so nothing to do. The convention and the
 
 ## MCP
 
-`cloudflare-docs` and `playwright` are in `.mcp.json`; the `yahoo-connectors`
-gateway was removed at your request. Neither needs an environment variable.
-`playwright` downloads a browser on first use.
+`cloudflare-docs` and `playwright` are in `.mcp.json`. Neither needs an
+environment variable. `playwright` downloads a browser on first use.
