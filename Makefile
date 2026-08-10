@@ -13,7 +13,7 @@ setup: ## Install dependencies from the lockfile (idempotent)
 	  [ "$$req" = "$$cur" ] || { echo "Node major $$cur found, .nvmrc requires $$req. Run: nvm install && nvm use"; exit 1; }
 	npm ci
 
-build: ## Typecheck, then production build into ./build (what pages:deploy uploads)
+build: ## Typecheck, then production build into ./build (what Cloudflare Pages serves)
 	npm run build
 
 run: ## Start the Vite dev server (PORT=3000 by default)

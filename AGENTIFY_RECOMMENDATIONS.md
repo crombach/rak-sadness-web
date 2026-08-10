@@ -4,39 +4,6 @@ What is left. Everything below was recommended but not applied, with the reason.
 
 ## Build
 
-### `pages:deploy` ignores `wrangler.toml`
-
-`npm run pages:deploy` is verified end to end against the real project. It uploads
-a working deployment: `/` serves 200, the Pages Function runs, and
-`/api/picks/1` returns the real spreadsheet out of R2, so direct-upload
-deployments inherit the bucket binding from the dashboard.
-
-The catch is that `wrangler.toml` plays no part in it. Because the file omits
-`pages_build_output_dir`, wrangler skips it entirely and warns:
-
-> We detected a configuration file at wrangler.toml but it is missing the
-> "pages_build_output_dir" field, required by Pages. Ignoring configuration file
-> for now.
-
-So `name = "rak-sadness"` is never read, and the bare command fails with `Missing
-Pages project name`. The script passes `--project-name` instead. That leaves
-`wrangler.toml` doing exactly one job: configuring `wrangler pages dev` for local
-development.
-
-Adding `pages_build_output_dir` would make the file authoritative for production
-builds and override the dashboard settings this project actually builds from.
-
-**Suggested action:** only add that key as part of deliberately moving build
-config out of the dashboard and into the repo.
-
-Two notes on deploying by hand. The branch decides the environment: the project's
-production branch is `main`, so a deploy from any other branch is a preview on its
-own subdomain. And the project is git-connected, so pushing a branch already
-produces a preview build; a manual deploy is only for testing the command itself.
-
-To make `/api/picks/:week` return a real spreadsheet locally:
-`wrangler r2 object put rak-sadness/picks/1.xlsx --file <path> --local`.
-
 ### The bundle is one 1.26 MB chunk
 
 Vite warns about it on every build. Pre-existing: Create React App produced the

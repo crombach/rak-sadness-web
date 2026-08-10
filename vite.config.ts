@@ -5,9 +5,9 @@ const DEV_PORT = Number(process.env.PORT ?? 3000);
 
 export default defineConfig({
   plugins: [react()],
-  // Cloudflare Pages and `pages:deploy` both upload ./build.
+  // The Cloudflare Pages build serves ./build, and `pages:dev` serves it locally.
   build: { outDir: "build" },
-  // Fail loudly on a busy port. `pages:dev` depends on the app being on 3001.
+  // Fail loudly on a busy port rather than sliding to the next one.
   server: { port: DEV_PORT, strictPort: true },
   preview: { port: DEV_PORT, strictPort: true },
   test: {

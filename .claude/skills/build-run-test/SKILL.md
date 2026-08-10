@@ -59,16 +59,16 @@ Tests print a lot of `console.debug` from the scoring path. Expected, not a fail
 
 ## Cloudflare Pages, not wrapped in make
 
+**Nothing in this repo deploys.** Cloudflare builds the site itself from git, using the build settings in its own dashboard: push to `main` for production, push any other branch for a preview. There is no deploy script, and adding one would create a second path to production that ignores those settings. wrangler is here for local testing only.
+
 - `npm run pages:dev` builds, then runs `wrangler pages dev ./build --port 3000`. Verified on wrangler 4: `/` serves 200, the Pages Function executes, assets serve. This is the supported form; the older `pages dev -- <command>` proxy form is deprecated and gone from this repo.
 - `pages:dev` serves a build, so there is no hot reload. Two workflows, on purpose: `make run` for iterating on the UI, `pages:dev` for anything touching the Function or the binding. Rerun it to pick up a code change.
 - No make target wraps `pages:dev` because it needs Cloudflare context that `make` targets deliberately stay out of.
-- `wrangler.toml` holds `name = "rak-sadness"` (the real Pages project), `compatibility_date`, and the `RAK_SADNESS_BUCKET` R2 binding pointing at the `rak-sadness` bucket. It configures `pages dev` only. `pages deploy` skips the file completely, because Pages only reads it when `pages_build_output_dir` is set, which is why `pages:deploy` passes `--project-name` on the command line. Without that flag the command fails with `Missing Pages project name`.
-- **Do not add `pages_build_output_dir` to `wrangler.toml`.** Its absence is what keeps the file local-development-only. Adding it makes wrangler.toml the source of truth for production builds and overrides the dashboard's own build settings, which is where this project's real config lives.
+- `wrangler.toml` holds `name = "rak-sadness"` (the real Pages project), `compatibility_date`, and the `RAK_SADNESS_BUCKET` R2 binding pointing at the `rak-sadness` bucket. It configures `pages dev` and nothing else.
+- **Do not add `pages_build_output_dir` to `wrangler.toml`.** Its absence is what keeps the file local-development-only. Adding it makes wrangler.toml the source of truth for production builds and overrides the dashboard settings the real build uses.
 - `functions/api/picks/[week].ts` reads `picks/<week>.xlsx` from the binding. Locally the bucket is simulated and empty, so `/api/picks/:week` returns 404 until seeded: `wrangler r2 object put rak-sadness/picks/1.xlsx --file <path> --local`.
 - Not a blocker for local work: `src/components/RakSadness.tsx` deliberately skips that fetch on localhost and falls back to manual spreadsheet upload.
-- `npm run pages:deploy` needs Cloudflare auth (`wrangler login`, or `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`). Deliberately not a make target: deploying is not an agent action to take unprompted.
-- Verified against the live project: it uploads, `/` serves 200, the Function runs, and `/api/picks/1` returns the real spreadsheet, so direct-upload deployments do get the dashboard's bucket binding. Give a fresh deployment a few seconds before probing it; the assets go live before the Functions routing does.
-- **The branch decides the environment.** The production branch is `main`, and `pages deploy` infers the branch from git, so a deploy from anywhere else is a preview on its own subdomain. Pass `--branch` explicitly rather than trusting the inference. The project is also git-connected, so pushing already builds a preview; deploy by hand only to test the command.
+- `wrangler *` and `npx wrangler *` sit in `ask`, because seeding a bucket or reading account state is not an agent action to take unattended.
 
 ## Offline
 

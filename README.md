@@ -32,3 +32,10 @@ make format  # eslint --fix, then prettier
 ```
 npx wrangler r2 object put rak-sadness/picks/1.xlsx --file <path> --local
 ```
+
+## Deploying
+
+Cloudflare Pages builds from git on its own, using the build settings in the
+Cloudflare dashboard. Push to `main` for production, push any other branch for a
+preview. wrangler is here for local testing only, so there is deliberately no
+deploy script to run.
