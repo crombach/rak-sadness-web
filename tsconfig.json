@@ -5,9 +5,6 @@
     "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    // Overriding "types" disables automatic @types inclusion, so node has to be
-    // listed for vite.config.ts, which reads process.env.
-    "types": ["node", "vite/client", "vitest/globals"],
     "skipLibCheck": true,
     "esModuleInterop": true,
     "strict": true,

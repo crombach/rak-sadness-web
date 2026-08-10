@@ -1,0 +1,8 @@
+{
+  // TypeScript 6 is newer than the version VS Code bundles. Without this the
+  // editor typechecks against a compiler that reads this repo's config
+  // differently, which is where "cannot find vitest/globals" comes from.
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "eslint.useFlatConfig": true
+}
