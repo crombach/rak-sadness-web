@@ -9,7 +9,7 @@ import {
 } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-/** Replaces Joy's `ColorPaletteProp`. Each value has a soft fill in `index.scss`. */
+/** Each value has a matching soft fill token in `index.scss`. */
 export type ToastType =
   "primary" | "neutral" | "success" | "warning" | "danger";
 

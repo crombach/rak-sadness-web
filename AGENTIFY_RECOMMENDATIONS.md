@@ -6,8 +6,7 @@ What is left. Everything below was recommended but not applied, with the reason.
 
 ### The bundle is one 1.26 MB chunk
 
-Vite warns about it on every build. Pre-existing: Create React App produced the
-same single-chunk output.
+Vite warns about it on every build.
 
 **Suggested action:** ignore, or set `build.chunkSizeWarningLimit` to silence it.
 Code-splitting a single-page tool with one route buys nothing.

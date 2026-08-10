@@ -1,6 +1,5 @@
-// Design tokens. These carry the values MUI Joy used to supply through
-// `--joy-*` custom properties, so the look survived dropping Joy for Base UI,
-// which ships no styles of its own.
+// Design tokens. Base UI ships no styles, so every visual in the app resolves
+// back to these.
 :root {
   // Colors extracted from the site logo
   --color-brand-light: #6eaad9;
@@ -65,7 +64,6 @@
   --rak-disabled-text: #9fa6ad;
 }
 
-// Replaces Joy's CssBaseline.
 body {
   margin: 0;
   background-color: #fff;

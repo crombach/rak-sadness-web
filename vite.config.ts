@@ -16,8 +16,7 @@ export default defineConfig({
     setupFiles: ["./src/setupTests.ts"],
     // The suites assert on class names, never on rendered styles.
     css: false,
-    // The suites were written against Create React App, which reset mocks
-    // between tests. Several of them assume a clean call count.
+    // Several suites assume a clean call count per test.
     mockReset: true,
   },
 });

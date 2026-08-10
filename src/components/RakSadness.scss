@@ -31,7 +31,7 @@
   }
 }
 
-// Base UI ships the select unstyled. These rules reproduce what Joy rendered.
+// Base UI ships the select unstyled, so these rules carry its whole look.
 .select__trigger {
   display: flex;
   align-items: center;

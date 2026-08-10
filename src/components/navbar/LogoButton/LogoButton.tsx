@@ -2,18 +2,12 @@ import Button from "../../button/Button";
 import "./LogoButton.scss";
 
 const OUTLINE_FILTER_ID = "logo-button-outline";
-// Whole pixels only. A fractional radius reintroduces the sub-pixel rounding
-// that made the old stacked drop-shadows render unevenly in Chrome.
 const OUTLINE_RADIUS_PX = 1;
 
 export default function LogoButton({ onClick }: { onClick: () => void }) {
   return (
     <Button onClick={onClick} className="logo-button">
-      {/*
-        Dilating the alpha channel gives a stroke of one fixed width in every
-        direction. Stacked drop-shadows only approximate that, and the sub-pixel
-        offsets they need rendered unevenly in Chrome.
-      */}
+      {/* Dilating the alpha channel strokes the logo evenly on every side. */}
       <svg className="logo-button__filter" aria-hidden="true" focusable="false">
         <filter
           id={OUTLINE_FILTER_ID}
