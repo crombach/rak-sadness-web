@@ -1,3 +1,5 @@
+@use "../../styles/breakpoints" as *;
+
 @keyframes skeleton-pulse {
   from {
     opacity: 0.45;
@@ -8,6 +10,7 @@
 }
 
 .table.--skeleton {
+  --rak-skeleton-header-lines: calc(2 * 1.5em + 4px);
   // Spans the content column, where a real table is only as wide as its columns.
   width: 100%;
   // `.table` centers itself vertically, which would split the leftover space into
@@ -26,6 +29,14 @@
     animation: skeleton-pulse 1s ease-in-out infinite alternate;
   }
 
+  .table__header th {
+    // A real header needs no height, since its own text gives it one, and that text
+    // wraps: two lines at any width below roughly 1100px, three once the columns
+    // are phone-narrow. The wireframe has no text to wrap, so it is handed the
+    // height that text would have made. Assumes the inherited line-height of 1.5.
+    height: var(--rak-skeleton-header-lines);
+  }
+
   .table__header .skeleton__bar {
     // The header is already dark, so the bars read as light gaps in it.
     background-color: white;
@@ -37,6 +48,12 @@
     // then divide the table's width evenly. Overriding it also keeps the wireframe
     // from being wider than a phone and scrolling sideways.
     min-width: 0;
+  }
+}
+
+@include narrow-screen {
+  .table.--skeleton {
+    --rak-skeleton-header-lines: calc(3 * 1.5em + 4px);
   }
 }
 
