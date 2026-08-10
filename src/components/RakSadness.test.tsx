@@ -121,6 +121,9 @@ function scoresHeaderButtons(): Array<HTMLElement> {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // An upload caches its workbook, and jsdom keeps localStorage between cases,
+  // so without this a later case finds picks an earlier one left behind.
+  localStorage.clear();
   getLeagueInfoMock.mockResolvedValue(leagueInfo);
   getPlayerScoresMock.mockResolvedValue(scores);
   readFileToBufferMock.mockResolvedValue(new ArrayBuffer(8));

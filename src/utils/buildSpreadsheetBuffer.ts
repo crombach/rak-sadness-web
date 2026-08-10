@@ -2,6 +2,10 @@ import { Status, RakMadnessScores } from "../types/RakMadnessScores";
 import * as XLSX from "xlsx-js-style";
 import rangeWithPrefix from "./rangeWithPrefix";
 
+/** Keep in sync with the header `functions/api/picks/[week].ts` responds with. */
+export const XLSX_CONTENT_TYPE =
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
 const Color = {
   WHITE: {
     rgb: "FFFFFF",

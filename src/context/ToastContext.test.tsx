@@ -202,6 +202,9 @@ const renders = { actionsOnly: 0, toastList: 0 };
 
 /** Reads the actions and nothing else, the way a player cell does. */
 function ActionsOnlyProbe() {
+  // Counting a render is the impurity the immutability rule exists to prevent.
+  // Observing it is the whole point here.
+  // eslint-disable-next-line react-hooks/immutability
   renders.actionsOnly += 1;
   const { showToast } = useToastActions();
   return <button onClick={() => showToast(new Toast("neutral", "Z", "z"))} />;
@@ -209,6 +212,7 @@ function ActionsOnlyProbe() {
 
 /** The control: a consumer that reads the list does re-render. */
 function ToastListProbe() {
+  // eslint-disable-next-line react-hooks/immutability
   renders.toastList += 1;
   return <span>{useToasts().length}</span>;
 }

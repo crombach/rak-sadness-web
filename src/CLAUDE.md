@@ -5,5 +5,6 @@
 ## Subdirectories
 
 - [`components/`](components/CLAUDE.md) — React UI, app root `RakSadness`
+- [`hooks/`](hooks/CLAUDE.md) — week lookup, picks fetch and scoring, export
 - [`types/`](types/CLAUDE.md) — ESPN, league, and scoring type declarations
 - [`utils/`](utils/CLAUDE.md) — score computation, ESPN fetching, spreadsheet export
