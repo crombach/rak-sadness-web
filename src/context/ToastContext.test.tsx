@@ -1,12 +1,17 @@
 import { act, render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { Toast, ToastContextProvider, useToastContext } from "./ToastContext";
-
-const TOAST_LIFETIME_MS = 5000;
+import {
+  TOAST_LIFETIME_MS,
+  Toast,
+  ToastContextProvider,
+  useToastActions,
+  useToasts,
+} from "./ToastContext";
 
 /** Exposes the whole context as buttons plus a rendered list of toast headers. */
 function Harness() {
-  const { toasts, showToast, removeToast, clearToasts } = useToastContext();
+  const toasts = useToasts();
+  const { showToast, removeToast, clearToasts } = useToastActions();
   return (
     <div>
       <ul data-testid="toasts">
@@ -179,7 +184,7 @@ describe("ToastContextProvider", () => {
   });
 });
 
-describe("useToastContext outside a provider", () => {
+describe("the toast hooks outside a provider", () => {
   it("falls back to no-ops rather than throwing", async () => {
     const user = userEvent.setup({
       advanceTimers: (ms: number) => vi.advanceTimersByTime(ms),
@@ -187,5 +192,67 @@ describe("useToastContext outside a provider", () => {
     render(<Harness />);
     await user.click(screen.getByText("show A"));
     expect(headers()).toEqual([]);
+  });
+});
+
+// Counting renders in the component body rather than through React.Profiler:
+// Profiler does not report a commit when only a nested context consumer
+// re-renders, which is exactly the case under test.
+const renders = { actionsOnly: 0, toastList: 0 };
+
+/** Reads the actions and nothing else, the way a player cell does. */
+function ActionsOnlyProbe() {
+  renders.actionsOnly += 1;
+  const { showToast } = useToastActions();
+  return <button onClick={() => showToast(new Toast("neutral", "Z", "z"))} />;
+}
+
+/** The control: a consumer that reads the list does re-render. */
+function ToastListProbe() {
+  renders.toastList += 1;
+  return <span>{useToasts().length}</span>;
+}
+
+describe("toast actions", () => {
+  function mountProbes() {
+    const user = userEvent.setup({
+      advanceTimers: (ms: number) => vi.advanceTimersByTime(ms),
+    });
+    renders.actionsOnly = 0;
+    renders.toastList = 0;
+    // No StrictMode here on purpose: its double-invoked renders would double
+    // every count below.
+    render(
+      <ToastContextProvider>
+        <ActionsOnlyProbe />
+        <ToastListProbe />
+        <Harness />
+      </ToastContextProvider>,
+    );
+    return user;
+  }
+
+  it("does not re-render an actions-only consumer when a toast appears", async () => {
+    const user = mountProbes();
+
+    await user.click(screen.getByText("show A"));
+
+    expect(headers()).toEqual(["A"]);
+    expect(renders.actionsOnly).toBe(1);
+    // The control, proving a toast really did move through the provider.
+    expect(renders.toastList).toBe(2);
+  });
+
+  it("does not re-render an actions-only consumer when a toast times out", async () => {
+    const user = mountProbes();
+    await user.click(screen.getByText("show A"));
+
+    act(() => {
+      vi.advanceTimersByTime(TOAST_LIFETIME_MS);
+    });
+
+    expect(headers()).toEqual([]);
+    expect(renders.actionsOnly).toBe(1);
+    expect(renders.toastList).toBe(3);
   });
 });

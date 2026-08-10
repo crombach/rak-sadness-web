@@ -13,7 +13,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Toast, useToastContext } from "../context/ToastContext";
+import { Toast, useToastActions } from "../context/ToastContext";
 import { League, WeekInfo } from "../types/League";
 import { RakMadnessScores } from "../types/RakMadnessScores";
 import buildSpreadsheetBuffer from "../utils/buildSpreadsheetBuffer";
@@ -29,7 +29,7 @@ import ExplanationTable from "./table/explanation/ExplanationTable";
 import ScoresTable from "./table/scores/ScoresTable";
 
 export default function RakSadness() {
-  const { showToast, clearToasts } = useToastContext();
+  const { showToast, clearToasts } = useToastActions();
 
   // Refs
   const refreshButtonRef = useRef<HTMLElement>(null);

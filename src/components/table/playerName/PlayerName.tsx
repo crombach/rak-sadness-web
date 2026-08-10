@@ -5,11 +5,11 @@ import {
   SentimentVeryDissatisfied,
   SentimentVerySatisfied,
 } from "@mui/icons-material";
-import { useToastContext, Toast } from "../../../context/ToastContext";
+import { useToastActions, Toast } from "../../../context/ToastContext";
 import "./PlayerName.scss";
 
 function PlayerName({ player }: { player: PlayerScore }) {
-  const { showToast, clearToasts } = useToastContext();
+  const { showToast, clearToasts } = useToastActions();
 
   return (
     <td

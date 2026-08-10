@@ -4,13 +4,13 @@ import {
   Toast,
   ToastContextProvider,
   ToastType,
-  useToastContext,
+  useToastActions,
 } from "../../context/ToastContext";
 import Toaster from "./Toaster";
 
 /** Shows one toast per click, so tests can queue them from the outside. */
 function ShowToastButton({ toast }: { toast: Toast }) {
-  const { showToast } = useToastContext();
+  const { showToast } = useToastActions();
   return <button onClick={() => showToast(toast)}>show {toast.header}</button>;
 }
 

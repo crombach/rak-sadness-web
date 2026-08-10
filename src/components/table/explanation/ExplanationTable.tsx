@@ -8,7 +8,7 @@ import rangeWithPrefix from "../../../utils/rangeWithPrefix";
 import PlayerName from "../playerName/PlayerName";
 import "../Table.scss";
 import "./ExplanationTable.scss";
-import { useToastContext, Toast } from "../../../context/ToastContext";
+import { useToastActions, Toast } from "../../../context/ToastContext";
 
 function leagueHeaders(count: number, prefix: string) {
   return rangeWithPrefix(count, prefix).map((header) => (
@@ -19,7 +19,7 @@ function leagueHeaders(count: number, prefix: string) {
 }
 
 function ExplanationTable({ scores }: { scores?: RakMadnessScores | null }) {
-  const { showToast, clearToasts } = useToastContext();
+  const { showToast, clearToasts } = useToastActions();
 
   const handlePickResultClick = useCallback(
     (result: PickResult) => {
