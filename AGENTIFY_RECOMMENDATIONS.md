@@ -4,16 +4,15 @@ What is left. Everything below was recommended but not applied, with the reason.
 
 ## Build
 
-### The deploy path has not been exercised against `wrangler.toml`
+### `pages:deploy` has not been run against `wrangler.toml`
 
-`wrangler.toml` now declares `name = "rak-sadness"`, `compatibility_date`, and the `RAK_SADNESS_BUCKET` binding on the `rak-sadness` bucket. Local dev is verified: wrangler reports the binding, the Pages Function runs, `/` serves 200.
+`wrangler.toml` declares `name = "rak-sadness"`, `compatibility_date`, and the `RAK_SADNESS_BUCKET` binding on the `rak-sadness` bucket. Local dev is verified: wrangler reports the binding, the Pages Function runs, `/` serves 200. The `Cloudflare Pages` check also passed on the PR that added the file, so the git-triggered build tolerates it.
 
-It deliberately omits `pages_build_output_dir`, because that key makes `pages:dev` fail with `Specify either a directory OR a proxy command, not both` and hot reload is worth more than the key. That choice is unverified against two things this environment cannot reach:
+What is still untested is `npm run pages:deploy` from a laptop. It is auth-gated and production-affecting, and `wrangler *` sits in `ask`, so it was not run.
 
-- `npm run pages:deploy` — auth-gated, production-affecting, and `wrangler *` sits in `ask`, so it was not run.
-- The Cloudflare-side git build. The project has `Git Provider: Yes`, so pushes trigger a build on Cloudflare, which previously ran with no `wrangler.toml` at all.
+The file omits `pages_build_output_dir` on purpose: that key makes `pages:dev` fail with `Specify either a directory OR a proxy command, not both`, and hot reload is worth more.
 
-**Suggested action:** watch the first deploy after this file lands. If the Cloudflare build complains about a missing `pages_build_output_dir`, add `pages_build_output_dir = "build"` and change `pages:dev` to `npm run build && wrangler pages dev --port 3000`, giving up hot reload.
+**Suggested action:** if a Cloudflare build ever does ask for that key, add `pages_build_output_dir = "build"` and change `pages:dev` to `npm run build && wrangler pages dev --port 3000`, giving up hot reload.
 
 To make `/api/picks/:week` return a real spreadsheet locally: `wrangler r2 object put rak-sadness/picks/1.xlsx --file <path> --local`.
 
@@ -52,9 +51,9 @@ Documented in `.claude/skills/parallel-work/SKILL.md`. One advisory item remains
 
 ## Contrib
 
-### Actions is not enabled for this repo
+### Nothing outstanding
 
-`.github/workflows/pr-title.yml` is checked in and kept at your request, but it will not run until GitHub Actions is enabled. Until then, PR titles are enforced for agents only, by `.claude/hooks/check_conventions.py`.
+`.github/workflows/pr-title.yml` runs. It reported as `conventional-commit-title` on the PR that added it, so Actions is enabled and the gate is live for everyone. `.claude/hooks/check_conventions.py` covers agents before they reach the gate.
 
 ### Existing history does not follow Conventional Commits
 

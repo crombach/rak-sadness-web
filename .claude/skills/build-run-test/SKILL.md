@@ -10,7 +10,7 @@ description: How to build, run, and test this repo. Read before any npm, make, t
 ## Toolchain
 
 - Node `v20.8` (`.nvmrc`), npm 10 (`lockfileVersion: 3`). `nvm use` before anything. `make setup` fails with an actionable message on a major mismatch.
-- No CI config anywhere. No workflow encodes the build, so the Makefile is the only ground truth.
+- Two CI signals on a PR, neither of which builds the app the way the Makefile does: `conventional-commit-title` (`.github/workflows/pr-title.yml`, Actions is enabled) and `Cloudflare Pages`, which builds from git using the dashboard's own settings. The Makefile is still the only place the local build story is written down.
 
 ## Verified
 
@@ -49,7 +49,7 @@ Tests print a lot of `console.debug` from the scoring path. Expected, not a fail
 - `wrangler.toml` holds `name = "rak-sadness"` (the real Pages project), `compatibility_date`, and the `RAK_SADNESS_BUCKET` R2 binding pointing at the `rak-sadness` bucket.
 - **Do not add `pages_build_output_dir` to `wrangler.toml`.** It makes `pages:dev` fail with `Specify either a directory OR a proxy command, not both`, because that script uses proxy mode to keep hot reload. Its absence is deliberate.
 - `functions/api/picks/[week].ts` reads `picks/<week>.xlsx` from the binding. Locally the bucket is simulated and empty, so `/api/picks/:week` returns 404 until seeded: `wrangler r2 object put rak-sadness/picks/1.xlsx --file <path> --local`.
-- `pages:deploy` and the Cloudflare-side git build have not been exercised against this `wrangler.toml`. The project builds from git, so watch the first deploy after this file landed.
+- The Cloudflare Pages build passed on the branch that added this `wrangler.toml`, so the config does not break the git-triggered build. `npm run pages:deploy` from a laptop has still never run against it.
 - Not a blocker for local work: `src/components/RakSadness.tsx` deliberately skips that fetch on localhost and falls back to manual spreadsheet upload.
 - `npm run pages:deploy` needs Cloudflare auth (`wrangler login`, or `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`). Deliberately not a make target: deploying is not an agent action to take unprompted.
 - Wrangler is pinned at 3.x and warns that 4.x is out.
