@@ -1,3 +1,3 @@
 # toaster
 
-`Toaster`: renders `ToastContext` toasts as MUI Joy `Alert`s, icon per type (info/warning/danger/success), dismiss button.
+`Toaster`: renders `ToastContext` toasts as `role="alert"` divs styled by `--<type>` class, icon per type (info/warning/danger/success), dismiss button. Soft fills come from the `--rak-soft-*` tokens.

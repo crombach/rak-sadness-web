@@ -1,4 +1,3 @@
-import { ColorPaletteProp } from "@mui/joy";
 import {
   PropsWithChildren,
   ReactElement,
@@ -10,17 +9,17 @@ import {
 } from "react";
 import { v4 as uuidv4 } from "uuid";
 
+/** Replaces Joy's `ColorPaletteProp`. Each value has a soft fill in `index.scss`. */
+export type ToastType =
+  "primary" | "neutral" | "success" | "warning" | "danger";
+
 export class Toast {
   id: string;
-  type: ColorPaletteProp;
+  type: ToastType;
   header: string;
   message: string | ReactElement;
 
-  constructor(
-    type: ColorPaletteProp,
-    header: string,
-    message: string | ReactElement,
-  ) {
+  constructor(type: ToastType, header: string, message: string | ReactElement) {
     this.id = uuidv4();
     this.type = type;
     this.header = header;

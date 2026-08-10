@@ -14,7 +14,7 @@ This was thrown together using KISS principles for a small, family-and-friends f
 
 ## Development
 
-Built with [Vite](https://vite.dev/), React 19, TypeScript, and MUI Joy. Requires Node `v22` (`.nvmrc`). Run `nvm use` first.
+Built with [Vite](https://vite.dev/), React 19, TypeScript, and [Base UI](https://base-ui.com/). Base UI ships unstyled primitives, so the look lives in SCSS with design tokens in `src/index.scss`. Requires Node `v22` (`.nvmrc`). Run `nvm use` first.
 
 ```
 make setup   # install dependencies from the lockfile

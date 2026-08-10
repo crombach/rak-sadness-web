@@ -1,0 +1,98 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  // The `--loading-btn` shimmer is an absolutely positioned ::after, so it
+  // needs this element as its containing block.
+  position: relative;
+  overflow: hidden;
+  min-height: 36px;
+  padding: 6px 16px;
+  border: none;
+  border-radius: var(--rak-radius-sm);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+
+  &:focus-visible {
+    outline: 2px solid var(--rak-primary-500);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: default;
+    background-color: var(--rak-disabled-bg);
+    color: var(--rak-disabled-text);
+  }
+
+  &.--sm {
+    min-height: 32px;
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  // Icon-only buttons should stay square rather than stretch to the text width.
+  &.--icon {
+    padding: 0;
+    aspect-ratio: 1;
+  }
+
+  // Every colour below is scoped to :not(:disabled). The variant selectors are
+  // more specific than `&:disabled`, so without that the disabled fill loses.
+  &.--solid:not(:disabled) {
+    color: var(--rak-on-solid);
+
+    &.--primary {
+      background-color: var(--rak-primary-500);
+
+      &:hover {
+        background-color: var(--rak-primary-600);
+      }
+      &:active {
+        background-color: var(--rak-primary-700);
+      }
+    }
+
+    &.--success {
+      background-color: var(--rak-success-500);
+
+      &:hover {
+        background-color: var(--rak-success-600);
+      }
+      &:active {
+        background-color: var(--rak-success-700);
+      }
+    }
+
+    &.--danger {
+      background-color: var(--rak-danger-500);
+
+      &:hover {
+        background-color: var(--rak-danger-600);
+      }
+      &:active {
+        background-color: var(--rak-danger-700);
+      }
+    }
+  }
+
+  // Soft buttons inherit the surrounding tint, which is how the toast close
+  // button picks up its own toast color.
+  &.--soft:not(:disabled) {
+    background-color: transparent;
+    color: inherit;
+
+    &:hover {
+      background-color: rgb(0 0 0 / 8%);
+    }
+    &:active {
+      background-color: rgb(0 0 0 / 16%);
+    }
+  }
+}

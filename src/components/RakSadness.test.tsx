@@ -211,7 +211,8 @@ describe("RakSadness, automatic picks fetch", () => {
     });
 
     await user.click(screen.getByRole("combobox"));
-    await user.click(screen.getByRole("option", { name: "Week 1" }));
+    // Base UI mounts the popup in a portal, so the options arrive a tick later.
+    await user.click(await screen.findByRole("option", { name: "Week 1" }));
 
     await waitFor(() => {
       expect(

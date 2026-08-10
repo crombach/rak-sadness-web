@@ -10,17 +10,79 @@ $toasterWidth: min(calc(100% - 48px), 400px);
   right: calc(50% - $toasterWidth / 2 - 24px);
   margin: 24px;
   width: $toasterWidth;
-  box-shadow: var(--joy-shadow-lg);
-  border-radius: var(--joy-radius-lg);
+  box-shadow: var(--rak-shadow-lg);
+  border-radius: var(--rak-radius-lg);
 }
 
 .toast {
   display: flex;
   align-items: flex-start;
+  gap: 12px;
   width: 100%;
+  padding: 12px;
+  border-radius: var(--rak-radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+
+  &.--primary {
+    background-color: var(--rak-soft-primary-bg);
+    color: var(--rak-soft-primary-text);
+
+    .toast__header {
+      color: var(--rak-soft-primary-title);
+    }
+  }
+  &.--neutral {
+    background-color: var(--rak-soft-neutral-bg);
+    color: var(--rak-soft-neutral-text);
+
+    .toast__header {
+      color: var(--rak-soft-neutral-title);
+    }
+  }
+  &.--success {
+    background-color: var(--rak-soft-success-bg);
+    color: var(--rak-soft-success-text);
+
+    .toast__header {
+      color: var(--rak-soft-success-title);
+    }
+  }
+  &.--warning {
+    background-color: var(--rak-soft-warning-bg);
+    color: var(--rak-soft-warning-text);
+
+    .toast__header {
+      color: var(--rak-soft-warning-title);
+    }
+  }
+  &.--danger {
+    background-color: var(--rak-soft-danger-bg);
+    color: var(--rak-soft-danger-text);
+
+    .toast__header {
+      color: var(--rak-soft-danger-title);
+    }
+  }
+
+  .toast__icon {
+    display: flex;
+    align-items: center;
+    align-self: center;
+  }
+
+  .toast__body {
+    flex: 1;
+  }
 
   .toast__header {
+    font-size: 1rem;
     font-weight: 600;
-    filter: brightness(0.7);
+    line-height: 1.5;
+  }
+
+  .toast__close {
+    align-self: center;
   }
 }

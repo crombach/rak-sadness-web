@@ -5,7 +5,9 @@
   align-items: center;
   justify-content: center;
   z-index: 999;
-  box-shadow: var(--joy-shadow-md);
+  box-shadow: var(--rak-shadow-md);
+  background-color: var(--rak-primary-500);
+  color: var(--rak-on-solid);
 }
 
 .navbar__content {

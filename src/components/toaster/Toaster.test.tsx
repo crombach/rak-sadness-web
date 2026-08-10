@@ -1,9 +1,9 @@
-import { ColorPaletteProp } from "@mui/joy";
 import { render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import {
   Toast,
   ToastContextProvider,
+  ToastType,
   useToastContext,
 } from "../../context/ToastContext";
 import Toaster from "./Toaster";
@@ -67,7 +67,7 @@ describe("Toaster", () => {
     ["warning", "WarningIcon"],
     ["neutral", "InfoIcon"],
   ])("shows the %s icon", async (type, iconTestId) => {
-    mountToaster(new Toast(type as ColorPaletteProp, "Header", "Message"));
+    mountToaster(new Toast(type as ToastType, "Header", "Message"));
     await show("Header");
     expect(screen.getByTestId(iconTestId)).toBeInTheDocument();
   });

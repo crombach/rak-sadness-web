@@ -1,4 +1,4 @@
-import Button from "@mui/joy/Button";
+import Button from "../../button/Button";
 import "./LogoButton.scss";
 
 const OUTLINE_FILTER_ID = "logo-button-outline";
@@ -8,12 +8,7 @@ const OUTLINE_RADIUS_PX = 1;
 
 export default function LogoButton({ onClick }: { onClick: () => void }) {
   return (
-    <Button
-      variant="solid"
-      color="primary"
-      onClick={onClick}
-      className="logo-button"
-    >
+    <Button onClick={onClick} className="logo-button">
       {/*
         Dilating the alpha channel gives a stroke of one fixed width in every
         direction. Stacked drop-shadows only approximate that, and the sub-pixel

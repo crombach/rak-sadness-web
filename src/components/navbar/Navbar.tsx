@@ -1,5 +1,4 @@
 import { ReactNode } from "react";
-import { Sheet } from "@mui/joy";
 import "./Navbar.scss";
 
 export default function Navbar({
@@ -10,11 +9,11 @@ export default function Navbar({
   right?: ReactNode;
 }) {
   return (
-    <Sheet className="navbar" variant="solid" color="primary">
+    <header className="navbar">
       <div className="navbar__content">
         <div className="navbar__content-left">{left}</div>
         <div className="navbar__content-right">{right}</div>
       </div>
-    </Sheet>
+    </header>
   );
 }

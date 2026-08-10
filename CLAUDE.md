@@ -1,6 +1,6 @@
 # rak-sadness-web
 
-Auto-scoring web app for the Rak Madness football pool. Vite + React 19 + TypeScript, MUI Joy, SCSS. Vitest for tests, ESLint flat config. Scores an uploaded weekly picks spreadsheet against ESPN game results, exports XLSX. Deployed to Cloudflare Pages (`wrangler`); `functions/api/picks/[week].ts` is the Pages Function serving stored picks.
+Auto-scoring web app for the Rak Madness football pool. Vite + React 19 + TypeScript, Base UI, SCSS. Vitest for tests, ESLint flat config. Scores an uploaded weekly picks spreadsheet against ESPN game results, exports XLSX. Deployed to Cloudflare Pages (`wrangler`); `functions/api/picks/[week].ts` is the Pages Function serving stored picks.
 
 ## Subdirectories
 
