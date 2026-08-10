@@ -1,4 +1,4 @@
-# Rak Sadness
+# Rak Madness Calculator
 
 Simple auto-scoring web application for [Rak Madness](https://rakmadness.net/). The [public site](https://rak.cullenrombach.com/) is hosted on [CloudFlare Pages](https://developers.cloudflare.com/pages/).
 

@@ -53,7 +53,7 @@ function headerCell(value: string) {
   };
 }
 
-function explanationCell(pick: string, isCorrect: Status) {
+function pickCell(pick: string, isCorrect: Status) {
   const cellColor = PICK_STATUS_FILL[isCorrect];
 
   return {
@@ -171,11 +171,11 @@ export default async function buildSpreadsheetBuffer(
     `Rak Madness Week ${week} Results`,
   );
 
-  // Build the explanation sheet data as an array of arrays.
+  // Build the picks sheet data as an array of arrays.
   const firstPlayer = scoresObject.scores[0];
   const collegeCount = firstPlayer.college.length;
   const proCount = firstPlayer.pro.length;
-  const explanationData = [
+  const picksData = [
     // Header row
     [
       headerCell("Rank"),
@@ -191,13 +191,9 @@ export default async function buildSpreadsheetBuffer(
       return [
         normalCell({ value: index + 1, alignment: "left", isBold: true }),
         normalCell({ value: player.name, alignment: "left" }),
-        ...player.college.map((result) =>
-          explanationCell(result.pick, result.status),
-        ),
+        ...player.college.map((result) => pickCell(result.pick, result.status)),
         normalCell({ value: player.score.college, alignment: "center" }),
-        ...player.pro.map((result) =>
-          explanationCell(result.pick, result.status),
-        ),
+        ...player.pro.map((result) => pickCell(result.pick, result.status)),
         normalCell({ value: player.score.pro, alignment: "center" }),
         normalCell({
           value: player.score.total,
@@ -208,10 +204,10 @@ export default async function buildSpreadsheetBuffer(
     }),
   ];
 
-  // Convert the explanation data to a sheet.
-  const explanationSheet = XLSX.utils.aoa_to_sheet(explanationData);
+  // Convert the picks data to a sheet.
+  const picksSheet = XLSX.utils.aoa_to_sheet(picksData);
   // Set column widths.
-  explanationSheet["!cols"] = [
+  picksSheet["!cols"] = [
     { wch: 5 },
     { wch: 22 },
     ...rangeWithPrefix(collegeCount).map(() => ({ wch: 10 })),
@@ -223,8 +219,8 @@ export default async function buildSpreadsheetBuffer(
   // Add the results sheet to the workbook.
   XLSX.utils.book_append_sheet(
     workbook,
-    explanationSheet,
-    `Rak Madness Week ${week} Explanation`,
+    picksSheet,
+    `Rak Madness Week ${week} Picks`,
   );
 
   // Write the workbook to a buffer and return that buffer.

@@ -4,7 +4,7 @@ import useWeekRouteGuard from "../../hooks/useWeekRouteGuard";
 import getClasses from "../../utils/getClasses";
 import LogoButton from "../navbar/LogoButton/LogoButton";
 import ScoresNavbar, { ScoresView } from "../navbar/ScoresNavbar";
-import PageLayout from "../PageLayout";
+import PageLayout, { APP_NAME } from "../PageLayout";
 import SkeletonTable from "../table/SkeletonTable";
 import "./ResultsLayout.scss";
 
@@ -12,7 +12,7 @@ import "./ResultsLayout.scss";
  * Chrome for a week's results, shared by both views.
  *
  * A layout route rather than a piece of each view, so switching between the
- * scoreboard and the explanation does not remount the refresh button and restart
+ * scoreboard and the picks does not remount the refresh button and restart
  * its throttle window.
  */
 export default function ResultsLayout() {
@@ -22,8 +22,8 @@ export default function ResultsLayout() {
   const guard = useWeekRouteGuard(rawWeek);
 
   // The route decides which view is showing, not component state.
-  const view: ScoresView = useMatch("/week/:week/explanation")
-    ? "Explanation"
+  const view: ScoresView = useMatch("/week/:week/picks")
+    ? "Picks"
     : "Scoreboard";
 
   const isReady = guard.status === "ready";
@@ -34,7 +34,7 @@ export default function ResultsLayout() {
       navbarLeft={
         <>
           <LogoButton onClick={() => navigate("/")} />
-          <span>{view}</span>
+          <span>{APP_NAME}</span>
         </>
       }
       navbarRight={

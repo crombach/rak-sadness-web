@@ -3,6 +3,9 @@ import getClasses from "../utils/getClasses";
 import Navbar from "./navbar/Navbar";
 import "./PageLayout.scss";
 
+/** Shown in the navbar on every page, whichever view is open. */
+export const APP_NAME = "Rak Madness Calculator";
+
 const BACKGROUND_STYLE = {
   backgroundImage: "url(/logo512.png)",
   backgroundColor: "#6eaad9",

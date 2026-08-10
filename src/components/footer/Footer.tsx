@@ -12,7 +12,7 @@ export default function Footer() {
       </a>
       |
       <a
-        href="https://github.com/crombach/rak-sadness-web"
+        href="https://github.com/crombach/rak-madness-calculator"
         target="_blank"
         rel="noreferrer"
       >

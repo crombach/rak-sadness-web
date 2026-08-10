@@ -3,7 +3,7 @@
 // scores: recomputing those is fast, and a cached score could go stale against a
 // change to the scoring rules.
 
-const KEY_PREFIX = "rak-sadness:picks:";
+const KEY_PREFIX = "rak-madness:picks:";
 /** A size guard, not a history. Picks files are tens of KB. */
 const MAX_CACHED_WEEKS = 3;
 // Encoding the whole buffer in one call overflows the argument list, so it goes

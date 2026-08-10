@@ -13,6 +13,6 @@ worked out. Nothing but filler rows, so the shell sizes it.
 
 ## Subdirectories
 
-- [`explanation/`](explanation/CLAUDE.md) — explanation-view table with pick toasts
+- [`picks/`](picks/CLAUDE.md) — picks-view table with per-pick toasts
 - [`playerName/`](playerName/CLAUDE.md) — player name cell with knocked-out icon
 - [`scores/`](scores/CLAUDE.md) — ranked score table, the default results view

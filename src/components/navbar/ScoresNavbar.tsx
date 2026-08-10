@@ -3,9 +3,9 @@ import getClasses from "../../utils/getClasses";
 import Button from "../button/Button";
 import "./ScoresNavbar.scss";
 
-export type ScoresView = "Scoreboard" | "Explanation";
+export type ScoresView = "Scoreboard" | "Picks";
 
-/** The scoreboard/explanation switch and the refresh button. */
+/** The scoreboard/picks switch and the refresh button. */
 export default function ScoresNavbar({
   view,
   onViewChange,
@@ -30,15 +30,19 @@ export default function ScoresNavbar({
         })}`}
       >
         <LeaderboardIcon />
+        {/* Hidden by the stylesheet on a narrow screen, where the icon has to
+            carry the button on its own. */}
+        <span className="home__scores-header-label">Scoreboard</span>
       </Button>
       <Button
         disabled={disabled}
-        onClick={() => onViewChange("Explanation")}
+        onClick={() => onViewChange("Picks")}
         className={`home__scores-header-button ${getClasses({
-          "--active": view === "Explanation",
+          "--active": view === "Picks",
         })}`}
       >
         <InfoIcon />
+        <span className="home__scores-header-label">Picks</span>
       </Button>
       <div className="home__scores-header-divider" />
       <Button

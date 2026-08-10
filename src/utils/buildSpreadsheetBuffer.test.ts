@@ -9,9 +9,9 @@ import buildSpreadsheetBuffer from "./buildSpreadsheetBuffer";
 
 const WEEK = 5;
 const RESULTS_SHEET = `Rak Madness Week ${WEEK} Results`;
-const EXPLANATION_SHEET = `Rak Madness Week ${WEEK} Explanation`;
+const PICKS_SHEET = `Rak Madness Week ${WEEK} Picks`;
 
-// Fill colors that explanationCell assigns per pick status.
+// Fill colors that pickCell assigns per pick status.
 const FILL_BY_STATUS = {
   yes: "A3FAA0",
   no: "FAA0A0",
@@ -67,16 +67,16 @@ function rowsOf(workbook: XLSX.WorkBook, sheetName: string): Array<Array<any>> {
 }
 
 describe("buildSpreadsheetBuffer, workbook shape", () => {
-  it("writes a results sheet and an explanation sheet named after the week", async () => {
+  it("writes a results sheet and a picks sheet named after the week", async () => {
     const workbook = await readBack();
-    expect(workbook.SheetNames).toEqual([RESULTS_SHEET, EXPLANATION_SHEET]);
+    expect(workbook.SheetNames).toEqual([RESULTS_SHEET, PICKS_SHEET]);
   });
 
   it("names both sheets after whichever week it was given", async () => {
     const workbook = await readBack(scores, 12);
     expect(workbook.SheetNames).toEqual([
       "Rak Madness Week 12 Results",
-      "Rak Madness Week 12 Explanation",
+      "Rak Madness Week 12 Picks",
     ]);
   });
 
@@ -130,10 +130,10 @@ describe("buildSpreadsheetBuffer, results sheet", () => {
   });
 });
 
-describe("buildSpreadsheetBuffer, explanation sheet", () => {
+describe("buildSpreadsheetBuffer, picks sheet", () => {
   it("labels one column per pick, sized from the first player", async () => {
     const workbook = await readBack();
-    expect(rowsOf(workbook, EXPLANATION_SHEET)[0]).toEqual([
+    expect(rowsOf(workbook, PICKS_SHEET)[0]).toEqual([
       "Rank",
       "Player",
       "C1",
@@ -147,7 +147,7 @@ describe("buildSpreadsheetBuffer, explanation sheet", () => {
   });
 
   it("writes each pick alongside the running college, pro, and total scores", async () => {
-    const rows = rowsOf(await readBack(), EXPLANATION_SHEET);
+    const rows = rowsOf(await readBack(), PICKS_SHEET);
     expect(rows[1]).toEqual([
       1,
       "Alice",
@@ -162,7 +162,7 @@ describe("buildSpreadsheetBuffer, explanation sheet", () => {
   });
 
   it("colors each pick cell by its status", async () => {
-    const sheet = (await readBack()).Sheets[EXPLANATION_SHEET];
+    const sheet = (await readBack()).Sheets[PICKS_SHEET];
     // Reading a workbook back flattens the fill onto the style itself.
     const fillOf = (address: string) => sheet[address].s.fgColor.rgb;
     // Row 3 is Bob: C1 no, C2 error, P1 no, P2 incomplete.
@@ -187,11 +187,11 @@ describe("buildSpreadsheetBuffer, explanation sheet", () => {
         }),
       ],
     });
-    expect(rowsOf(workbook, EXPLANATION_SHEET)[1][2]).toBe("N/A");
+    expect(rowsOf(workbook, PICKS_SHEET)[1][2]).toBe("N/A");
   });
 
-  it("sets a column width for every explanation column", async () => {
+  it("sets a column width for every picks column", async () => {
     const workbook = await readBack();
-    expect(workbook.Sheets[EXPLANATION_SHEET]["!cols"]).toHaveLength(9);
+    expect(workbook.Sheets[PICKS_SHEET]["!cols"]).toHaveLength(9);
   });
 });

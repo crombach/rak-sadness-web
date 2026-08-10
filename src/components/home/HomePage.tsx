@@ -9,7 +9,7 @@ import getClasses from "../../utils/getClasses";
 import Button from "../button/Button";
 import Footer from "../footer/Footer";
 import LogoButton from "../navbar/LogoButton/LogoButton";
-import PageLayout from "../PageLayout";
+import PageLayout, { APP_NAME } from "../PageLayout";
 import "./HomePage.scss";
 
 export default function HomePage() {
@@ -50,7 +50,7 @@ export default function HomePage() {
       navbarLeft={
         <>
           <LogoButton onClick={() => navigate("/")} />
-          <span>Rak Madness Scoreboard</span>
+          <span>{APP_NAME}</span>
         </>
       }
     >
