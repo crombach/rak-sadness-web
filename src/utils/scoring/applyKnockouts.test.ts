@@ -184,10 +184,10 @@ describe("applyKnockouts", () => {
   });
 
   // The cases below can at best tie on total score, and have equal, settled
-  // college scores, so the against-the-spread tiebreaker decides them. Bob's score
-  // against the spread is the one that has to catch up, and it only counts his own
-  // picks that carry a spread, so his pick is what decides whether the gap can
-  // close.
+  // college scores, so the against-the-spread tiebreaker decides them. Both rows
+  // carry the same spread because a valid workbook cannot say otherwise, so only
+  // two shapes are reachable: a differing pick on a game with a spread, and one on
+  // a game without.
   function trailingBySpreadTiebreaker(
     leaderProPick: string,
     trailingProPick: string,
@@ -220,15 +220,6 @@ describe("applyKnockouts", () => {
     expect(
       trailingBySpreadTiebreaker("BUF -3", "KC -3")[1].status.isKnockedOut,
     ).toBe(false);
-  });
-
-  it("ignores a spread only the leader took, which cannot score for anyone else", () => {
-    const result = trailingBySpreadTiebreaker("BUF -3", "KC");
-
-    expect(result[1].status.isKnockedOut).toBe(true);
-    expect(result[1].status.explanation).toContain(
-      "Knocked out on Pro Score Against the Spread tiebreaker",
-    );
   });
 
   it("ignores a differing pro pick with no spread on either side", () => {

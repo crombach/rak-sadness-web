@@ -5,7 +5,12 @@ export type GameScore = {
     message: string;
     downDistanceText?: string;
   };
-  wasNotFound: boolean;
+  /**
+   * The pick cannot be scored either way: it is missing, its game is missing, or
+   * the workbook contradicts itself about the game's spread. `explanation` says
+   * which.
+   */
+  isInvalid: boolean;
   isCompleted: boolean;
   hasSpread: boolean;
 };

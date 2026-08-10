@@ -1,7 +1,11 @@
 import { GameStatus, HomeAway } from "../../types/ESPN";
 import { LeagueResult } from "../../types/LeagueResult";
 import { finalGame } from "../leagueResultFixtures";
-import { getPickResults, indexResultsByTeam } from "./getPickResults";
+import {
+  getPickResults,
+  getStatus,
+  indexResultsByTeam,
+} from "./getPickResults";
 
 // BUF beat KC by 10.
 const bufBeatKcBy10 = finalGame({
@@ -108,7 +112,7 @@ describe("getPickResults, missing data", () => {
       indexResultsByTeam([bufBeatKcBy10]),
     )[0];
     expect(result.pointValue).toBe(0);
-    expect(result.wasNotFound).toBe(true);
+    expect(result.isInvalid).toBe(true);
     expect(result.explanation.header).toBe("Missing Game");
   });
 
@@ -118,7 +122,7 @@ describe("getPickResults, missing data", () => {
       indexResultsByTeam([bufBeatKcBy10]),
     )[0];
     expect(result.pointValue).toBe(0);
-    expect(result.wasNotFound).toBe(true);
+    expect(result.isInvalid).toBe(true);
     expect(result.explanation.header).toBe("Missing Pick");
   });
 });
@@ -208,5 +212,41 @@ describe("getPickResults, ordering", () => {
       indexResultsByTeam([bufBeatKcBy10]),
     );
     expect(results.map((result) => result.pointValue)).toEqual([0, 1]);
+  });
+});
+
+describe("getPickResults, unscoreable games", () => {
+  const reason = 'Picks disagree about the spread: "BUF +7" and "KC -8".';
+
+  function scoreFirstOfTwo(pick: string) {
+    return getPickResults(
+      [pick, "BUF"],
+      indexResultsByTeam([bufBeatKcBy10]),
+      new Map([[0, reason]]),
+    );
+  }
+
+  it("scores nothing for a game the workbook describes two ways", () => {
+    const [unscoreable] = scoreFirstOfTwo("BUF +7");
+
+    expect(unscoreable.pointValue).toBe(0);
+    expect(unscoreable.isInvalid).toBe(true);
+    expect(unscoreable.isCompleted).toBe(false);
+    expect(getStatus(unscoreable)).toBe("error");
+  });
+
+  it("explains itself with the disagreement", () => {
+    const [unscoreable] = scoreFirstOfTwo("BUF +7");
+
+    expect(unscoreable.explanation.header).toBe("Invalid Spread");
+    expect(unscoreable.explanation.message).toBe(reason);
+  });
+
+  it("withholds the point even from the pick that would have won", () => {
+    expect(scoreFirstOfTwo("BUF -3")[0].pointValue).toBe(0);
+  });
+
+  it("leaves the other games on the row alone", () => {
+    expect(scoreFirstOfTwo("BUF +7")[1].pointValue).toBe(1);
   });
 });

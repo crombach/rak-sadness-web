@@ -6,7 +6,7 @@ import debugLog from "../debugLog";
 import parsePick from "./parsePick";
 
 export function getStatus(score: GameScore): Status {
-  if (score.wasNotFound) {
+  if (score.isInvalid) {
     return "error";
   } else if (!score.isCompleted) {
     return "incomplete";
@@ -36,38 +36,67 @@ export function indexResultsByTeam(
   return byTeam;
 }
 
-/** Takes the index rather than the games, so scoring builds it once per week. */
+/**
+ * A pick with no point in it either way. Every reason a game cannot be scored ends
+ * here, and they share `isInvalid` because they share that outcome. Only the
+ * explanation differs, since only the user can act on the difference.
+ */
+function unscoreable(
+  header: string,
+  message: string,
+  hasSpread: boolean,
+): GameScore {
+  return {
+    pointValue: 0,
+    explanation: { header, message },
+    isInvalid: true,
+    isCompleted: false,
+    hasSpread,
+  };
+}
+
+/**
+ * Takes the index rather than the games, so scoring builds it once per week.
+ *
+ * `spreadDisagreements` maps a position in `picks` to the workbook's own
+ * contradiction about that game's spread. A game described two ways scores for
+ * nobody, so the whole column comes back unscoreable rather than resolving the
+ * contradiction one way and quietly handing out points on it.
+ */
 export function getPickResults(
   picks: Array<string>,
   resultsByTeam: Map<string, LeagueResult>,
+  spreadDisagreements: Map<number, string> = new Map(),
 ): Array<GameScore> {
-  return picks.map((pick: string) => {
+  return picks.map((pick: string, index: number) => {
     // Parse the pick text to extract the selected team abbreviation and spread (if present).
     const { teamAbbreviation: selectedTeam, spread } = parsePick(pick);
     const hasSpread = spread !== 0;
 
-    // Find the game result matching the selected team.
-    const gameResult =
-      selectedTeam != null ? resultsByTeam.get(selectedTeam) : undefined;
-    if (!gameResult) {
-      if (selectedTeam) {
-        console.warn(
-          "FAILED to find game result for team abbreviation:",
-          selectedTeam,
-        );
-      }
-      return {
-        pointValue: 0,
-        explanation: {
-          header: selectedTeam ? "Missing Game" : "Missing Pick",
-          message: selectedTeam
-            ? `Unable to find game result for team with abbreviation ${selectedTeam}`
-            : "No selection was made for this game.",
-        },
-        wasNotFound: true,
-        isCompleted: false,
+    const spreadDisagreement = spreadDisagreements.get(index);
+    if (spreadDisagreement != null) {
+      return unscoreable("Invalid Spread", spreadDisagreement, hasSpread);
+    }
+    if (selectedTeam == null) {
+      return unscoreable(
+        "Missing Pick",
+        "No selection was made for this game.",
         hasSpread,
-      };
+      );
+    }
+
+    // Find the game result matching the selected team.
+    const gameResult = resultsByTeam.get(selectedTeam);
+    if (!gameResult) {
+      console.warn(
+        "FAILED to find game result for team abbreviation:",
+        selectedTeam,
+      );
+      return unscoreable(
+        "Missing Game",
+        `Unable to find game result for team with abbreviation ${selectedTeam}`,
+        hasSpread,
+      );
     }
 
     // Determine if the player picked the winner.
@@ -124,7 +153,7 @@ export function getPickResults(
             ? gameResult.possession.downDistanceText
             : "",
       },
-      wasNotFound: false,
+      isInvalid: false,
       isCompleted: gameResult.status === GameStatus.FINAL,
       hasSpread,
     };

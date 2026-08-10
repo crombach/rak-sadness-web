@@ -1,5 +1,6 @@
 import debugLog from "../debugLog";
 import parsePick from "./parsePick";
+import findInconsistentSpreadGames from "./validateSpreads";
 
 export const TIEBREAKER_PICK_KEY = "Pts";
 
@@ -10,6 +11,8 @@ export type ParsedPicks = {
   tiebreakerGameKey: string;
   collegeMatchups: Array<Set<string>>;
   proMatchups: Array<Set<string>>;
+  /** Game key to the disagreement, for the games that cannot be scored. */
+  inconsistentSpreadGames: Map<string, string>;
 };
 
 /**
@@ -60,6 +63,16 @@ export default async function parsePicksWorkbook(
     .map((key) => matchups[key]);
   debugLog("matchups", { collegeMatchups, proMatchups });
 
+  const inconsistentSpreadGames = findInconsistentSpreadGames(rows, [
+    ...collegeKeys,
+    ...proKeys,
+  ]);
+  // Warned about in production, not just in a dev server: it means the workbook
+  // needs fixing, and only whoever published it can do that.
+  inconsistentSpreadGames.forEach((reason, gameKey) => {
+    console.error(`Cannot score game ${gameKey}. ${reason}`);
+  });
+
   return {
     rows,
     collegeKeys,
@@ -67,5 +80,6 @@ export default async function parsePicksWorkbook(
     tiebreakerGameKey,
     collegeMatchups,
     proMatchups,
+    inconsistentSpreadGames,
   };
 }

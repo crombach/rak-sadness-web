@@ -410,3 +410,51 @@ describe("getPlayerScores, league requests", () => {
     expect(leagues).toContain(League.PRO);
   });
 });
+
+describe("getPlayerScores, spreads the workbook contradicts", () => {
+  // KC's spread should be +7 against Alice's BUF -7. It is not, so there is no
+  // way to know which number the pool was playing.
+  const contradictoryP1 = [
+    { Name: "Alice", C1: "OSU -3", P1: "BUF -7", P2: "DAL -3", Pts: 41 },
+    { Name: "Bob", C1: "MICH +3", P1: "KC -8", P2: "PHI +3", Pts: 45 },
+  ];
+
+  beforeEach(() => {
+    withEverythingFinal();
+    vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  it("scores the game for nobody, and says why in the cell", async () => {
+    const result = await getPlayerScores(WEEK, picksBuffer(contradictoryP1));
+
+    result.scores.forEach((score) => {
+      expect(score.pro[0].status).toBe("error");
+      expect(score.pro[0].explanation.header).toBe("Invalid Spread");
+      expect(score.pro[0].explanation.message).toBe(
+        'Picks disagree about the spread: "BUF -7" and "KC -8".',
+      );
+    });
+  });
+
+  it("leaves every other game on the row scored", async () => {
+    const result = await getPlayerScores(WEEK, picksBuffer(contradictoryP1));
+    const alice = result.scores.find((score) => score.name === "Alice");
+
+    // OSU and DAL both covered, and P1 is the game that cannot be scored.
+    expect(alice?.score).toEqual({
+      total: 2,
+      college: 1,
+      pro: 1,
+      proAgainstTheSpread: 1,
+    });
+    expect(alice?.pro[1].status).toBe("yes");
+  });
+
+  it("reports the workbook problem to the console", async () => {
+    await getPlayerScores(WEEK, picksBuffer(contradictoryP1));
+
+    expect(console.error).toHaveBeenCalledWith(
+      'Cannot score game P1. Picks disagree about the spread: "BUF -7" and "KC -8".',
+    );
+  });
+});

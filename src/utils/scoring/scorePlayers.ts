@@ -13,6 +13,21 @@ function sumPointValues(scores: Array<GameScore>): number {
   return scores.reduce((sum, score) => sum + score.pointValue, 0);
 }
 
+/** Restates the flagged games as positions, which is how a row's picks arrive. */
+function byPickIndex(
+  gameKeys: Array<string>,
+  reasonByGameKey: Map<string, string>,
+): Map<number, string> {
+  const byIndex = new Map<number, string>();
+  gameKeys.forEach((gameKey, index) => {
+    const reason = reasonByGameKey.get(gameKey);
+    if (reason != null) {
+      byIndex.set(index, reason);
+    }
+  });
+  return byIndex;
+}
+
 /** Scores every row in the workbook, highest first. */
 export default function scorePlayers(
   parsed: ParsedPicks,
@@ -23,6 +38,14 @@ export default function scorePlayers(
   // games.
   const collegeResultsByTeam = indexResultsByTeam(results.college);
   const proResultsByTeam = indexResultsByTeam(results.pro);
+  const unscoreableCollege = byPickIndex(
+    parsed.collegeKeys,
+    parsed.inconsistentSpreadGames,
+  );
+  const unscoreablePro = byPickIndex(
+    parsed.proKeys,
+    parsed.inconsistentSpreadGames,
+  );
 
   const scores: Array<PlayerScore> = parsed.rows.map((playerRow: any) => {
     const collegePicks = parsed.collegeKeys.map((key) => playerRow[key]);
@@ -34,12 +57,17 @@ export default function scorePlayers(
     const collegePickResults = getPickResults(
       collegePicks,
       collegeResultsByTeam,
+      unscoreableCollege,
     );
     const scoreCollege = sumPointValues(
       collegePickResults.filter((result) => result.isCompleted),
     );
 
-    const proPickResults = getPickResults(proPicks, proResultsByTeam);
+    const proPickResults = getPickResults(
+      proPicks,
+      proResultsByTeam,
+      unscoreablePro,
+    );
     const proPickResultsCompleted = proPickResults.filter(
       (result) => result.isCompleted,
     );

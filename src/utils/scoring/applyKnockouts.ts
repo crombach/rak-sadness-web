@@ -15,10 +15,9 @@ type PairDifferences = {
  * How many of the games still to be played these two players have picked
  * differently, which is the most ground the active player can still make up.
  *
- * `differentProPicksWithSpreads` reads the spread off the active player's own
- * pick, because their score against the spread is what has to catch up, and that
- * score comes from their own picks. Swapping the two players can therefore give a
- * different answer, on a sheet where the two rows disagree about a game's spread.
+ * A spread describes the game, so either row answers whether one is on it.
+ * `parsePicksWorkbook` refuses to score a game whose rows disagree, which is what
+ * makes reading the active player's own pick equivalent to reading the opponent's.
  */
 function countDifferences(
   activeScore: PlayerScore,

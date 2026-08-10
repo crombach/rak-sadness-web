@@ -22,7 +22,7 @@ From a clean checkout: `make setup`, `make build`, `make run`, `make test`, `mak
 
 ## Tests
 
-188 cases, 15 suites, all offline. `npm test` is `vitest run`; `npm run test:watch` watches.
+204 cases, 16 suites, all offline. `npm test` is `vitest run`; `npm run test:watch` watches.
 
 - `src/utils/scoring/getPickResults.test.ts` — spread scoring (favorite covers / fails to cover, underdog, push, tie, half-point spread, missing pick vs missing game, live and upcoming state). Also pins the statuses `GameStatus` does not model: ESPN sends type ids for postponed and canceled, they land in the same branch as a live game, and a canceled game has no winner so every pick scores a point.
 - `src/utils/scoring/getPlayerScores.test.ts` — workbook parsing, matchup derivation, per-league scoring, tiebreaker distance, the whole sort order, every knockout branch. Builds a real workbook with `xlsx-js-style` and mocks `getLeagueResults`.
@@ -30,6 +30,7 @@ From a clean checkout: `make setup`, `make build`, `make run`, `make test`, `mak
 - `src/utils/getLeagueInfo.test.ts` — endpoint URLs, calendar and week mapping, active-calendar choice per league, the off-season calendar that arrives with no `entries`.
 - `src/utils/getLeagueResults.test.ts` — pro and college request URLs, the college week offset, the postseason collapse to week 1, event mapping, matchup filtering.
 - `src/utils/scoring/applyKnockouts.test.ts` — knockouts from plain `PlayerScore` objects, including the college and against-the-spread tiebreakers.
+- `src/utils/scoring/validateSpreads.test.ts` — the rule that a spread belongs to the game: same side means the same number, opposite sides mean opposite numbers. A game whose rows disagree scores for nobody, so this is what stops one typo from deciding the pool.
 - `src/utils/picksCache.test.ts` — round trip, per-week keys, the size cap, and a corrupt or rejected entry counting as a miss.
 - `src/context/ToastContext.test.tsx` — queue cap of 3, removal by id, 5-second auto-dismiss, plus render counts proving an actions-only consumer does not re-render.
 - `src/App.test.tsx` — week lookup, the picks fetch, upload, both results routes, refresh, export, and every branch of the week route guard. Mounts the routed app in a `MemoryRouter`, with the entry URL as a parameter.
