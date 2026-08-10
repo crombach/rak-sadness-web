@@ -1,6 +1,6 @@
 # navbar
 
-`Navbar`: MUI Joy `Sheet`, `left`/`right` `ReactElement` slots.
+`Navbar`: `<header>` with `left`/`right` `ReactNode` slots, solid primary fill from `Navbar.scss`.
 
 ## Subdirectories
 

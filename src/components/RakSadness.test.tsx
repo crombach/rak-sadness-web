@@ -211,7 +211,8 @@ describe("RakSadness, automatic picks fetch", () => {
     });
 
     await user.click(screen.getByRole("combobox"));
-    await user.click(screen.getByRole("option", { name: "Week 1" }));
+    // Base UI mounts the popup in a portal, so the options arrive a tick later.
+    await user.click(await screen.findByRole("option", { name: "Week 1" }));
 
     await waitFor(() => {
       expect(
@@ -250,6 +251,33 @@ describe("RakSadness, manual spreadsheet upload", () => {
       expect(screen.getByText("View Results")).toBeEnabled();
     });
     expect(screen.getByText("Export Results")).toBeEnabled();
+  });
+
+  it("reports a toast when the spreadsheet cannot be scored", async () => {
+    getPlayerScoresMock.mockRejectedValue(new Error("not a spreadsheet"));
+    const user = await mountLoadedApp();
+    await uploadSpreadsheet(user);
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          "Failed to read picks from the spreadsheet you selected.",
+        ),
+      ).toBeInTheDocument();
+    });
+    expect(screen.getByText("View Results")).toBeDisabled();
+  });
+
+  it("reports a toast when the file itself cannot be read", async () => {
+    readFileToBufferMock.mockRejectedValue(new Error("unreadable"));
+    const user = await mountLoadedApp();
+    await uploadSpreadsheet(user);
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          "Failed to read picks from the spreadsheet you selected.",
+        ),
+      ).toBeInTheDocument();
+    });
   });
 
   it("reports an aborted selection when no file is chosen", async () => {

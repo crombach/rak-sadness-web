@@ -22,6 +22,9 @@
 .dev.vars
 .dev.vars.*
 
+# Playwright MCP scratch output (snapshots, console logs, screenshots)
+/.playwright-mcp
+
 #wrangler
 /.wrangler
 

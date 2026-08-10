@@ -1,14 +1,41 @@
-import Button from "@mui/joy/Button";
+import Button from "../../button/Button";
 import "./LogoButton.scss";
+
+const OUTLINE_FILTER_ID = "logo-button-outline";
+const OUTLINE_RADIUS_PX = 1;
 
 export default function LogoButton({ onClick }: { onClick: () => void }) {
   return (
-    <Button
-      variant="solid"
-      color="primary"
-      onClick={onClick}
-      className="logo-button"
-    >
+    <Button onClick={onClick} className="logo-button">
+      {/* Dilating the alpha channel strokes the logo evenly on every side. */}
+      <svg className="logo-button__filter" aria-hidden="true" focusable="false">
+        <filter
+          id={OUTLINE_FILTER_ID}
+          x="-25%"
+          y="-25%"
+          width="150%"
+          height="150%"
+          colorInterpolationFilters="sRGB"
+        >
+          <feMorphology
+            in="SourceAlpha"
+            operator="dilate"
+            radius={OUTLINE_RADIUS_PX}
+            result="dilated"
+          />
+          <feFlood floodColor="#fff" result="outlineColor" />
+          <feComposite
+            in="outlineColor"
+            in2="dilated"
+            operator="in"
+            result="outline"
+          />
+          <feMerge>
+            <feMergeNode in="outline" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </svg>
       <img className="logo-button__logo" src="/logo192.png" alt="" />
     </Button>
   );

@@ -53,12 +53,7 @@
       "Bash(git *)",
       "Bash(gh *)"
     ],
-    "ask": [
-      "Bash(npm run pages:deploy)",
-      "Bash(npm run pages:deploy *)",
-      "Bash(wrangler *)",
-      "Bash(npx wrangler *)"
-    ],
+    "ask": ["Bash(wrangler *)", "Bash(npx wrangler *)"],
     "deny": [
       "Read(**/.env)",
       "Read(**/.env.*)",
@@ -68,7 +63,11 @@
       "Read(**/*.jks)",
       "Read(**/*credentials.json)",
       "Bash(git push --force:*)",
-      "Bash(git push -f:*)"
+      "Bash(git push -f:*)",
+      "Bash(wrangler pages deploy:*)",
+      "Bash(npx wrangler pages deploy:*)",
+      "Bash(wrangler pages deployment create:*)",
+      "Bash(npx wrangler pages deployment create:*)"
     ]
   }
 }

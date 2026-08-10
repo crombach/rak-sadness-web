@@ -4,6 +4,7 @@
 
 ## Subdirectories
 
+- [`button/`](button/CLAUDE.md) — shared button over Base UI's unstyled primitive
 - [`footer/`](footer/CLAUDE.md) — bottom links bar
 - [`navbar/`](navbar/CLAUDE.md) — top nav bar
 - [`table/`](table/CLAUDE.md) — shared table styles and score/explanation table pieces

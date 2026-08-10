@@ -1,8 +1,78 @@
+// Design tokens. Base UI ships no styles, so every visual in the app resolves
+// back to these.
 :root {
   // Colors extracted from the site logo
   --color-brand-light: #6eaad9;
   --color-brand: #375267;
   --color-brand-dark: #2f4557;
+
+  --rak-font-body:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+
+  --rak-radius-sm: 6px;
+  --rak-radius-md: 8px;
+  --rak-radius-lg: 12px;
+
+  --rak-shadow-xs: 0 1px 2px 0 rgb(21 21 21 / 8%);
+  --rak-shadow-md:
+    0 2px 8px -2px rgb(21 21 21 / 8%), 0 6px 12px -2px rgb(21 21 21 / 8%);
+  --rak-shadow-lg:
+    0 2px 8px -2px rgb(21 21 21 / 8%), 0 12px 16px -4px rgb(21 21 21 / 8%);
+
+  // Primary scale, from the logo's mid blue.
+  --rak-primary-100: #acc2d2;
+  --rak-primary-500: #375267;
+  --rak-primary-600: #2d4253;
+  --rak-primary-700: #243542;
+  --rak-primary-800: #1b2832;
+
+  --rak-success-500: #1f7a1f;
+  --rak-success-600: #136c13;
+  --rak-success-700: #0a470a;
+  --rak-danger-500: #c41c1c;
+  --rak-danger-600: #a51818;
+  --rak-danger-700: #7d1212;
+  --rak-warning-500: #9a5b13;
+
+  // Soft fills, used by the toasts.
+  --rak-soft-primary-bg: #acc2d2;
+  --rak-soft-primary-text: #243542;
+  --rak-soft-primary-title: #375267;
+  --rak-soft-neutral-bg: #f0f4f8;
+  --rak-soft-neutral-text: #32383e;
+  --rak-soft-neutral-title: #32383e;
+  --rak-soft-success-bg: #e3fbe3;
+  --rak-soft-success-text: #0a470a;
+  --rak-soft-success-title: #1f7a1f;
+  --rak-soft-warning-bg: #fdf0e1;
+  --rak-soft-warning-text: #492b08;
+  --rak-soft-warning-title: #9a5b13;
+  --rak-soft-danger-bg: #fce4e4;
+  --rak-soft-danger-text: #7d1212;
+  --rak-soft-danger-title: #c41c1c;
+
+  --rak-surface: #fbfcfe;
+  --rak-level1: #f0f4f8;
+  --rak-border: #cdd7e1;
+  --rak-neutral-200: #dde7ee;
+  --rak-text: #171a1c;
+  --rak-text-secondary: #32383e;
+  --rak-text-tertiary: #555e68;
+  --rak-on-solid: #fff;
+  --rak-disabled-bg: #f0f4f8;
+  --rak-disabled-text: #9fa6ad;
+}
+
+body {
+  margin: 0;
+  background-color: #fff;
+  color: var(--rak-text-secondary);
+  font-family: var(--rak-font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {

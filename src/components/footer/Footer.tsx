@@ -18,14 +18,6 @@ export default function Footer() {
       >
         🖥️ GitHub
       </a>
-      |
-      <a
-        href="https://give.translifeline.org/give/461718/#!/donation/checkout"
-        target="_blank"
-        rel="noreferrer"
-      >
-        🏳️‍⚧️ Donate
-      </a>
     </div>
   );
 }

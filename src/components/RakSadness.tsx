@@ -1,7 +1,9 @@
 import { Refresh } from "@mui/icons-material";
 import Info from "@mui/icons-material/Info";
+import UnfoldMore from "@mui/icons-material/UnfoldMore";
 import Leaderboard from "@mui/icons-material/Leaderboard";
-import { Button, Option, Select, Sheet } from "@mui/joy";
+import { Select } from "@base-ui-components/react/select";
+import Button from "./button/Button";
 import throttle from "lodash.throttle";
 import {
   ChangeEventHandler,
@@ -29,7 +31,7 @@ export default function RakSadness() {
   const { showToast, clearToasts } = useToastContext();
 
   // Refs
-  const refreshButtonRef = useRef<HTMLButtonElement>(null);
+  const refreshButtonRef = useRef<HTMLElement>(null);
 
   // Loading flags
   const [isWeekInfoLoading, setWeekInfoLoading] = useState(true);
@@ -175,10 +177,16 @@ export default function RakSadness() {
           abort();
           return;
         }
-        const picksBuffer = await readFileToBuffer(files[0]);
-        setPicksBuffer(picksBuffer);
-        const newScores = await getPlayerScores(selectedWeek, picksBuffer);
-        if (newScores) {
+        // Both of these reject on a file that is not a readable workbook, which
+        // is whatever the user happened to pick.
+        try {
+          const picksBuffer = await readFileToBuffer(files[0]);
+          setPicksBuffer(picksBuffer);
+          const newScores = await getPlayerScores(selectedWeek, picksBuffer);
+          if (!newScores) {
+            abort();
+            return;
+          }
           setScores(newScores);
           setScoresLoading(false);
           showToast(
@@ -188,8 +196,17 @@ export default function RakSadness() {
               "Generated results from picks spreadsheet",
             ),
           );
-        } else {
-          abort();
+        } catch (error) {
+          console.error("Failed to score the uploaded spreadsheet", error);
+          setScores(undefined);
+          setScoresLoading(false);
+          showToast(
+            new Toast(
+              "danger",
+              "Error",
+              "Failed to read picks from the spreadsheet you selected.",
+            ),
+          );
         }
       };
 
@@ -275,8 +292,6 @@ export default function RakSadness() {
     return !!showScores && !!scores ? (
       <>
         <Button
-          variant="solid"
-          color="primary"
           onClick={() => setShowScores("Scoreboard")}
           className={`home__scores-header-button ${getClasses({
             "--active": showScores === "Scoreboard",
@@ -285,8 +300,6 @@ export default function RakSadness() {
           <Leaderboard />
         </Button>
         <Button
-          variant="solid"
-          color="primary"
           onClick={() => setShowScores("Explanation")}
           className={`home__scores-header-button ${getClasses({
             "--active": showScores === "Explanation",
@@ -296,9 +309,7 @@ export default function RakSadness() {
         </Button>
         <div className="home__scores-header-divider" />
         <Button
-          ref={refreshButtonRef}
-          variant="solid"
-          color="primary"
+          buttonRef={refreshButtonRef}
           onClick={handleRefresh}
           className="home__scores-header-button"
         >
@@ -320,12 +331,10 @@ export default function RakSadness() {
       <Navbar left={navbarLeft} right={navbarRight} />
 
       {/* Main Content */}
-      <Sheet
+      <main
         className={`home__content ${getClasses({
           "--scores": !!showScores && !!scores,
         })}`}
-        variant="plain"
-        color="neutral"
       >
         {/* Home Page */}
         {!showScores && !isWeekInfoLoading && (
@@ -333,24 +342,50 @@ export default function RakSadness() {
             {/* Input Controls */}
             <div className="home__controls">
               {/* Week number input */}
-              <Select
-                className="home__week-input"
-                placeholder="Select a week..."
-                value={selectedWeek}
-                onChange={(_, value) => setSelectedWeek(value ?? undefined)}
+              {/*
+                `value` holds the WeekInfo object itself, and Base UI compares
+                with Object.is by default, so an option only reads as selected
+                when it is the same object the week list handed out.
+              */}
+              <Select.Root
+                value={selectedWeek ?? null}
+                onValueChange={(week) => setSelectedWeek(week ?? undefined)}
                 disabled={isWeekInfoLoading}
               >
-                {(weeks ?? [])
-                  .slice(0, currentWeek)
-                  .reverse()
-                  .map((week) => {
-                    return (
-                      <Option key={week.value} value={week}>
-                        {week.label}
-                      </Option>
-                    );
-                  })}
-              </Select>
+                <Select.Trigger className="home__week-input select__trigger">
+                  <Select.Value>
+                    {(week: WeekInfo | null) =>
+                      week?.label ?? "Select a week..."
+                    }
+                  </Select.Value>
+                  <Select.Icon className="select__icon">
+                    <UnfoldMore />
+                  </Select.Icon>
+                </Select.Trigger>
+                <Select.Portal>
+                  <Select.Positioner
+                    className="select__positioner"
+                    sideOffset={4}
+                  >
+                    <Select.Popup className="select__popup">
+                      {(weeks ?? [])
+                        .slice(0, currentWeek)
+                        .reverse()
+                        .map((week) => {
+                          return (
+                            <Select.Item
+                              key={week.value}
+                              value={week}
+                              className="select__item"
+                            >
+                              <Select.ItemText>{week.label}</Select.ItemText>
+                            </Select.Item>
+                          );
+                        })}
+                    </Select.Popup>
+                  </Select.Positioner>
+                </Select.Portal>
+              </Select.Root>
               {/* Hidden picks file input */}
               <input
                 ref={fileInputRef}
@@ -368,8 +403,6 @@ export default function RakSadness() {
                     isScoresLoading ||
                     !!scores,
                 })}`}
-                variant="solid"
-                color="primary"
                 onClick={clickFileInput}
                 disabled={
                   !selectedWeek ||
@@ -393,7 +426,6 @@ export default function RakSadness() {
                   !scores ||
                   isScoresLoading
                 }
-                variant="solid"
                 color="success"
                 onClick={() => setShowScores("Scoreboard")}
               >
@@ -416,7 +448,6 @@ export default function RakSadness() {
                   isScoresLoading ||
                   isExportLoading
                 }
-                variant="solid"
                 color="danger"
                 onClick={exportResults}
               >
@@ -438,7 +469,7 @@ export default function RakSadness() {
             )}
           </div>
         )}
-      </Sheet>
+      </main>
     </div>
   );
 }

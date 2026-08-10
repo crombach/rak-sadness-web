@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import Footer from "./Footer";
 
 describe("Footer", () => {
-  it("links to the standings, the repo, and the donation page", () => {
+  it("links to the standings and the repo", () => {
     render(<Footer />);
     const hrefs = screen
       .getAllByRole("link")
@@ -10,7 +10,6 @@ describe("Footer", () => {
     expect(hrefs).toEqual([
       "https://rakmadness.net/standings-pickem",
       "https://github.com/crombach/rak-sadness-web",
-      "https://give.translifeline.org/give/461718/#!/donation/checkout",
     ]);
   });
 
