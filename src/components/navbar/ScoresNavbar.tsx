@@ -1,4 +1,4 @@
-import { Info, Leaderboard, Refresh } from "@mui/icons-material";
+import { InfoIcon, LeaderboardIcon, RefreshIcon } from "../icon/Icon";
 import getClasses from "../../utils/getClasses";
 import Button from "../button/Button";
 import "./ScoresNavbar.scss";
@@ -25,7 +25,7 @@ export default function ScoresNavbar({
           "--active": view === "Scoreboard",
         })}`}
       >
-        <Leaderboard />
+        <LeaderboardIcon />
       </Button>
       <Button
         onClick={() => onViewChange("Explanation")}
@@ -33,7 +33,7 @@ export default function ScoresNavbar({
           "--active": view === "Explanation",
         })}`}
       >
-        <Info />
+        <InfoIcon />
       </Button>
       <div className="home__scores-header-divider" />
       <Button
@@ -42,7 +42,7 @@ export default function ScoresNavbar({
           "--spinning": isRefreshing,
         })}`}
       >
-        <Refresh />
+        <RefreshIcon />
       </Button>
     </>
   );

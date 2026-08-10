@@ -1,5 +1,5 @@
 import { Select } from "@base-ui-components/react/select";
-import { UnfoldMore } from "@mui/icons-material";
+import { UnfoldMoreIcon } from "../icon/Icon";
 import { ChangeEventHandler, useCallback, useRef } from "react";
 import { useNavigate } from "react-router";
 import { useAppData } from "../../context/AppDataContext";
@@ -72,7 +72,7 @@ export default function HomePage() {
                   {(week: WeekInfo | null) => week?.label ?? "Select a week..."}
                 </Select.Value>
                 <Select.Icon className="select__icon">
-                  <UnfoldMore />
+                  <UnfoldMoreIcon />
                 </Select.Icon>
               </Select.Trigger>
               <Select.Portal>

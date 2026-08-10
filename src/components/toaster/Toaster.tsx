@@ -1,8 +1,10 @@
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import InfoIcon from "@mui/icons-material/Info";
-import ReportIcon from "@mui/icons-material/Report";
-import WarningIcon from "@mui/icons-material/Warning";
+import {
+  CheckCircleIcon,
+  CloseRoundedIcon,
+  InfoIcon,
+  ReportIcon,
+  WarningIcon,
+} from "../icon/Icon";
 import Button from "../button/Button";
 import { Toast, useToastActions, useToasts } from "../../context/ToastContext";
 import "./Toaster.scss";
