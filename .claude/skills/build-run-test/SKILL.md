@@ -22,7 +22,7 @@ From a clean checkout: `make setup`, `make build`, `make run`, `make test`, `mak
 
 ## Tests
 
-214 cases, 17 suites, all offline. `npm test` is `vitest run`; `npm run test:watch` watches.
+215 cases, 17 suites, all offline. `npm test` is `vitest run`; `npm run test:watch` watches.
 
 - `src/utils/scoring/getPickResults.test.ts` — spread scoring (favorite covers / fails to cover, underdog, push, tie, half-point spread, missing pick vs missing game, live and upcoming state). Also pins the statuses `GameStatus` does not model: ESPN sends type ids for postponed and canceled, they land in the same branch as a live game, and a canceled game has no winner so every pick scores a point.
 - `src/utils/scoring/getPlayerScores.test.ts` — workbook parsing, matchup derivation, per-league scoring, tiebreaker distance, the whole sort order, every knockout branch. Builds a real workbook with `xlsx-js-style` and mocks `getLeagueResults`.

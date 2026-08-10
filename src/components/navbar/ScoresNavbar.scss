@@ -8,13 +8,17 @@
 }
 
 .home__scores-header-button {
-  &.--active {
-    background-color: var(--rak-primary-600);
-  }
-
   &.--spinning svg {
     animation: spin 0.5s infinite linear;
   }
+}
+
+// `Button` paints its own fill from four nested classes, and its hover and press
+// colors from five, so this has to out-specify all of them or the view you are on
+// looks exactly like the one you are not. Held by the route rather than the
+// pointer, which is why it also has to beat `:hover`.
+.button.--solid:not(:disabled).--primary.home__scores-header-button.--active {
+  background-color: var(--rak-primary-700);
 }
 
 .home__scores-header-divider {

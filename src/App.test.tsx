@@ -386,6 +386,19 @@ describe("the app, results views", () => {
     expect(screen.getByText("MNF Points Pick")).toBeInTheDocument();
   });
 
+  it("marks the view you are on, on both routes", async () => {
+    const user = await mountWithScores();
+    await user.click(screen.getByText("View Results"));
+
+    const [scoreboard, explanation] = scoresHeaderButtons();
+    expect(scoreboard).toHaveClass("--active");
+    expect(explanation).not.toHaveClass("--active");
+
+    await user.click(explanation);
+    expect(explanation).toHaveClass("--active");
+    expect(scoreboard).not.toHaveClass("--active");
+  });
+
   it("returns home from the logo button", async () => {
     const user = await mountWithScores();
     await user.click(screen.getByText("View Results"));
