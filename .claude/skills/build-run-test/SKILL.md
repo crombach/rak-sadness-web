@@ -21,16 +21,16 @@ From a clean checkout: `make setup`, `make build`, `make run`, `make test`, `mak
 
 ## Tests
 
-147 cases, 12 suites, all offline. `npm test` is `vitest run`; `npm run test:watch` watches.
+151 cases, 13 suites, all offline. `npm test` is `vitest run`; `npm run test:watch` watches.
 
-- `src/utils/getPickResults.test.ts` — spread scoring (favorite covers / fails to cover, underdog, push, tie, half-point spread, missing pick vs missing game, live and upcoming state).
+- `src/utils/getPickResults.test.ts` — spread scoring (favorite covers / fails to cover, underdog, push, tie, half-point spread, missing pick vs missing game, live and upcoming state). Also pins the statuses `GameStatus` does not model: ESPN sends type ids for postponed and canceled, they land in the same branch as a live game, and a canceled game has no winner so every pick scores a point.
 - `src/utils/getPlayerScores.test.ts` — workbook parsing, matchup derivation, per-league scoring, tiebreaker distance, the whole sort order, every knockout branch. Builds a real workbook with `xlsx-js-style` and mocks `getLeagueResults`.
 - `src/utils/buildSpreadsheetBuffer.test.ts` — writes a workbook, reads it back, asserts both sheets, headers, rows, and per-status fill colors. Reading a workbook back flattens the fill onto `cell.s`, so it is `cell.s.fgColor.rgb`, not `cell.s.fill.fgColor.rgb`.
 - `src/utils/getLeagueInfo.test.ts` — endpoint URLs, calendar and week mapping, active-calendar choice per league, the off-season calendar that arrives with no `entries`.
 - `src/utils/getLeagueResults.test.ts` — pro and college request URLs, the college week offset, the postseason collapse to week 1, event mapping, matchup filtering.
 - `src/context/ToastContext.test.tsx` — queue cap of 3, removal by id, 5-second auto-dismiss.
 - `src/components/RakSadness.test.tsx` — week lookup, localhost picks-fetch skip, upload, results views, refresh, export.
-- `ExplanationTable`, `ScoresTable`, `Navbar`, `Footer`, `Toaster` each have their own suite.
+- `ExplanationTable`, `ScoresTable`, `Navbar`, `LogoButton`, `Footer`, `Toaster` each have their own suite.
 
 Writing a test here:
 
@@ -62,12 +62,13 @@ Tests print a lot of `console.debug` from the scoring path. Expected, not a fail
 - `npm run pages:dev` builds, then runs `wrangler pages dev ./build --port 3000`. Verified on wrangler 4: `/` serves 200, the Pages Function executes, assets serve. This is the supported form; the older `pages dev -- <command>` proxy form is deprecated and gone from this repo.
 - `pages:dev` serves a build, so there is no hot reload. Two workflows, on purpose: `make run` for iterating on the UI, `pages:dev` for anything touching the Function or the binding. Rerun it to pick up a code change.
 - No make target wraps `pages:dev` because it needs Cloudflare context that `make` targets deliberately stay out of.
-- `wrangler.toml` holds `name = "rak-sadness"` (the real Pages project), `compatibility_date`, and the `RAK_SADNESS_BUCKET` R2 binding pointing at the `rak-sadness` bucket.
+- `wrangler.toml` holds `name = "rak-sadness"` (the real Pages project), `compatibility_date`, and the `RAK_SADNESS_BUCKET` R2 binding pointing at the `rak-sadness` bucket. It configures `pages dev` only. `pages deploy` skips the file completely, because Pages only reads it when `pages_build_output_dir` is set, which is why `pages:deploy` passes `--project-name` on the command line. Without that flag the command fails with `Missing Pages project name`.
 - **Do not add `pages_build_output_dir` to `wrangler.toml`.** Its absence is what keeps the file local-development-only. Adding it makes wrangler.toml the source of truth for production builds and overrides the dashboard's own build settings, which is where this project's real config lives.
 - `functions/api/picks/[week].ts` reads `picks/<week>.xlsx` from the binding. Locally the bucket is simulated and empty, so `/api/picks/:week` returns 404 until seeded: `wrangler r2 object put rak-sadness/picks/1.xlsx --file <path> --local`.
-- The Cloudflare Pages build passed on the branch that added this `wrangler.toml`. `npm run pages:deploy` from a laptop has still never run against it.
 - Not a blocker for local work: `src/components/RakSadness.tsx` deliberately skips that fetch on localhost and falls back to manual spreadsheet upload.
 - `npm run pages:deploy` needs Cloudflare auth (`wrangler login`, or `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`). Deliberately not a make target: deploying is not an agent action to take unprompted.
+- Verified against the live project: it uploads, `/` serves 200, the Function runs, and `/api/picks/1` returns the real spreadsheet, so direct-upload deployments do get the dashboard's bucket binding. Give a fresh deployment a few seconds before probing it; the assets go live before the Functions routing does.
+- **The branch decides the environment.** The production branch is `main`, and `pages deploy` infers the branch from git, so a deploy from anywhere else is a preview on its own subdomain. Pass `--branch` explicitly rather than trusting the inference. The project is also git-connected, so pushing already builds a preview; deploy by hand only to test the command.
 
 ## Offline
 

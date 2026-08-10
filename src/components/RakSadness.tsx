@@ -258,10 +258,6 @@ export default function RakSadness() {
   }, [scores, selectedWeek, showToast]);
 
   const navbarLeft = useMemo(() => {
-    <>
-      <LogoButton onClick={() => setShowScores(false)} />
-      <span>{showScores}</span>
-    </>;
     return !!showScores && !!scores ? (
       <>
         <LogoButton onClick={() => setShowScores(false)} />
