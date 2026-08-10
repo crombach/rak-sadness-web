@@ -1,4 +1,3 @@
-import * as XLSX from "xlsx-js-style";
 import debugLog from "../debugLog";
 import parsePick from "./parsePick";
 
@@ -13,9 +12,14 @@ export type ParsedPicks = {
   proMatchups: Array<Set<string>>;
 };
 
-export default function parsePicksWorkbook(
+/**
+ * `xlsx-js-style` is over half the bundle, and nothing on the first paint needs
+ * it, so it is fetched when a workbook actually turns up.
+ */
+export default async function parsePicksWorkbook(
   picksBuffer: ArrayBuffer,
-): ParsedPicks {
+): Promise<ParsedPicks> {
+  const XLSX = await import("xlsx-js-style");
   const workbook = XLSX.read(picksBuffer, { type: "array" });
   const picksSheet = workbook.Sheets[Object.keys(workbook.Sheets)[0]];
   const rows: Array<any> = XLSX.utils.sheet_to_json(picksSheet);

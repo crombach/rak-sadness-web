@@ -1,5 +1,4 @@
 import { Status, RakMadnessScores } from "../types/RakMadnessScores";
-import * as XLSX from "xlsx-js-style";
 import { PICK_STATUS_FILL } from "./pickStatusFill";
 import rangeWithPrefix from "./rangeWithPrefix";
 
@@ -112,10 +111,15 @@ function normalCell({
   };
 }
 
-export default function buildSpreadsheetBuffer(
+/**
+ * `xlsx-js-style` is over half the bundle, and an export is a deliberate click, so
+ * it is fetched at that point rather than on load.
+ */
+export default async function buildSpreadsheetBuffer(
   scoresObject: RakMadnessScores,
   week: number,
 ): Promise<ArrayBuffer> {
+  const XLSX = await import("xlsx-js-style");
   // Create a new Excel workbook.
   const workbook = XLSX.utils.book_new();
 

@@ -11,7 +11,7 @@ export async function getPlayerScores(
   week: WeekInfo,
   picksBuffer: ArrayBuffer,
 ): Promise<RakMadnessScores> {
-  const parsed = parsePicksWorkbook(picksBuffer);
+  const parsed = await parsePicksWorkbook(picksBuffer);
 
   const collegeResults = await getLeagueResults(
     League.COLLEGE,
