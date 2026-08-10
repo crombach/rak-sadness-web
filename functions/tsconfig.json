@@ -9,8 +9,8 @@
     "lib": ["esnext"],
     "types": ["@cloudflare/workers-types"],
     "skipLibCheck": true,
+    "strict": true,
     "isolatedModules": true,
-    "noImplicitAny": true,
     "noEmit": true
   }
 }

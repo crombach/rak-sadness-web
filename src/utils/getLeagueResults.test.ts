@@ -186,9 +186,9 @@ describe("getLeagueResults, mapping", () => {
   it("records the winner, the loser, and the margin", async () => {
     mockFetch([bufVsKc]);
     const [result] = await getLeagueResults(League.PRO, WEEK, [BUF_KC]);
-    expect(result.winner.team.abbreviation).toBe("BUF");
+    expect(result.winner.team?.abbreviation).toBe("BUF");
     expect(result.winner.homeAway).toBe(HomeAway.HOME);
-    expect(result.loser.team.abbreviation).toBe("KC");
+    expect(result.loser.team?.abbreviation).toBe("KC");
     expect(result.winner.by).toBe(10);
   });
 

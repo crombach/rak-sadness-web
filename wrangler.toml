@@ -1,5 +1,6 @@
 name = "rak-sadness"
-compatibility_date = "2023-10-30"
+# The date the runtime behavior was last verified against, not the project's age.
+compatibility_date = "2026-08-10"
 
 # Serves picks/<week>.xlsx to functions/api/picks/[week].ts.
 # Simulated locally by `wrangler pages dev`; seed it with

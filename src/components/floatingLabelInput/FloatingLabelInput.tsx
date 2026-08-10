@@ -69,7 +69,7 @@ export default function FloatingLabelInput({
 }) {
   const InnerInput = useMemo(
     () =>
-      React.forwardRef<HTMLInputElement, JSX.IntrinsicElements["input"]>(
+      React.forwardRef<HTMLInputElement, React.JSX.IntrinsicElements["input"]>(
         function InnerInput(props, ref) {
           const id = React.useId();
           return (

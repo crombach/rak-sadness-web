@@ -51,6 +51,15 @@ function urlOf(fetchMock: Mock): string {
   return fetchMock.mock.calls[0][0];
 }
 
+/** getLeagueInfo returns null on a bad response, which these cases never mock. */
+async function infoFor(league: League) {
+  const info = await getLeagueInfo(league);
+  if (info == null) {
+    throw new Error(`getLeagueInfo unexpectedly returned null for ${league}`);
+  }
+  return info;
+}
+
 beforeEach(() => {
   vi.useFakeTimers().setSystemTime(NOW);
 });
@@ -90,7 +99,7 @@ describe("getLeagueInfo, requests", () => {
 describe("getLeagueInfo, calendar mapping", () => {
   it("parses season types, dates, and week numbers", async () => {
     mockFetch(scoreboard(League.PRO));
-    const info = await getLeagueInfo(League.PRO);
+    const info = await infoFor(League.PRO);
     expect(info.league).toBe(League.PRO);
     expect(info.calendars.map((cal) => cal.seasonType)).toEqual([
       SeasonType.REGULAR,
@@ -103,20 +112,20 @@ describe("getLeagueInfo, calendar mapping", () => {
 
   it("uses the regular season calendar for the pro league", async () => {
     mockFetch(scoreboard(League.PRO));
-    const info = await getLeagueInfo(League.PRO);
+    const info = await infoFor(League.PRO);
     expect(info.activeCalendar.seasonType).toBe(SeasonType.REGULAR);
   });
 
   it("uses the calendar covering today for the college league", async () => {
     mockFetch(scoreboard(League.COLLEGE));
-    const info = await getLeagueInfo(League.COLLEGE);
+    const info = await infoFor(League.COLLEGE);
     expect(info.activeCalendar.seasonType).toBe(SeasonType.REGULAR);
   });
 
   it("falls back to the last college calendar outside every date range", async () => {
     vi.setSystemTime(new Date("2025-08-01T00:00Z"));
     mockFetch(scoreboard(League.COLLEGE));
-    const info = await getLeagueInfo(League.COLLEGE);
+    const info = await infoFor(League.COLLEGE);
     expect(info.activeCalendar.seasonType).toBe(SeasonType.POST);
   });
 });
@@ -124,14 +133,14 @@ describe("getLeagueInfo, calendar mapping", () => {
 describe("getLeagueInfo, active week", () => {
   it("picks the week containing today", async () => {
     mockFetch(scoreboard(League.PRO));
-    const info = await getLeagueInfo(League.PRO);
+    const info = await infoFor(League.PRO);
     expect(info.activeWeek.value).toBe(5);
   });
 
   it("falls back to the last week when today is outside every week", async () => {
     vi.setSystemTime(new Date("2024-11-15T00:00Z"));
     mockFetch(scoreboard(League.PRO));
-    const info = await getLeagueInfo(League.PRO);
+    const info = await infoFor(League.PRO);
     expect(info.activeWeek.value).toBe(18);
   });
 });

@@ -48,6 +48,10 @@ export default async function getLeagueInfo(
   const leagueMetadata = scoreboard.leagues.find(
     (it) => it.slug === (league as string),
   );
+  if (leagueMetadata == null) {
+    console.error(`Scoreboard response has no calendar for league ${league}`);
+    return null;
+  }
 
   // Get the current datetime.
   const now = new Date();
@@ -91,6 +95,15 @@ export default async function getLeagueInfo(
       index === activeCalendar.weeks.length - 1
     );
   });
+
+  // Both lookups fall back to the last entry, so they only come back empty when
+  // the response carried no calendars or no weeks at all.
+  if (activeCalendar == null || activeWeek == null) {
+    console.error(
+      `Scoreboard response has no active week for league ${league}`,
+    );
+    return null;
+  }
 
   return {
     league,

@@ -10,11 +10,10 @@
     "types": ["node", "vite/client", "vitest/globals"],
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "noImplicitAny": true,
+    "strict": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
-    "baseUrl": "."
+    "noEmit": true
   },
   "include": ["src/**/*", "vite.config.ts"],
   "exclude": ["functions/**/*"]

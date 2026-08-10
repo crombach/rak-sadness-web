@@ -119,6 +119,11 @@ export async function getLeagueResults(
         },
       );
 
+      // ESPN has always sent both sides. Skip the event rather than trust it.
+      if (home == null || away == null) {
+        return null;
+      }
+
       // If the event isn't in the matchups for the week, skip it.
       const isInMatchups = matchups.some((teams) => {
         if (teams.size === 2) {

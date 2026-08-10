@@ -18,7 +18,7 @@ function leagueHeaders(count: number, prefix: string) {
   ));
 }
 
-function ExplanationTable({ scores }: { scores?: RakMadnessScores }) {
+function ExplanationTable({ scores }: { scores?: RakMadnessScores | null }) {
   const { showToast, clearToasts } = useToastContext();
 
   const handlePickResultClick = useCallback(
