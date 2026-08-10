@@ -9,7 +9,7 @@ import getClasses from "../../utils/getClasses";
 import Button from "../button/Button";
 import Footer from "../footer/Footer";
 import LogoButton from "../navbar/LogoButton/LogoButton";
-import PageLayout, { APP_NAME } from "../PageLayout";
+import PageLayout from "../PageLayout";
 import "./HomePage.scss";
 
 export default function HomePage() {
@@ -46,14 +46,7 @@ export default function HomePage() {
   const hasNoScoresYet = !selectedWeek || isBusy || !scores;
 
   return (
-    <PageLayout
-      navbarLeft={
-        <>
-          <LogoButton onClick={() => navigate("/")} />
-          <span>{APP_NAME}</span>
-        </>
-      }
-    >
+    <PageLayout navbarLeft={<LogoButton onClick={() => navigate("/")} />}>
       {!isWeekInfoLoading && (
         <>
           <div className="home__controls">

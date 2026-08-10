@@ -4,7 +4,7 @@ import useWeekRouteGuard from "../../hooks/useWeekRouteGuard";
 import getClasses from "../../utils/getClasses";
 import LogoButton from "../navbar/LogoButton/LogoButton";
 import ScoresNavbar, { ScoresView } from "../navbar/ScoresNavbar";
-import PageLayout, { APP_NAME } from "../PageLayout";
+import PageLayout from "../PageLayout";
 import SkeletonTable from "../table/SkeletonTable";
 import "./ResultsLayout.scss";
 
@@ -31,12 +31,7 @@ export default function ResultsLayout() {
   return (
     <PageLayout
       showingScores={isReady}
-      navbarLeft={
-        <>
-          <LogoButton onClick={() => navigate("/")} />
-          <span>{APP_NAME}</span>
-        </>
-      }
+      navbarLeft={<LogoButton onClick={() => navigate("/")} />}
       navbarRight={
         // Rendered while the week loads, so the navbar does not change shape
         // under the pointer once it arrives. Disabled until there is something to
