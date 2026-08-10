@@ -109,51 +109,20 @@ export function getPickResults(
       gameResult.winner.team === null ||
       gameResult.winner.team.abbreviation === selectedTeam;
 
-    // Check if the player gets a point or not.
-    let pointValue: number;
-    if (pickedWinner) {
-      if (!hasSpread) {
-        console.debug("WIN. Picked winner, no spread.");
-        pointValue = 1;
-      } else if (spread > 0) {
-        console.debug("WIN. Picked unfavored winner.");
-        pointValue = 1;
-      } else if (spread < 0 && gameResult.winner.by > Math.abs(spread)) {
-        console.debug("WIN. Picked favored winner, spread covered.");
-        pointValue = 1;
-      } else if (Math.abs(spread) === gameResult.winner.by) {
-        console.debug(
-          "WIN. Picked winner, but against the spread the game is a push.",
-        );
-        pointValue = 1;
-      } else {
-        console.debug("LOSE. Picked favored winner, but spread not covered.");
-        pointValue = 0;
-      }
-    } else {
-      if (!hasSpread) {
-        console.debug("LOSE. Picked loser, no spread.");
-        pointValue = 0;
-      } else if (spread < 0) {
-        console.debug("LOSE. Picked favored loser.");
-        pointValue = 0;
-      } else if (spread > 0 && gameResult.winner.by < Math.abs(spread)) {
-        console.debug(
-          "WIN. Picked unfavored loser, but winner failed to cover spread.",
-        );
-        pointValue = 1;
-      } else if (Math.abs(spread) === gameResult.winner.by) {
-        console.debug(
-          "WIN. Picked loser, but against the spread the game is a push.",
-        );
-        pointValue = 1;
-      } else {
-        console.debug(
-          "LOSE. Picked unfavored loser, and winner covered spread.",
-        );
-        pointValue = 0;
-      }
-    }
+    // How far ahead the picked team finished once the spread is applied. A push
+    // counts as a win, which is why this is >= rather than >.
+    // `winner.by` is only signed from the picked team's side once the game is
+    // final, so this value means nothing until `isCompleted`.
+    const marginAgainstSpread =
+      (pickedWinner ? gameResult.winner.by : -gameResult.winner.by) + spread;
+    const pointValue = marginAgainstSpread >= 0 ? 1 : 0;
+    console.debug("Pick", {
+      selectedTeam,
+      spread,
+      by: gameResult.winner.by,
+      marginAgainstSpread,
+      pointValue,
+    });
 
     let explanationHeader: string;
     switch (gameResult.status) {
