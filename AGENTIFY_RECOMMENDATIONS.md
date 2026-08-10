@@ -66,25 +66,3 @@ scoring). Almost any two feature branches touch one of them. Documented in
 **Suggested action:** advisory only. Extracting the upload/fetch flow out of
 `RakSadness.tsx` into a hook, and splitting `getPlayerScores.ts` by concern, would
 let more work run in parallel. Not worth doing for its own sake.
-
-## Config
-
-### Deliberately left prompting
-
-- `npm run pages:deploy`, `wrangler *`, `npx wrangler *` are in `ask`. They deploy
-  to production or mutate Cloudflare state, so they should never fire unattended.
-- `git push --force` / `-f` are in `deny`, even though everyday `git` and `gh` are
-  allowed.
-
-### Activation prerequisites
-
-- Project `allow` rules and the three checked-in hooks only take effect after you
-  accept the workspace trust dialog for this repo.
-- An org policy of `allowManagedHooksOnly` would disable the project hooks
-  entirely.
-- `.mcp.json` servers need per-user approval on first run.
-
-## MCP
-
-`cloudflare-docs` and `playwright` are in `.mcp.json`. Neither needs an
-environment variable. `playwright` downloads a browser on first use.
