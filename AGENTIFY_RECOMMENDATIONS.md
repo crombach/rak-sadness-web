@@ -24,15 +24,6 @@ config out of the dashboard and into the repo.
 To make `/api/picks/:week` return a real spreadsheet locally:
 `wrangler r2 object put rak-sadness/picks/1.xlsx --file <path> --local`.
 
-### Nothing gates the tests on a PR
-
-`npm run build` runs `typecheck` first, so a type error fails the Cloudflare
-build. Nothing runs `make check`, so a failing test or a lint error can merge.
-Actions is enabled and already runs `pr-title.yml`.
-
-**Suggested action:** add a workflow running `make setup && make check` on pull
-requests. Roughly 20 lines, and it makes the 147 tests load-bearing.
-
 ### The bundle is one 1.26 MB chunk
 
 Vite warns about it on every build. Pre-existing: Create React App produced the
@@ -85,14 +76,6 @@ Not removed, because it predates this work:
   a `reportWebVitals` module that this repo no longer has.
 
 **Suggested action:** delete both when next editing those files.
-
-## Contrib
-
-### Existing history does not follow Conventional Commits
-
-0 of the commits before this work conform. Published history is never rewritten
-to fit a convention, so nothing to do. The convention and the
-`conventional-commit-title` check apply going forward.
 
 ## Config
 

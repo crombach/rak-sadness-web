@@ -1,0 +1,38 @@
+# Runs the same `make check` a contributor runs: lint, typecheck, tests, prettier.
+#
+# Kept to one job on the cheapest runner. This repo is public, so standard
+# runners are unmetered, but the settings below still matter for turnaround:
+#   - ubuntu-latest is the 1x multiplier tier, the only one worth using here
+#   - concurrency cancels a superseded run instead of paying for both
+#   - setup-node caches ~/.npm, so npm ci resolves from disk
+#   - pull_request only. Adding push:main would rerun the same commits after merge
+#   - timeout-minutes caps a hung run rather than letting it burn the 6h default
+name: Check
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # make setup enforces the .nvmrc major and runs npm ci, so the local
+      # contract and CI stay one code path.
+      - run: make setup
+
+      - run: make check

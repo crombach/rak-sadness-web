@@ -11,13 +11,13 @@ description: How to build, run, and test this repo. Read before any npm, make, t
 
 - Vite 8, React 19, TypeScript 6, Vitest 4, ESLint 9 flat config, wrangler 4.
 - Node `v22` (`.nvmrc`), npm 10 (`lockfileVersion: 3`). `nvm use` before anything. wrangler 4 refuses to run on Node 20, and jsdom 30 needs `>=22.22.2`. `make setup` fails with an actionable message on a major mismatch.
-- Two CI signals on a PR, neither of which builds the app the way the Makefile does: `conventional-commit-title` (`.github/workflows/pr-title.yml`, Actions is enabled) and `Cloudflare Pages`, which builds from git using the dashboard's own settings. The Makefile is still the only place the local build story is written down.
+- Three CI signals on a PR: `check` (`.github/workflows/check.yml`) runs the same `make check` you run locally, `conventional-commit-title` (`.github/workflows/pr-title.yml`) matches the title format, and `Cloudflare Pages` builds from git using the dashboard's own settings. Break `make check` locally and CI breaks the same way.
 
 ## Verified
 
 From a clean checkout: `make setup`, `make build`, `make run`, `make test`, `make check` all green. `make run` serves `http://localhost:3000`, HTTP 200, `<title>Rak Madness Scoreboard</title>`. `npm audit` reports 0 vulnerabilities.
 
-`npm run build` runs `npm run typecheck` first, so a type error fails the Cloudflare build too. Nothing lints during the build any more, unlike Create React App, so lint lives only in `make check`.
+`npm run build` runs `npm run typecheck` first, so a type error fails the Cloudflare build too. Nothing lints during the build any more, unlike Create React App; lint reaches CI through the `check` workflow calling `make check`.
 
 ## Tests
 
