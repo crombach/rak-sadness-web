@@ -1,6 +1,7 @@
 import { Info, Leaderboard, Refresh } from "@mui/icons-material";
 import getClasses from "../../utils/getClasses";
 import Button from "../button/Button";
+import "./ScoresNavbar.scss";
 
 export type ScoresView = "Scoreboard" | "Explanation";
 

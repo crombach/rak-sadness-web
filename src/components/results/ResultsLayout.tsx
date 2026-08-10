@@ -4,6 +4,7 @@ import useWeekRouteGuard from "../../hooks/useWeekRouteGuard";
 import LogoButton from "../navbar/LogoButton/LogoButton";
 import ScoresNavbar, { ScoresView } from "../navbar/ScoresNavbar";
 import PageLayout from "../PageLayout";
+import "./ResultsLayout.scss";
 
 /**
  * Chrome for a week's results, shared by both views.

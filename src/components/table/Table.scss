@@ -90,8 +90,17 @@
       background-color: var(--rak-neutral-200);
     }
 
-    // Empty last row
+    // Keeps the last real row clear of a phone's rounded corners and home
+    // indicator. Sized from the device's own inset, so it has no height at all
+    // on a screen that does not report one. `index.html` asks for
+    // `viewport-fit=cover`, without which the inset is always zero.
     tr:last-child.table__last-row td {
+      height: env(safe-area-inset-bottom, 0px);
+      min-height: 0;
+      padding: 0;
+      // Without this the row still draws its borders at zero height, and the
+      // last real row already carries the table's bottom edge.
+      border: none;
       background-color: var(--rak-primary-800);
     }
   }

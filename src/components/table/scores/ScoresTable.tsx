@@ -1,17 +1,20 @@
 import { memo } from "react";
 import { PlayerScore, RakMadnessScores } from "../../../types/RakMadnessScores";
 import PlayerName from "../playerName/PlayerName";
-import "../Table.scss";
+import TableShell, { RankCell } from "../TableShell";
 
-function ScoresTable({ scores }: { scores?: RakMadnessScores }) {
+const COLUMN_COUNT = 8;
+
+function ScoresTable({ scores }: { scores?: RakMadnessScores | null }) {
   if (scores == null) {
     return null;
   }
 
   return (
-    <table className="table" cellSpacing="0">
-      <thead className="table__header">
-        <tr>
+    <TableShell
+      columnCount={COLUMN_COUNT}
+      header={
+        <>
           <th>Rank</th>
           <th className="table__player-col">Player</th>
           <th>MNF Points Pick</th>
@@ -20,40 +23,24 @@ function ScoresTable({ scores }: { scores?: RakMadnessScores }) {
           <th>Pro Score</th>
           <th>Pro Score ATS</th>
           <th>Total Score</th>
+        </>
+      }
+    >
+      {scores.scores.map((player: PlayerScore, index: number) => (
+        <tr key={player.name}>
+          <RankCell rank={index + 1} />
+          <PlayerName player={player} />
+          <td>{player.tiebreaker.pick ?? "N/A"}</td>
+          <td>{player.tiebreaker.distance ?? "N/A"}</td>
+          <td>{player.score.college}</td>
+          <td>{player.score.pro}</td>
+          <td>{player.score.proAgainstTheSpread}</td>
+          <td>
+            <b>{player.score.total}</b>
+          </td>
         </tr>
-      </thead>
-      <tbody>
-        {scores.scores.map((player: PlayerScore, index: number) => {
-          return (
-            <tr key={player.name}>
-              <td>
-                <b>{index + 1}</b>
-              </td>
-              <PlayerName player={player} />
-              <td>{player.tiebreaker.pick ?? "N/A"}</td>
-              <td>{player.tiebreaker.distance ?? "N/A"}</td>
-              <td>{player.score.college}</td>
-              <td>{player.score.pro}</td>
-              <td>{player.score.proAgainstTheSpread}</td>
-              <td>
-                <b>{player.score.total}</b>
-              </td>
-            </tr>
-          );
-        })}
-        {/* Empty last row */}
-        <tr className="table__last-row">
-          <td />
-          <td />
-          <td />
-          <td />
-          <td />
-          <td />
-          <td />
-          <td />
-        </tr>
-      </tbody>
-    </table>
+      ))}
+    </TableShell>
   );
 }
 

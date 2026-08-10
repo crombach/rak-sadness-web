@@ -1,7 +1,7 @@
 import { PropsWithChildren, ReactNode } from "react";
 import getClasses from "../utils/getClasses";
 import Navbar from "./navbar/Navbar";
-import "./App.scss";
+import "./PageLayout.scss";
 
 const BACKGROUND_STYLE = {
   backgroundImage: "url(/logo512.png)",

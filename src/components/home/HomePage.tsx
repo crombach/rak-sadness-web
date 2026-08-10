@@ -10,6 +10,7 @@ import Button from "../button/Button";
 import Footer from "../footer/Footer";
 import LogoButton from "../navbar/LogoButton/LogoButton";
 import PageLayout from "../PageLayout";
+import "./HomePage.scss";
 
 export default function HomePage() {
   const navigate = useNavigate();

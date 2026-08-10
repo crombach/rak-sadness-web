@@ -4,33 +4,6 @@
   }
 }
 
-.home {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow: hidden;
-}
-
-.home__content {
-  flex: 1;
-  width: min(1024px, 100%);
-  max-width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--rak-shadow-md);
-  overflow: auto;
-  background-color: var(--rak-surface);
-  color: var(--rak-text-secondary);
-
-  &.--scores {
-    width: max-content;
-  }
-}
-
 // Base UI ships the select unstyled, so these rules carry its whole look.
 .select__trigger {
   display: flex;
@@ -101,6 +74,7 @@
     background-color: var(--rak-neutral-200);
   }
 }
+
 .home__controls {
   display: flex;
   flex-direction: column;
@@ -171,44 +145,4 @@
   background-size:
     300% 100%,
     cover;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.home__scores {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-
-  &-header {
-    &-button {
-      @media (max-width: 400px) {
-        padding-inline: 12px !important;
-      }
-
-      &.--active {
-        background-color: var(--rak-primary-600);
-      }
-
-      &.--spinning svg {
-        animation: spin 0.5s infinite linear;
-      }
-    }
-
-    &-divider {
-      width: 2px;
-      height: 1.5rem;
-      margin: 0 6px;
-      background-color: white;
-    }
-  }
 }

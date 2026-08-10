@@ -5,6 +5,9 @@
   flex-direction: row;
   gap: 6px;
   padding: 16px;
+  // The results table has its own trailing row for this. The home page does not,
+  // so the links keep clear of the home indicator here.
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   text-align: center;
   color: #888888;
   opacity: 0.75;
