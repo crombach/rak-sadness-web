@@ -177,10 +177,16 @@ export default function RakSadness() {
           abort();
           return;
         }
-        const picksBuffer = await readFileToBuffer(files[0]);
-        setPicksBuffer(picksBuffer);
-        const newScores = await getPlayerScores(selectedWeek, picksBuffer);
-        if (newScores) {
+        // Both of these reject on a file that is not a readable workbook, which
+        // is whatever the user happened to pick.
+        try {
+          const picksBuffer = await readFileToBuffer(files[0]);
+          setPicksBuffer(picksBuffer);
+          const newScores = await getPlayerScores(selectedWeek, picksBuffer);
+          if (!newScores) {
+            abort();
+            return;
+          }
           setScores(newScores);
           setScoresLoading(false);
           showToast(
@@ -190,8 +196,17 @@ export default function RakSadness() {
               "Generated results from picks spreadsheet",
             ),
           );
-        } else {
-          abort();
+        } catch (error) {
+          console.error("Failed to score the uploaded spreadsheet", error);
+          setScores(undefined);
+          setScoresLoading(false);
+          showToast(
+            new Toast(
+              "danger",
+              "Error",
+              "Failed to read picks from the spreadsheet you selected.",
+            ),
+          );
         }
       };
 
