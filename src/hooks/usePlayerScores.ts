@@ -152,7 +152,7 @@ export default function usePlayerScores(selectedWeek?: WeekInfo) {
         clearScores();
         setScoresLoading(false);
         showToast(
-          new Toast("neutral", "Info", "Aborted picks shreadsheet selection"),
+          new Toast("neutral", "Info", "Aborted picks spreadsheet selection"),
         );
         return;
       }

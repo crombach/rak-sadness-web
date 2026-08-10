@@ -25,11 +25,15 @@ export default function useExportScores(
       );
 
       const blob = new Blob([spreadsheetBuffer], { type: XLSX_CONTENT_TYPE });
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.href = window.URL.createObjectURL(blob);
+      link.href = url;
       link.download = `rak-madness_week-${week.value}_scores.xlsx`;
       link.click();
       link.remove();
+      // The blob is held until its URL is released, and every export mints
+      // another one.
+      window.URL.revokeObjectURL(url);
 
       setExportLoading(false);
       showToast(

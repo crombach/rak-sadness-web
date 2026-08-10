@@ -195,9 +195,11 @@ describe("the app, first load", () => {
   it("offers only weeks up to the current one, newest first", async () => {
     const user = await mountLoadedApp();
     await user.click(screen.getByRole("combobox"));
-    const options = screen
-      .getAllByRole("option")
-      .map((option) => option.textContent);
+    // The popup lands in a portal a frame after the click, so this has to wait
+    // for it. Reading it synchronously passed most of the time and not always.
+    const options = (await screen.findAllByRole("option")).map(
+      (option) => option.textContent,
+    );
     expect(options).toEqual(["Week 3", "Week 2", "Week 1"]);
   });
 
@@ -347,7 +349,7 @@ describe("the app, manual spreadsheet upload", () => {
     fireEvent.change(fileInput(), { target: { files: [] } });
     await waitFor(() => {
       expect(
-        screen.getByText("Aborted picks shreadsheet selection"),
+        screen.getByText("Aborted picks spreadsheet selection"),
       ).toBeInTheDocument();
     });
     expect(getPlayerScoresMock).not.toHaveBeenCalled();
