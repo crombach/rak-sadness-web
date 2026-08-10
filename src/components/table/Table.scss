@@ -15,8 +15,12 @@
       background-color: var(--rak-primary-800);
       min-width: max-content;
       padding: 2px 8px;
+      // Named even on the edges that carry no border, because a zero-width border
+      // takes `currentColor`, which is white here. Dark Reader forces borders
+      // visible and draws that white against the dividers below.
+      border-color: var(--rak-primary-600);
 
-      // Add white border between header cells
+      // Add a border between header cells
       &:not(:last-child) {
         border-right: 2px solid var(--rak-primary-600);
       }
