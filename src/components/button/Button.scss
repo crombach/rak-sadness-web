@@ -43,7 +43,7 @@
     aspect-ratio: 1;
   }
 
-  // Every colour below is scoped to :not(:disabled). The variant selectors are
+  // Every color below is scoped to :not(:disabled). The variant selectors are
   // more specific than `&:disabled`, so without that the disabled fill loses.
   &.--solid:not(:disabled) {
     color: var(--rak-on-solid);

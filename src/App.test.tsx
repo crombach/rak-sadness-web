@@ -343,7 +343,7 @@ describe("the app, manual spreadsheet upload", () => {
   it("reports an aborted selection when no file is chosen", async () => {
     await mountLoadedApp();
     // userEvent.upload with an empty list fires no change event, which is what
-    // a cancelled file dialog looks like to the DOM. Fire it directly.
+    // a canceled file dialog looks like to the DOM. Fire it directly.
     fireEvent.change(fileInput(), { target: { files: [] } });
     await waitFor(() => {
       expect(

@@ -61,7 +61,7 @@
   --rak-text-tertiary: #555e68;
   --rak-on-solid: #fff;
   // Pick fills, by whether the pick scored. Keep in sync with
-  // PICK_STATUS_FILL in src/utils/pickStatusFill.ts, which colours the same
+  // PICK_STATUS_FILL in src/utils/pickStatusFill.ts, which colors the same
   // statuses in the exported spreadsheet. The -dark values stripe the even rows
   // and have no counterpart there, since the export is not striped.
   --rak-pick-yes: #a3faa0;

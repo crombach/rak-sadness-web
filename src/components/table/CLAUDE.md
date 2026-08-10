@@ -1,6 +1,10 @@
 # table
 
-Table.scss: shared `.table` styles (sticky header/player col, pick status colors, striped rows).
+`TableShell`: the frame both results tables share, plus the trailing row that keeps
+the last real row clear of a phone's rounded corners. `Table.scss` sizes that row
+from `env(safe-area-inset-bottom)`, so it has no height on a screen without an
+inset, and holds the shared `.table` styles (sticky header and player column,
+pick status colors, striped rows).
 
 ## Subdirectories
 

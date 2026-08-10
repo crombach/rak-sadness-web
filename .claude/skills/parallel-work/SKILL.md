@@ -10,19 +10,23 @@ Single build root, one `package.json`, one `package-lock.json`. No module bounda
 ## Serialize these
 
 - **`package.json` + `package-lock.json`** — one lockfile for the whole repo. Two agents adding dependencies in separate worktrees both rewrite it; the merge is a conflict every time. One agent owns dependency changes per branch.
-- **`src/components/RakSadness.tsx`** (429 lines) — app root: week select, spreadsheet upload, `/api/picks/:week` fetch, score calc, XLSX export. Nearly every UI feature lands here. Two agents on unrelated UI work still collide. Split by giving one agent this file and the other a leaf component.
-- **`src/utils/getPlayerScores.ts`** (576 lines) — all scoring, knockout, and tiebreaker logic in one file. Same story: scoring changes serialize.
+- **`src/context/AppDataContext.tsx`** — the week list, picks, and scores for the whole app. Small, but every data change passes through what it exposes, so two agents adding state both touch it.
 - **Port 3000** — separate worktrees still contend for the same localhost port. Not a blocker: `make run PORT=3001` moves the dev server, so the second agent overrides instead of taking the default. `npm run pages:dev` occupies 3000 and 3001 together.
 
 ## Watch, don't serialize
 
 - `src/setupTests.ts` is shared by every suite, but it holds one import line and rarely changes.
+- `src/App.test.tsx` is the only suite covering both routes end to end, so two agents adding cases for different pages do land in the same file.
+- `src/styles/_breakpoints.scss` and `src/index.scss` hold shared tokens. Small and append-mostly.
 - Each `*.test.*` file pairs with one source file, so test work splits the same way the source does. Two agents adding suites for different files do not collide.
 
 ## Safe in parallel
 
 - Leaf components under `src/components/` (`footer/`, `navbar/`, `toaster/`, `table/explanation/`, `table/playerName/`) — each is its own `.tsx` + `.scss` pair, no cross-imports between them.
-- `src/utils/` files other than `getPlayerScores.ts`: `getLeagueInfo.ts`, `getLeagueResults.ts`, `buildSpreadsheetBuffer.ts`, `getClasses.ts`, `rangeWithPrefix.ts`.
+- Route components: `home/HomePage.tsx` and the three files in `results/` each own one page and one stylesheet.
+- `src/hooks/` — one hook per file, and only `AppDataContext` mounts more than one.
+- `src/utils/scoring/` — one concern per file. Scoring work no longer serializes on a single module, though `getPlayerScores.ts` sequences the others, so a change to the pipeline's shape still touches it.
+- `src/utils/` leaves: `getLeagueInfo.ts`, `getLeagueResults.ts`, `buildSpreadsheetBuffer.ts`, `picksCache.ts`, `debugLog.ts`, `getClasses.ts`, `rangeWithPrefix.ts`.
 - `functions/api/picks/[week].ts` — Cloudflare Pages Function, touched by nothing in `src/` except the fetch URL.
 - `public/` static assets.
 
