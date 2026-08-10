@@ -129,6 +129,27 @@ describe("getPlayerScores, spreadsheet parsing", () => {
     ]);
   });
 
+  // A game everybody took the same side of names one team, and that is enough to
+  // find it. Without this, a sheet needs a made-up player holding the other side.
+  it("scores a game every row picked the same way", async () => {
+    withEverythingFinal();
+    const result = await getPlayerScores(
+      WEEK,
+      picksBuffer([
+        { Name: "Alice", C1: "OSU -3", P1: "BUF -7", P2: "DAL -3", Pts: 41 },
+        { Name: "Bob", C1: "OSU -3", P1: "KC +7", P2: "PHI +3", Pts: 45 },
+      ]),
+    );
+
+    expect(mockGetLeagueResults).toHaveBeenCalledWith(League.COLLEGE, WEEK, [
+      new Set(["OSU"]),
+    ]);
+    expect(result.scores.map((score) => score.college[0].status)).toEqual([
+      "yes",
+      "yes",
+    ]);
+  });
+
   it("reads the first sheet in the workbook, whatever it is named", async () => {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(
