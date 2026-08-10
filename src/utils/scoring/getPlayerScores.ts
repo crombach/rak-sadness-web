@@ -1,5 +1,6 @@
 import { League, WeekInfo } from "../../types/League";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
+import debugLog from "../debugLog";
 import { getLeagueResults } from "../getLeagueResults";
 import applyKnockouts from "./applyKnockouts";
 import getTiebreakerScore from "./getTiebreakerScore";
@@ -17,13 +18,12 @@ export async function getPlayerScores(
     week,
     parsed.collegeMatchups,
   );
-  console.debug("college results", collegeResults);
   const proResults = await getLeagueResults(
     League.PRO,
     week,
     parsed.proMatchups,
   );
-  console.debug("pro results", proResults);
+  debugLog("league results", { collegeResults, proResults });
 
   const tiebreakerScore = getTiebreakerScore(
     parsed.tiebreakerGameKey,

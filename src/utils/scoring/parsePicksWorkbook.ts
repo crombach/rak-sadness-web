@@ -1,4 +1,5 @@
 import * as XLSX from "xlsx-js-style";
+import debugLog from "../debugLog";
 import parsePick from "./parsePick";
 
 export const TIEBREAKER_PICK_KEY = "Pts";
@@ -53,8 +54,7 @@ export default function parsePicksWorkbook(
   const proMatchups: Array<Set<string>> = Object.keys(matchups)
     .filter((key) => key.startsWith("P"))
     .map((key) => matchups[key]);
-  console.log("college matchups", collegeMatchups);
-  console.log("pro matchups", proMatchups);
+  debugLog("matchups", { collegeMatchups, proMatchups });
 
   return {
     rows,

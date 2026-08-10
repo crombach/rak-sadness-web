@@ -2,6 +2,7 @@ import { GameStatus, HomeAway } from "../../types/ESPN";
 import { GameScore } from "../../types/GameScore";
 import { LeagueResult } from "../../types/LeagueResult";
 import { Status } from "../../types/RakMadnessScores";
+import debugLog from "../debugLog";
 import parsePick from "./parsePick";
 
 export function getStatus(score: GameScore): Status {
@@ -42,12 +43,8 @@ export function getPickResults(
   const resultsByTeam = indexResultsByTeam(leagueResults);
 
   return picks.map((pick: string) => {
-    console.debug("==========");
-
     // Parse the pick text to extract the selected team abbreviation and spread (if present).
     const { teamAbbreviation: selectedTeam, spread } = parsePick(pick);
-    console.debug("Selected Team:", selectedTeam);
-    console.debug("Spread:", spread);
     const hasSpread = spread !== 0;
 
     // Find the game result matching the selected team.
@@ -73,7 +70,6 @@ export function getPickResults(
         hasSpread,
       };
     }
-    console.debug("Winner:", gameResult.winner);
 
     // Determine if the player picked the winner.
     // null gameResult.winner.team indicates a tie.
@@ -88,10 +84,10 @@ export function getPickResults(
     const marginAgainstSpread =
       (pickedWinner ? gameResult.winner.by : -gameResult.winner.by) + spread;
     const pointValue = marginAgainstSpread >= 0 ? 1 : 0;
-    console.debug("Pick", {
+    debugLog("scored pick", {
       selectedTeam,
       spread,
-      by: gameResult.winner.by,
+      winnerBy: gameResult.winner.by,
       marginAgainstSpread,
       pointValue,
     });
