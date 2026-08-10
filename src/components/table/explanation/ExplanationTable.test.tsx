@@ -1,3 +1,4 @@
+import { Mock } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import {
@@ -9,12 +10,13 @@ import {
 import { Toast, useToastContext } from "../../../context/ToastContext";
 import ExplanationTable from "./ExplanationTable";
 
-const showToast = jest.fn();
-const clearToasts = jest.fn();
+const showToast = vi.fn();
+const clearToasts = vi.fn();
 
-jest.mock("../../../context/ToastContext", () => {
-  const actual = jest.requireActual("../../../context/ToastContext");
-  return { ...actual, useToastContext: jest.fn() };
+vi.mock("../../../context/ToastContext", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../../../context/ToastContext")>();
+  return { ...actual, useToastContext: vi.fn() };
 });
 
 function pick(
@@ -65,10 +67,10 @@ const scores: RakMadnessScores = {
 beforeEach(() => {
   showToast.mockClear();
   clearToasts.mockClear();
-  (useToastContext as jest.Mock).mockReturnValue({
+  (useToastContext as Mock).mockReturnValue({
     toasts: [],
     showToast,
-    removeToast: jest.fn(),
+    removeToast: vi.fn(),
     clearToasts,
   });
 });

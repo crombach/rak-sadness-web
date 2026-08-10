@@ -3,7 +3,14 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
+    // Without this, "module": "esnext" falls back to the deprecated "classic"
+    // resolver. Wrangler bundles these files, so "bundler" is the right model.
+    "moduleResolution": "bundler",
     "lib": ["esnext"],
-    "types": ["@cloudflare/workers-types"]
+    "types": ["@cloudflare/workers-types"],
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "noImplicitAny": true,
+    "noEmit": true
   }
 }

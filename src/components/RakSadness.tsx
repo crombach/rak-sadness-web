@@ -196,6 +196,9 @@ export default function RakSadness() {
   // function literal, so useCallback cannot see its dependencies.
   const doRefreshThrottled = useMemo(
     () =>
+      // throttle() only stores the callback here. It runs from handleRefresh,
+      // never during render, so reading the ref inside it is safe.
+      // eslint-disable-next-line react-hooks/refs
       throttle(async () => {
         refreshButtonRef.current?.classList.add("--spinning");
         clearToasts();

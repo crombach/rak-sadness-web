@@ -1,3 +1,4 @@
+import { Mock } from "vitest";
 import { League, SeasonType } from "../types/League";
 import getLeagueInfo from "./getLeagueInfo";
 
@@ -37,7 +38,7 @@ function scoreboard(slug: string, calendar = [REGULAR_SEASON, POST_SEASON]) {
 }
 
 function mockFetch(body: unknown, ok = true, status = 200) {
-  const fetchMock = jest.fn().mockResolvedValue({
+  const fetchMock = vi.fn().mockResolvedValue({
     ok,
     status,
     json: async () => body,
@@ -46,16 +47,16 @@ function mockFetch(body: unknown, ok = true, status = 200) {
   return fetchMock;
 }
 
-function urlOf(fetchMock: jest.Mock): string {
+function urlOf(fetchMock: Mock): string {
   return fetchMock.mock.calls[0][0];
 }
 
 beforeEach(() => {
-  jest.useFakeTimers().setSystemTime(NOW);
+  vi.useFakeTimers().setSystemTime(NOW);
 });
 
 afterEach(() => {
-  jest.useRealTimers();
+  vi.useRealTimers();
 });
 
 describe("getLeagueInfo, requests", () => {
@@ -76,7 +77,7 @@ describe("getLeagueInfo, requests", () => {
   });
 
   it("returns null when the request fails", async () => {
-    const consoleError = jest
+    const consoleError = vi
       .spyOn(console, "error")
       .mockImplementation(() => undefined);
     mockFetch({}, false, 503);
@@ -113,7 +114,7 @@ describe("getLeagueInfo, calendar mapping", () => {
   });
 
   it("falls back to the last college calendar outside every date range", async () => {
-    jest.setSystemTime(new Date("2025-08-01T00:00Z"));
+    vi.setSystemTime(new Date("2025-08-01T00:00Z"));
     mockFetch(scoreboard(League.COLLEGE));
     const info = await getLeagueInfo(League.COLLEGE);
     expect(info.activeCalendar.seasonType).toBe(SeasonType.POST);
@@ -128,7 +129,7 @@ describe("getLeagueInfo, active week", () => {
   });
 
   it("falls back to the last week when today is outside every week", async () => {
-    jest.setSystemTime(new Date("2024-11-15T00:00Z"));
+    vi.setSystemTime(new Date("2024-11-15T00:00Z"));
     mockFetch(scoreboard(League.PRO));
     const info = await getLeagueInfo(League.PRO);
     expect(info.activeWeek.value).toBe(18);

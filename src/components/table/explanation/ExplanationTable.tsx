@@ -28,13 +28,11 @@ function ExplanationTable({ scores }: { scores?: RakMadnessScores }) {
         new Toast(
           "neutral",
           result.explanation.header,
-          (
-            <>
-              {result.explanation.message}
-              {result.explanation.downDistanceText && <br />}
-              {result.explanation.downDistanceText}
-            </>
-          ),
+          <>
+            {result.explanation.message}
+            {result.explanation.downDistanceText && <br />}
+            {result.explanation.downDistanceText}
+          </>,
         ),
       );
     },

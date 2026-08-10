@@ -1,3 +1,4 @@
+import { Mock } from "vitest";
 import { EspnEvent, GameStatus, HomeAway } from "../types/ESPN";
 import { League, WeekInfo } from "../types/League";
 import { getLeagueResults } from "./getLeagueResults";
@@ -73,14 +74,14 @@ function espnEvent({
 
 /** Every fetch resolves to the same event list. */
 function mockFetch(events: Array<EspnEvent>) {
-  const fetchMock = jest
+  const fetchMock = vi
     .fn()
     .mockResolvedValue({ ok: true, json: async () => ({ events }) });
   global.fetch = fetchMock as unknown as typeof fetch;
   return fetchMock;
 }
 
-function urlsOf(fetchMock: jest.Mock): Array<string> {
+function urlsOf(fetchMock: Mock): Array<string> {
   return fetchMock.mock.calls.map((call) => call[0]);
 }
 
@@ -88,11 +89,11 @@ const bufVsKc = espnEvent({ home: "BUF", away: "KC" });
 const BUF_KC = new Set(["BUF", "KC"]);
 
 beforeEach(() => {
-  jest.spyOn(console, "log").mockImplementation(() => undefined);
+  vi.spyOn(console, "log").mockImplementation(() => undefined);
 });
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe("getLeagueResults, pro requests", () => {

@@ -5,9 +5,9 @@ import { getLeagueResults } from "./getLeagueResults";
 import { getPlayerScores } from "./getPlayerScores";
 import { finalGame, upcomingGame } from "./leagueResultFixtures";
 
-jest.mock("./getLeagueResults");
+vi.mock("./getLeagueResults");
 
-const mockGetLeagueResults = jest.mocked(getLeagueResults);
+const mockGetLeagueResults = vi.mocked(getLeagueResults);
 
 const WEEK: WeekInfo = {
   value: 5,

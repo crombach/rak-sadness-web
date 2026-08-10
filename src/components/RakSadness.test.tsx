@@ -1,3 +1,4 @@
+import { MockedFunction } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { ToastContextProvider } from "../context/ToastContext";
@@ -6,27 +7,24 @@ import { RakMadnessScores } from "../types/RakMadnessScores";
 import RakSadness from "./RakSadness";
 import Toaster from "./toaster/Toaster";
 
-jest.mock("../utils/getLeagueInfo");
-jest.mock("../utils/getPlayerScores");
-jest.mock("../utils/buildSpreadsheetBuffer");
+vi.mock("../utils/getLeagueInfo");
+vi.mock("../utils/getPlayerScores");
+vi.mock("../utils/buildSpreadsheetBuffer");
 
-/* eslint-disable import/first */
 import getLeagueInfo from "../utils/getLeagueInfo";
 import { getPlayerScores, readFileToBuffer } from "../utils/getPlayerScores";
 import buildSpreadsheetBuffer from "../utils/buildSpreadsheetBuffer";
-/* eslint-enable import/first */
 
-const getLeagueInfoMock = getLeagueInfo as jest.MockedFunction<
-  typeof getLeagueInfo
->;
-const getPlayerScoresMock = getPlayerScores as jest.MockedFunction<
+const getLeagueInfoMock = getLeagueInfo as MockedFunction<typeof getLeagueInfo>;
+const getPlayerScoresMock = getPlayerScores as MockedFunction<
   typeof getPlayerScores
 >;
-const readFileToBufferMock = readFileToBuffer as jest.MockedFunction<
+const readFileToBufferMock = readFileToBuffer as MockedFunction<
   typeof readFileToBuffer
 >;
-const buildSpreadsheetBufferMock =
-  buildSpreadsheetBuffer as jest.MockedFunction<typeof buildSpreadsheetBuffer>;
+const buildSpreadsheetBufferMock = buildSpreadsheetBuffer as MockedFunction<
+  typeof buildSpreadsheetBuffer
+>;
 
 const CURRENT_WEEK = 3;
 
@@ -120,19 +118,19 @@ function scoresHeaderButtons(): Array<HTMLElement> {
 }
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   getLeagueInfoMock.mockResolvedValue(leagueInfo);
   getPlayerScoresMock.mockResolvedValue(scores);
   readFileToBufferMock.mockResolvedValue(new ArrayBuffer(8));
   buildSpreadsheetBufferMock.mockResolvedValue(new ArrayBuffer(8));
-  global.fetch = jest.fn();
-  window.URL.createObjectURL = jest.fn(() => "blob:fake");
-  jest.spyOn(console, "warn").mockImplementation(() => undefined);
-  jest.spyOn(console, "error").mockImplementation(() => undefined);
+  global.fetch = vi.fn();
+  window.URL.createObjectURL = vi.fn(() => "blob:fake");
+  vi.spyOn(console, "warn").mockImplementation(() => undefined);
+  vi.spyOn(console, "error").mockImplementation(() => undefined);
 });
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe("RakSadness, first load", () => {
@@ -346,7 +344,7 @@ describe("RakSadness, export", () => {
       expect(screen.getByText("Export Results")).toBeEnabled();
     });
 
-    const click = jest.spyOn(HTMLAnchorElement.prototype, "click");
+    const click = vi.spyOn(HTMLAnchorElement.prototype, "click");
     await user.click(screen.getByText("Export Results"));
 
     await waitFor(() => {

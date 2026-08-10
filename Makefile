@@ -8,29 +8,28 @@ help: ## Show available targets
 	@grep -E '^[a-zA-Z_-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "%-12s %s\n", $$1, $$2}'
 
 setup: ## Install dependencies from the lockfile (idempotent)
-	@command -v node >/dev/null || { echo "Missing node. Install $$(cat .nvmrc): brew install node@20"; exit 1; }
+	@command -v node >/dev/null || { echo "Missing node. Install $$(cat .nvmrc): brew install node@22"; exit 1; }
 	@req=$$(sed 's/^v//' .nvmrc | cut -d. -f1); cur=$$(node -v | sed 's/^v//' | cut -d. -f1); \
 	  [ "$$req" = "$$cur" ] || { echo "Node major $$cur found, .nvmrc requires $$req. Run: nvm install && nvm use"; exit 1; }
 	npm ci
 
-build: ## Production build into ./build (what pages:deploy uploads)
+build: ## Typecheck, then production build into ./build (what pages:deploy uploads)
 	npm run build
 
-run: ## Start the CRA dev server (PORT=3000 by default)
+run: ## Start the Vite dev server (PORT=3000 by default)
 	PORT=$(PORT) npm start
 
-test: ## Run the Jest suite once (no watch mode)
-	CI=true npm test -- --watchAll=false
+test: ## Run the Vitest suite once (no watch mode)
+	npm test
 
 check: lint typecheck test ## Lint, typecheck, test, and format-check everything
 	npm run prettier
 
-lint: ## ESLint over .ts/.tsx
+lint: ## ESLint over the repo
 	npm run lint
 
 typecheck: ## tsc --noEmit for src/ and functions/ separately
-	npx tsc --noEmit
-	npx tsc --noEmit -p functions/tsconfig.json
+	npm run typecheck
 
 format: ## Apply eslint --fix, then prettier (formatter runs last, so it wins)
 	npm run format

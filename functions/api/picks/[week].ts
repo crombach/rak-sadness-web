@@ -29,7 +29,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         "Content-Disposition": `attachment; filename=week-${week}-picks.xlsx`,
       },
     });
-  } catch (error) {
+  } catch {
     return new Response("Not Found", { status: 404 });
   }
 };
