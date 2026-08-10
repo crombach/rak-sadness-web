@@ -14,9 +14,10 @@ vi.mock("../utils/buildSpreadsheetBuffer");
 
 import getLeagueInfo from "../utils/getLeagueInfo";
 import { readFileToBuffer } from "../utils/readFileToBuffer";
-import { XLSX_CONTENT_TYPE } from "../utils/buildSpreadsheetBuffer";
+import buildSpreadsheetBuffer, {
+  XLSX_CONTENT_TYPE,
+} from "../utils/buildSpreadsheetBuffer";
 import { getPlayerScores } from "../utils/scoring/getPlayerScores";
-import buildSpreadsheetBuffer from "../utils/buildSpreadsheetBuffer";
 
 const getLeagueInfoMock = getLeagueInfo as MockedFunction<typeof getLeagueInfo>;
 const getPlayerScoresMock = getPlayerScores as MockedFunction<
