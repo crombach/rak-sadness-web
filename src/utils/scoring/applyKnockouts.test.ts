@@ -183,10 +183,15 @@ describe("applyKnockouts", () => {
     );
   });
 
-  // Both cases below can at best tie on total score, and have equal, settled
-  // college scores, so the against-the-spread tiebreaker decides them. Only the
-  // opponent's differing picks that carry a spread can close that gap.
-  function trailingBySpreadTiebreaker(leaderProPick: string) {
+  // The cases below can at best tie on total score, and have equal, settled
+  // college scores, so the against-the-spread tiebreaker decides them. Bob's score
+  // against the spread is the one that has to catch up, and it only counts his own
+  // picks that carry a spread, so his pick is what decides whether the gap can
+  // close.
+  function trailingBySpreadTiebreaker(
+    leaderProPick: string,
+    trailingProPick: string,
+  ) {
     return applyKnockouts([
       player({
         name: "Alice",
@@ -205,20 +210,29 @@ describe("applyKnockouts", () => {
         proScore: 2,
         proAgainstTheSpread: 1,
         college: [pickResult("OSU", "yes")],
-        pro: [pickResult("KC", "incomplete")],
+        pro: [pickResult(trailingProPick, "incomplete")],
         tiebreakerPick: 40,
       }),
     ]);
   }
 
-  it("counts a differing pro pick with a spread against the spread tiebreaker", () => {
-    expect(trailingBySpreadTiebreaker("BUF -3")[1].status.isKnockedOut).toBe(
-      false,
+  it("counts a differing pro pick the trailing player took with a spread", () => {
+    expect(
+      trailingBySpreadTiebreaker("BUF -3", "KC -3")[1].status.isKnockedOut,
+    ).toBe(false);
+  });
+
+  it("ignores a spread only the leader took, which cannot score for anyone else", () => {
+    const result = trailingBySpreadTiebreaker("BUF -3", "KC");
+
+    expect(result[1].status.isKnockedOut).toBe(true);
+    expect(result[1].status.explanation).toContain(
+      "Knocked out on Pro Score Against the Spread tiebreaker",
     );
   });
 
-  it("ignores a differing pro pick with no spread", () => {
-    const result = trailingBySpreadTiebreaker("BUF");
+  it("ignores a differing pro pick with no spread on either side", () => {
+    const result = trailingBySpreadTiebreaker("BUF", "KC");
 
     expect(result[1].status.isKnockedOut).toBe(true);
     expect(result[1].status.explanation).toContain(

@@ -12,6 +12,52 @@ type PairDifferences = {
 };
 
 /**
+ * How many of the games still to be played these two players have picked
+ * differently, which is the most ground the active player can still make up.
+ *
+ * `differentProPicksWithSpreads` reads the spread off the active player's own
+ * pick, because their score against the spread is what has to catch up, and that
+ * score comes from their own picks. Swapping the two players can therefore give a
+ * different answer, on a sheet where the two rows disagree about a game's spread.
+ */
+function countDifferences(
+  activeScore: PlayerScore,
+  oppScore: PlayerScore,
+  remainingCollegeIndices: Array<number>,
+  remainingProIndices: Array<number>,
+): PairDifferences {
+  const differentCollegePicks = remainingCollegeIndices.reduce(
+    (sum, gameIndex) => {
+      const oppPick = oppScore.college[gameIndex].pick;
+      const activePick = activeScore.college[gameIndex].pick;
+      return oppPick != null && activePick != null && oppPick !== activePick
+        ? sum + 1
+        : sum;
+    },
+    0,
+  );
+
+  let differentProPicks = 0;
+  let differentProPicksWithSpreads = 0;
+  remainingProIndices.forEach((gameIndex) => {
+    const oppPick = oppScore.pro[gameIndex].pick;
+    const activePick = activeScore.pro[gameIndex].pick;
+    if (oppPick != null && activePick != null && oppPick !== activePick) {
+      differentProPicks += 1;
+      if (parsePick(activePick).spread !== 0) {
+        differentProPicksWithSpreads += 1;
+      }
+    }
+  });
+
+  return {
+    differentCollegePicks,
+    differentProPicks,
+    differentProPicksWithSpreads,
+  };
+}
+
+/**
  * Marks every player who can no longer catch the leader, with the reason.
  *
  * Assumes the team abbreviations are all correct. If they are not, or the games
@@ -31,8 +77,6 @@ export default function applyKnockouts(
       return pickResult.status === "incomplete" ? index : null;
     })
     .filter((it) => it != null);
-
-  const cache: { [key: string]: PairDifferences } = {};
 
   return sortedScores.map((activeScore, activeIndex) => {
     // If a player has no picks, they're knocked out.
@@ -61,54 +105,16 @@ export default function applyKnockouts(
         // No use comparing a player to themself or a player with no picks.
         if (oppIndex === activeIndex || oppScore.status.hasNoPicks) continue;
 
-        const cacheKey = `${Math.min(oppIndex, activeIndex)},${Math.max(
-          oppIndex,
-          activeIndex,
-        )}`;
-        let differences = cache[cacheKey];
-        if (differences == null) {
-          const differentCollegePicks = remainingCollegeIndices.reduce(
-            (sum, gameIndex) => {
-              const oppPick = oppScore.college[gameIndex].pick;
-              const activePick = activeScore.college[gameIndex].pick;
-              return oppPick != null &&
-                activePick != null &&
-                oppPick !== activePick
-                ? sum + 1
-                : sum;
-            },
-            0,
-          );
-
-          let differentProPicks = 0;
-          let differentProPicksWithSpreads = 0;
-          remainingProIndices.forEach((gameIndex) => {
-            const oppPick = oppScore.pro[gameIndex].pick;
-            const activePick = activeScore.pro[gameIndex].pick;
-            if (
-              oppPick != null &&
-              activePick != null &&
-              oppPick !== activePick
-            ) {
-              differentProPicks += 1;
-              if (parsePick(oppPick).spread !== 0) {
-                differentProPicksWithSpreads += 1;
-              }
-            }
-          });
-
-          differences = {
-            differentCollegePicks,
-            differentProPicks,
-            differentProPicksWithSpreads,
-          };
-          cache[cacheKey] = differences;
-        }
         const {
           differentCollegePicks,
           differentProPicks,
           differentProPicksWithSpreads,
-        } = differences;
+        } = countDifferences(
+          activeScore,
+          oppScore,
+          remainingCollegeIndices,
+          remainingProIndices,
+        );
 
         const totalScoreDiff = oppScore.score.total - activeScore.score.total;
         const totalDifferentPicks = differentCollegePicks + differentProPicks;
