@@ -23,29 +23,29 @@
       }
 
       &.--yes {
-        background-color: #a3faa0;
+        background-color: var(--rak-pick-yes);
       }
 
       &.--no {
-        background-color: #faa0a0;
+        background-color: var(--rak-pick-no);
       }
 
       &.--error {
-        background-color: #edfaa0;
+        background-color: var(--rak-pick-error);
       }
     }
 
     tr:nth-child(even) .table__pick {
       &.--yes {
-        background-color: #7ede7c;
+        background-color: var(--rak-pick-yes-dark);
       }
 
       &.--no {
-        background-color: #de7c7c;
+        background-color: var(--rak-pick-no-dark);
       }
 
       &.--error {
-        background-color: #cfde7c;
+        background-color: var(--rak-pick-error-dark);
       }
     }
   }

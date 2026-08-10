@@ -1,5 +1,6 @@
 import { Status, RakMadnessScores } from "../types/RakMadnessScores";
 import * as XLSX from "xlsx-js-style";
+import { PICK_STATUS_FILL } from "./pickStatusFill";
 import rangeWithPrefix from "./rangeWithPrefix";
 
 /** Keep in sync with the header `functions/api/picks/[week].ts` responds with. */
@@ -12,15 +13,6 @@ const Color = {
   },
   OFF_BLACK: {
     rgb: "111111",
-  },
-  GREEN: {
-    rgb: "A3FAA0",
-  },
-  YELLOW: {
-    rgb: "EDFAA0",
-  },
-  RED: {
-    rgb: "FAA0A0",
   },
 };
 
@@ -63,17 +55,8 @@ function headerCell(value: string) {
 }
 
 function explanationCell(pick: string, isCorrect: Status) {
-  // Determine cell color
-  let cellColor = Color.WHITE;
-  if (isCorrect === "yes") {
-    cellColor = Color.GREEN;
-  } else if (isCorrect === "no") {
-    cellColor = Color.RED;
-  } else if (isCorrect === "error") {
-    cellColor = Color.YELLOW;
-  }
+  const cellColor = PICK_STATUS_FILL[isCorrect];
 
-  // Return cell object
   return {
     t: CellType.Text,
     v: pick ?? "N/A",
