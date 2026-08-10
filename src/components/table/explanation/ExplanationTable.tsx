@@ -49,7 +49,6 @@ function ExplanationTable({ scores }: { scores?: RakMadnessScores | null }) {
   const firstPlayer = scores.scores[0];
   const collegeCount = firstPlayer.college.length;
   const proCount = firstPlayer.pro.length;
-  // Rank, player, college score, pro score, total score, plus one per pick.
   const columnCount = FIXED_COLUMN_COUNT + collegeCount + proCount;
 
   return (

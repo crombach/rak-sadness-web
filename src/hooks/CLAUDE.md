@@ -5,7 +5,7 @@ pipeline lives here, so components only render. The first two are mounted once, 
 `AppDataContext`, above the routes.
 
 - `useLeagueWeeks`: the season's weeks from ESPN, and which one is selected. Takes
-  the week the visitor arrived asking for, so a results URL is not preceded by
+  the week the user arrived asking for, so a results URL is not preceded by
   scoring the current week. `selectableWeeks` holds the calendar's own `WeekInfo`
   objects, because the week picker compares options by reference.
 - `usePlayerScores`: the scores for a week, from the API, the local cache of an

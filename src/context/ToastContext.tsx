@@ -36,9 +36,9 @@ type ToastActions = {
   clearToasts: () => void;
 };
 
-// Two contexts rather than one. The actions never change identity, so the parts
-// of the app that only send toasts (every player cell, for one) no longer
-// re-render each time a toast appears or times out.
+// The actions sit in their own context because their identity never changes. That
+// keeps the parts of the app that only send toasts (every player cell, for one)
+// still while toasts appear and time out.
 const ToastActionsContext = createContext<ToastActions>({
   showToast: () => {
     /* Placeholder */

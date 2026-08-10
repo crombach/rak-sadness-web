@@ -51,12 +51,16 @@ export default function useLeagueWeeks(initialWeek?: number) {
     [weeks, currentWeek],
   );
 
-  return {
-    weeks,
-    selectableWeeks,
-    currentWeek,
-    selectedWeek,
-    setSelectedWeek,
-    isWeekInfoLoading,
-  };
+  // Memoized so `AppDataContext` can memoize the value it publishes.
+  return useMemo(
+    () => ({
+      weeks,
+      selectableWeeks,
+      currentWeek,
+      selectedWeek,
+      setSelectedWeek,
+      isWeekInfoLoading,
+    }),
+    [weeks, selectableWeeks, currentWeek, selectedWeek, isWeekInfoLoading],
+  );
 }

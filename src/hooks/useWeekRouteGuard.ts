@@ -10,7 +10,7 @@ type GuardResult =
 type Redirect = { header: string; message: string } | "silent";
 
 /**
- * Decides whether a `/week/:week` URL has results to show, and sends the visitor
+ * Decides whether a `/week/:week` URL has results to show, and sends the user
  * home when it does not.
  *
  * The waiting rules matter more than the redirect ones. A results URL is opened

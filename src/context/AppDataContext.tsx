@@ -1,6 +1,7 @@
 import {
   PropsWithChildren,
   createContext,
+  useCallback,
   useContext,
   useMemo,
   useState,
@@ -38,23 +39,23 @@ function weekFromPath(pathname: string): number | undefined {
 export function AppDataContextProvider({
   children,
 }: PropsWithChildren<object>) {
-  // Read once: this is the week the visitor arrived asking for, not the week
-  // they are looking at now.
   const { pathname } = useLocation();
-  // State with no setter: the initial pathname, kept even as the route changes.
+  // State with no setter, so this stays the week the user arrived asking for
+  // even once they are looking at another one.
   const [arrivedAtWeek] = useState(() => weekFromPath(pathname));
 
   const leagueWeeks = useLeagueWeeks(arrivedAtWeek);
   const playerScores = usePlayerScores(leagueWeeks.selectedWeek);
   const { weeks } = leagueWeeks;
 
+  const findWeek = useCallback(
+    (value: number) => weeks?.find((week) => week.value === value),
+    [weeks],
+  );
+
   const value = useMemo(
-    () => ({
-      ...leagueWeeks,
-      ...playerScores,
-      findWeek: (value: number) => weeks?.find((week) => week.value === value),
-    }),
-    [leagueWeeks, playerScores, weeks],
+    () => ({ ...leagueWeeks, ...playerScores, findWeek }),
+    [leagueWeeks, playerScores, findWeek],
   );
 
   return (

@@ -40,6 +40,11 @@ export default function usePlayerScores(selectedWeek?: WeekInfo) {
   const [isRefreshing, setRefreshing] = useState(false);
   const [settledWeek, setSettledWeek] = useState<number>();
 
+  const clearScores = useCallback(() => {
+    setScores(undefined);
+    setScoresWeek(undefined);
+  }, []);
+
   // Every path into the scores runs through here, so the loading flags and the
   // failure toasts cannot drift between them.
   const attemptScoring = useCallback(
@@ -63,8 +68,7 @@ export default function usePlayerScores(selectedWeek?: WeekInfo) {
           `Failed to load week ${selectedWeek.value} picks spreadsheet. Has it been uploaded yet?`,
           error,
         );
-        setScores(undefined);
-        setScoresWeek(undefined);
+        clearScores();
         setPicksLoading(false);
         setScoresLoading(false);
         showToast(onLoadFailure);
@@ -80,15 +84,14 @@ export default function usePlayerScores(selectedWeek?: WeekInfo) {
         }
       } catch (error) {
         console.error("Failed to calculate scores", error);
-        setScores(undefined);
-        setScoresWeek(undefined);
+        clearScores();
         showToast(onScoreFailure);
       } finally {
         setScoresLoading(false);
         setSettledWeek(selectedWeek.value);
       }
     },
-    [selectedWeek, showToast],
+    [selectedWeek, showToast, clearScores],
   );
 
   // Fetch the week's picks from the API, falling back to whatever this browser
@@ -146,8 +149,7 @@ export default function usePlayerScores(selectedWeek?: WeekInfo) {
     async (file?: File) => {
       if (!selectedWeek) return;
       if (!file) {
-        setScores(undefined);
-        setScoresWeek(undefined);
+        clearScores();
         setScoresLoading(false);
         showToast(
           new Toast("neutral", "Info", "Aborted picks shreadsheet selection"),
@@ -176,7 +178,7 @@ export default function usePlayerScores(selectedWeek?: WeekInfo) {
         ),
       });
     },
-    [selectedWeek, attemptScoring, showToast],
+    [selectedWeek, attemptScoring, showToast, clearScores],
   );
 
   // useMemo, not useCallback: the value is throttle()'s wrapper, not the
@@ -217,14 +219,27 @@ export default function usePlayerScores(selectedWeek?: WeekInfo) {
     await refreshThrottled();
   }, [isScoresLoading, refreshThrottled]);
 
-  return {
-    scores,
-    scoresWeek,
-    settledWeek,
-    isPicksLoading,
-    isScoresLoading,
-    isRefreshing,
-    scoreLocalFile,
-    refresh,
-  };
+  // Memoized so `AppDataContext` can memoize the value it publishes.
+  return useMemo(
+    () => ({
+      scores,
+      scoresWeek,
+      settledWeek,
+      isPicksLoading,
+      isScoresLoading,
+      isRefreshing,
+      scoreLocalFile,
+      refresh,
+    }),
+    [
+      scores,
+      scoresWeek,
+      settledWeek,
+      isPicksLoading,
+      isScoresLoading,
+      isRefreshing,
+      scoreLocalFile,
+      refresh,
+    ],
+  );
 }

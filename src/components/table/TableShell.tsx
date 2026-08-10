@@ -1,5 +1,4 @@
 import { ReactNode } from "react";
-import rangeWithPrefix from "../../utils/rangeWithPrefix";
 import "./Table.scss";
 
 /**
@@ -26,9 +25,7 @@ export default function TableShell({
       <tbody>
         {children}
         <tr className="table__last-row">
-          {rangeWithPrefix(columnCount).map((key) => (
-            <td key={key} />
-          ))}
+          <td colSpan={columnCount} />
         </tr>
       </tbody>
     </table>

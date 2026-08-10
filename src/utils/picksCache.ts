@@ -1,7 +1,7 @@
-// Uploaded spreadsheets only ever existed in memory, so a reload or a shared
-// results link lost them. Caching the workbook lets a results URL reopen without
-// asking for the file again. The scores themselves are not cached: recomputing
-// them from the workbook is fast, and it cannot go stale against a code change.
+// A per-week copy of an uploaded workbook, so a results URL can be reopened
+// without asking for the file again. Only the workbook is cached, never the
+// scores: recomputing those is fast, and a cached score could go stale against a
+// change to the scoring rules.
 
 const KEY_PREFIX = "rak-sadness:picks:";
 /** A size guard, not a history. Picks files are tens of KB. */
