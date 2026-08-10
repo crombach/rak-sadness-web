@@ -2,7 +2,11 @@ import { GameScore } from "../../types/GameScore";
 import { LeagueResult } from "../../types/LeagueResult";
 import { PlayerScore } from "../../types/RakMadnessScores";
 import comparePlayerScores from "./comparePlayerScores";
-import { getPickResults, getStatus } from "./getPickResults";
+import {
+  getPickResults,
+  getStatus,
+  indexResultsByTeam,
+} from "./getPickResults";
 import { ParsedPicks, TIEBREAKER_PICK_KEY } from "./parsePicksWorkbook";
 
 function sumPointValues(scores: Array<GameScore>): number {
@@ -15,6 +19,11 @@ export default function scorePlayers(
   results: { college: Array<LeagueResult>; pro: Array<LeagueResult> },
   tiebreakerScore?: number,
 ): Array<PlayerScore> {
+  // Built here, not per player: every row resolves its picks against the same
+  // games.
+  const collegeResultsByTeam = indexResultsByTeam(results.college);
+  const proResultsByTeam = indexResultsByTeam(results.pro);
+
   const scores: Array<PlayerScore> = parsed.rows.map((playerRow: any) => {
     const collegePicks = parsed.collegeKeys.map((key) => playerRow[key]);
     const proPicks = parsed.proKeys.map((key) => playerRow[key]);
@@ -22,12 +31,15 @@ export default function scorePlayers(
       !collegePicks.some((it) => it != null) &&
       !proPicks.some((it) => it != null);
 
-    const collegePickResults = getPickResults(collegePicks, results.college);
+    const collegePickResults = getPickResults(
+      collegePicks,
+      collegeResultsByTeam,
+    );
     const scoreCollege = sumPointValues(
       collegePickResults.filter((result) => result.isCompleted),
     );
 
-    const proPickResults = getPickResults(proPicks, results.pro);
+    const proPickResults = getPickResults(proPicks, proResultsByTeam);
     const proPickResultsCompleted = proPickResults.filter(
       (result) => result.isCompleted,
     );

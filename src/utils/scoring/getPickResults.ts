@@ -18,9 +18,9 @@ export function getStatus(score: GameScore): Status {
 
 /**
  * Indexes both sides of every game by team abbreviation. First result wins, so a
- * team appearing twice resolves to its earliest game, the way a linear scan did.
+ * team playing twice in a week resolves to its earliest game.
  */
-function indexResultsByTeam(
+export function indexResultsByTeam(
   leagueResults: Array<LeagueResult>,
 ): Map<string, LeagueResult> {
   const byTeam = new Map<string, LeagueResult>();
@@ -36,12 +36,11 @@ function indexResultsByTeam(
   return byTeam;
 }
 
+/** Takes the index rather than the games, so scoring builds it once per week. */
 export function getPickResults(
   picks: Array<string>,
-  leagueResults: Array<LeagueResult>,
+  resultsByTeam: Map<string, LeagueResult>,
 ): Array<GameScore> {
-  const resultsByTeam = indexResultsByTeam(leagueResults);
-
   return picks.map((pick: string) => {
     // Parse the pick text to extract the selected team abbreviation and spread (if present).
     const { teamAbbreviation: selectedTeam, spread } = parsePick(pick);
