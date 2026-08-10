@@ -483,6 +483,18 @@ describe("the app, week routes", () => {
     expect(document.querySelector(".table.--skeleton")).not.toBeInTheDocument();
   });
 
+  it("shows the view and refresh buttons disabled while the week loads", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    const loading = scoresHeaderButtons();
+    expect(loading).toHaveLength(3);
+    loading.forEach((button) => expect(button).toBeDisabled());
+
+    await screen.findByText("MNF Points Pick");
+    scoresHeaderButtons().forEach((button) => expect(button).toBeEnabled());
+  });
+
   it("fills the wireframe with rows down to the bottom of the viewport", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
     mountApp(`/week/${CURRENT_WEEK}/scoreboard`);

@@ -38,18 +38,20 @@ export default function ResultsLayout() {
         </>
       }
       navbarRight={
-        isReady && (
-          <ScoresNavbar
-            view={view}
-            onViewChange={(next) =>
-              navigate(`/week/${guard.week.value}/${next.toLowerCase()}`, {
-                replace: true,
-              })
-            }
-            onRefresh={refresh}
-            isRefreshing={isRefreshing}
-          />
-        )
+        // Rendered while the week loads, so the navbar does not change shape
+        // under the pointer once it arrives. Disabled until there is something to
+        // switch between.
+        <ScoresNavbar
+          view={view}
+          disabled={!isReady}
+          onViewChange={(next) =>
+            navigate(`/week/${rawWeek}/${next.toLowerCase()}`, {
+              replace: true,
+            })
+          }
+          onRefresh={refresh}
+          isRefreshing={isRefreshing}
+        />
       }
     >
       <div className={`home__scores ${getClasses({ "--loading": !isReady })}`}>

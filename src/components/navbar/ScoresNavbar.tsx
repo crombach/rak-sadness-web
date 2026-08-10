@@ -11,15 +11,19 @@ export default function ScoresNavbar({
   onViewChange,
   onRefresh,
   isRefreshing,
+  disabled = false,
 }: {
   view: ScoresView;
   onViewChange: (view: ScoresView) => void;
   onRefresh: () => void;
   isRefreshing: boolean;
+  /** Set while a week is still loading, so the navbar keeps its shape. */
+  disabled?: boolean;
 }) {
   return (
     <>
       <Button
+        disabled={disabled}
         onClick={() => onViewChange("Scoreboard")}
         className={`home__scores-header-button ${getClasses({
           "--active": view === "Scoreboard",
@@ -28,6 +32,7 @@ export default function ScoresNavbar({
         <LeaderboardIcon />
       </Button>
       <Button
+        disabled={disabled}
         onClick={() => onViewChange("Explanation")}
         className={`home__scores-header-button ${getClasses({
           "--active": view === "Explanation",
@@ -37,6 +42,7 @@ export default function ScoresNavbar({
       </Button>
       <div className="home__scores-header-divider" />
       <Button
+        disabled={disabled}
         onClick={onRefresh}
         className={`home__scores-header-button ${getClasses({
           "--spinning": isRefreshing,
