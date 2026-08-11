@@ -2,6 +2,9 @@
 
 .table {
   margin: auto;
+  // Tapping a cell opens a toast about it, and a drag across one selected the text
+  // instead of reading as a tap.
+  user-select: none;
   // Read back by useFillerRows, which needs a row height to work out how many
   // rows fit below the real ones.
   --rak-table-row-height: 32px;
@@ -12,8 +15,13 @@
   --rak-table-cell-padding-x: 6px;
   --rak-table-cell-padding-y: 2px;
   --rak-table-header-padding-x: 8px;
-  --rak-table-border: 2px solid var(--rak-primary-800);
-  --rak-table-header-border: 2px solid var(--rak-primary-600);
+  --rak-table-border: var(--rak-border-width) solid var(--rak-primary-800);
+  --rak-table-header-border: var(--rak-border-width) solid
+    var(--rak-primary-600);
+  // For an edge that draws nothing. Never `none`, which resets the color to
+  // `currentColor`: Dark Reader forces a zero-width border visible, and white is
+  // what it would then draw between the rank and the player.
+  --rak-table-no-border: 0 solid var(--rak-primary-800);
   // The status icon beside a player's name, in `PlayerName.scss`. Sized here
   // because the wireframe has to leave the same room without drawing one.
   --rak-player-icon-size: 16px;
@@ -44,7 +52,8 @@
         border-right: var(--rak-table-header-border);
       }
       &:first-child {
-        border-right: none;
+        // The rank and the player read as one block, so nothing divides them.
+        border-right: var(--rak-table-no-border);
       }
       &:nth-child(2) {
         border-left: var(--rak-table-header-border);
@@ -125,7 +134,8 @@
       border-right: var(--rak-table-border);
       &:first-child {
         border-left: var(--rak-table-border);
-        border-right: none;
+        // The player column draws this divider on its own left edge.
+        border-right: var(--rak-table-no-border);
       }
     }
 
@@ -134,16 +144,16 @@
     }
 
     // Keeps the last real row clear of a phone's rounded corners and home
-    // indicator. Sized from the device's own inset, so it has no height at all
-    // on a screen that does not report one. `index.html` asks for
-    // `viewport-fit=cover`, without which the inset is always zero.
+    // indicator. A row tall, in the header's color, so it reads as the table's own
+    // bottom edge, plus the device's inset where there is one. `index.html` asks
+    // for `viewport-fit=cover`, without which the inset is always zero.
     tr:last-child.table__last-row td {
-      height: env(safe-area-inset-bottom, 0px);
-      min-height: 0;
+      height: calc(
+        var(--rak-table-row-height) + env(safe-area-inset-bottom, 0px)
+      );
       padding: 0;
-      // Without this the row still draws its borders at zero height, and the
-      // last real row already carries the table's bottom edge.
-      border: none;
+      // The last real row already carries the table's bottom edge.
+      border: var(--rak-table-no-border);
       background-color: var(--rak-primary-800);
     }
   }

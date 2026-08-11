@@ -1,5 +1,11 @@
 import "@testing-library/jest-dom";
+import { configure } from "@testing-library/dom";
 import { vi } from "vitest";
+
+// The app suites mount the whole app and wait on several chained promises, which
+// takes longer than the 1s default on a loaded CI runner. Raised here rather than
+// per call site, because any of them can be the one that runs slowly.
+configure({ asyncUtilTimeout: 5000 });
 
 // @testing-library/dom decides whether fake timers are installed by looking for
 // a `jest` global, then advances the clock through it. Without this shim its

@@ -1,13 +1,27 @@
+@use "sass:math";
+
+// The fraction of the table's width the sheen covers. A transform percentage is of
+// the sheen's own width, so crossing the whole table takes 100% divided by that
+// fraction. The sheen starts with its right edge on the table's left, and ends with
+// its left edge on the table's right.
+$sheen-fraction: 0.6;
+
 @keyframes skeleton-sweep {
   from {
     transform: translate3d(-100%, 0, 0);
   }
   to {
-    transform: translate3d(100vw, 0, 0);
+    transform: translate3d(math.div(100%, $sheen-fraction), 0, 0);
   }
 }
 
 .table.--skeleton {
+  // Containing block for the sheen, which travels the table's width and no further.
+  // Clipped as well as contained: the sheen is as wide as most of the table, so both
+  // ends of its run hang outside. Nothing here sticks, because the page holds still
+  // until the week arrives, so there is no sticky header to lose to the clip.
+  position: relative;
+  overflow: hidden;
   // `.table` centers itself vertically, which would split the leftover space into
   // a band above and below. Flush to the top instead, so the whole remainder is at
   // the bottom and the row count can claim it.
@@ -18,16 +32,15 @@
   // throttled phone, over the same seconds the week is being scored. This is one
   // transform on the compositor, so it costs the same whatever the table's size.
   //
-  // Fixed, so the table's own width, which runs well past the screen on the picks
-  // view, has no say in how far the sheen travels. Above the sticky header, below
-  // the navbar.
+  // Held to the table's own box, so it crosses the wireframe and not the page
+  // around it. Above the sticky header, below the navbar.
   &::after {
     content: "";
-    position: fixed;
+    position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
-    width: 60vw;
+    width: $sheen-fraction * 100%;
     z-index: 30;
     pointer-events: none;
     background: linear-gradient(

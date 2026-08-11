@@ -12,6 +12,9 @@ import LogoButton from "../navbar/LogoButton/LogoButton";
 import PageLayout from "../PageLayout";
 import "./HomePage.scss";
 
+/** Title case, to read like the week labels ESPN sends. */
+const seasonLabel = (season: number) => `${season} Season`;
+
 export default function HomePage() {
   const navigate = useNavigate();
   const {
@@ -79,7 +82,7 @@ export default function HomePage() {
               >
                 <Select.Value>
                   {(season: number | null) =>
-                    season != null ? `${season} season` : "Select a season..."
+                    season != null ? seasonLabel(season) : "Select a season..."
                   }
                 </Select.Value>
                 <Select.Icon className="select__icon">
@@ -98,7 +101,7 @@ export default function HomePage() {
                         value={season}
                         className="select__item"
                       >
-                        <Select.ItemText>{season} season</Select.ItemText>
+                        <Select.ItemText>{seasonLabel(season)}</Select.ItemText>
                       </Select.Item>
                     ))}
                   </Select.Popup>

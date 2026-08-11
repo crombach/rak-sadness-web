@@ -36,6 +36,7 @@ Writing a test here:
 - Don't name a helper `render*` unless it returns the render result — `testing-library/render-result-naming-convention` is an error, not a warning.
 - `testing-library/no-node-access` is off for test files (`eslint.config.js` override): the file input is hidden and the navbar buttons are only identifiable by class. `testing-library/no-container` is on, so reach for `screen` queries.
 - `mockReset` is on in `vite.config.ts`. Set mock implementations in `beforeEach`, not at module scope.
+- A `waitFor` or `findBy` gets 5s, raised from the 1s default in `src/setupTests.ts`, and a test gets 15s (`testTimeout`). The app suites mount the whole app and wait on chained promises, which outran 1s on a loaded CI runner. Keep the test limit the larger of the two, so a wait that never resolves fails on its own assertion.
 - `src/setupTests.ts` shims a `jest` global. `@testing-library/dom` looks for it to decide whether fake timers are installed, and without it every interaction in a `vi.useFakeTimers()` suite times out. Don't remove it.
 - Import `Mock` / `MockedFunction` from `vitest`. `vi`, `describe`, `it`, and `expect` are globals (`globals: true`).
 

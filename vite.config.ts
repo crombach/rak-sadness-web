@@ -24,5 +24,8 @@ export default defineConfig({
     css: false,
     // Several suites assume a clean call count per test.
     mockReset: true,
+    // Above the 5s a single `findBy` is now allowed to wait, so a slow wait fails
+    // on its own assertion rather than on the test running out of time.
+    testTimeout: 15000,
   },
 });

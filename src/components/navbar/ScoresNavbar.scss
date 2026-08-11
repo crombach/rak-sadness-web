@@ -49,3 +49,35 @@
   margin: 0 6px;
   background-color: var(--rak-on-solid);
 }
+
+// The refresh button and its divider, collapsed together once the week is decided.
+// A grid column from `1fr` to `0fr` narrows them, because they measure whatever
+// their padding and the icon come to, and `auto` cannot be interpolated.
+// `--collapse-duration` comes from `ScoresNavbar`, which unmounts this after it.
+.home__scores-header-refresh {
+  display: grid;
+  grid-template-columns: 1fr;
+  transition-property: grid-template-columns, margin-inline-start, opacity;
+  transition-duration: var(--collapse-duration);
+  transition-timing-function: ease;
+
+  &.--collapsed {
+    grid-template-columns: 0fr;
+    opacity: 0;
+    // The navbar's gap sits to the left of this, and would be left behind on its
+    // own once the width is gone.
+    margin-inline-start: calc(-1 * var(--navbar-gap));
+
+    // Only while collapsing. Expanded, this would clip the button's focus outline.
+    .home__scores-header-refresh-content {
+      overflow: hidden;
+    }
+  }
+}
+
+.home__scores-header-refresh-content {
+  display: flex;
+  align-items: center;
+  // So the column can narrow past what the divider and button measure.
+  min-width: 0;
+}

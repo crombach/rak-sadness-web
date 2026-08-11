@@ -7,7 +7,7 @@
   align-items: center;
   justify-content: center;
   z-index: 999;
-  box-shadow: var(--rak-shadow-md);
+  box-shadow: var(--rak-shadow-xs);
   background-color: var(--rak-primary-500);
   color: var(--rak-on-solid);
 }
@@ -42,10 +42,13 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 12px;
+  // Named because `ScoresNavbar` cancels it with a negative margin while the
+  // refresh button collapses, and a gap around nothing would otherwise remain.
+  --navbar-gap: 12px;
+  gap: var(--navbar-gap);
 
   @include narrow-screen {
-    gap: 4px;
+    --navbar-gap: 4px;
   }
 }
 

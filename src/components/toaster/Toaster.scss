@@ -10,7 +10,6 @@ $toasterWidth: min(calc(100% - 48px), 400px);
   right: calc(50% - $toasterWidth / 2 - 24px);
   margin: 24px;
   width: $toasterWidth;
-  box-shadow: var(--rak-shadow-lg);
   border-radius: var(--rak-radius-lg);
 }
 
@@ -21,6 +20,11 @@ $toasterWidth: min(calc(100% - 48px), 400px);
   width: 100%;
   padding: 12px;
   border-radius: var(--rak-radius-sm);
+  // A toast lands over the table, which is busy behind it. The same width as the
+  // table's own dividers, and the same shadow the navbar sits on. The color is the
+  // strong shade of the fill each type carries, primary here and repainted below.
+  border: var(--rak-border-width) solid var(--rak-primary-500);
+  box-shadow: var(--rak-shadow-xs);
   font-size: 1rem;
   font-weight: 500;
   line-height: 1.5;
@@ -28,59 +32,46 @@ $toasterWidth: min(calc(100% - 48px), 400px);
   &.--primary {
     background-color: var(--rak-soft-primary-bg);
     color: var(--rak-soft-primary-text);
-
-    .toast__header {
-      color: var(--rak-soft-primary-title);
-    }
   }
   &.--neutral {
+    border-color: var(--rak-text-secondary);
     background-color: var(--rak-soft-neutral-bg);
     color: var(--rak-soft-neutral-text);
-
-    .toast__header {
-      color: var(--rak-soft-neutral-title);
-    }
   }
   &.--success {
+    border-color: var(--rak-success-500);
     background-color: var(--rak-soft-success-bg);
     color: var(--rak-soft-success-text);
-
-    .toast__header {
-      color: var(--rak-soft-success-title);
-    }
   }
   &.--warning {
+    border-color: var(--rak-warning-500);
     background-color: var(--rak-soft-warning-bg);
     color: var(--rak-soft-warning-text);
-
-    .toast__header {
-      color: var(--rak-soft-warning-title);
-    }
   }
   &.--danger {
+    border-color: var(--rak-danger-500);
     background-color: var(--rak-soft-danger-bg);
     color: var(--rak-soft-danger-text);
-
-    .toast__header {
-      color: var(--rak-soft-danger-title);
-    }
   }
 
+  // Both icons sit on the heading's line rather than the middle of the toast, which
+  // is where the container's `flex-start` puts them.
   .toast__icon {
     display: flex;
-    align-items: center;
-    align-self: center;
   }
 
   .toast__body {
     flex: 1;
   }
 
+  // The message's own color, and the weight the message does not carry.
   .toast__header {
-    font-weight: 600;
+    font-weight: 700;
   }
 
   .toast__close {
-    align-self: center;
+    // Its box is 32px against the heading's 24px line, so lift it by half the
+    // difference to put the icon on that line. Keeps the whole touch target.
+    margin-top: -4px;
   }
 }
