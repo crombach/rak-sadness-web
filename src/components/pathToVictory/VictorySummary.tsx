@@ -40,22 +40,24 @@ function Picks({ games }: { games: Array<RemainingPick> }) {
   );
 }
 
-/** The totals that win, written the way someone would say them. */
+/** The MNF points that win, named the way the scoreboard column is. */
 function mondayNightSentence(outlook: MondayNightOutlook): string | null {
   if (outlook.kind === "settled") {
-    return "Monday night is already final, so the games above settle it.";
+    return "MNF points are already final, so the games above settle it.";
   }
   if (outlook.kind === "notNeeded") {
-    return "Takes the week outright, whatever Monday night comes to.";
+    return "Takes the week outright, whatever the MNF points come to.";
   }
   const { min, max } = outlook;
-  const total =
+  const points =
     min != null && max != null
-      ? `between ${min} and ${max}`
+      ? min === max
+        ? `MNF points = ${min}`
+        : `${min} ≤ MNF points ≤ ${max}`
       : min != null
-        ? `of ${min} or more`
-        : `of ${max} or less`;
-  return `Monday night total ${total} to beat ${NAMES.format(outlook.contenders)}.`;
+        ? `MNF points ≥ ${min}`
+        : `MNF points ≤ ${max}`;
+  return `${points} to beat ${NAMES.format(outlook.contenders)}.`;
 }
 
 function MondayNight({
@@ -75,7 +77,7 @@ function MondayNight({
       : null;
   if (sentence == null && outright == null) return null;
   return (
-    <Section title="Monday night">
+    <Section title="MNF points">
       {sentence && <p className="victory__line">{sentence}</p>}
       {outright && <p className="victory__line">{outright}</p>}
     </Section>
@@ -197,7 +199,7 @@ export default function VictorySummary({
           heading={`${result.player} needs at least ${result.minimumWins} of their ${result.remainingPickCount} remaining picks.`}
           body={
             result.needsMondayNight
-              ? "That is only enough to draw level, so the Monday night tiebreaker would still decide it. The routes are worked out once ten games are left."
+              ? "That is only enough to draw level, so the MNF points tiebreaker would still decide it. The routes are worked out once ten games are left."
               : "The routes are worked out once ten games are left."
           }
         />

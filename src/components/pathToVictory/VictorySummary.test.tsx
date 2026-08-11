@@ -73,7 +73,7 @@ describe("VictorySummary", () => {
     expect(
       screen.getByText("Alice needs at least 6 of their 13 remaining picks."),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Monday night tiebreaker/)).toBeInTheDocument();
+    expect(screen.getByText(/MNF points tiebreaker/)).toBeInTheDocument();
     expect(screen.getByText("14 games still to play")).toBeInTheDocument();
   });
 
@@ -123,9 +123,7 @@ describe("VictorySummary", () => {
     render(<VictorySummary result={result} />);
 
     expect(
-      screen.getByText(
-        "Monday night total between 38 and 44 to beat Rak and Bill.",
-      ),
+      screen.getByText("38 ≤ MNF points ≤ 44 to beat Rak and Bill."),
     ).toBeInTheDocument();
   });
 
@@ -138,7 +136,7 @@ describe("VictorySummary", () => {
     render(<VictorySummary result={result} />);
 
     expect(
-      screen.getByText("Monday night total of 45 or less to beat Rak."),
+      screen.getByText("MNF points ≤ 45 to beat Rak."),
     ).toBeInTheDocument();
   });
 
@@ -207,7 +205,7 @@ describe("VictorySummary", () => {
     const routes = [...document.querySelectorAll(".victory__route")];
     expect(routes.map((route) => route.textContent)).toEqual([
       "P1KC -3",
-      "P2BUF -1P3SF -6Monday night total of 32 or less to beat Rak.",
+      "P2BUF -1P3SF -6MNF points ≤ 32 to beat Rak.",
     ]);
     expect(screen.getByText("2 other routes not shown.")).toBeInTheDocument();
   });
