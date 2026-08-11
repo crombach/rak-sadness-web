@@ -9,8 +9,6 @@
 // Base UI ships the select unstyled, so these rules carry its whole look.
 .select__trigger,
 .select__popup {
-  border: 1px solid var(--rak-border);
-  border-radius: var(--rak-radius-sm);
   color: var(--rak-text-secondary);
   font-size: 1rem;
 }
@@ -21,6 +19,8 @@
   justify-content: space-between;
   gap: 8px;
   padding: 3px 12px;
+  border: 1px solid var(--rak-border);
+  border-radius: var(--rak-radius-sm);
   background-color: var(--rak-surface);
   box-shadow: var(--rak-shadow-xs);
   font-family: inherit;

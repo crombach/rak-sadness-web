@@ -19,9 +19,10 @@ it. The standing leads, from `Standing`, which reads the scores rather than the
 search, and names no leader until a pick is settled. Picks sit in a
 grid rather than a wrapping row, so the same game holds the same column down every
 route. A must-win game carries a red line where a route carries gold. Routes stand
-four deep and unfold on a click, keyed on the player so a new one starts folded. A
-closing note counts the routes found past the ten kept. A player picked always
-reads a sentence, down to the week resting on the tiebreaker alone.
+four deep and unfold on a click, and the dialog's own key on the player is what
+starts a new one folded. A closing note counts the routes found past the ten kept.
+A player picked always reads a sentence, down to the week resting on the
+tiebreaker alone.
 
 A tiebreaker every route shares is stated once under `MNF points`, and left off
 the routes themselves. Where they disagree each route carries its own, and that

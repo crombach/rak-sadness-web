@@ -71,6 +71,11 @@ export function Standing({
   );
 }
 
+/** Whatever the answer turns out to be, it plays in under the same wrapper. */
+function Answer({ children }: { children: ReactNode }) {
+  return <div className="victory">{children}</div>;
+}
+
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="victory__section">
@@ -127,13 +132,12 @@ function hasGames(result: PathsResult): boolean {
   );
 }
 
-/** The fewest games any route asks for, which the outright line is measured on. */
+/** The fewest games a way through asks for, which the outright line is measured on. */
 function fewestWins(result: PathsResult): number {
-  const fromPool = result.pool?.choose ?? 0;
-  const fromRoutes = result.routes?.length
-    ? Math.min(...result.routes.map((route) => route.games.length))
-    : 0;
-  return result.mustWin.length + Math.max(fromPool, fromRoutes);
+  // The routes are held fewest games first, so the shortest is the one on top.
+  const fromGames =
+    result.pool?.choose ?? result.routes?.[0]?.games.length ?? 0;
+  return result.mustWin.length + fromGames;
 }
 
 /**
@@ -141,24 +145,21 @@ function fewestWins(result: PathsResult): number {
  * the reader has to think about it.
  */
 function Outright({ result }: { result: PathsResult }) {
-  const lines = [
+  const line =
     result.mondayNight?.kind === "notNeeded"
       ? "Takes the week outright, whatever the MNF points come to."
-      : null,
-    // Only worth saying where it asks for more than the routes below already do.
-    result.outrightAt != null && result.outrightAt > fewestWins(result)
-      ? `Winning ${plural(result.outrightAt, "game")} takes it outright.`
-      : null,
-  ].filter((line) => line != null);
-  if (lines.length === 0) return null;
-  // The last of them hands over to the sections under it, which ask for less.
-  const last = hasGames(result) ? " Otherwise:" : "";
-  return lines.map((line, index) => (
-    <p key={line} className="victory__line">
+      : // Only worth saying where it asks more than the routes below already do.
+        result.outrightAt != null && result.outrightAt > fewestWins(result)
+        ? `Winning ${plural(result.outrightAt, "game")} takes it outright.`
+        : null;
+  if (line == null) return null;
+  return (
+    <p className="victory__line">
       {line}
-      {index === lines.length - 1 && last}
+      {/* Hands over to the sections under it, which ask for less. */}
+      {hasGames(result) && " Otherwise:"}
     </p>
-  ));
+  );
 }
 
 function MondayNight({ outlook }: { outlook?: MondayNightOutlook }) {
@@ -233,14 +234,17 @@ function Routes({
   );
 }
 
-function Message({ lines }: { lines: Array<string> }) {
+/** A line absent is one the answer did not call for, so the caller can pass it. */
+function Message({ lines }: { lines: Array<string | undefined> }) {
   return (
     <div className="victory__message">
-      {lines.map((line) => (
-        <p key={line} className="victory__line">
-          {line}
-        </p>
-      ))}
+      {lines
+        .filter((line) => line != null)
+        .map((line) => (
+          <p key={line} className="victory__line">
+            {line}
+          </p>
+        ))}
     </div>
   );
 }
@@ -257,53 +261,48 @@ export default function VictorySummary({
 
   if (result.kind === "eliminated") {
     return (
-      <div className="victory">
+      <Answer>
         <Message
-          lines={[
-            `${result.player} cannot win this week.`,
-            ...(result.explanation ? [result.explanation] : []),
-          ]}
+          lines={[`${result.player} cannot win this week.`, result.explanation]}
         />
-      </div>
+      </Answer>
     );
   }
 
   if (result.kind === "clinched") {
     return (
-      <div className="victory">
+      <Answer>
         <Message
           lines={[
             `${result.player} has already won the week.`,
             "Nothing still to be played can take it away.",
           ]}
         />
-      </div>
+      </Answer>
     );
   }
 
   if (result.kind === "headline") {
     return (
-      <div className="victory">
+      <Answer>
         <Message
           lines={[
             `${result.player} needs at least ${result.minimumWins} of their ${result.remainingPickCount} remaining picks.`,
-            ...(result.needsMondayNight
-              ? [
-                  "That is only enough to draw level, so the MNF points tiebreaker would still decide it.",
-                ]
-              : []),
+            result.needsMondayNight
+              ? "That is only enough to draw level, so the MNF points tiebreaker would still decide it."
+              : undefined,
           ]}
         />
         {/* Why there is nothing below it, in the place the paths count theirs. */}
         <p className="victory__note">
           Detailed paths are worked out once ten games are left.
         </p>
-      </div>
+      </Answer>
     );
   }
 
   return (
-    <div className="victory">
+    <Answer>
       <Outright result={result} />
 
       {result.mustWin.length > 0 && (
@@ -328,8 +327,9 @@ export default function VictorySummary({
         />
       )}
 
-      {/* A picked player always reads a sentence, whatever the search turned up. */}
-      {!hasGames(result) && (
+      {/* A picked player always reads a sentence. This is the one left where the
+          games ask nothing and the line above said nothing either. */}
+      {!hasGames(result) && result.mondayNight?.kind !== "notNeeded" && (
         <p className="victory__line">
           No clean path to victory. The MNF points tiebreaker decides it.
         </p>
@@ -344,6 +344,6 @@ export default function VictorySummary({
           {plural(result.hiddenRouteCount, "other path")} found but not shown.
         </p>
       )}
-    </div>
+    </Answer>
   );
 }

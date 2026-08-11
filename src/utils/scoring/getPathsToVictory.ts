@@ -13,8 +13,8 @@ import remainingGames, {
 } from "./remainingGames";
 
 /**
- * The most games still to play the routes are worked out for. The search doubles
- * in cost with each one, and a fuller slate is too long an answer to read anyway.
+ * The most games still to play the routes are worked out for. Only the contested
+ * ones are searched, and the search doubles per one, so this is a loose ceiling.
  */
 const MAX_SEARCHED_GAMES = 10;
 
@@ -384,9 +384,7 @@ type Search = { minimal: Array<Route>; outrightAt?: number };
  */
 function search(
   ordered: Array<number>,
-  luckOutcomes: Array<number>,
-  guaranteed: boolean,
-  read: (outcome: number) => Verdict,
+  outcomeOf: (hits: number) => RouteOutcome,
 ): Search {
   const minimal: Array<Route> = [];
   let outrightAt: number | undefined;
@@ -395,9 +393,7 @@ function search(
       (found) => (found.hits & hits) === found.hits,
     );
     if (isRedundant && outrightAt != null) continue;
-    const outcome = guaranteed
-      ? { verdict: guaranteedVerdict(hits, luckOutcomes, read), luck: 0 }
-      : bestVerdict(hits, luckOutcomes, read);
+    const outcome = outcomeOf(hits);
     if (outcome.verdict.kind === "loss") continue;
     if (outcome.verdict.kind === "win" && outrightAt == null) {
       outrightAt = bitCount(hits);
@@ -417,13 +413,13 @@ function uncontrolledGames(
   contested: Array<RemainingGame>,
   live: Array<number>,
   coverers: Array<string>,
-  luckMask: number,
+  playerIndex: number,
   luck: number,
 ): Array<UncontrolledGame> {
   return contested
     .map((game, bit): UncontrolledGame | null => {
+      if (game.cells[playerIndex].team != null) return null;
       const mask = 1 << bit;
-      if ((luckMask & mask) === 0) return null;
       const covers = (luck & mask) !== 0;
       const teams = live
         .map((index) => game.cells[index].team)
@@ -442,13 +438,10 @@ function uncontrolledGames(
     .filter((game) => game != null);
 }
 
-type RouteShape = {
-  mustWin: Array<RemainingPick>;
-  pool?: { choose: number; games: Array<RemainingPick> };
-  routes?: Array<VictoryRoute>;
-  hiddenRouteCount: number;
-  mondayNight?: MondayNightOutlook;
-};
+type RouteShape = Pick<
+  Extract<PathsToVictory, { kind: "paths" }>,
+  "mustWin" | "pool" | "routes" | "hiddenRouteCount" | "mondayNight"
+>;
 
 /** The games every route needs, and the ways past them: one pool, or a list. */
 function reduceRoutes(
@@ -580,11 +573,16 @@ export default function getPathsToVictory(
 
   // Held against the player first, so a route that survives every way the games
   // they left blank can fall is reported without conditions.
-  let { minimal, outrightAt } = search(ordered, luckOutcomes, true, read);
+  let { minimal, outrightAt } = search(ordered, (hits) => ({
+    verdict: guaranteedVerdict(hits, luckOutcomes, read),
+    luck: 0,
+  }));
   let needsHelp: Array<UncontrolledGame> = [];
   let dropped = 0;
   if (minimal.length === 0 && luckMask !== 0) {
-    const helped = search(ordered, luckOutcomes, false, read);
+    const helped = search(ordered, (hits) =>
+      bestVerdict(hits, luckOutcomes, read),
+    );
     const [best] = helped.minimal;
     if (best != null) {
       // `needsHelp` is written once for every route shown, so the routes wanting
@@ -599,7 +597,7 @@ export default function getPathsToVictory(
         contested,
         live,
         coverers,
-        luckMask,
+        playerIndex,
         best.outcome.luck,
       );
     }

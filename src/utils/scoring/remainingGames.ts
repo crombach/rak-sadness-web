@@ -45,11 +45,11 @@ function remainingGameIndices(
 }
 
 /**
- * What one game still to be played is worth to a player against a rival.
+ * How one game still to be played separates a player from a rival.
  *
- * `opposed` swings two points, since the point one takes is one the other does not.
- * `playerOnly` swings one, and covers a game the rival left blank as well as one
- * only the player picked. `none` is a game the player cannot score.
+ * `opposed` is a game the two picked different teams in. `playerOnly` is one the
+ * player picked and the rival left blank. `none` is one the player left blank, or
+ * one they both picked the same way.
  */
 export type PickDifference = "none" | "opposed" | "playerOnly";
 

@@ -24,6 +24,9 @@ type PairDifferences = {
 /**
  * How many of the games still to be played these two players have picked
  * differently, split by the tiebreaker tier each one can move.
+ *
+ * A game the rival left blank counts, because the active player can take a point
+ * there that the rival cannot.
  */
 function countDifferences(
   games: Array<RemainingGame>,
@@ -37,13 +40,13 @@ function countDifferences(
   };
   games.forEach((game) => {
     if (pickDifference(game, activeIndex, oppIndex) === "none") return;
-    const mine = game.cells[activeIndex];
+    const activeCell = game.cells[activeIndex];
     if (game.league === "college") {
       differences.differentCollegePicks += 1;
       return;
     }
     differences.differentProPicks += 1;
-    if (mine.hasSpread) {
+    if (activeCell.hasSpread) {
       differences.differentProPicksWithSpreads += 1;
     }
   });

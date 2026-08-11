@@ -111,8 +111,6 @@
   @include listbox-popup;
 
   max-height: min(240px, var(--available-height));
-  border: 1px solid var(--rak-border);
-  border-radius: var(--rak-radius-sm);
 }
 
 .path-to-victory__option {

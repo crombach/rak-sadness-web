@@ -76,8 +76,8 @@ export default function getLeagueInfo(
   league: League,
   season?: number,
 ): Promise<LeagueInfo | null> {
-  // `useLeagueWeeks` and `getRegularSeasonWeekCount` ask for one season's calendar
-  // together. One request answers both, and is dropped as it settles.
+  // `useCurrentSeason` asks for whichever season is running, `useLeagueWeeks` and
+  // `getRegularSeasonWeekCount` for a named one. One request answers each, then drops.
   const key = `${league}:${season ?? "current"}`;
   const inFlight = requests.get(key);
   if (inFlight != null) {
