@@ -119,7 +119,7 @@ export default function PathToVictoryDialog({
               >
                 <Combobox.Popup className="path-to-victory__list">
                   <Combobox.Empty className="path-to-victory__empty">
-                    No player by that name.
+                    No matching players
                   </Combobox.Empty>
                   <Combobox.List>
                     {(option: PlayerOption) => (

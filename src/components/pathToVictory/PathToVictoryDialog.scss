@@ -134,15 +134,14 @@
     background-color: var(--rak-neutral-200);
   }
 
-  // Only ever offered where nobody still standing shares the letters typed, so it
-  // reads as the answer rather than as a choice.
-  &.--eliminated {
-    color: var(--rak-danger-600);
+  // Only ever offered where nobody still standing shares the letters typed. Named
+  // in the color the tables fill the same player's cell with, so it reads as the
+  // answer rather than as a choice.
+  &.--eliminated,
+  &.--eliminated[data-highlighted] {
+    background-color: transparent;
+    color: var(--rak-knocked-out-text);
     cursor: default;
-
-    &[data-highlighted] {
-      background-color: transparent;
-    }
   }
 }
 

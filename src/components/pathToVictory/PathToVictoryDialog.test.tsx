@@ -98,7 +98,12 @@ describe("PathToVictoryDialog", () => {
 
     expect(screen.getByText("Pick a player")).toBeInTheDocument();
 
-    await user.type(screen.getByRole("combobox", { name: "Player" }), "Ali");
+    const search = screen.getByRole("combobox", { name: "Player" });
+    await user.type(search, "zzz");
+    expect(await screen.findByText("No matching players")).toBeInTheDocument();
+
+    await user.clear(search);
+    await user.type(search, "Ali");
     await user.click(await screen.findByRole("option", { name: "Alice" }));
 
     const mustWin = screen.getByRole("heading", { name: "Must win" });

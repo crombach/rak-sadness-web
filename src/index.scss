@@ -75,6 +75,12 @@
   --rak-pick-no-dark: #de7c7c;
   --rak-pick-error: #edfaa0;
   --rak-pick-error-dark: #cfde7c;
+  // A player who can no longer win, wherever they are named. The -dark value
+  // stripes the even rows of the tables. The -text value is the same hue taken
+  // far enough down to read on white, which the fill itself cannot.
+  --rak-knocked-out: #fac99e;
+  --rak-knocked-out-dark: #deaa7c;
+  --rak-knocked-out-text: #8a4a12;
 
   --rak-disabled-bg: #f0f4f8;
   --rak-disabled-text: #9fa6ad;
