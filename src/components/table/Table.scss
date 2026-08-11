@@ -24,7 +24,11 @@
   --rak-table-no-border: 0 solid var(--rak-primary-800);
   // The status icon beside a player's name, in `PlayerName.scss`. Sized here
   // because the wireframe has to leave the same room without drawing one.
-  --rak-player-icon-size: 16px;
+  //
+  // One line of the cell's own text, so the icon stands as tall as the name it sits
+  // beside at every screen size. Resolved where it is used rather than here, which
+  // is what makes it follow the narrow-screen font below.
+  --rak-player-icon-size: 1lh;
   --rak-player-icon-gap: 8px;
 
   .table__header {
