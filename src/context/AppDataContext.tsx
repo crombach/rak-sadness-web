@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { useLocation } from "react-router";
+import useCurrentSeason from "../hooks/useCurrentSeason";
 import useLeagueWeeks from "../hooks/useLeagueWeeks";
 import usePicksSeasons from "../hooks/usePicksSeasons";
 import usePlayerScores from "../hooks/usePlayerScores";
@@ -15,7 +16,8 @@ import isWeekDecided from "../utils/scoring/isWeekDecided";
 
 type AppData = ReturnType<typeof useLeagueWeeks> &
   ReturnType<typeof usePlayerScores> &
-  ReturnType<typeof usePicksSeasons> & {
+  ReturnType<typeof usePicksSeasons> &
+  ReturnType<typeof useCurrentSeason> & {
     /**
      * The `WeekInfo` for a week number, or undefined if the season has no such
      * week. Always the calendar's own object: the week picker compares options by
@@ -32,7 +34,7 @@ type AppData = ReturnType<typeof useLeagueWeeks> &
     requestedSeason?: number;
     /**
      * The seasons that can be chosen, newest first. The ones with picks in the
-     * database, or the season running now when that list cannot be had.
+     * database, plus the season running now whether or not it has any.
      */
     selectableSeasons: Array<number>;
   };
@@ -89,9 +91,10 @@ export function AppDataContextProvider({
   }
 
   const picksSeasons = usePicksSeasons();
+  const currentSeason = useCurrentSeason();
   // The newest season with picks, unless the URL or the picker named one. ESPN
   // moves on to the season about to start as soon as the last one ends, and that
-  // season has nothing to show.
+  // season has nothing to show, so it is offered below rather than opened on.
   const requestedSeason = selectedSeason ?? picksSeasons.seasons?.[0];
   const leagueWeeks = useLeagueWeeks(
     route.week,
@@ -115,21 +118,29 @@ export function AppDataContextProvider({
     [scores],
   );
 
-  // A season with no picks cannot be scored, so it is not offered. Falling back
-  // to the season running now keeps the picker usable where the list could not be
-  // fetched, which is every `make run`.
+  // The seasons with picks, plus the one running now whether or not it has any.
+  // That season's weeks are scored from a spreadsheet the user uploads until its
+  // picks reach the database, and leaving it out puts the week they are holding
+  // out of reach. Falling back to the season the week list describes keeps the
+  // picker usable where neither could be fetched, which is every `make run`.
   const { seasonYear } = leagueWeeks;
   const selectableSeasons = useMemo(() => {
-    const listed = picksSeasons.seasons ?? [];
-    if (listed.length > 0) return listed;
-    return seasonYear != null ? [seasonYear] : [];
-  }, [picksSeasons.seasons, seasonYear]);
+    const offered = new Set(picksSeasons.seasons ?? []);
+    if (currentSeason.currentSeason != null) {
+      offered.add(currentSeason.currentSeason);
+    }
+    if (offered.size === 0 && seasonYear != null) {
+      offered.add(seasonYear);
+    }
+    return [...offered].sort((a, b) => b - a);
+  }, [picksSeasons.seasons, currentSeason.currentSeason, seasonYear]);
 
   const value = useMemo(
     () => ({
       ...leagueWeeks,
       ...playerScores,
       ...picksSeasons,
+      ...currentSeason,
       findWeek,
       setSelectedSeason,
       requestedSeason,
@@ -139,6 +150,7 @@ export function AppDataContextProvider({
       leagueWeeks,
       playerScores,
       picksSeasons,
+      currentSeason,
       findWeek,
       requestedSeason,
       selectableSeasons,

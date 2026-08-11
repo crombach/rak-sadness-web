@@ -97,7 +97,30 @@ describe("the app, first load", () => {
     expect(screen.getByRole("combobox", { name: "Season" })).toHaveTextContent(
       `${SEASON - 1} Season`,
     );
-    expect(getLeagueInfoMock).not.toHaveBeenCalledWith(League.PRO, undefined);
+    // The season running now is looked up, so it can be offered below, but the
+    // calendar that gets fetched and scored is the one opened on.
+    expect(getLeagueInfoMock).toHaveBeenCalledWith(League.PRO, SEASON - 1);
+  });
+
+  it("offers the season running now even before it has any picks", async () => {
+    // ESPN answers with whichever season was asked for, and with the one running
+    // now when asked for none. That season has no picks in this list.
+    getLeagueInfoMock.mockImplementation(async (_league, season) => ({
+      ...leagueInfo,
+      season: season ?? SEASON,
+    }));
+    global.fetch = routedFetch(notFoundResponse, [SEASON - 1, SEASON - 2]);
+    const user = await mountLoadedApp();
+
+    await user.click(screen.getByRole("combobox", { name: "Season" }));
+    const options = (await screen.findAllByRole("option")).map(
+      (option) => option.textContent,
+    );
+    expect(options).toEqual([
+      `${SEASON} Season`,
+      `${SEASON - 1} Season`,
+      `${SEASON - 2} Season`,
+    ]);
   });
 
   it("offers the current season alone when the list cannot be had", async () => {
