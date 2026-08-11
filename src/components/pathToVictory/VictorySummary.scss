@@ -29,7 +29,9 @@
 // every route. Each list is the same width, so each divides the same way.
 .victory__picks {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  // The floor is what the longest pick a sheet can hold measures, so a column
+  // never has to cut one short or wrap it.
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
   gap: 6px;
   margin: 0;
   padding: 0;
@@ -40,8 +42,8 @@
 .victory__pick {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 10px;
+  gap: 6px;
+  padding: 4px 8px;
   border-radius: var(--rak-radius-sm);
   background-color: var(--rak-level1);
   font-size: 0.875rem;
