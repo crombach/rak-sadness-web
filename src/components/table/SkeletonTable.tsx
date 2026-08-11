@@ -1,3 +1,5 @@
+import { memo } from "react";
+import rangeWithPrefix from "../../utils/rangeWithPrefix";
 import { ScoresView } from "../navbar/ScoresNavbar";
 import TableShell from "./TableShell";
 import "./SkeletonTable.scss";
@@ -42,8 +44,8 @@ const SCOREBOARD_COLUMNS: Array<Column> = [
 ];
 
 function leagueColumns(count: number, prefix: string): Array<Column> {
-  return Array.from({ length: count }, (_, game) => ({
-    header: `${prefix}${game + 1}`,
+  return rangeWithPrefix(count, prefix).map((header) => ({
+    header,
     cell: PICK,
     isPick: true,
   }));
@@ -64,8 +66,11 @@ const PICKS_COLUMNS: Array<Column> = [
  *
  * Shaped like the view it stands in for, down to the column count and the row
  * count, so the page does not rearrange itself once the week arrives.
+ *
+ * Memoized because it is well over a thousand cells and its route re-renders on
+ * every flag the week's loading sets, all of them while this is on screen.
  */
-export default function SkeletonTable({ view }: { view: ScoresView }) {
+function SkeletonTable({ view }: { view: ScoresView }) {
   const columns = view === "Picks" ? PICKS_COLUMNS : SCOREBOARD_COLUMNS;
 
   return (
@@ -102,3 +107,5 @@ export default function SkeletonTable({ view }: { view: ScoresView }) {
     </TableShell>
   );
 }
+
+export default memo(SkeletonTable);
