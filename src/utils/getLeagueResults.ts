@@ -1,17 +1,14 @@
 import { EspnCompetitor, EspnEvent, GameStatus, HomeAway } from "../types/ESPN";
 import { League, SeasonType, WeekInfo } from "../types/League";
 import { LeagueResult, Possession } from "../types/LeagueResult";
+import { getRegularSeasonWeekCount } from "./getLeagueInfo";
 
 /**
- * NCAA regular season has 16 weeks in 2024 (Army/Navy is its own week for some reason).
- * In the past, this number was 15. Check back in 2025.
- * TODO: Use the LeagueInfo construct to work around hard-coding this value.
+ * Used only where the season's own calendar could not be read. The NCAA count
+ * moves (15 weeks in 2023, 16 in 2024, Army/Navy being its own week), so it is
+ * asked for per season rather than trusted from here.
  */
 const WEEKS_COLLEGE_REGULAR_SEASON = 16;
-
-/**
- * NFL regular season has 18 weeks.
- */
 const WEEKS_PRO_REGULAR_SEASON = 18;
 
 /**
@@ -30,18 +27,27 @@ const COLLEGE_GROUPS = [
 async function getLeagueEvents(
   league: League,
   week: WeekInfo, // Rak Madness week, corresponds with NFL regular season week
+  season?: number,
 ): Promise<Array<EspnEvent>> {
+  const [collegeWeeks, proWeeks] = await Promise.all([
+    getRegularSeasonWeekCount(League.COLLEGE, season),
+    getRegularSeasonWeekCount(League.PRO, season),
+  ]);
+  const weeksInCollegeRegularSeason =
+    collegeWeeks ?? WEEKS_COLLEGE_REGULAR_SEASON;
+  const weeksInProRegularSeason = proWeeks ?? WEEKS_PRO_REGULAR_SEASON;
+
   // After the regular season is over, ESPN resets the week counter to 1 for the postseason.
   let adjustedWeekNumber =
     league === League.COLLEGE
       ? week.value + WEEK_OFFSET_COLLEGE
-      : week.value > WEEKS_PRO_REGULAR_SEASON
-        ? week.value % WEEKS_PRO_REGULAR_SEASON
+      : week.value > weeksInProRegularSeason
+        ? week.value % weeksInProRegularSeason
         : week.value;
   const seasonType: SeasonType =
     (league === League.COLLEGE &&
-      adjustedWeekNumber <= WEEKS_COLLEGE_REGULAR_SEASON) ||
-    (league === League.PRO && week.value <= WEEKS_PRO_REGULAR_SEASON)
+      adjustedWeekNumber <= weeksInCollegeRegularSeason) ||
+    (league === League.PRO && week.value <= weeksInProRegularSeason)
       ? SeasonType.REGULAR
       : SeasonType.POST;
   // For college games, the postseason is all week 1
@@ -50,8 +56,11 @@ async function getLeagueEvents(
     adjustedWeekNumber = 1;
   }
 
-  // Build final request URL.
-  const baseRequestUrl = `https://site.api.espn.com/apis/site/v2/sports/football/${league}/scoreboard?week=${adjustedWeekNumber}&seasontype=${seasonType}`;
+  // Build final request URL. `dates` is the year the season started in, not the
+  // calendar year its games fall in, so `dates=2025&week=18` is the January 2026
+  // game it should be. Left off, ESPN answers with the season running now.
+  const seasonParam = season != null ? `&dates=${season}` : "";
+  const baseRequestUrl = `https://site.api.espn.com/apis/site/v2/sports/football/${league}/scoreboard?week=${adjustedWeekNumber}&seasontype=${seasonType}${seasonParam}`;
 
   // For college, we need to concatenate multiple groups.
   if (league === League.COLLEGE) {
@@ -94,14 +103,17 @@ async function getLeagueEvents(
  *
  * @param league league for which to get results
  * @param week week in the season (week 1 is the first NFL week)
+ * @param matchups the games the picks describe
+ * @param season the year the season started in, current season if left out
  * @returns league results
  */
 export async function getLeagueResults(
   league: League,
   week: WeekInfo,
   matchups: Array<Set<string>>,
+  season?: number,
 ): Promise<Array<LeagueResult>> {
-  const events = await getLeagueEvents(league, week);
+  const events = await getLeagueEvents(league, week, season);
   console.log(`${league} events`, events);
 
   return events

@@ -19,6 +19,8 @@ type Calendar = {
 
 type LeagueMetadata = {
   slug: string;
+  /** The year the season started in, whatever calendar year its games fall in. */
+  season: { year: number };
   calendar: Calendar[];
 };
 
@@ -27,14 +29,54 @@ type Scoreboard = {
 };
 
 /**
+ * How many weeks a season's regular season has, or undefined if the calendar for
+ * it could not be read.
+ *
+ * The count is not the same every year: the NCAA regular season ran 15 weeks in
+ * 2023 and 16 in 2024, and it decides where the regular season ends and the
+ * postseason begins. Cached per league and season, because it is fixed once the
+ * calendar is published and scoring asks for it on every refresh.
+ */
+export async function getRegularSeasonWeekCount(
+  league: League,
+  season?: number,
+): Promise<number | undefined> {
+  const key = `${league}:${season ?? "current"}`;
+  const cached = regularSeasonWeekCounts.get(key);
+  if (cached != null) {
+    return cached;
+  }
+  const info = await getLeagueInfo(league, season);
+  const regularSeason = info?.calendars.find(
+    (calendar) => calendar.seasonType === SeasonType.REGULAR,
+  );
+  const count = regularSeason?.weeks.length;
+  if (count == null || count === 0) {
+    return undefined;
+  }
+  regularSeasonWeekCounts.set(key, count);
+  return count;
+}
+
+const regularSeasonWeekCounts = new Map<string, number>();
+
+/**
  * Fetches league information from the ESPN API.
+ *
+ * `season` is the year a season started in, which is what ESPN's `dates` means
+ * here: `dates=2025` covers the games played from September 2025 into January
+ * 2026, not the 2026 games of the season after. Left out, ESPN answers with
+ * whichever season is running now.
  */
 export default async function getLeagueInfo(
   league: League,
+  season?: number,
 ): Promise<LeagueInfo | null> {
   // Get the ESPN league data.
   const response = await fetch(
-    `https://site.api.espn.com/apis/site/v2/sports/football/${league}/scoreboard`,
+    `https://site.api.espn.com/apis/site/v2/sports/football/${league}/scoreboard${
+      season != null ? `?dates=${season}` : ""
+    }`,
   );
   if (!response.ok) {
     console.error(
@@ -112,6 +154,7 @@ export default async function getLeagueInfo(
 
   return {
     league,
+    season: leagueMetadata.season.year,
     activeCalendar,
     activeWeek,
     calendars,

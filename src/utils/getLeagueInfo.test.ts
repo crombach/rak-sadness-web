@@ -47,11 +47,13 @@ type CalendarFixture = {
   entries?: Array<ReturnType<typeof week>>;
 };
 
+const SEASON = 2024;
+
 function scoreboard(
   slug: string,
   calendar: Array<CalendarFixture> = [REGULAR_SEASON, POST_SEASON],
 ) {
-  return { leagues: [{ slug, calendar }] };
+  return { leagues: [{ slug, season: { year: SEASON }, calendar }] };
 }
 
 function mockFetch(body: unknown, ok = true, status = 200) {
@@ -92,6 +94,19 @@ describe("getLeagueInfo, requests", () => {
     expect(urlOf(fetchMock)).toBe(
       "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard",
     );
+  });
+
+  it("asks for a past season by the year it started in", async () => {
+    const fetchMock = mockFetch(scoreboard(League.PRO));
+    await getLeagueInfo(League.PRO, 2022);
+    expect(urlOf(fetchMock)).toBe(
+      "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=2022",
+    );
+  });
+
+  it("reports the season the response describes", async () => {
+    mockFetch(scoreboard(League.PRO));
+    expect((await infoFor(League.PRO)).season).toBe(SEASON);
   });
 
   it("fetches the college scoreboard endpoint", async () => {

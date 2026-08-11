@@ -18,6 +18,10 @@ export default function HomePage() {
     selectableWeeks,
     selectedWeek,
     setSelectedWeek,
+    selectableSeasons,
+    seasonYear,
+    requestedSeason,
+    setSelectedSeason,
     isWeekInfoLoading,
     scores,
     isPicksLoading,
@@ -41,15 +45,67 @@ export default function HomePage() {
     [scoreLocalFile],
   );
 
-  // Anything that has to finish before the controls mean anything.
+  // Anything that has to finish before the controls mean anything. The week
+  // lookup waits on the season list, so its flag covers that too.
   const isBusy = isWeekInfoLoading || isPicksLoading || isScoresLoading;
   const hasNoScoresYet = !selectedWeek || isBusy || !scores;
 
   return (
     <PageLayout navbarLeft={<LogoButton onClick={() => navigate("/")} />}>
-      {!isWeekInfoLoading && (
+      {/*
+        Only the first load hides the controls. Switching seasons disables them
+        instead, so the picker the user just used does not vanish under them.
+      */}
+      {seasonYear != null && (
         <>
           <div className="home__controls">
+            {/*
+              Seasons are named by the year they started in, so the 2025 season
+              covers the games played from September 2025 into January 2026.
+            */}
+            <Select.Root
+              // The season asked for, not the one loaded, so the trigger shows
+              // the switch immediately. Falls back for `make run`, where there
+              // is no season list to have asked from.
+              value={requestedSeason ?? seasonYear ?? null}
+              onValueChange={(season) =>
+                season != null && setSelectedSeason(season)
+              }
+              disabled={isWeekInfoLoading}
+            >
+              <Select.Trigger
+                aria-label="Season"
+                className="home__week-input home__season-input select__trigger"
+              >
+                <Select.Value>
+                  {(season: number | null) =>
+                    season != null ? `${season} season` : "Select a season..."
+                  }
+                </Select.Value>
+                <Select.Icon className="select__icon">
+                  <UnfoldMoreIcon />
+                </Select.Icon>
+              </Select.Trigger>
+              <Select.Portal>
+                <Select.Positioner
+                  className="select__positioner"
+                  sideOffset={4}
+                >
+                  <Select.Popup className="select__popup">
+                    {selectableSeasons.map((season) => (
+                      <Select.Item
+                        key={season}
+                        value={season}
+                        className="select__item"
+                      >
+                        <Select.ItemText>{season} season</Select.ItemText>
+                      </Select.Item>
+                    ))}
+                  </Select.Popup>
+                </Select.Positioner>
+              </Select.Portal>
+            </Select.Root>
+
             {/*
               `value` holds the WeekInfo object itself, and Base UI compares with
               Object.is by default, so an option only reads as selected when it is
@@ -60,7 +116,10 @@ export default function HomePage() {
               onValueChange={(week) => setSelectedWeek(week ?? undefined)}
               disabled={isWeekInfoLoading}
             >
-              <Select.Trigger className="home__week-input select__trigger">
+              <Select.Trigger
+                aria-label="Week"
+                className="home__week-input select__trigger"
+              >
                 <Select.Value>
                   {(week: WeekInfo | null) => week?.label ?? "Select a week..."}
                 </Select.Value>
@@ -112,7 +171,7 @@ export default function HomePage() {
               disabled={hasNoScoresYet}
               color="success"
               onClick={() =>
-                navigate(`/week/${selectedWeek?.value}/scoreboard`)
+                navigate(`/${seasonYear}/${selectedWeek?.value}/scoreboard`)
               }
             >
               View Results

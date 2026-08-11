@@ -17,7 +17,10 @@
   }
 }
 
-@media (max-height: 460px) {
+// The controls stack is one control taller since the season picker joined it, so
+// the links have to give up sooner: 56px for the picker and 12px for the gap
+// above it.
+@media (max-height: 528px) {
   .footer {
     display: none;
   }

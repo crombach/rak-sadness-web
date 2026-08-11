@@ -7,9 +7,14 @@ import getTiebreakerScore from "./getTiebreakerScore";
 import parsePicksWorkbook from "./parsePicksWorkbook";
 import scorePlayers from "./scorePlayers";
 
+/**
+ * `season` is the year the week's season started in, so a week played in January
+ * still scores against the season it belongs to.
+ */
 export async function getPlayerScores(
   week: WeekInfo,
   picksBuffer: ArrayBuffer,
+  season?: number,
 ): Promise<RakMadnessScores> {
   const parsed = await parsePicksWorkbook(picksBuffer);
 
@@ -17,11 +22,13 @@ export async function getPlayerScores(
     League.COLLEGE,
     week,
     parsed.collegeMatchups,
+    season,
   );
   const proResults = await getLeagueResults(
     League.PRO,
     week,
     parsed.proMatchups,
+    season,
   );
   debugLog("league results", { collegeResults, proResults });
 

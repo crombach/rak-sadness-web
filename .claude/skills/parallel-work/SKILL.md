@@ -23,11 +23,15 @@ Single build root, one `package.json`, one `package-lock.json`. No module bounda
 ## Safe in parallel
 
 - Leaf components under `src/components/` (`footer/`, `navbar/`, `toaster/`, `table/picks/`, `table/playerName/`) — each is its own `.tsx` + `.scss` pair, no cross-imports between them.
-- Route components: `home/HomePage.tsx` and the three files in `results/` each own one page and one stylesheet.
-- `src/hooks/` — one hook per file, and only `AppDataContext` mounts more than one.
+- Route components: `home/HomePage.tsx` and the route files in `results/`
+  (`CurrentWeekRedirect.tsx`, `PicksRoute.tsx`, `ResultsLayout.tsx`,
+  `ScoreboardRoute.tsx`), each owning one route. `ResultsFrame.tsx` is the page
+  frame `ResultsLayout` and `CurrentWeekRedirect` share.
+- `src/hooks/` — one hook per file (including `usePicksSeasons.ts`), and only
+  `AppDataContext` mounts more than one.
 - `src/utils/scoring/` — one concern per file. Scoring work no longer serializes on a single module, though `getPlayerScores.ts` sequences the others, so a change to the pipeline's shape still touches it.
 - `src/utils/` leaves: `getLeagueInfo.ts`, `getLeagueResults.ts`, `buildSpreadsheetBuffer.ts`, `picksCache.ts`, `debugLog.ts`, `getClasses.ts`, `rangeWithPrefix.ts`.
-- `functions/api/picks/[week].ts` — Cloudflare Pages Function, touched by nothing in `src/` except the fetch URL.
+- `functions/api/picks/index.ts` and `functions/api/picks/[year]/[week].ts` — Cloudflare Pages Functions, touched by nothing in `src/` except the fetch URLs.
 - `public/` static assets.
 
 ## Cleared

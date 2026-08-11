@@ -1,5 +1,5 @@
 import throttle from "lodash.throttle";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Toast, useToastActions } from "../context/ToastContext";
 import { WeekInfo } from "../types/League";
 import { RakMadnessScores } from "../types/RakMadnessScores";
@@ -24,12 +24,20 @@ type ScoringRequest = {
  * The scores for a week, however the picks arrive: from the API, from this
  * browser's cache of an earlier upload, or from a file the user just chose.
  *
+ * `season` is the year the week's season started in. It names the picks in the
+ * API path and the cache, and it is what the games are scored against, so a week
+ * played in January still scores against the season it belongs to. Nothing is
+ * attempted until it is known.
+ *
  * `scoresWeek` says which week `scores` describes, and `settledWeek` says which
  * week this hook has finished trying. Switching weeks leaves the old values in
  * place for a moment, so anything reacting to a missing score has to wait for
  * `settledWeek` to catch up or it will act on the previous week's outcome.
  */
-export default function usePlayerScores(selectedWeek?: WeekInfo) {
+export default function usePlayerScores(
+  selectedWeek?: WeekInfo,
+  season?: number,
+) {
   const { showToast, clearToasts } = useToastActions();
 
   const [picksBuffer, setPicksBuffer] = useState<ArrayBuffer>();
@@ -39,6 +47,10 @@ export default function usePlayerScores(selectedWeek?: WeekInfo) {
   const [isScoresLoading, setScoresLoading] = useState(true);
   const [isRefreshing, setRefreshing] = useState(false);
   const [settledWeek, setSettledWeek] = useState<number>();
+  // Counts scoring attempts, so a superseded one cannot write its week's scores
+  // over the week that replaced it. Two can be in flight whenever the selected
+  // week changes while the first is still loading.
+  const latestAttempt = useRef(0);
 
   const clearScores = useCallback(() => {
     setScores(undefined);
@@ -54,15 +66,19 @@ export default function usePlayerScores(selectedWeek?: WeekInfo) {
       onScoreFailure,
       onSuccess,
     }: ScoringRequest) => {
-      if (!selectedWeek) return;
+      if (!selectedWeek || season == null) return;
+      const attempt = ++latestAttempt.current;
+      const isLatest = () => latestAttempt.current === attempt;
       setPicksLoading(true);
       setScoresLoading(true);
 
       let buffer: ArrayBuffer;
       try {
         buffer = await loadPicks();
+        if (!isLatest()) return;
         setPicksBuffer(buffer);
       } catch (error) {
+        if (!isLatest()) return;
         setSettledWeek(selectedWeek.value);
         console.warn(
           `Failed to load week ${selectedWeek.value} picks spreadsheet. Has it been uploaded yet?`,
@@ -77,60 +93,70 @@ export default function usePlayerScores(selectedWeek?: WeekInfo) {
       setPicksLoading(false);
 
       try {
-        setScores(await getPlayerScores(selectedWeek, buffer));
+        const weekScores = await getPlayerScores(selectedWeek, buffer, season);
+        if (!isLatest()) return;
+        setScores(weekScores);
         setScoresWeek(selectedWeek.value);
         if (onSuccess) {
           showToast(onSuccess);
         }
       } catch (error) {
+        if (!isLatest()) return;
         console.error("Failed to calculate scores", error);
         clearScores();
         showToast(onScoreFailure);
       } finally {
-        setScoresLoading(false);
-        setSettledWeek(selectedWeek.value);
+        if (isLatest()) {
+          setScoresLoading(false);
+          setSettledWeek(selectedWeek.value);
+        }
       }
     },
-    [selectedWeek, showToast, clearScores],
+    [selectedWeek, season, showToast, clearScores],
   );
 
   // Fetch the week's picks from the API, falling back to whatever this browser
   // cached from an earlier upload. Without the fallback, reopening a results URL
   // for a week that was only ever uploaded locally would find nothing.
-  const loadStoredPicks = useCallback(async (week: WeekInfo) => {
-    try {
-      const response = await fetch(`/api/picks/${week.value}`);
-      if (response.status === 404) {
-        throw new Error("Picks spreadsheet is missing from database");
+  const loadStoredPicks = useCallback(
+    async (seasonYear: number, week: WeekInfo) => {
+      try {
+        const response = await fetch(`/api/picks/${seasonYear}/${week.value}`);
+        if (response.status === 404) {
+          throw new Error("Picks spreadsheet is missing from database");
+        }
+        // `make run` is a bare dev server with no Pages Function behind it, so
+        // it answers this path with the app's own HTML at 200. Checking the type
+        // keeps that page out of the workbook parser, and lets the real fetch
+        // work against `npm run pages:dev`.
+        const contentType = response.headers.get("content-type") ?? "";
+        if (!contentType.startsWith(XLSX_CONTENT_TYPE)) {
+          throw new Error(
+            `Picks response was ${contentType}, not a spreadsheet`,
+          );
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        if (!arrayBuffer?.byteLength) {
+          throw new Error("Empty picks buffer");
+        }
+        writeCachedPicks(seasonYear, week.value, arrayBuffer);
+        return arrayBuffer;
+      } catch (error) {
+        const cached = readCachedPicks(seasonYear, week.value);
+        if (cached != null) {
+          return cached;
+        }
+        throw error;
       }
-      // `make run` is a bare dev server with no Pages Function behind it, so it
-      // answers this path with the app's own HTML at 200. Checking the type
-      // keeps that page out of the workbook parser, and lets the real fetch work
-      // against `npm run pages:dev`.
-      const contentType = response.headers.get("content-type") ?? "";
-      if (!contentType.startsWith(XLSX_CONTENT_TYPE)) {
-        throw new Error(`Picks response was ${contentType}, not a spreadsheet`);
-      }
-      const arrayBuffer = await response.arrayBuffer();
-      if (!arrayBuffer?.byteLength) {
-        throw new Error("Empty picks buffer");
-      }
-      writeCachedPicks(week.value, arrayBuffer);
-      return arrayBuffer;
-    } catch (error) {
-      const cached = readCachedPicks(week.value);
-      if (cached != null) {
-        return cached;
-      }
-      throw error;
-    }
-  }, []);
+    },
+    [],
+  );
 
   useEffect(() => {
-    if (!selectedWeek) return;
+    if (!selectedWeek || season == null) return;
     const scoreStoredPicks = async () =>
       attemptScoring({
-        loadPicks: () => loadStoredPicks(selectedWeek),
+        loadPicks: () => loadStoredPicks(season, selectedWeek),
         onLoadFailure: new Toast(
           "warning",
           "Missing Picks",
@@ -143,11 +169,11 @@ export default function usePlayerScores(selectedWeek?: WeekInfo) {
         ),
       });
     scoreStoredPicks();
-  }, [selectedWeek, attemptScoring, loadStoredPicks]);
+  }, [selectedWeek, season, attemptScoring, loadStoredPicks]);
 
   const scoreLocalFile = useCallback(
     async (file?: File) => {
-      if (!selectedWeek) return;
+      if (!selectedWeek || season == null) return;
       if (!file) {
         clearScores();
         setScoresLoading(false);
@@ -166,7 +192,7 @@ export default function usePlayerScores(selectedWeek?: WeekInfo) {
       await attemptScoring({
         loadPicks: async () => {
           const buffer = await readFileToBuffer(file);
-          writeCachedPicks(selectedWeek.value, buffer);
+          writeCachedPicks(season, selectedWeek.value, buffer);
           return buffer;
         },
         onLoadFailure: failure,
@@ -178,7 +204,7 @@ export default function usePlayerScores(selectedWeek?: WeekInfo) {
         ),
       });
     },
-    [selectedWeek, attemptScoring, showToast, clearScores],
+    [selectedWeek, season, attemptScoring, showToast, clearScores],
   );
 
   // useMemo, not useCallback: the value is throttle()'s wrapper, not the

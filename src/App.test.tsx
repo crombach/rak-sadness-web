@@ -33,6 +33,8 @@ const buildSpreadsheetBufferMock = buildSpreadsheetBuffer as MockedFunction<
 >;
 
 const CURRENT_WEEK = 3;
+/** The year the fixture season started in, which is what its dates say. */
+const SEASON = 2024;
 
 function week(value: number): WeekInfo {
   return {
@@ -47,6 +49,7 @@ const weeks = [week(1), week(2), week(3), week(4), week(5)];
 
 const leagueInfo: LeagueInfo = {
   league: League.PRO,
+  season: SEASON,
   activeCalendar: {
     seasonType: SeasonType.REGULAR,
     startDate: new Date(2024, 8, 1),
@@ -140,6 +143,22 @@ function htmlResponse(): Response {
   });
 }
 
+function seasonsResponse(years: Array<number>): Response {
+  return new Response(JSON.stringify({ years }), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
+}
+
+/** Answers the seasons list, and everything else the way the case asked for. */
+function routedFetch(picks: () => Response, years = [SEASON, SEASON - 1]) {
+  return vi.fn((input: RequestInfo | URL) =>
+    Promise.resolve(
+      String(input) === "/api/picks" ? seasonsResponse(years) : picks(),
+    ),
+  ) as unknown as MockedFunction<typeof fetch>;
+}
+
 function spreadsheetResponse(): Response {
   return new Response(new ArrayBuffer(8), {
     status: 200,
@@ -170,7 +189,7 @@ afterEach(() => {
 describe("the app, first load", () => {
   it("asks ESPN for the pro league calendar", async () => {
     await mountLoadedApp();
-    expect(getLeagueInfoMock).toHaveBeenCalledWith(League.PRO);
+    expect(getLeagueInfoMock).toHaveBeenCalledWith(League.PRO, undefined);
   });
 
   it("hides the controls until the week lookup resolves", () => {
@@ -187,20 +206,72 @@ describe("the app, first load", () => {
 
   it("defaults to the active week", async () => {
     await mountLoadedApp();
-    expect(screen.getByRole("combobox")).toHaveTextContent(
+    expect(screen.getByRole("combobox", { name: "Week" })).toHaveTextContent(
       `Week ${CURRENT_WEEK}`,
     );
   });
 
   it("offers only weeks up to the current one, newest first", async () => {
     const user = await mountLoadedApp();
-    await user.click(screen.getByRole("combobox"));
+    await user.click(screen.getByRole("combobox", { name: "Week" }));
     // The popup lands in a portal a frame after the click, so this has to wait
     // for it. Reading it synchronously passed most of the time and not always.
     const options = (await screen.findAllByRole("option")).map(
       (option) => option.textContent,
     );
     expect(options).toEqual(["Week 3", "Week 2", "Week 1"]);
+  });
+
+  it("offers the seasons that have picks, and opens on the current one", async () => {
+    global.fetch = routedFetch(notFoundResponse);
+    const user = await mountLoadedApp();
+    expect(screen.getByRole("combobox", { name: "Season" })).toHaveTextContent(
+      `${SEASON} season`,
+    );
+
+    await user.click(screen.getByRole("combobox", { name: "Season" }));
+    const options = (await screen.findAllByRole("option")).map(
+      (option) => option.textContent,
+    );
+    expect(options).toEqual([`${SEASON} season`, `${SEASON - 1} season`]);
+  });
+
+  it("opens on the newest season with picks, not the one ESPN calls current", async () => {
+    getLeagueInfoMock.mockImplementation(async (_league, season) => ({
+      ...leagueInfo,
+      season: season ?? SEASON,
+    }));
+    global.fetch = routedFetch(notFoundResponse, [SEASON - 1, SEASON - 2]);
+    await mountLoadedApp();
+
+    expect(screen.getByRole("combobox", { name: "Season" })).toHaveTextContent(
+      `${SEASON - 1} season`,
+    );
+    expect(getLeagueInfoMock).not.toHaveBeenCalledWith(League.PRO, undefined);
+  });
+
+  it("offers the current season alone when the list cannot be had", async () => {
+    const user = await mountLoadedApp();
+
+    await user.click(screen.getByRole("combobox", { name: "Season" }));
+    const options = (await screen.findAllByRole("option")).map(
+      (option) => option.textContent,
+    );
+    expect(options).toEqual([`${SEASON} season`]);
+  });
+
+  it("asks ESPN for the season the user picked", async () => {
+    global.fetch = routedFetch(notFoundResponse);
+    const user = await mountLoadedApp();
+
+    await user.click(screen.getByRole("combobox", { name: "Season" }));
+    await user.click(
+      await screen.findByRole("option", { name: `${SEASON - 1} season` }),
+    );
+
+    await waitFor(() => {
+      expect(getLeagueInfoMock).toHaveBeenCalledWith(League.PRO, SEASON - 1);
+    });
   });
 
   it("shows the app title in the navbar", async () => {
@@ -213,7 +284,9 @@ describe("the app, automatic picks fetch", () => {
   it("asks the API for the selected week's picks", async () => {
     await mountLoadedApp();
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(`/api/picks/${CURRENT_WEEK}`);
+      expect(global.fetch).toHaveBeenCalledWith(
+        `/api/picks/${SEASON}/${CURRENT_WEEK}`,
+      );
     });
   });
 
@@ -272,7 +345,7 @@ describe("the app, automatic picks fetch", () => {
       expect(screen.getByText("Missing Picks")).toBeInTheDocument();
     });
 
-    await user.click(screen.getByRole("combobox"));
+    await user.click(screen.getByRole("combobox", { name: "Week" }));
     // Base UI mounts the popup in a portal, so the options arrive a tick later.
     await user.click(await screen.findByRole("option", { name: "Week 1" }));
 
@@ -477,14 +550,14 @@ describe("the app, export", () => {
 describe("the app, week routes", () => {
   it("opens a week's scoreboard from its URL", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
-    await mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+    await mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
 
     expect(await screen.findByText("MNF Points Pick")).toBeInTheDocument();
   });
 
   it("crowns a player still standing at the end of the week", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
-    await mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+    await mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
 
     await screen.findByText("MNF Points Pick");
     expect(screen.getByTestId("EmojiEventsIcon")).toBeInTheDocument();
@@ -507,7 +580,7 @@ describe("the app, week routes", () => {
       ],
     });
     fetchMock.mockResolvedValue(spreadsheetResponse());
-    await mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+    await mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
 
     await screen.findByText("MNF Points Pick");
     expect(
@@ -518,7 +591,7 @@ describe("the app, week routes", () => {
 
   it("shows a wireframe table until the results are ready", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
-    mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+    mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
 
     expect(document.querySelector(".table.--skeleton")).toBeInTheDocument();
 
@@ -528,7 +601,7 @@ describe("the app, week routes", () => {
 
   it("shows the view and refresh buttons disabled while the week loads", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
-    mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+    mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
 
     const loading = scoresHeaderButtons();
     expect(loading).toHaveLength(3);
@@ -540,7 +613,7 @@ describe("the app, week routes", () => {
 
   it("fills the wireframe with rows down to the bottom of the viewport", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
-    mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+    mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
 
     // jsdom reports no layout, so every measurement is zero and the whole
     // viewport counts as spare. That still exercises the row count for real.
@@ -550,7 +623,7 @@ describe("the app, week routes", () => {
 
   it("shapes the scoreboard wireframe like the scoreboard", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
-    mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+    mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
 
     expect(
       document.querySelectorAll(".table.--skeleton thead th"),
@@ -559,7 +632,7 @@ describe("the app, week routes", () => {
 
   it("shapes the picks wireframe with a column per game", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
-    mountApp(`/week/${CURRENT_WEEK}/picks`);
+    mountApp(`/${SEASON}/${CURRENT_WEEK}/picks`);
 
     // Rank, player, and three score columns, plus a middling week's worth of
     // games. The real count is not known until the picks have been read.
@@ -570,7 +643,7 @@ describe("the app, week routes", () => {
 
   it("gives the wireframe a row per player of a middling week", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
-    mountApp(`/week/${CURRENT_WEEK}/picks`);
+    mountApp(`/${SEASON}/${CURRENT_WEEK}/picks`);
 
     expect(
       document.querySelectorAll(
@@ -581,7 +654,7 @@ describe("the app, week routes", () => {
 
   it("holds the content still while the week loads, keeping the scrollbar's room", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
-    mountApp(`/week/${CURRENT_WEEK}/picks`);
+    mountApp(`/${SEASON}/${CURRENT_WEEK}/picks`);
 
     expect(document.querySelector(".home__content")).toHaveClass("--frozen");
 
@@ -593,14 +666,14 @@ describe("the app, week routes", () => {
 
   it("opens a week's picks from its URL", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
-    await mountApp(`/week/${CURRENT_WEEK}/picks`);
+    await mountApp(`/${SEASON}/${CURRENT_WEEK}/picks`);
 
     expect(await screen.findByText("College Score")).toBeInTheDocument();
   });
 
   it("scores the week named in the URL, not the current one", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
-    await mountApp("/week/1/scoreboard");
+    await mountApp(`/${SEASON}/1/scoreboard`);
 
     await waitFor(() => {
       expect(getPlayerScoresMock).toHaveBeenCalled();
@@ -610,14 +683,14 @@ describe("the app, week routes", () => {
 
   it("scores the week named in the URL exactly once", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
-    await mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+    await mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
     await screen.findByText("MNF Points Pick");
 
     expect(getPlayerScoresMock).toHaveBeenCalledTimes(1);
   });
 
   it("sends a week with no picks home, explaining why", async () => {
-    await mountLoadedApp(`/week/${CURRENT_WEEK}/scoreboard`);
+    await mountLoadedApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
 
     expect(await screen.findByText("No Results")).toBeInTheDocument();
     expect(screen.getByText("Use Local Spreadsheet")).toBeInTheDocument();
@@ -630,7 +703,7 @@ describe("the app, week routes", () => {
         resolve = r;
       }),
     );
-    mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+    mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
 
     expect(screen.queryByText("No Results")).not.toBeInTheDocument();
     expect(screen.queryByText("Unknown Week")).not.toBeInTheDocument();
@@ -639,14 +712,69 @@ describe("the app, week routes", () => {
   });
 
   it("sends a week beyond the season home", async () => {
-    await mountLoadedApp("/week/99/scoreboard");
+    await mountLoadedApp(`/${SEASON}/99/scoreboard`);
 
     expect(await screen.findByText("Unknown Week")).toBeInTheDocument();
     expect(getPlayerScoresMock).not.toHaveBeenCalled();
   });
 
+  it("scores the season named in the URL", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        `/api/picks/${SEASON}/${CURRENT_WEEK}`,
+      );
+    });
+  });
+
+  it("sends /scoreboard to the current week of the newest season with picks", async () => {
+    // ESPN answers with whichever season was asked for, which is what tells the
+    // app the schedule on hand is the one the redirect is waiting for.
+    getLeagueInfoMock.mockImplementation(async (_league, season) => ({
+      ...leagueInfo,
+      season: season ?? SEASON,
+    }));
+    global.fetch = routedFetch(spreadsheetResponse, [SEASON - 1]);
+    await mountApp("/scoreboard");
+
+    await waitFor(() => {
+      expect(getLeagueInfoMock).toHaveBeenCalledWith(League.PRO, SEASON - 1);
+    });
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        `/api/picks/${SEASON - 1}/${CURRENT_WEEK}`,
+      );
+    });
+  });
+
+  it("sends /picks to the picks view of that week", async () => {
+    global.fetch = routedFetch(spreadsheetResponse, [SEASON]);
+    await mountApp("/picks");
+
+    expect(await screen.findByText("College Score")).toBeInTheDocument();
+    expect(screen.queryByText("MNF Points Pick")).not.toBeInTheDocument();
+  });
+
+  it("sends /scoreboard home when the schedule cannot be loaded", async () => {
+    getLeagueInfoMock.mockResolvedValue(null);
+    global.fetch = routedFetch(spreadsheetResponse, [SEASON]);
+    mountApp("/scoreboard");
+
+    // Home, rather than the wireframe it shows while it works out where to go.
+    expect(await screen.findByText("Select a week...")).toBeInTheDocument();
+  });
+
+  it("sends a season that is not a year home", async () => {
+    await mountLoadedApp(`/nope/${CURRENT_WEEK}/scoreboard`);
+
+    expect(await screen.findByText("Unknown Season")).toBeInTheDocument();
+    expect(getPlayerScoresMock).not.toHaveBeenCalled();
+  });
+
   it("sends a week that is not a number home", async () => {
-    await mountLoadedApp("/week/abc/scoreboard");
+    await mountLoadedApp(`/${SEASON}/abc/scoreboard`);
 
     expect(await screen.findByText("Unknown Week")).toBeInTheDocument();
     expect(getPlayerScoresMock).not.toHaveBeenCalled();
@@ -654,7 +782,7 @@ describe("the app, week routes", () => {
 
   it("shows the scoreboard for a bare week URL", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
-    await mountApp(`/week/${CURRENT_WEEK}`);
+    await mountApp(`/${SEASON}/${CURRENT_WEEK}`);
 
     expect(await screen.findByText("MNF Points Pick")).toBeInTheDocument();
   });

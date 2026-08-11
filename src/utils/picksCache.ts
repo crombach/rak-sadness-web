@@ -10,8 +10,8 @@ const MAX_CACHED_WEEKS = 3;
 // through in slices.
 const BASE64_CHUNK_BYTES = 8192;
 
-function keyFor(week: number): string {
-  return `${KEY_PREFIX}${week}`;
+function keyFor(season: number, week: number): string {
+  return `${KEY_PREFIX}${season}:${week}`;
 }
 
 function toBase64(buffer: ArrayBuffer): string {
@@ -50,9 +50,12 @@ function clearCache(): void {
 }
 
 /** The cached workbook for a week, or undefined if there isn't a usable one. */
-export function readCachedPicks(week: number): ArrayBuffer | undefined {
+export function readCachedPicks(
+  season: number,
+  week: number,
+): ArrayBuffer | undefined {
   try {
-    const text = localStorage.getItem(keyFor(week));
+    const text = localStorage.getItem(keyFor(season, week));
     return text != null ? fromBase64(text) : undefined;
   } catch (error) {
     // A cache is never allowed to break scoring, so a corrupt or unreadable
@@ -63,16 +66,20 @@ export function readCachedPicks(week: number): ArrayBuffer | undefined {
   }
 }
 
-export function writeCachedPicks(week: number, buffer: ArrayBuffer): void {
+export function writeCachedPicks(
+  season: number,
+  week: number,
+  buffer: ArrayBuffer,
+): void {
   try {
     // Prune before writing, so the week being written is never the one dropped.
     // localStorage does not report insertion order, so which other weeks go is
     // arbitrary. The cap is only here to bound how much space this takes.
-    const keys = cachedKeys().filter((key) => key !== keyFor(week));
+    const keys = cachedKeys().filter((key) => key !== keyFor(season, week));
     keys
       .slice(0, Math.max(keys.length - (MAX_CACHED_WEEKS - 1), 0))
       .forEach((key) => localStorage.removeItem(key));
-    localStorage.setItem(keyFor(week), toBase64(buffer));
+    localStorage.setItem(keyFor(season, week), toBase64(buffer));
   } catch (error) {
     console.warn("Could not cache picks", error);
     clearCache();
