@@ -1,17 +1,14 @@
 import { EspnCompetitor, EspnEvent, GameStatus, HomeAway } from "../types/ESPN";
 import { League, SeasonType, WeekInfo } from "../types/League";
 import { LeagueResult, Possession } from "../types/LeagueResult";
+import { getRegularSeasonWeekCount } from "./getLeagueInfo";
 
 /**
- * NCAA regular season has 16 weeks in 2024 (Army/Navy is its own week for some reason).
- * In the past, this number was 15. Check back in 2025.
- * TODO: Use the LeagueInfo construct to work around hard-coding this value.
+ * Used only where the season's own calendar could not be read. The NCAA count
+ * moves (15 weeks in 2023, 16 in 2024, Army/Navy being its own week), so it is
+ * asked for per season rather than trusted from here.
  */
 const WEEKS_COLLEGE_REGULAR_SEASON = 16;
-
-/**
- * NFL regular season has 18 weeks.
- */
 const WEEKS_PRO_REGULAR_SEASON = 18;
 
 /**
@@ -32,17 +29,25 @@ async function getLeagueEvents(
   week: WeekInfo, // Rak Madness week, corresponds with NFL regular season week
   season?: number,
 ): Promise<Array<EspnEvent>> {
+  const [collegeWeeks, proWeeks] = await Promise.all([
+    getRegularSeasonWeekCount(League.COLLEGE, season),
+    getRegularSeasonWeekCount(League.PRO, season),
+  ]);
+  const weeksInCollegeRegularSeason =
+    collegeWeeks ?? WEEKS_COLLEGE_REGULAR_SEASON;
+  const weeksInProRegularSeason = proWeeks ?? WEEKS_PRO_REGULAR_SEASON;
+
   // After the regular season is over, ESPN resets the week counter to 1 for the postseason.
   let adjustedWeekNumber =
     league === League.COLLEGE
       ? week.value + WEEK_OFFSET_COLLEGE
-      : week.value > WEEKS_PRO_REGULAR_SEASON
-        ? week.value % WEEKS_PRO_REGULAR_SEASON
+      : week.value > weeksInProRegularSeason
+        ? week.value % weeksInProRegularSeason
         : week.value;
   const seasonType: SeasonType =
     (league === League.COLLEGE &&
-      adjustedWeekNumber <= WEEKS_COLLEGE_REGULAR_SEASON) ||
-    (league === League.PRO && week.value <= WEEKS_PRO_REGULAR_SEASON)
+      adjustedWeekNumber <= weeksInCollegeRegularSeason) ||
+    (league === League.PRO && week.value <= weeksInProRegularSeason)
       ? SeasonType.REGULAR
       : SeasonType.POST;
   // For college games, the postseason is all week 1

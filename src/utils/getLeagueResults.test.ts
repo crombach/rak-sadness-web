@@ -1,7 +1,15 @@
-import { Mock } from "vitest";
+import { Mock, MockedFunction } from "vitest";
 import { EspnEvent, GameStatus, HomeAway } from "../types/ESPN";
 import { League, WeekInfo } from "../types/League";
 import { getLeagueResults } from "./getLeagueResults";
+
+vi.mock("./getLeagueInfo");
+
+import { getRegularSeasonWeekCount } from "./getLeagueInfo";
+
+const weekCountMock = getRegularSeasonWeekCount as MockedFunction<
+  typeof getRegularSeasonWeekCount
+>;
 
 const WEEK: WeekInfo = {
   value: 5,
@@ -90,6 +98,10 @@ const BUF_KC = new Set(["BUF", "KC"]);
 
 beforeEach(() => {
   vi.spyOn(console, "log").mockImplementation(() => undefined);
+  // The counts the calendars carried in 2024.
+  weekCountMock.mockImplementation(async (league) =>
+    league === League.COLLEGE ? 16 : 18,
+  );
 });
 
 afterEach(() => {
@@ -128,6 +140,20 @@ describe("getLeagueResults, college requests", () => {
       "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?week=6&seasontype=2&limit=400&groups=80",
       "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?week=6&seasontype=2&limit=400&groups=22",
     ]);
+  });
+
+  it("takes the regular season's length from that season's calendar", async () => {
+    // 2023 ran 15 college weeks, so Rak week 15 is college week 16, a bowl week.
+    weekCountMock.mockImplementation(async (league) =>
+      league === League.COLLEGE ? 15 : 18,
+    );
+    const fetchMock = mockFetch([espnEvent({ home: "OSU", away: "MICH" })]);
+
+    await getLeagueResults(League.COLLEGE, { ...WEEK, value: 15 }, [
+      new Set(["OSU", "MICH"]),
+    ]);
+
+    expect(urlsOf(fetchMock)[0]).toContain("week=1&seasontype=3");
   });
 
   it("collapses the whole postseason into week 1", async () => {
