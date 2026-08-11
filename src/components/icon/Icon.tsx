@@ -9,12 +9,26 @@ import "./Icon.scss";
  * `@mui/material`'s `createSvgIcon`, which pulled `@mui/material` and emotion into
  * the bundle for the sake of ten shapes. The `<svg>` here carries the same box and
  * fill rules that `SvgIcon` applied, so nothing downstream had to be resized.
+ *
+ * One shape comes from Material Symbols instead, which that package does not
+ * carry. Same icons, same licence, drawn on a taller box, which is what `viewBox`
+ * is for.
  */
-function Icon({ name, children }: { name: string; children: ReactNode }) {
+const SYMBOLS_VIEW_BOX = "0 -960 960 960";
+
+function Icon({
+  name,
+  viewBox = "0 0 24 24",
+  children,
+}: {
+  name: string;
+  viewBox?: string;
+  children: ReactNode;
+}) {
   return (
     <svg
       className="icon"
-      viewBox="0 0 24 24"
+      viewBox={viewBox}
       aria-hidden="true"
       focusable="false"
       // The name `@mui/icons-material` put here, which the toaster suite looks an
@@ -66,12 +80,10 @@ export function RefreshIcon() {
   );
 }
 
-export function SentimentVeryDissatisfiedIcon() {
+export function SkullIcon() {
   return (
-    <Icon name="SentimentVeryDissatisfiedIcon">
-      <circle cx="15.5" cy="9.5" r="1.5" />
-      <circle cx="8.5" cy="9.5" r="1.5" />
-      <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2M12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8m0-6c-2.33 0-4.32 1.45-5.12 3.5h1.67c.69-1.19 1.97-2 3.45-2s2.75.81 3.45 2h1.67c-.8-2.05-2.79-3.5-5.12-3.5" />
+    <Icon name="SkullIcon" viewBox={SYMBOLS_VIEW_BOX}>
+      <path d="M240-80v-170q-39-17-68.5-45.5t-50-64.5q-20.5-36-31-77T80-520q0-158 112-259t288-101q176 0 288 101t112 259q0 42-10.5 83t-31 77q-20.5 36-50 64.5T720-250v170H240Zm80-80h40v-80h80v80h80v-80h80v80h40v-142q38-9 67.5-30t50-50q20.5-29 31.5-64t11-74q0-125-88.5-202.5T480-800q-143 0-231.5 77.5T160-520q0 39 11 74t31.5 64q20.5 29 50.5 50t67 30v142Zm100-200h120l-60-120-60 120Zm-80-80q33 0 56.5-23.5T420-520q0-33-23.5-56.5T340-600q-33 0-56.5 23.5T260-520q0 33 23.5 56.5T340-440Zm280 0q33 0 56.5-23.5T700-520q0-33-23.5-56.5T620-600q-33 0-56.5 23.5T540-520q0 33 23.5 56.5T620-440ZM480-160Z" />
     </Icon>
   );
 }
