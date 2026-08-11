@@ -51,7 +51,7 @@ describe("picksCache", () => {
 
   it("treats an entry it cannot decode as a miss", () => {
     writeCachedPicks(3, buffer(1));
-    localStorage.setItem("rak-sadness:picks:3", "!!!");
+    localStorage.setItem("rak-madness:picks:3", "!!!");
 
     expect(readCachedPicks(3)).toBeUndefined();
   });

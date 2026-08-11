@@ -1,5 +1,5 @@
 type Env = {
-  RAK_SADNESS_BUCKET: R2Bucket;
+  RAK_MADNESS_BUCKET: R2Bucket;
 };
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
@@ -9,7 +9,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const filePath = `picks/${week}.xlsx`;
   console.log(`Fetching picks for week ${week} from ${filePath}`);
   try {
-    const spreadsheet = await context.env.RAK_SADNESS_BUCKET.get(filePath);
+    const spreadsheet = await context.env.RAK_MADNESS_BUCKET.get(filePath);
     if (!spreadsheet) {
       return new Response("Not Found", { status: 404 });
     }

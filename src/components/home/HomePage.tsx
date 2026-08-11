@@ -46,14 +46,7 @@ export default function HomePage() {
   const hasNoScoresYet = !selectedWeek || isBusy || !scores;
 
   return (
-    <PageLayout
-      navbarLeft={
-        <>
-          <LogoButton onClick={() => navigate("/")} />
-          <span>Rak Madness Scoreboard</span>
-        </>
-      }
-    >
+    <PageLayout navbarLeft={<LogoButton onClick={() => navigate("/")} />}>
       {!isWeekInfoLoading && (
         <>
           <div className="home__controls">

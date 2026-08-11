@@ -8,7 +8,7 @@ import {
   Status,
 } from "../../../types/RakMadnessScores";
 import { Toast, useToastActions } from "../../../context/ToastContext";
-import ExplanationTable from "./ExplanationTable";
+import PicksTable from "./PicksTable";
 
 const showToast = vi.fn();
 const clearToasts = vi.fn();
@@ -74,21 +74,21 @@ beforeEach(() => {
   });
 });
 
-describe("ExplanationTable, empty states", () => {
+describe("PicksTable, empty states", () => {
   it("renders nothing without scores", () => {
-    const { container } = render(<ExplanationTable />);
+    const { container } = render(<PicksTable />);
     expect(container).toBeEmptyDOMElement();
   });
 
   it("renders nothing when scores are null", () => {
-    const { container } = render(<ExplanationTable scores={null} />);
+    const { container } = render(<PicksTable scores={null} />);
     expect(container).toBeEmptyDOMElement();
   });
 });
 
-describe("ExplanationTable, headers", () => {
+describe("PicksTable, headers", () => {
   it("labels one column per pick, C-prefixed then P-prefixed", () => {
-    render(<ExplanationTable scores={scores} />);
+    render(<PicksTable scores={scores} />);
     const headers = screen
       .getAllByRole("columnheader")
       .map((header) => header.textContent);
@@ -118,7 +118,7 @@ describe("ExplanationTable, headers", () => {
         }),
       ],
     };
-    render(<ExplanationTable scores={uneven} />);
+    render(<PicksTable scores={uneven} />);
     const headers = screen
       .getAllByRole("columnheader")
       .map((header) => header.textContent);
@@ -127,9 +127,9 @@ describe("ExplanationTable, headers", () => {
   });
 });
 
-describe("ExplanationTable, rows", () => {
+describe("PicksTable, rows", () => {
   it("ranks players by their position in the list", () => {
-    render(<ExplanationTable scores={scores} />);
+    render(<PicksTable scores={scores} />);
     const firstRow = screen.getByText("Alice").closest("tr");
     expect(firstRow).toHaveTextContent("1");
     const secondRow = screen.getByText("Bob").closest("tr");
@@ -137,7 +137,7 @@ describe("ExplanationTable, rows", () => {
   });
 
   it("shows each pick's text", () => {
-    render(<ExplanationTable scores={scores} />);
+    render(<PicksTable scores={scores} />);
     expect(screen.getByText("MICH")).toBeInTheDocument();
     expect(screen.getByText("OSU")).toBeInTheDocument();
     expect(screen.getByText("BUF")).toBeInTheDocument();
@@ -148,12 +148,12 @@ describe("ExplanationTable, rows", () => {
       tiebreaker: 47,
       scores: [player({ name: "Alice", college: [pick("")], pro: [pick("")] })],
     };
-    render(<ExplanationTable scores={blank} />);
+    render(<PicksTable scores={blank} />);
     expect(screen.getAllByText("N/A")).toHaveLength(2);
   });
 
   it("tags each pick cell with its status", () => {
-    render(<ExplanationTable scores={scores} />);
+    render(<PicksTable scores={scores} />);
     expect(screen.getByText("MICH")).toHaveClass("--yes");
     expect(screen.getByText("OSU")).toHaveClass("--no");
     expect(screen.getByText("KC")).toHaveClass("--incomplete");
@@ -161,7 +161,7 @@ describe("ExplanationTable, rows", () => {
   });
 
   it("shows the college, pro, and total score per player", () => {
-    render(<ExplanationTable scores={scores} />);
+    render(<PicksTable scores={scores} />);
     const row = screen.getByText("Alice").closest("tr");
     expect(row).toHaveTextContent("1");
     expect(row).toHaveTextContent("2");
@@ -169,10 +169,10 @@ describe("ExplanationTable, rows", () => {
   });
 });
 
-describe("ExplanationTable, pick explanations", () => {
+describe("PicksTable, pick explanations", () => {
   it("clears existing toasts before showing a new one", async () => {
     const user = userEvent.setup();
-    render(<ExplanationTable scores={scores} />);
+    render(<PicksTable scores={scores} />);
     await user.click(screen.getByText("MICH"));
     expect(clearToasts).toHaveBeenCalledTimes(1);
     expect(showToast).toHaveBeenCalledTimes(1);
@@ -180,7 +180,7 @@ describe("ExplanationTable, pick explanations", () => {
 
   it("uses the clicked pick's explanation header", async () => {
     const user = userEvent.setup();
-    render(<ExplanationTable scores={scores} />);
+    render(<PicksTable scores={scores} />);
     await user.click(screen.getByText("OSU"));
     const toast: Toast = showToast.mock.calls[0][0];
     expect(toast.header).toBe("OSU header");
@@ -189,14 +189,14 @@ describe("ExplanationTable, pick explanations", () => {
 
   it("shows an explanation for a pro pick too", async () => {
     const user = userEvent.setup();
-    render(<ExplanationTable scores={scores} />);
+    render(<PicksTable scores={scores} />);
     await user.click(screen.getByText("BUF"));
     expect(showToast.mock.calls[0][0].header).toBe("BUF header");
   });
 
   it("reports the newest click, not the first", async () => {
     const user = userEvent.setup();
-    render(<ExplanationTable scores={scores} />);
+    render(<PicksTable scores={scores} />);
     await user.click(screen.getByText("MICH"));
     await user.click(screen.getByText("KC"));
     expect(showToast).toHaveBeenCalledTimes(2);
@@ -206,7 +206,7 @@ describe("ExplanationTable, pick explanations", () => {
 
 describe("PlayerName, rendered through the table", () => {
   it("marks a knocked-out player", () => {
-    render(<ExplanationTable scores={scores} />);
+    render(<PicksTable scores={scores} />);
     expect(screen.getByText("Bob").closest("td")).toHaveClass("--knocked-out");
     expect(screen.getByText("Alice").closest("td")).not.toHaveClass(
       "--knocked-out",
@@ -215,7 +215,7 @@ describe("PlayerName, rendered through the table", () => {
 
   it("explains a player's status on click", async () => {
     const user = userEvent.setup();
-    render(<ExplanationTable scores={scores} />);
+    render(<PicksTable scores={scores} />);
     await user.click(screen.getByText("Bob"));
     expect(clearToasts).toHaveBeenCalledTimes(1);
     expect(showToast.mock.calls[0][0].header).toBe("Bob");

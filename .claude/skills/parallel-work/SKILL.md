@@ -22,7 +22,7 @@ Single build root, one `package.json`, one `package-lock.json`. No module bounda
 
 ## Safe in parallel
 
-- Leaf components under `src/components/` (`footer/`, `navbar/`, `toaster/`, `table/explanation/`, `table/playerName/`) — each is its own `.tsx` + `.scss` pair, no cross-imports between them.
+- Leaf components under `src/components/` (`footer/`, `navbar/`, `toaster/`, `table/picks/`, `table/playerName/`) — each is its own `.tsx` + `.scss` pair, no cross-imports between them.
 - Route components: `home/HomePage.tsx` and the three files in `results/` each own one page and one stylesheet.
 - `src/hooks/` — one hook per file, and only `AppDataContext` mounts more than one.
 - `src/utils/scoring/` — one concern per file. Scoring work no longer serializes on a single module, though `getPlayerScores.ts` sequences the others, so a change to the pipeline's shape still touches it.

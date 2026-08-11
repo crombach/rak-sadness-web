@@ -4,9 +4,23 @@
 
 $breakpoint-narrow: 400px;
 
+/**
+ * Below this the navbar cannot hold the app name and three labelled buttons at
+ * once. Measured: with the labels showing, the name wraps to three lines at 540px
+ * and to two at 560px.
+ */
+$breakpoint-crowded-navbar: 560px;
+
 /** Phone-width screens, where the tables and navbar tighten up. */
 @mixin narrow-screen {
   @media (max-width: $breakpoint-narrow) {
+    @content;
+  }
+}
+
+/** Too little room for the navbar to label its buttons. */
+@mixin crowded-navbar {
+  @media (max-width: $breakpoint-crowded-navbar) {
     @content;
   }
 }

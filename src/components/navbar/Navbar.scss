@@ -46,8 +46,17 @@
   }
 }
 
-@include narrow-screen {
+// Two tiers, both there to keep the app name off a third line. 16px puts it
+// there around 420px, and 12px still does at 360px and below. Measured with the
+// name inside the logo button, so its own padding counts too.
+@include crowded-navbar {
   .navbar__content .button {
     padding-inline: 12px !important;
+  }
+}
+
+@include narrow-screen {
+  .navbar__content .button {
+    padding-inline: 6px !important;
   }
 }

@@ -9,7 +9,7 @@ describe("Footer", () => {
       .map((link) => link.getAttribute("href"));
     expect(hrefs).toEqual([
       "https://rakmadness.net/standings-pickem",
-      "https://github.com/crombach/rak-sadness-web",
+      "https://github.com/crombach/rak-madness-calculator",
     ]);
   });
 

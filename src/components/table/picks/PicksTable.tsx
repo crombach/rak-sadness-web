@@ -7,7 +7,7 @@ import {
 import rangeWithPrefix from "../../../utils/rangeWithPrefix";
 import PlayerName from "../playerName/PlayerName";
 import TableShell, { RankCell } from "../TableShell";
-import "./ExplanationTable.scss";
+import "./PicksTable.scss";
 import { useToastActions, Toast } from "../../../context/ToastContext";
 
 /** Rank, player, college score, pro score, and total score. */
@@ -21,7 +21,7 @@ function leagueHeaders(count: number, prefix: string) {
   ));
 }
 
-function ExplanationTable({ scores }: { scores?: RakMadnessScores | null }) {
+function PicksTable({ scores }: { scores?: RakMadnessScores | null }) {
   const { showToast, clearToasts } = useToastActions();
 
   const handlePickResultClick = useCallback(
@@ -103,4 +103,4 @@ function ExplanationTable({ scores }: { scores?: RakMadnessScores | null }) {
   );
 }
 
-export default memo(ExplanationTable);
+export default memo(PicksTable);

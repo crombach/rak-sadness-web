@@ -1,3 +1,5 @@
+@use "../../styles/breakpoints" as *;
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -8,12 +10,36 @@
 }
 
 .home__scores-header-button {
-  &.--active {
-    background-color: var(--rak-primary-600);
-  }
-
   &.--spinning svg {
     animation: spin 0.5s infinite linear;
+  }
+}
+
+@include crowded-navbar {
+  // The icon carries the button on its own here, so the app name beside it keeps
+  // to two lines. Labelled buttons squeeze it to three.
+  .home__scores-header-label {
+    display: none;
+  }
+}
+
+// `Button` paints its own fill from four nested classes, and its hover and press
+// colors from five, so this has to out-specify all of them or the view you are on
+// looks exactly like the one you are not. Held by the route rather than the
+// pointer, which is why it also has to beat `:hover`.
+.button.--solid:not(:disabled).--primary.home__scores-header-button.--active {
+  background-color: var(--rak-primary-700);
+}
+
+// Disabled only while a week loads, and it should not look it. The buttons sit
+// where they will sit, showing the view the URL already names, and do nothing
+// until there is something to switch between.
+.button.--solid.home__scores-header-button:disabled {
+  background-color: var(--rak-primary-500);
+  color: var(--rak-on-solid);
+
+  &.--active {
+    background-color: var(--rak-primary-700);
   }
 }
 

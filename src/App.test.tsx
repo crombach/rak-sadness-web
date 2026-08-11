@@ -120,7 +120,7 @@ async function uploadSpreadsheet(user: ReturnType<typeof userEvent.setup>) {
   await user.upload(fileInput(), file);
 }
 
-/** Scoreboard, Explanation, Refresh, in the order RakSadness renders them. */
+/** Scoreboard, Picks, Refresh, in the order ScoresNavbar renders them. */
 function scoresHeaderButtons(): Array<HTMLElement> {
   return Array.from(
     document.querySelectorAll<HTMLElement>(".home__scores-header-button"),
@@ -134,7 +134,7 @@ function notFoundResponse(): Response {
 }
 
 function htmlResponse(): Response {
-  return new Response("<!doctype html><title>Rak Madness Scoreboard</title>", {
+  return new Response("<!doctype html><title>Rak Madness Calculator</title>", {
     status: 200,
     headers: { "content-type": "text/html" },
   });
@@ -205,7 +205,7 @@ describe("the app, first load", () => {
 
   it("shows the app title in the navbar", async () => {
     await mountLoadedApp();
-    expect(screen.getByText("Rak Madness Scoreboard")).toBeInTheDocument();
+    expect(screen.getByText("Rak Madness Calculator")).toBeInTheDocument();
   });
 });
 
@@ -373,17 +373,39 @@ describe("the app, results views", () => {
     expect(screen.queryByText("Use Local Spreadsheet")).not.toBeInTheDocument();
   });
 
-  it("switches to the explanation view and back", async () => {
+  it("switches to the picks view and back", async () => {
     const user = await mountWithScores();
     await user.click(screen.getByText("View Results"));
 
-    const [scoreboard, explanation] = scoresHeaderButtons();
-    await user.click(explanation);
+    const [scoreboard, picks] = scoresHeaderButtons();
+    await user.click(picks);
     expect(screen.getByText("College Score")).toBeInTheDocument();
     expect(screen.queryByText("MNF Points Pick")).not.toBeInTheDocument();
 
     await user.click(scoreboard);
     expect(screen.getByText("MNF Points Pick")).toBeInTheDocument();
+  });
+
+  it("labels the two view buttons", async () => {
+    const user = await mountWithScores();
+    await user.click(screen.getByText("View Results"));
+
+    const [scoreboard, picks] = scoresHeaderButtons();
+    expect(scoreboard).toHaveTextContent("Scoreboard");
+    expect(picks).toHaveTextContent("Picks");
+  });
+
+  it("marks the view you are on, on both routes", async () => {
+    const user = await mountWithScores();
+    await user.click(screen.getByText("View Results"));
+
+    const [scoreboard, picks] = scoresHeaderButtons();
+    expect(scoreboard).toHaveClass("--active");
+    expect(picks).not.toHaveClass("--active");
+
+    await user.click(picks);
+    expect(picks).toHaveClass("--active");
+    expect(scoreboard).not.toHaveClass("--active");
   });
 
   it("returns home from the logo button", async () => {
@@ -460,9 +482,86 @@ describe("the app, week routes", () => {
     expect(await screen.findByText("MNF Points Pick")).toBeInTheDocument();
   });
 
-  it("opens a week's explanation from its URL", async () => {
+  it("shows a wireframe table until the results are ready", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
-    await mountApp(`/week/${CURRENT_WEEK}/explanation`);
+    mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    expect(document.querySelector(".table.--skeleton")).toBeInTheDocument();
+
+    await screen.findByText("MNF Points Pick");
+    expect(document.querySelector(".table.--skeleton")).not.toBeInTheDocument();
+  });
+
+  it("shows the view and refresh buttons disabled while the week loads", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    const loading = scoresHeaderButtons();
+    expect(loading).toHaveLength(3);
+    loading.forEach((button) => expect(button).toBeDisabled());
+
+    await screen.findByText("MNF Points Pick");
+    scoresHeaderButtons().forEach((button) => expect(button).toBeEnabled());
+  });
+
+  it("fills the wireframe with rows down to the bottom of the viewport", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    // jsdom reports no layout, so every measurement is zero and the whole
+    // viewport counts as spare. That still exercises the row count for real.
+    const rows = document.querySelectorAll(".table__filler-row");
+    expect(rows.length).toBe(Math.floor(window.innerHeight / 32));
+  });
+
+  it("shapes the scoreboard wireframe like the scoreboard", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    expect(
+      document.querySelectorAll(".table.--skeleton thead th"),
+    ).toHaveLength(8);
+  });
+
+  it("shapes the picks wireframe with a column per game", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    mountApp(`/week/${CURRENT_WEEK}/picks`);
+
+    // Rank, player, and three score columns, plus a middling week's worth of
+    // games. The real count is not known until the picks have been read.
+    expect(
+      document.querySelectorAll(".table.--skeleton thead th"),
+    ).toHaveLength(24);
+  });
+
+  it("widens the content area for the picks wireframe only", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    mountApp(`/week/${CURRENT_WEEK}/picks`);
+
+    // The loaded picks table is wider than the content column, so its wireframe
+    // starts out that wide too.
+    expect(document.querySelector(".home__content")).toHaveClass(
+      "--full-width",
+    );
+
+    await screen.findByText("College Score");
+    expect(document.querySelector(".home__content")).not.toHaveClass(
+      "--full-width",
+    );
+  });
+
+  it("keeps the content area narrow for the scoreboard wireframe", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    expect(document.querySelector(".home__content")).not.toHaveClass(
+      "--full-width",
+    );
+  });
+
+  it("opens a week's picks from its URL", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountApp(`/week/${CURRENT_WEEK}/picks`);
 
     expect(await screen.findByText("College Score")).toBeInTheDocument();
   });

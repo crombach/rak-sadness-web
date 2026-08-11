@@ -13,11 +13,14 @@ export default function PageLayout({
   navbarLeft,
   navbarRight,
   showingScores = false,
+  fillsWidth = false,
   children,
 }: PropsWithChildren<{
   navbarLeft: ReactNode;
   navbarRight?: ReactNode;
   showingScores?: boolean;
+  /** Widens the content area past its usual column, out to the whole screen. */
+  fillsWidth?: boolean;
 }>) {
   return (
     <div className="home" style={BACKGROUND_STYLE}>
@@ -25,6 +28,7 @@ export default function PageLayout({
       <main
         className={`home__content ${getClasses({
           "--scores": showingScores,
+          "--full-width": fillsWidth,
         })}`}
       >
         {children}

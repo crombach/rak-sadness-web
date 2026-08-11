@@ -30,4 +30,11 @@
   &.--scores {
     width: max-content;
   }
+
+  // 100% rather than 100vw, so a landscape notch's inset still holds the edges
+  // back. Wider than the usual column, which is what the picks table itself is
+  // once it loads.
+  &.--full-width {
+    width: 100%;
+  }
 }

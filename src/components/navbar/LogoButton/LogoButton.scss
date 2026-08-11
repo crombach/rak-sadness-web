@@ -10,4 +10,12 @@
     height: 20px;
     filter: url(#logo-button-outline);
   }
+
+  // Reads as the navbar's own heading rather than as button text, which is what
+  // it looked like before the two became one button.
+  &__name {
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: left;
+  }
 }

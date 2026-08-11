@@ -4,6 +4,9 @@ import "./LogoButton.scss";
 const OUTLINE_FILTER_ID = "logo-button-outline";
 const OUTLINE_RADIUS_PX = 1;
 
+/** Shown in the navbar on every page, whichever view is open. */
+export const APP_NAME = "Rak Madness Calculator";
+
 export default function LogoButton({ onClick }: { onClick: () => void }) {
   return (
     <Button onClick={onClick} className="logo-button">
@@ -37,6 +40,7 @@ export default function LogoButton({ onClick }: { onClick: () => void }) {
         </filter>
       </svg>
       <img className="logo-button__logo" src="/logo192.png" alt="" />
+      <span className="logo-button__name">{APP_NAME}</span>
     </Button>
   );
 }
