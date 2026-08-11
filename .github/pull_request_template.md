@@ -13,31 +13,40 @@ https://www.conventionalcommits.org/en/v1.0.0/
   feat(auth): [YCOM-21] add device-code login
   refactor(api)!: drop v1 response envelope
 
-Shortest body a reviewer can review from. Bullets, not paragraphs. Every line must
-change how they read the diff. No restating the diff, no process narration.
+Shortest body a reviewer can review from, under 200 words. Bullets, one line each,
+not paragraphs. Every line must change how they read the diff. Cut every line that
+does not, and delete every section left with nothing to say. An embedded screenshot
+or recording does not count against the budget. Add one where seeing the change
+beats reading about it, usually a UX change, not as a matter of course.
+
+Never in the body: a retelling of the ticket, the path taken to the change,
+alternatives rejected, counts of files or lines or tests, timings, coverage or
+benchmark numbers nobody asked for, a tour of the code, or a note about your own
+machine. A reviewer reads the diff and can click the ticket.
+
 No em-dashes, no semicolons. Short sentences instead, one idea each. Plain words
-a reader takes in once. Delete sections that don't apply. Leave no empty headings.
+a reader takes in once. Leave no empty headings.
 -->
 
 ## What
 
-<!-- What changed and where. Link every ticket this belongs to (Jira, Linear), the one in the title first. -->
+<!-- One or two sentences: what changed and where. Link every ticket this belongs to (Jira, Linear) as a URL, the one in the title first. No ticket: link nothing. -->
 
 ## Why
 
-<!-- The problem. Skip if What covers it. -->
+<!-- The problem, one or two sentences. Skip if What covers it. -->
 
 ## Changes
 
 <!--
-One bullet per substantive change: the design decisions a reviewer would otherwise reverse-engineer, and what is
-deliberately out of scope. Skip the mechanical ones.
+One bullet per design decision a reviewer would otherwise reverse-engineer, plus anything deliberately out of scope.
+One line each, six at most. Skip the mechanical ones.
 -->
 
 ## Verification
 
-<!-- Only checks CI can't show: a manual repro, a one-off check. Never the standard build, test, lint, or hooks. Else delete. -->
+<!-- Only checks CI can't show: a manual repro, a one-off check. One line each. Never the standard build, test, lint, or hooks. Else delete. -->
 
 ## Notes / Follow-ups
 
-<!-- Only what a reviewer or merger would be wrong not to know: a gap this PR doesn't fix, merge ordering, a dependent PR. Else delete. -->
+<!-- Only what a reviewer or merger would be wrong not to know: a gap this PR doesn't fix, merge ordering, a dependent PR. One line each. Else delete. -->

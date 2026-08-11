@@ -9,7 +9,9 @@ Checks, all mechanical:
     branch names one
   - a PR body passed with --body/--body-file was built from the PR template,
     with no leftover guidance comments and no empty sections
+  - the body links the ticket its branch names, when the template asks for it
   - the punctuation the template bans stays out of the body
+  - the body stays inside the word budget the template states
 
 Fails open everywhere: an unreadable subject or body (editor commits, `-F -`,
 unbalanced quotes, a missing template) is allowed through. What it can read it
@@ -40,7 +42,25 @@ ISSUE_PATTERN = re.compile(r"^[a-z]+(?:\([^()\s]+\))?!?: \[([^\]\s]+)\]",
 TEMPLATE = os.path.join(".github", "pull_request_template.md")
 # The template says so in its own comments; the hook only enforces what it finds.
 PUNCTUATION_RULE = "No em-dashes, no semicolons"
+# The branch's key is the one ticket a hook can find. Any other ticket the work
+# belongs to is the agent's to link, which is why the skill states the rule too.
+TICKET_RULE = "Link every ticket"
 BANNED = {"—": "em-dash", "–": "en-dash", ";": "semicolon"}
+# The budget comes off the template too, so a repo that never states one, or states
+# its own, is judged by its own words and never by a number hardcoded here.
+WORD_RULE = re.compile(r"under (\d+) words", re.IGNORECASE)
+TABLE_ROW = re.compile(r"^\s*\|")
+CHECKLIST_ITEM = re.compile(r"^\s*[-*+]\s+\[[ xX]\]")
+# Embedded media is markup and a URL, not prose, and either can run hundreds of
+# characters, so counting it would decide the budget for the body around it.
+MEDIA_EXT = r"png|jpe?g|gif|webp|svg|apng|avif|bmp|mp4|mov|webm|m4v"
+MEDIA_TARGET = r"(?:\.(?:%s)\b|user-attachments/assets/)" % MEDIA_EXT
+MEDIA = re.compile(
+    r"!\[[^\]]*\]\([^)]*\)"                               # ![alt](src)
+    r"|\[[^\]]*\]\([^)]*%s[^)]*\)" % MEDIA_TARGET +       # [text](screenshot.png)
+    r"|<\s*/?\s*(?:img|video|source|picture|figure|figcaption)\b[^>]*>",
+    re.IGNORECASE)
+MEDIA_TOKEN = re.compile(r"^<?\S*%s\S*>?$" % MEDIA_TARGET, re.IGNORECASE)
 
 SEPARATORS = ("&&", "||", ";", "|", "&", "\n")
 WRAPPERS = ("timeout", "time", "nice", "nohup", "stdbuf", "command", "builtin",
@@ -56,6 +76,7 @@ GIT_OPTS_WITH_VALUE = ("-C", "-c", "--git-dir", "--work-tree", "--namespace",
 TICKET_IN_BRANCH = re.compile(
     r"(?:^|[^A-Za-z0-9])([A-Z][A-Z0-9]{1,9}-\d+)(?![A-Za-z0-9])")
 CODE_SPANS = re.compile(r"```.*?```|`[^`]*`", re.DOTALL)
+FENCE = re.compile(r"(?ms)^```.*?^```")
 COMMENTS = re.compile(r"<!--.*?-->", re.DOTALL)
 
 
@@ -145,6 +166,27 @@ def headings(text):
     return set(re.findall(r"(?m)^#{2,3}\s+(.+?)\s*$", text))
 
 
+def prose_words(body):
+    """Words a reviewer reads. A fenced block, a table, a checklist and an embedded
+    image or video are not prose, so none of them counts against the budget."""
+    text = MEDIA.sub("", COMMENTS.sub("", FENCE.sub("", body)))
+    kept, skipping_item = [], False
+    for line in text.splitlines():
+        if TABLE_ROW.match(line):
+            continue
+        if CHECKLIST_ITEM.match(line):
+            skipping_item = True
+            continue
+        if skipping_item:
+            # A checklist item wraps onto indented continuation lines.
+            if line[:1] in (" ", "\t") and line.strip():
+                continue
+            skipping_item = False
+        kept.append(line)
+    return len([word for word in " ".join(kept).split()
+                if not MEDIA_TOKEN.match(word)])
+
+
 def empty_sections(body):
     """Headings with nothing under them."""
     parts = re.split(r"(?m)^(#{2,3}\s+.+?)\s*$", body)
@@ -163,9 +205,15 @@ def read_file(path):
         return ""
 
 
-def body_problems(body, template):
+def body_problems(body, template, branch=""):
     """Everything wrong with a PR body, given the repo's template."""
     problems = []
+    ticket = TICKET_IN_BRANCH.search(branch or "")
+    if TICKET_RULE in template and ticket:
+        key = ticket.group(1)
+        if key.lower() not in body.lower():
+            problems.append("branch %s names ticket %s, so the body links it. Link "
+                            "every other ticket this work belongs to too" % (branch, key))
     wanted = headings(template)
     if wanted and not (headings(body) & wanted):
         problems.append(
@@ -178,6 +226,16 @@ def body_problems(body, template):
     empty = empty_sections(body)
     if empty:
         problems.append("empty sections, fill or delete: %s" % ", ".join(empty))
+    budget = WORD_RULE.search(template)
+    if budget:
+        limit = int(budget.group(1))
+        words = prose_words(body)
+        if words > limit:
+            problems.append(
+                "the body is %d words, the budget is %d. Cut what the reviewer "
+                "gets from the diff or the ticket: a retelling of the ticket, "
+                "history, counts, a per-file walkthrough, self-assessment"
+                % (words, limit))
     if PUNCTUATION_RULE in template:
         found = sorted({name for mark, name in BANNED.items()
                         if mark in prose(body)})
@@ -261,7 +319,8 @@ def problems_for(command, cwd):
                 body = read_file(os.path.join(cwd or ".", body_file))
             if body:
                 template = read_file(os.path.join(cwd or ".", TEMPLATE))
-                found += ["PR body: " + p for p in body_problems(body, template)]
+                found += ["PR body: " + p
+                          for p in body_problems(body, template, branch)]
     return found
 
 
