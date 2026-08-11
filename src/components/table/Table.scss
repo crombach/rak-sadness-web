@@ -44,7 +44,11 @@
         border-right: var(--rak-table-header-border);
       }
       &:first-child {
-        border-right: none;
+        // Zero width rather than `none`, and colored: the shorthand resets the
+        // color to `currentColor`, which is white here, and Dark Reader draws that
+        // as a line between the rank and the player. The header's own background
+        // gives it nothing to show.
+        border-right: 0 solid var(--rak-primary-800);
       }
       &:nth-child(2) {
         border-left: var(--rak-table-header-border);
@@ -125,7 +129,9 @@
       border-right: var(--rak-table-border);
       &:first-child {
         border-left: var(--rak-table-border);
-        border-right: none;
+        // Zero width, but colored like the divider the player column draws on its
+        // own left edge. See the header, where the same reset shows up white.
+        border-right: 0 solid var(--rak-primary-800);
       }
     }
 
@@ -134,16 +140,17 @@
     }
 
     // Keeps the last real row clear of a phone's rounded corners and home
-    // indicator. Sized from the device's own inset, so it has no height at all
-    // on a screen that does not report one. `index.html` asks for
-    // `viewport-fit=cover`, without which the inset is always zero.
+    // indicator. A row tall, in the header's color, so it reads as the table's own
+    // bottom edge, plus the device's inset where there is one. `index.html` asks
+    // for `viewport-fit=cover`, without which the inset is always zero.
     tr:last-child.table__last-row td {
-      height: env(safe-area-inset-bottom, 0px);
-      min-height: 0;
+      height: calc(
+        var(--rak-table-row-height) + env(safe-area-inset-bottom, 0px)
+      );
       padding: 0;
-      // Without this the row still draws its borders at zero height, and the
-      // last real row already carries the table's bottom edge.
-      border: none;
+      // Zero width rather than `none`, which would reset the color to
+      // `currentColor`. The last real row already carries the table's bottom edge.
+      border: 0 solid var(--rak-primary-800);
       background-color: var(--rak-primary-800);
     }
   }

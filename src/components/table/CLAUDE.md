@@ -2,11 +2,16 @@
 
 `TableShell`: the frame both results tables share, the filler rows that carry a
 short table down to the bottom of the viewport, and the trailing row that keeps the
-last real row clear of a phone's rounded corners. `Table.scss` sizes that row from
-`env(safe-area-inset-bottom)`, so it has no height on a screen without an inset,
-publishes `--rak-table-row-height` for `useFillerRows` to measure against, and
-holds the shared `.table` styles (sticky header and player column, the touch
-feedback both clickable cells share, striped rows). Every measurement the wireframe
+last real row clear of a phone's rounded corners. `Table.scss` makes that row one
+row tall in the header's color, plus `env(safe-area-inset-bottom)` where the device
+reports one, publishes `--rak-table-row-height` for `useFillerRows` to measure
+against, and holds the shared `.table` styles (sticky header and player column, the
+touch feedback both clickable cells share, striped rows).
+
+No edge that carries no border is written `none`. The shorthand resets the color to
+`currentColor`, and Dark Reader forces a zero-width border visible, so `none` shows
+up as a white line. They are `0 solid var(--rak-primary-800)` instead, which has
+nothing to show. Every measurement the wireframe
 has to reproduce is a custom property on `.table`: cell padding, cell borders, and
 the size of the icon beside a player's name. Change one there, not in two files.
 
