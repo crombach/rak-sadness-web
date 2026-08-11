@@ -53,16 +53,31 @@ describe("Standing", () => {
     scores: [player("Rak", 3, "KC -3"), player("Alice", 1, "DEN +3")],
   };
 
-  it("names the leader before anyone is picked", () => {
+  it("names the leader and their score before anyone is picked", () => {
     render(<Standing scores={scores} />);
 
-    expect(screen.getByText("Rak leads · 1 game still to play"));
+    expect(
+      screen.getByText("Rak leads with 3 points · 1 game still to play"),
+    ).toBeInTheDocument();
+  });
+
+  it("counts the leaders where the top is shared", () => {
+    const tied: RakMadnessScores = {
+      scores: [...scores.scores, player("Bill", 3, "KC -3")],
+    };
+    render(<Standing scores={tied} />);
+
+    expect(
+      screen.getByText("2 players lead with 3 points · 1 game still to play"),
+    ).toBeInTheDocument();
   });
 
   it("counts the player picked back to the leader", () => {
     render(<Standing scores={scores} player="Alice" />);
 
-    expect(screen.getByText("2 points behind Rak · 1 game still to play"));
+    expect(
+      screen.getByText("2 points behind Rak · 1 game still to play"),
+    ).toBeInTheDocument();
   });
 
   it("has nothing to say before a week is scored", () => {

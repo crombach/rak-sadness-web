@@ -31,25 +31,26 @@ export function Standing({
   scores?: RakMadnessScores;
   player?: string;
 }) {
-  const [leader, runnerUp] = scores?.scores ?? [];
+  const players = scores?.scores ?? [];
+  const [leader] = players;
   if (leader == null) return null;
-  const chosen = scores?.scores.find((it) => it.name === player);
-  const behind =
-    chosen != null ? leader.score.total - chosen.score.total : undefined;
-  const isLevel =
-    behind != null
-      ? behind === 0
-      : runnerUp?.score.total === leader.score.total;
+  const top = leader.score.total;
+  const chosen = players.find((it) => it.name === player);
+  const leaders = players.filter((it) => it.score.total === top).length;
+  const lead =
+    leaders > 1
+      ? `${leaders} players lead with ${plural(top, "point")}`
+      : `${leader.name} leads with ${plural(top, "point")}`;
+  const behind = chosen != null ? top - chosen.score.total : null;
   return (
     <p className="victory__standing">
-      {isLevel
-        ? "Level at the top"
-        : behind != null
+      {behind == null
+        ? lead
+        : behind > 0
           ? `${plural(behind, "point")} behind ${leader.name}`
-          : `${leader.name} leads`}
+          : "Level at the top"}
       {" · "}
-      {plural(remainingGames(scores?.scores ?? []).length, "game")} still to
-      play
+      {plural(remainingGames(players).length, "game")} still to play
     </p>
   );
 }
