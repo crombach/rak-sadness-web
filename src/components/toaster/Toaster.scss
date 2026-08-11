@@ -21,6 +21,9 @@ $toasterWidth: min(calc(100% - 48px), 400px);
   width: 100%;
   padding: 12px;
   border-radius: var(--rak-radius-sm);
+  // Outline rather than a border, so a toast keeps its size. It has to read as
+  // above the table, which is busy behind it.
+  outline: 1px solid var(--rak-primary-500);
   font-size: 1rem;
   font-weight: 500;
   line-height: 1.5;
