@@ -5,6 +5,7 @@ import { ToastContextProvider } from "../context/ToastContext";
 import { WeekInfo } from "../types/League";
 import { RakMadnessScores } from "../types/RakMadnessScores";
 import { XLSX_CONTENT_TYPE } from "../utils/buildSpreadsheetBuffer";
+import { writeCachedPicks } from "../utils/picksCache";
 import { getPlayerScores } from "../utils/scoring/getPlayerScores";
 import usePlayerScores from "./usePlayerScores";
 
@@ -52,6 +53,40 @@ beforeEach(() => {
 });
 
 describe("usePlayerScores", () => {
+  it("scores this browser's cached upload when the API has no picks", async () => {
+    // What lets a results URL survive a reload after a local upload.
+    writeCachedPicks(SEASON, 5, new ArrayBuffer(8));
+    global.fetch = vi.fn(async () =>
+      Promise.resolve(new Response(null, { status: 404 })),
+    ) as unknown as typeof fetch;
+    getPlayerScoresMock.mockResolvedValue(scoresFor(5));
+
+    const { result } = renderHook(() => usePlayerScores(week(5), SEASON), {
+      wrapper,
+    });
+
+    await waitFor(() =>
+      expect(result.current.settled).toEqual({ season: SEASON, week: 5 }),
+    );
+    expect(result.current.scores).toEqual(scoresFor(5));
+  });
+
+  it("gives up when the API has no picks and nothing is cached", async () => {
+    global.fetch = vi.fn(async () =>
+      Promise.resolve(new Response(null, { status: 404 })),
+    ) as unknown as typeof fetch;
+
+    const { result } = renderHook(() => usePlayerScores(week(5), SEASON), {
+      wrapper,
+    });
+
+    await waitFor(() =>
+      expect(result.current.settled).toEqual({ season: SEASON, week: 5 }),
+    );
+    expect(result.current.scores).toBeUndefined();
+    expect(getPlayerScoresMock).not.toHaveBeenCalled();
+  });
+
   it("names the season it settled, so the same week of another one waits", async () => {
     getPlayerScoresMock.mockImplementation(async (selectedWeek) =>
       scoresFor(selectedWeek.value),
