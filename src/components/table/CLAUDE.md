@@ -6,14 +6,14 @@ last real row clear of a phone's rounded corners. `Table.scss` makes that row on
 row tall in the header's color, plus `env(safe-area-inset-bottom)` where the device
 reports one, publishes `--rak-table-row-height` for `useFillerRows` to measure
 against, and holds the shared `.table` styles (sticky header and player column, the
-touch feedback both clickable cells share, striped rows).
+touch feedback both clickable cells share, striped rows). Every measurement the
+wireframe has to reproduce is a custom property on `.table`: cell padding, cell
+borders, and the size of the icon beside a player's name. Change one there, not in
+two files.
 
-No edge that carries no border is written `none`. The shorthand resets the color to
-`currentColor`, and Dark Reader forces a zero-width border visible, so `none` shows
-up as a white line. They are `0 solid var(--rak-primary-800)` instead, which has
-nothing to show. Every measurement the wireframe
-has to reproduce is a custom property on `.table`: cell padding, cell borders, and
-the size of the icon beside a player's name. Change one there, not in two files.
+An edge that carries no border is `0 solid var(--rak-primary-800)`, never `none`.
+The shorthand resets the color to `currentColor`, and Dark Reader forces a
+zero-width border visible, so `none` shows up as a white line.
 
 `SkeletonTable`: the wireframe shown while a week's results are being worked out,
 shaped like the view it stands in for. One sheen sweeps across the screen rather

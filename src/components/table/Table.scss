@@ -148,8 +148,8 @@
         var(--rak-table-row-height) + env(safe-area-inset-bottom, 0px)
       );
       padding: 0;
-      // Zero width rather than `none`, which would reset the color to
-      // `currentColor`. The last real row already carries the table's bottom edge.
+      // The last real row already carries the table's bottom edge. Zero width
+      // rather than `none`, as in the header.
       border: 0 solid var(--rak-primary-800);
       background-color: var(--rak-primary-800);
     }

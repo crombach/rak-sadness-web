@@ -7,10 +7,8 @@ import "./ScoresNavbar.scss";
 export type ScoresView = "Scoreboard" | "Picks";
 
 /**
- * How long the refresh button takes to fade and narrow away.
- *
- * Held here rather than in the stylesheet, because the button has to stay mounted
- * for exactly as long as the transition runs. The stylesheet reads it back as
+ * How long the refresh button takes to fade and narrow away. Held here because the
+ * button has to stay mounted for exactly that long. The stylesheet reads it back as
  * `--collapse-duration`, so the two cannot drift apart.
  */
 export const COLLAPSE_DURATION_MS = 300;

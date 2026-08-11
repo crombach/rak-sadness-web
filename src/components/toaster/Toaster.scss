@@ -56,8 +56,7 @@ $toasterWidth: min(calc(100% - 48px), 400px);
     flex: 1;
   }
 
-  // Takes the body's own text color, which is darker than the title tint it used
-  // to have, and carries the weight the message does not.
+  // The message's own color, and the weight the message does not carry.
   .toast__header {
     font-weight: 700;
   }
