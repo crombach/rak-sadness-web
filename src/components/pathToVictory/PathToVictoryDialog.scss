@@ -1,0 +1,172 @@
+@use "../../styles/breakpoints" as *;
+
+// Base UI ships the dialog and the combobox unstyled, so these rules carry the
+// whole look of both. State comes off the data attributes they set, the same way
+// the select on the home page reads `[data-highlighted]`.
+.path-to-victory__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background-color: rgb(21 21 21 / 45%);
+  transition: opacity 200ms ease;
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+  }
+}
+
+.path-to-victory__popup {
+  position: fixed;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  top: 50%;
+  left: 50%;
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(680px, calc(100dvh - 64px));
+  padding: 20px;
+  border-radius: var(--rak-radius-lg);
+  background-color: var(--rak-surface);
+  box-shadow: var(--rak-shadow-md);
+  transform: translate(-50%, -50%);
+  transition:
+    opacity 200ms ease,
+    transform 200ms ease;
+
+  &:focus-visible {
+    outline: none;
+  }
+
+  // Held apart from the resting rule above, so the sheet below can replace both
+  // ends of the transition without inheriting a centered transform.
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+    transform: translate(-50%, -46%);
+  }
+}
+
+.path-to-victory__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.path-to-victory__title {
+  margin: 0;
+  color: var(--rak-primary-700);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.path-to-victory__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 12px;
+  border: 1px solid var(--rak-border);
+  border-radius: var(--rak-radius-sm);
+  background-color: var(--rak-on-solid);
+  box-shadow: var(--rak-shadow-xs);
+
+  &:focus-within {
+    outline: 2px solid var(--rak-primary-500);
+    outline-offset: 2px;
+  }
+}
+
+.path-to-victory__input {
+  flex: 1;
+  min-width: 0;
+  padding: 3px 0;
+  border: 0 solid var(--rak-border);
+  background-color: transparent;
+  color: var(--rak-text-secondary);
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.path-to-victory__input-icon {
+  display: flex;
+  align-items: center;
+  color: var(--rak-text-tertiary);
+}
+
+.path-to-victory__positioner {
+  // Above the dialog it opens inside of, which the backdrop already sits under.
+  z-index: 1002;
+  max-height: var(--available-height);
+}
+
+.path-to-victory__list {
+  box-sizing: border-box;
+  min-width: var(--anchor-width);
+  max-height: min(240px, var(--available-height));
+  overflow-y: auto;
+  padding: 6px 0;
+  border: 1px solid var(--rak-border);
+  border-radius: var(--rak-radius-sm);
+  background-color: var(--rak-on-solid);
+  box-shadow: var(--rak-shadow-md);
+}
+
+.path-to-victory__option {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 4px 12px;
+  cursor: pointer;
+
+  &[data-highlighted] {
+    background-color: var(--rak-level1);
+  }
+
+  &[data-selected] {
+    background-color: var(--rak-neutral-200);
+  }
+}
+
+.path-to-victory__empty {
+  padding: 8px 12px;
+  color: var(--rak-text-tertiary);
+  font-size: 0.875rem;
+}
+
+.path-to-victory__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+@include compact-screen {
+  // A sheet on the bottom edge, where a centered window would leave no margin
+  // either side of it. The same dialog, told apart here rather than in the
+  // component, because every other screen split in the app is drawn this way.
+  .path-to-victory__popup {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: 85dvh;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    border-radius: var(--rak-radius-lg) var(--rak-radius-lg) 0 0;
+    transform: none;
+
+    &[data-starting-style],
+    &[data-ending-style] {
+      // Only the slide, so a sheet on its way in is not also faded. The travel
+      // reads as the whole animation at this size.
+      opacity: 1;
+      transform: translateY(100%);
+    }
+  }
+}

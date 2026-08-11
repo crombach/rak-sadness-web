@@ -37,6 +37,13 @@
   --rak-danger-600: #a51818;
   --rak-danger-700: #7d1212;
   --rak-warning-500: #9a5b13;
+  // The trophy button's accent. Its own hue rather than a step on any scale above,
+  // so the one affordance that is neither a view switch nor a result reads as
+  // neither. Light enough that text on it is `--rak-primary-800`, not
+  // `--rak-on-solid`.
+  --rak-gold-500: #d9a02b;
+  --rak-gold-600: #bd8a20;
+  --rak-gold-700: #9a7018;
 
   // Soft fills, used by the toasts.
   --rak-soft-primary-bg: #acc2d2;

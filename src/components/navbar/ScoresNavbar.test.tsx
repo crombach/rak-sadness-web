@@ -6,11 +6,12 @@ const props = {
   view: "Scoreboard" as const,
   onViewChange: () => undefined,
   onRefresh: () => undefined,
+  onShowPaths: () => undefined,
   isRefreshing: false,
 };
 
-function refreshWrapper() {
-  return document.querySelector(".home__scores-header-refresh");
+function liveWrapper() {
+  return document.querySelector(".home__scores-header-live");
 }
 
 describe("ScoresNavbar", () => {
@@ -22,45 +23,51 @@ describe("ScoresNavbar", () => {
     vi.useRealTimers();
   });
 
-  it("offers refresh for a week that is still open", () => {
-    render(<ScoresNavbar {...props} canRefresh />);
+  it("offers refresh and a path to victory for a week that is still open", () => {
+    render(<ScoresNavbar {...props} isWeekLive />);
 
     expect(screen.getByRole("button", { name: "Refresh" })).toBeInTheDocument();
-    expect(refreshWrapper()).not.toHaveClass("--collapsed");
+    expect(
+      screen.getByRole("button", { name: "Path to Victory" }),
+    ).toBeInTheDocument();
+    expect(liveWrapper()).not.toHaveClass("--collapsed");
   });
 
-  it("marks refresh collapsed, and keeps it mounted, while it animates out", () => {
-    const { rerender } = render(<ScoresNavbar {...props} canRefresh />);
+  it("marks them collapsed, and keeps them mounted, while they animate out", () => {
+    const { rerender } = render(<ScoresNavbar {...props} isWeekLive />);
 
-    rerender(<ScoresNavbar {...props} canRefresh={false} />);
+    rerender(<ScoresNavbar {...props} isWeekLive={false} />);
 
     // Still painted, so the transition has something to run on, but out of reach of
     // pointer, keyboard, and screen reader.
-    expect(refreshWrapper()).toHaveClass("--collapsed");
-    expect(refreshWrapper()).toHaveAttribute("inert");
+    expect(liveWrapper()).toHaveClass("--collapsed");
+    expect(liveWrapper()).toHaveAttribute("inert");
     act(() => {
       vi.advanceTimersByTime(COLLAPSE_DURATION_MS - 1);
     });
-    expect(refreshWrapper()).toBeInTheDocument();
+    expect(liveWrapper()).toBeInTheDocument();
   });
 
-  it("drops refresh and its divider once the collapse has run", () => {
-    const { rerender } = render(<ScoresNavbar {...props} canRefresh />);
+  it("drops them and their divider once the collapse has run", () => {
+    const { rerender } = render(<ScoresNavbar {...props} isWeekLive />);
 
-    rerender(<ScoresNavbar {...props} canRefresh={false} />);
+    rerender(<ScoresNavbar {...props} isWeekLive={false} />);
     act(() => {
       vi.advanceTimersByTime(COLLAPSE_DURATION_MS);
     });
 
-    expect(refreshWrapper()).not.toBeInTheDocument();
+    expect(liveWrapper()).not.toBeInTheDocument();
     expect(
       document.querySelector(".home__scores-header-divider"),
     ).not.toBeInTheDocument();
   });
 
-  it("never renders refresh for a week that arrives decided", () => {
-    render(<ScoresNavbar {...props} canRefresh={false} />);
+  it("never renders them for a week that arrives decided", () => {
+    render(<ScoresNavbar {...props} isWeekLive={false} />);
 
-    expect(refreshWrapper()).not.toBeInTheDocument();
+    expect(liveWrapper()).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Path to Victory" }),
+    ).not.toBeInTheDocument();
   });
 });

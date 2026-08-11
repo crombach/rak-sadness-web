@@ -19,7 +19,7 @@ function knockedOut(score: PlayerScore, explanation: string): PlayerScore {
  * row alone would drop a game the leader happened to skip and knock out everybody
  * who needed it.
  */
-function remainingGameIndices(
+export function remainingGameIndices(
   scores: Array<PlayerScore>,
   league: "college" | "pro",
 ): Array<number> {

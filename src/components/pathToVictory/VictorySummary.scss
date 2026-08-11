@@ -1,0 +1,107 @@
+.victory {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.victory__standing {
+  margin: 0;
+  color: var(--rak-text-tertiary);
+  font-size: 0.875rem;
+}
+
+.victory__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.victory__section-title {
+  margin: 0;
+  color: var(--rak-text-tertiary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.victory__picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// One pick reads as a chip of two halves: which game, then what to back in it.
+.victory__pick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: var(--rak-radius-sm);
+  background-color: var(--rak-level1);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.victory__pick-label {
+  color: var(--rak-text-tertiary);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.victory__pick-team {
+  color: var(--rak-text);
+}
+
+.victory__routes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.victory__route {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  // Drawn on the left alone, so a stack of routes reads as a list of alternatives
+  // rather than as a stack of boxes.
+  border-inline-start: var(--rak-border-width) solid var(--rak-gold-500);
+  background-color: var(--rak-level1);
+}
+
+.victory__help {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.victory__line {
+  margin: 0;
+  color: var(--rak-text-secondary);
+  font-size: 0.875rem;
+}
+
+.victory__message {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 0;
+}
+
+.victory__heading {
+  margin: 0;
+  color: var(--rak-text);
+  font-size: 1rem;
+  font-weight: 600;
+}

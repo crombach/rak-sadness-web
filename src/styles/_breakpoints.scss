@@ -11,6 +11,14 @@ $breakpoint-narrow: 400px;
  */
 $breakpoint-crowded-navbar: 560px;
 
+/**
+ * Below this a dialog centered in the viewport leaves too little either side of it
+ * to read as a window, and belongs on the bottom edge as a sheet instead. Wider
+ * than the navbar breakpoints, because this is about the width of a paragraph
+ * rather than about what fits in one bar.
+ */
+$breakpoint-compact: 600px;
+
 /** Phone-width screens, where the tables and navbar tighten up. */
 @mixin narrow-screen {
   @media (max-width: $breakpoint-narrow) {
@@ -21,6 +29,13 @@ $breakpoint-crowded-navbar: 560px;
 /** Too little room for the navbar to label its buttons. */
 @mixin crowded-navbar {
   @media (max-width: $breakpoint-crowded-navbar) {
+    @content;
+  }
+}
+
+/** Too little room to center a dialog, so it rises from the bottom edge. */
+@mixin compact-screen {
+  @media (max-width: $breakpoint-compact) {
     @content;
   }
 }
