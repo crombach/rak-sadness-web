@@ -134,7 +134,7 @@ function notFoundResponse(): Response {
 }
 
 function htmlResponse(): Response {
-  return new Response("<!doctype html><title>Rak Madness Calculator</title>", {
+  return new Response("<!doctype html><title>The Rakulator</title>", {
     status: 200,
     headers: { "content-type": "text/html" },
   });

@@ -16,7 +16,7 @@ description: How to build, run, and test this repo. Read before any npm, make, t
 
 ## Verified
 
-From a clean checkout: `make setup`, `make build`, `make run`, `make test`, `make check` all green. `make run` serves `http://localhost:3000`, HTTP 200, `<title>Rak Madness Calculator</title>`. `npm audit` reports 0 vulnerabilities.
+From a clean checkout: `make setup`, `make build`, `make run`, `make test`, `make check` all green. `make run` serves `http://localhost:3000`, HTTP 200, `<title>The Rakulator</title>`. `npm audit` reports 0 vulnerabilities.
 
 `npm run build` runs `npm run typecheck` first, so a type error fails the Cloudflare build too. The build does not lint. Lint reaches CI through the `check` workflow calling `make check`.
 
