@@ -17,5 +17,8 @@
     font-size: 1rem;
     font-weight: bold;
     text-align: left;
+    // One line at every width. The navbar is sized for it, and a wrapped app name
+    // pushed the bar taller than the buttons standing next to it.
+    white-space: nowrap;
   }
 }
