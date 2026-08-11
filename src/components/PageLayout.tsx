@@ -13,14 +13,17 @@ export default function PageLayout({
   navbarLeft,
   navbarRight,
   showingScores = false,
-  fillsWidth = false,
+  scrollable = true,
   children,
 }: PropsWithChildren<{
   navbarLeft: ReactNode;
   navbarRight?: ReactNode;
   showingScores?: boolean;
-  /** Widens the content area past its usual column, out to the whole screen. */
-  fillsWidth?: boolean;
+  /**
+   * Set false to hold the content still while keeping the room a scrollbar would
+   * take, so nothing shifts sideways when scrolling comes back.
+   */
+  scrollable?: boolean;
 }>) {
   return (
     <div className="home" style={BACKGROUND_STYLE}>
@@ -28,7 +31,7 @@ export default function PageLayout({
       <main
         className={`home__content ${getClasses({
           "--scores": showingScores,
-          "--full-width": fillsWidth,
+          "--frozen": !scrollable,
         })}`}
       >
         {children}

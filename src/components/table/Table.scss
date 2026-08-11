@@ -36,6 +36,22 @@
     }
   }
 
+  // These three size a game's column, so the wireframe needs them as much as the
+  // picks table does. The pick colors stay in `PicksTable.scss`, which the
+  // wireframe has no use for.
+  .table__pick-header {
+    display: inline-block;
+    min-width: 64px;
+  }
+
+  .table__center {
+    text-align: center;
+  }
+
+  tbody .table__pick {
+    white-space: nowrap;
+  }
+
   // Stick the player column to the left side of the screen.
   .table__player-col {
     z-index: 10;

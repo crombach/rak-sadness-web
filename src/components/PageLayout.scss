@@ -31,10 +31,11 @@
     width: max-content;
   }
 
-  // 100% rather than 100vw, so a landscape notch's inset still holds the edges
-  // back. Wider than the usual column, which is what the picks table itself is
-  // once it loads.
-  &.--full-width {
-    width: 100%;
+  // `hidden` is still a scroll container, so `stable` keeps whatever room a
+  // scrollbar takes on this browser while nobody can scroll yet. Without it the
+  // wireframe would jump sideways the moment the real table brings scrolling back.
+  &.--frozen {
+    overflow: hidden;
+    scrollbar-gutter: stable;
   }
 }
