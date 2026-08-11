@@ -2,13 +2,13 @@ import { PlayerScore } from "../../types/RakMadnessScores";
 import rangeWithPrefix from "../rangeWithPrefix";
 import parsePick from "./parsePick";
 
-export type LeagueKey = "college" | "pro";
+type LeagueKey = "college" | "pro";
 
 const LEAGUES: Array<LeagueKey> = ["college", "pro"];
 
 const LEAGUE_PREFIX: Record<LeagueKey, string> = { college: "C", pro: "P" };
 
-export type Cell = {
+type Cell = {
   /** Absent where the player left the game blank, which scores them nothing. */
   team?: string;
   hasSpread: boolean;
@@ -30,7 +30,7 @@ export type RemainingGame = {
  * row alone would drop a game the leader happened to skip and knock out everybody
  * who needed it.
  */
-export function remainingGameIndices(
+function remainingGameIndices(
   scores: Array<PlayerScore>,
   league: LeagueKey,
 ): Array<number> {

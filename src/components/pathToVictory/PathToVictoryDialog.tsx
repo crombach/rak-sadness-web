@@ -128,7 +128,7 @@ export default function PathToVictoryDialog({
                         value={option}
                         disabled={option.isKnockedOut}
                         className={`path-to-victory__option ${getClasses({
-                          "--eliminated": option.isKnockedOut,
+                          "--knocked-out": option.isKnockedOut,
                         })}`}
                       >
                         {option.name}

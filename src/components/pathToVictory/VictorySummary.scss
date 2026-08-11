@@ -25,10 +25,12 @@
   text-transform: uppercase;
 }
 
+// Columns rather than a wrapping row, so the same game sits at the same x down
+// every route. Each list is the same width, so each divides the same way.
 .victory__picks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;

@@ -5,16 +5,18 @@ gold trophy button.
 
 `PathToVictoryDialog`: a Base UI dialog over a Base UI combobox, with
 `VictorySummary` under it. `playersMatching` holds a knocked out player back while
-anyone still standing shares the letters typed, and offers them disabled in danger
-red with a skull when they are the only match. The search is thousands of scenarios,
-so it runs on the player chosen rather than on every render. `PathToVictoryDialog.scss`
+anyone still standing shares the letters typed, and offers them disabled when they
+are the only match, named in `--rak-knocked-out-text` with the same skull the table
+gives them. The search is thousands of scenarios, so it runs on the player chosen
+rather than on every render. `PathToVictoryDialog.scss`
 centers the one dialog as a modal and stands it on the bottom edge as a sheet below
 `compact-screen`, replacing both ends of the transition, since a sheet cannot inherit
 a centered transform.
 
-`VictorySummary`: renders `PathsToVictory` and works nothing out itself. Must-win
-leads and the standing line closes. Routes stand five deep and unfold on a click,
-keyed on the player so a new one starts folded.
+`VictorySummary`: renders `PathsToVictory`, working out only what it takes to say
+it. Must-win leads and the standing line closes. Picks sit in a grid rather than a
+wrapping row, so the same game holds the same column down every route. Routes stand
+five deep and unfold on a click, keyed on the player so a new one starts folded.
 
 One suite here mounts one dialog, on purpose. Base UI leaves its scroll lock, focus
 guards, and inert markers on the document when a second one mounts, which puts the
