@@ -48,7 +48,7 @@ export function Standing({
         ? lead
         : behind > 0
           ? `${plural(behind, "point")} behind ${leader.name}`
-          : "Level at the top"}
+          : "Tied for the lead"}
       {" · "}
       {plural(remainingGames(players).length, "game")} still to play
     </p>

@@ -80,6 +80,14 @@ describe("Standing", () => {
     ).toBeInTheDocument();
   });
 
+  it("ties the player picked to the lead where they hold it", () => {
+    render(<Standing scores={scores} player="Rak" />);
+
+    expect(
+      screen.getByText("Tied for the lead · 1 game still to play"),
+    ).toBeInTheDocument();
+  });
+
   it("has nothing to say before a week is scored", () => {
     const { container } = render(<Standing />);
 
