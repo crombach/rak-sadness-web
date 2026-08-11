@@ -47,7 +47,6 @@ export default function usePlayerScores(
   const [picksBuffer, setPicksBuffer] = useState<ArrayBuffer>();
   const [scores, setScores] = useState<RakMadnessScores>();
   const [settled, setSettled] = useState<SettledAttempt>();
-  const [isPicksLoading, setPicksLoading] = useState(true);
   const [isScoresLoading, setScoresLoading] = useState(true);
   const [isRefreshing, setRefreshing] = useState(false);
   // Counts scoring attempts, so a superseded one cannot write its week's scores
@@ -67,7 +66,6 @@ export default function usePlayerScores(
       if (!selectedWeek || season == null) return;
       const attempt = ++latestAttempt.current;
       const isLatest = () => latestAttempt.current === attempt;
-      setPicksLoading(true);
       setScoresLoading(true);
 
       const attempted = { season, week: selectedWeek.value };
@@ -85,12 +83,10 @@ export default function usePlayerScores(
         );
         setScores(undefined);
         setSettled(attempted);
-        setPicksLoading(false);
         setScoresLoading(false);
         showToast(onLoadFailure);
         return;
       }
-      setPicksLoading(false);
 
       try {
         const weekScores = await getPlayerScores(selectedWeek, buffer, season);
@@ -249,20 +245,11 @@ export default function usePlayerScores(
     () => ({
       scores,
       settled,
-      isPicksLoading,
       isScoresLoading,
       isRefreshing,
       scoreLocalFile,
       refresh,
     }),
-    [
-      scores,
-      settled,
-      isPicksLoading,
-      isScoresLoading,
-      isRefreshing,
-      scoreLocalFile,
-      refresh,
-    ],
+    [scores, settled, isScoresLoading, isRefreshing, scoreLocalFile, refresh],
   );
 }

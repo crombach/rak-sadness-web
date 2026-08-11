@@ -24,7 +24,6 @@ export default function HomePage() {
     setSelectedSeason,
     isWeekInfoLoading,
     scores,
-    isPicksLoading,
     isScoresLoading,
     scoreLocalFile,
   } = useAppData();
@@ -48,7 +47,7 @@ export default function HomePage() {
 
   // Anything that has to finish before the controls mean anything. The week
   // lookup waits on the season list, so its flag covers that too.
-  const isBusy = isWeekInfoLoading || isPicksLoading || isScoresLoading;
+  const isBusy = isWeekInfoLoading || isScoresLoading;
   const hasNoScoresYet = !selectedWeek || isBusy || !scores;
 
   return (
