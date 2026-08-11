@@ -308,8 +308,7 @@ export default function VictorySummary({
       {/* Worked out, then left off, so the count is what the reader is missing. */}
       {result.hiddenRouteCount > 0 && (
         <p className="victory__standing">
-          {plural(result.hiddenRouteCount, "other route")} worked out but not
-          shown.
+          {plural(result.hiddenRouteCount, "other route")} found but not shown.
         </p>
       )}
     </div>
