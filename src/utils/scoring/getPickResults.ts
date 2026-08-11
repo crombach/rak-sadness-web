@@ -17,8 +17,10 @@ export function getStatus(score: GameScore): Status {
 }
 
 /**
- * Indexes both sides of every game by team abbreviation. First result wins, so a
- * team playing twice in a week resolves to its earliest game.
+ * Indexes both sides of every game by team abbreviation.
+ *
+ * First result wins, so a team playing twice in one week resolves to whichever game
+ * its league's results list first. College is ordered latest first for that reason.
  */
 export function indexResultsByTeam(
   leagueResults: Array<LeagueResult>,
@@ -99,8 +101,9 @@ export function getPickResults(
       );
     }
 
-    // Determine if the player picked the winner.
-    // null gameResult.winner.team indicates a tie.
+    // A tie counts as picking the winner, and so does an unfinished game, which
+    // has no winner either. The unfinished case is harmless because nothing reads
+    // `pointValue` until `isCompleted`.
     const pickedWinner =
       gameResult.winner.team === null ||
       gameResult.winner.team.abbreviation === selectedTeam;

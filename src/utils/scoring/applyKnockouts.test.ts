@@ -61,6 +61,42 @@ describe("applyKnockouts", () => {
     expect(result[0].status.explanation).toBe("Winner!");
   });
 
+  it("counts a game still to be played that only a trailing player picked", () => {
+    // The leader left C1 blank, which scores "error", not "incomplete". Read from
+    // the leader alone, C1 would look played and Bob would be knocked out.
+    const result = applyKnockouts([
+      player({
+        name: "Alice",
+        total: 1,
+        college: [pickResult("undefined", "error")],
+      }),
+      player({
+        name: "Bob",
+        total: 0,
+        college: [pickResult("MICH", "incomplete")],
+      }),
+    ]);
+
+    expect(result[1].status.isKnockedOut).toBe(false);
+  });
+
+  it("counts a game the opponent left blank as ground still to make up", () => {
+    const result = applyKnockouts([
+      player({
+        name: "Alice",
+        total: 1,
+        college: [pickResult("undefined", "error")],
+      }),
+      player({
+        name: "Bob",
+        total: 0,
+        college: [pickResult("MICH", "incomplete")],
+      }),
+    ]);
+
+    expect(result[1].status.explanation).toBe("Not knocked out!");
+  });
+
   it("knocks out a player who submitted no picks", () => {
     const result = applyKnockouts([
       player({ name: "Alice", total: 3 }),
