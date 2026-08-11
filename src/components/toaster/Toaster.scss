@@ -21,9 +21,8 @@ $toasterWidth: min(calc(100% - 48px), 400px);
   width: 100%;
   padding: 12px;
   border-radius: var(--rak-radius-sm);
-  // Outline rather than a border, so a toast keeps its size. It has to read as
-  // above the table, which is busy behind it.
-  outline: 1px solid var(--rak-primary-500);
+  // A toast lands over the table, which is busy behind it.
+  border: 2px solid var(--rak-primary-500);
   font-size: 1rem;
   font-weight: 500;
   line-height: 1.5;
@@ -49,10 +48,10 @@ $toasterWidth: min(calc(100% - 48px), 400px);
     color: var(--rak-soft-danger-text);
   }
 
+  // Both icons sit on the heading's line rather than the middle of the toast, which
+  // is where the container's `flex-start` puts them.
   .toast__icon {
     display: flex;
-    align-items: center;
-    align-self: center;
   }
 
   .toast__body {
@@ -65,6 +64,8 @@ $toasterWidth: min(calc(100% - 48px), 400px);
   }
 
   .toast__close {
-    align-self: center;
+    // Its box is 32px against the heading's 24px line, so lift it by half the
+    // difference to put the icon on that line. Keeps the whole touch target.
+    margin-top: -4px;
   }
 }
