@@ -6,6 +6,7 @@ import {
   SentimentVerySatisfiedIcon,
   SkullIcon,
 } from "../../icon/Icon";
+import { useIsWeekDecided } from "../../../context/AppDataContext";
 import { useToastActions, Toast } from "../../../context/ToastContext";
 import "./PlayerName.scss";
 
@@ -17,15 +18,9 @@ function statusIcon(player: PlayerScore, isWeekDecided: boolean) {
   return isWeekDecided ? <EmojiEventsIcon /> : <SentimentVerySatisfiedIcon />;
 }
 
-function PlayerName({
-  player,
-  isWeekDecided = false,
-}: {
-  player: PlayerScore;
-  /** Every game scored and the tiebreaker settled, so nobody else can catch up. */
-  isWeekDecided?: boolean;
-}) {
+function PlayerName({ player }: { player: PlayerScore }) {
   const { showToast, clearToasts } = useToastActions();
+  const isWeekDecided = useIsWeekDecided();
 
   return (
     <td

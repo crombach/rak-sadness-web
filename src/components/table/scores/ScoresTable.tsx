@@ -1,17 +1,11 @@
-import { memo, useMemo } from "react";
+import { memo } from "react";
 import { PlayerScore, RakMadnessScores } from "../../../types/RakMadnessScores";
-import isWeekDecided from "../../../utils/scoring/isWeekDecided";
 import PlayerName from "../playerName/PlayerName";
 import TableShell, { RankCell } from "../TableShell";
 
 const COLUMN_COUNT = 8;
 
 function ScoresTable({ scores }: { scores?: RakMadnessScores | null }) {
-  const isDecided = useMemo(
-    () => scores != null && isWeekDecided(scores),
-    [scores],
-  );
-
   if (scores == null) {
     return null;
   }
@@ -35,7 +29,7 @@ function ScoresTable({ scores }: { scores?: RakMadnessScores | null }) {
       {scores.scores.map((player: PlayerScore, index: number) => (
         <tr key={player.name}>
           <RankCell rank={index + 1} />
-          <PlayerName player={player} isWeekDecided={isDecided} />
+          <PlayerName player={player} />
           <td>{player.tiebreaker.pick ?? "N/A"}</td>
           <td>{player.tiebreaker.distance ?? "N/A"}</td>
           <td>{player.score.college}</td>

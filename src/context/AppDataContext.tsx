@@ -10,6 +10,7 @@ import { useLocation } from "react-router";
 import useLeagueWeeks from "../hooks/useLeagueWeeks";
 import usePlayerScores from "../hooks/usePlayerScores";
 import { WeekInfo } from "../types/League";
+import isWeekSettled from "../utils/scoring/isWeekDecided";
 
 type AppData = ReturnType<typeof useLeagueWeeks> &
   ReturnType<typeof usePlayerScores> & {
@@ -19,6 +20,8 @@ type AppData = ReturnType<typeof useLeagueWeeks> &
      * reference, so a rebuilt one would leave it unable to show a selection.
      */
     findWeek: (value: number) => WeekInfo | undefined;
+    /** Whether the week on screen is over, so whoever is left standing has won. */
+    isWeekDecided: boolean;
   };
 
 const AppDataContext = createContext<AppData | undefined>(undefined);
@@ -53,9 +56,15 @@ export function AppDataContextProvider({
     [weeks],
   );
 
+  const { scores } = playerScores;
+  const isWeekDecided = useMemo(
+    () => scores != null && isWeekSettled(scores),
+    [scores],
+  );
+
   const value = useMemo(
-    () => ({ ...leagueWeeks, ...playerScores, findWeek }),
-    [leagueWeeks, playerScores, findWeek],
+    () => ({ ...leagueWeeks, ...playerScores, findWeek, isWeekDecided }),
+    [leagueWeeks, playerScores, findWeek, isWeekDecided],
   );
 
   return (
@@ -69,4 +78,12 @@ export function useAppData(): AppData {
     throw new Error("useAppData needs an AppDataContextProvider above it");
   }
   return value;
+}
+
+/**
+ * Whether the week on screen is over. False with no provider above, so a table
+ * can still be rendered on its own with scores handed straight to it.
+ */
+export function useIsWeekDecided(): boolean {
+  return useContext(AppDataContext)?.isWeekDecided ?? false;
 }

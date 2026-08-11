@@ -482,6 +482,40 @@ describe("the app, week routes", () => {
     expect(await screen.findByText("MNF Points Pick")).toBeInTheDocument();
   });
 
+  it("crowns a player still standing at the end of the week", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    await screen.findByText("MNF Points Pick");
+    expect(screen.getByTestId("EmojiEventsIcon")).toBeInTheDocument();
+  });
+
+  it("holds the crown back while a game is still to finish", async () => {
+    getPlayerScoresMock.mockResolvedValue({
+      ...scores,
+      scores: [
+        {
+          ...scores.scores[0],
+          pro: [
+            {
+              pick: "BUF",
+              status: "incomplete",
+              explanation: { header: "P1", message: "in progress" },
+            },
+          ],
+        },
+      ],
+    });
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    await screen.findByText("MNF Points Pick");
+    expect(
+      screen.getByTestId("SentimentVerySatisfiedIcon"),
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("EmojiEventsIcon")).not.toBeInTheDocument();
+  });
+
   it("shows a wireframe table until the results are ready", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
     mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
