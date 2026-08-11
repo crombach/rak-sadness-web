@@ -20,11 +20,20 @@ type AppData = ReturnType<typeof useLeagueWeeks> &
      * reference, so a rebuilt one would leave it unable to show a selection.
      */
     findWeek: (value: number) => WeekInfo | undefined;
-    /** Whether the week on screen is over, so whoever is left standing has won. */
-    isWeekDecided: boolean;
   };
 
 const AppDataContext = createContext<AppData | undefined>(undefined);
+
+/**
+ * Whether the week on screen is over, so whoever is left standing has won.
+ *
+ * Its own context rather than a field on `AppData`, because every player cell
+ * reads it. On `AppData` they would each re-render on every loading flag the app
+ * data carries, which is the same reason the toast list and its actions are
+ * split. False with no provider above, so a table can still be rendered on its
+ * own with scores handed straight to it.
+ */
+const WeekDecidedContext = createContext(false);
 
 function weekFromPath(pathname: string): number | undefined {
   const match = /^\/week\/(\d+)/.exec(pathname);
@@ -63,12 +72,16 @@ export function AppDataContextProvider({
   );
 
   const value = useMemo(
-    () => ({ ...leagueWeeks, ...playerScores, findWeek, isWeekDecided }),
-    [leagueWeeks, playerScores, findWeek, isWeekDecided],
+    () => ({ ...leagueWeeks, ...playerScores, findWeek }),
+    [leagueWeeks, playerScores, findWeek],
   );
 
   return (
-    <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>
+    <AppDataContext.Provider value={value}>
+      <WeekDecidedContext.Provider value={isWeekDecided}>
+        {children}
+      </WeekDecidedContext.Provider>
+    </AppDataContext.Provider>
   );
 }
 
@@ -80,10 +93,6 @@ export function useAppData(): AppData {
   return value;
 }
 
-/**
- * Whether the week on screen is over. False with no provider above, so a table
- * can still be rendered on its own with scores handed straight to it.
- */
 export function useIsWeekDecided(): boolean {
-  return useContext(AppDataContext)?.isWeekDecided ?? false;
+  return useContext(WeekDecidedContext);
 }
