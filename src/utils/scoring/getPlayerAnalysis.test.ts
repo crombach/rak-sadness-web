@@ -1,11 +1,11 @@
-import { PathsToVictory } from "../../types/PathsToVictory";
+import { PlayerAnalysis } from "../../types/PlayerAnalysis";
 import {
   PickResult,
   PlayerScore,
   RakMadnessScores,
   Status,
 } from "../../types/RakMadnessScores";
-import getPathsToVictory from "./getPathsToVictory";
+import getPlayerAnalysis from "./getPlayerAnalysis";
 
 /** A game still to be played unless a status says otherwise. */
 function pick(text: string, status: Status = "incomplete"): PickResult {
@@ -58,20 +58,20 @@ function week(
 }
 
 /** Narrows to the routes result, so a case can read the fields it is about. */
-function paths(result: PathsToVictory | undefined) {
+function paths(result: PlayerAnalysis | undefined) {
   expect(result?.kind).toBe("paths");
-  return result as Extract<PathsToVictory, { kind: "paths" }>;
+  return result as Extract<PlayerAnalysis, { kind: "paths" }>;
 }
 
 function labels(games: Array<{ label: string }>): Array<string> {
   return games.map((game) => game.label);
 }
 
-describe("getPathsToVictory, whether there is anything to work out", () => {
+describe("getPlayerAnalysis, whether there is anything to work out", () => {
   it("has no answer for a name the sheet does not hold", () => {
     const scores = week([player({ name: "Alice" })]);
 
-    expect(getPathsToVictory(scores, "Nobody")).toBeUndefined();
+    expect(getPlayerAnalysis(scores, "Nobody")).toBeUndefined();
   });
 
   it("gives a knocked out player the reason they already carry", () => {
@@ -86,7 +86,7 @@ describe("getPathsToVictory, whether there is anything to work out", () => {
     scores.scores[1].status.explanation =
       "Knocked out on Total Score by Alice.";
 
-    expect(getPathsToVictory(scores, "Bob")).toEqual({
+    expect(getPlayerAnalysis(scores, "Bob")).toEqual({
       kind: "eliminated",
       player: "Bob",
       explanation: "Knocked out on Total Score by Alice.",
@@ -101,7 +101,7 @@ describe("getPathsToVictory, whether there is anything to work out", () => {
       player({ name: "Bob", total: 3, pro: [pick("KC -3")] }),
     ]);
 
-    expect(getPathsToVictory(scores, "Alice")).toEqual({
+    expect(getPlayerAnalysis(scores, "Alice")).toEqual({
       kind: "clinched",
       player: "Alice",
     });
@@ -118,21 +118,21 @@ describe("getPathsToVictory, whether there is anything to work out", () => {
       }),
     ]);
 
-    expect(getPathsToVictory(scores, "Alice")).toEqual({
+    expect(getPlayerAnalysis(scores, "Alice")).toEqual({
       kind: "clinched",
       player: "Alice",
     });
   });
 });
 
-describe("getPathsToVictory, the routes", () => {
+describe("getPlayerAnalysis, the routes", () => {
   it("names the one game a player has to win", () => {
     const scores = week([
       player({ name: "Alice", total: 3, pro: [pick("KC -3")] }),
       player({ name: "Bob", total: 3, pro: [pick("DEN +3")] }),
     ]);
 
-    const result = paths(getPathsToVictory(scores, "Alice"));
+    const result = paths(getPlayerAnalysis(scores, "Alice"));
     expect(result.mustWin).toEqual([{ label: "P1", pick: "KC -3" }]);
     expect(result.pool).toBeUndefined();
     expect(result.routes).toBeUndefined();
@@ -150,7 +150,7 @@ describe("getPathsToVictory, the routes", () => {
       player({ name: "Bob", total: 2, pro: bob.map((it) => pick(it)) }),
     ]);
 
-    const result = paths(getPathsToVictory(scores, "Alice"));
+    const result = paths(getPlayerAnalysis(scores, "Alice"));
     expect(result.mustWin).toEqual([]);
     expect(result.pool?.choose).toBe(2);
     expect(labels(result.pool?.games ?? [])).toEqual(["P1", "P2", "P3", "P4"]);
@@ -178,7 +178,7 @@ describe("getPathsToVictory, the routes", () => {
       }),
     ]);
 
-    const result = paths(getPathsToVictory(scores, "Alice"));
+    const result = paths(getPlayerAnalysis(scores, "Alice"));
     expect(result.mustWin).toEqual([{ label: "P1", pick: "KC -3" }]);
     expect(result.pool?.choose).toBe(1);
     expect(labels(result.pool?.games ?? [])).toEqual(["P2", "P3"]);
@@ -200,7 +200,7 @@ describe("getPathsToVictory, the routes", () => {
       }),
     ]);
 
-    const result = paths(getPathsToVictory(scores, "Alice"));
+    const result = paths(getPlayerAnalysis(scores, "Alice"));
     expect(result.mustWin).toEqual([]);
     expect(result.pool).toBeUndefined();
     expect(result.routes?.map((route) => labels(route.games))).toEqual([
@@ -211,7 +211,7 @@ describe("getPathsToVictory, the routes", () => {
   });
 });
 
-describe("getPathsToVictory, the Monday night tiebreaker", () => {
+describe("getPlayerAnalysis, the Monday night tiebreaker", () => {
   it("bounds the totals that win from above when the player guessed lower", () => {
     // Level on points with nothing left to separate them but the guess. Alice is
     // closer than Bob on every total under the midpoint of 45.5.
@@ -230,7 +230,7 @@ describe("getPathsToVictory, the Monday night tiebreaker", () => {
       }),
     ]);
 
-    const result = paths(getPathsToVictory(scores, "Alice"));
+    const result = paths(getPlayerAnalysis(scores, "Alice"));
     expect(result.mustWin).toEqual([]);
     expect(result.mondayNight).toEqual({
       kind: "range",
@@ -257,7 +257,7 @@ describe("getPathsToVictory, the Monday night tiebreaker", () => {
       }),
     ]);
 
-    const result = paths(getPathsToVictory(scores, "Alice"));
+    const result = paths(getPlayerAnalysis(scores, "Alice"));
     expect(result.mondayNight).toEqual({
       kind: "range",
       min: 46,
@@ -286,7 +286,7 @@ describe("getPathsToVictory, the Monday night tiebreaker", () => {
       }),
     ]);
 
-    const result = paths(getPathsToVictory(scores, "Alice"));
+    const result = paths(getPlayerAnalysis(scores, "Alice"));
     expect(result.mondayNight).toEqual({
       kind: "range",
       min: 45,
@@ -315,7 +315,7 @@ describe("getPathsToVictory, the Monday night tiebreaker", () => {
       }),
     ]);
 
-    const result = paths(getPathsToVictory(scores, "Alice"));
+    const result = paths(getPlayerAnalysis(scores, "Alice"));
     expect(result.mustWin).toEqual([]);
     expect(result.outrightAt).toBe(1);
     expect(result.mondayNight).toBeUndefined();
@@ -354,7 +354,7 @@ describe("getPathsToVictory, the Monday night tiebreaker", () => {
       }),
     ]);
 
-    expect(getPathsToVictory(scores, "Alice")).toEqual({
+    expect(getPlayerAnalysis(scores, "Alice")).toEqual({
       kind: "clinched",
       player: "Alice",
     });
@@ -383,20 +383,20 @@ describe("getPathsToVictory, the Monday night tiebreaker", () => {
       47,
     );
 
-    const result = paths(getPathsToVictory(scores, "Bob"));
+    const result = paths(getPlayerAnalysis(scores, "Bob"));
     expect(result.mustWin).toEqual([{ label: "C1", pick: "BAMA +7" }]);
     expect(result.mondayNight).toEqual({ kind: "settled" });
   });
 });
 
-describe("getPathsToVictory, games out of the player's hands", () => {
+describe("getPlayerAnalysis, games out of the player's hands", () => {
   it("names the team that has to miss where the player left a game blank", () => {
     const scores = week([
       player({ name: "Alice", total: 3, pro: [pick("")] }),
       player({ name: "Bob", total: 3, pro: [pick("KC -3")] }),
     ]);
 
-    const result = paths(getPathsToVictory(scores, "Alice"));
+    const result = paths(getPlayerAnalysis(scores, "Alice"));
     expect(result.mustWin).toEqual([]);
     expect(result.needsHelp).toEqual([{ label: "P1", needsToMiss: ["KC"] }]);
   });
@@ -423,7 +423,7 @@ describe("getPathsToVictory, games out of the player's hands", () => {
       }),
     ]);
 
-    const result = paths(getPathsToVictory(scores, "Alice"));
+    const result = paths(getPlayerAnalysis(scores, "Alice"));
     expect(result.mustWin).toEqual([{ label: "P1", pick: "KC -3" }]);
     expect(result.routes).toEqual([
       { games: [], mondayNight: { kind: "notNeeded" } },
@@ -441,14 +441,14 @@ describe("getPathsToVictory, games out of the player's hands", () => {
       player({ name: "Bob", total: 3, pro: [pick("KC -3")] }),
     ]);
 
-    expect(getPathsToVictory(scores, "Alice")).toEqual({
+    expect(getPlayerAnalysis(scores, "Alice")).toEqual({
       kind: "clinched",
       player: "Alice",
     });
   });
 });
 
-describe("getPathsToVictory, weeks too big to search", () => {
+describe("getPlayerAnalysis, weeks too big to search", () => {
   /** Two sides of one game, on the same spread, so no tiebreaker tier splits them. */
   function opposed(count: number, prefix: string, spread: string) {
     return Array.from({ length: count }, (_, index) =>
@@ -474,7 +474,7 @@ describe("getPathsToVictory, weeks too big to search", () => {
       }),
     ]);
 
-    expect(getPathsToVictory(scores, "Alice")).toEqual({
+    expect(getPlayerAnalysis(scores, "Alice")).toEqual({
       kind: "headline",
       player: "Alice",
       remainingPickCount: 11,
@@ -493,7 +493,7 @@ describe("getPathsToVictory, weeks too big to search", () => {
       player({ name: "Bob", total: 4, pro: opposed(count, "B", "+3") }),
     ]);
 
-    expect(getPathsToVictory(scores, "Alice")).toEqual({
+    expect(getPlayerAnalysis(scores, "Alice")).toEqual({
       kind: "headline",
       player: "Alice",
       remainingPickCount: 11,
@@ -514,7 +514,7 @@ describe("getPathsToVictory, weeks too big to search", () => {
       player({ name: "Bob", total: 1, pro: [...agreed, pick("DEN +3")] }),
     ]);
 
-    expect(getPathsToVictory(scores, "Alice")?.kind).toBe("headline");
+    expect(getPlayerAnalysis(scores, "Alice")?.kind).toBe("headline");
   });
 
   it("works the routes out at ten", () => {
@@ -524,7 +524,7 @@ describe("getPathsToVictory, weeks too big to search", () => {
       player({ name: "Bob", total: 0, pro: opposed(count, "B", "+3") }),
     ]);
 
-    const result = paths(getPathsToVictory(scores, "Alice"));
+    const result = paths(getPlayerAnalysis(scores, "Alice"));
     expect(result.pool?.choose).toBe(5);
     expect(result.pool?.games).toHaveLength(10);
   });

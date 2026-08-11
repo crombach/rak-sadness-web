@@ -5,10 +5,10 @@ import {
   PlayerScore,
   RakMadnessScores,
 } from "../../types/RakMadnessScores";
-import PathToVictoryDialog, {
+import PlayerAnalysisDialog, {
   playerOptions,
   playersMatching,
-} from "./PathToVictoryDialog";
+} from "./PlayerAnalysisDialog";
 
 function proPick(pick: string): PickResult {
   return {
@@ -90,13 +90,13 @@ describe("playersMatching", () => {
  * one dialog and toggles `open` on it.
  *
  * So this covers the wiring once, and what each result reads like is covered
- * against `VictorySummary` instead.
+ * against `AnalysisSummary` instead.
  */
-describe("PathToVictoryDialog", () => {
+describe("PlayerAnalysisDialog", () => {
   it("works out the route of the player picked from the search", async () => {
     const user = userEvent.setup();
     render(
-      <PathToVictoryDialog
+      <PlayerAnalysisDialog
         open
         onOpenChange={() => undefined}
         scores={scores}

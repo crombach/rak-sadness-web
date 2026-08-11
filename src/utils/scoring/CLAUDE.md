@@ -2,7 +2,7 @@
 
 The picks-to-scoreboard pipeline, one concern per file. `getPlayerScores` is the only
 entry point the app calls for a week's results; everything else is a step it
-sequences. `getPathsToVictory` is a second entry point, reading those results back.
+sequences. `getPlayerAnalysis` is a second entry point, reading those results back.
 
 - `parsePicksWorkbook`: xlsx buffer to rows, column keys, and per-game matchups.
   Async because it imports `xlsx-js-style` on demand, which is over half the bundle.
@@ -24,7 +24,7 @@ sequences. `getPathsToVictory` is a second entry point, reading those results ba
   so one row alone would drop a game that row's player skipped. Both halves of the
   question below read it
 - `applyKnockouts`: who can still win, and why not
-- `getPathsToVictory`: the other half of `applyKnockouts`, for a player still
+- `getPlayerAnalysis`: the other half of `applyKnockouts`, for a player still
   standing, once ten or fewer games are left. Walks every way the contested ones
   can fall, and reduces the winning ones to the games that must go right, the pool
   the rest come from, and the Monday night totals that settle a dead heat on

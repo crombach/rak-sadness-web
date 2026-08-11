@@ -1,20 +1,20 @@
 import { ReactNode, useState } from "react";
 import {
   MondayNightOutlook,
-  PathsToVictory,
+  PlayerAnalysis,
   RemainingPick,
   UncontrolledGame,
   VictoryRoute,
-} from "../../types/PathsToVictory";
+} from "../../types/PlayerAnalysis";
 import { PlayerScore, RakMadnessScores } from "../../types/RakMadnessScores";
 import remainingGames from "../../utils/scoring/remainingGames";
 import Button from "../button/Button";
-import "./VictorySummary.scss";
+import "./AnalysisSummary.scss";
 
 /** How many routes stand open, the rest being a click away. */
 const ROUTES_SHOWN_AT_FIRST = 4;
 
-type PathsResult = Extract<PathsToVictory, { kind: "paths" }>;
+type PathsResult = Extract<PlayerAnalysis, { kind: "paths" }>;
 
 /** The outlooks worth a sentence: a week won outright says so on its own line. */
 type DecidingOutlook = Exclude<MondayNightOutlook, { kind: "notNeeded" }>;
@@ -57,7 +57,7 @@ export function Standing({
       : `${leader.name} leads with ${plural(top, "point")}`;
   const behind = chosen != null ? top - chosen.score.total : null;
   return (
-    <p className="victory__standing">
+    <p className="analysis__standing">
       {!hasKickedOff(players)
         ? "No finished games"
         : behind == null
@@ -73,13 +73,13 @@ export function Standing({
 
 /** Whatever the answer turns out to be, it plays in under the same wrapper. */
 function Answer({ children }: { children: ReactNode }) {
-  return <div className="victory">{children}</div>;
+  return <div className="analysis">{children}</div>;
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="victory__section">
-      <h3 className="victory__section-title">{title}</h3>
+    <section className="analysis__section">
+      <h3 className="analysis__section-title">{title}</h3>
       {children}
     </section>
   );
@@ -94,12 +94,12 @@ function Picks({
 }) {
   return (
     <ul
-      className={className ? `victory__picks ${className}` : "victory__picks"}
+      className={className ? `analysis__picks ${className}` : "analysis__picks"}
     >
       {games.map((game) => (
-        <li key={game.label} className="victory__pick">
-          <span className="victory__pick-label">{game.label}</span>
-          <span className="victory__pick-team">{game.pick}</span>
+        <li key={game.label} className="analysis__pick">
+          <span className="analysis__pick-label">{game.label}</span>
+          <span className="analysis__pick-team">{game.pick}</span>
         </li>
       ))}
     </ul>
@@ -154,7 +154,7 @@ function Outright({ result }: { result: PathsResult }) {
         : null;
   if (line == null) return null;
   return (
-    <p className="victory__line">
+    <p className="analysis__line">
       {line}
       {/* Hands over to the sections under it, which ask for less. */}
       {hasGames(result) && " Otherwise:"}
@@ -166,7 +166,7 @@ function MondayNight({ outlook }: { outlook?: MondayNightOutlook }) {
   if (outlook == null || outlook.kind === "notNeeded") return null;
   return (
     <Section title="MNF points">
-      <p className="victory__line">{mondayNightSentence(outlook)}</p>
+      <p className="analysis__line">{mondayNightSentence(outlook)}</p>
     </Section>
   );
 }
@@ -175,10 +175,10 @@ function NeedsHelp({ games }: { games: Array<UncontrolledGame> }) {
   if (games.length === 0) return null;
   return (
     <Section title="Out of your hands">
-      <ul className="victory__help">
+      <ul className="analysis__help">
         {games.map((game) => (
-          <li key={game.label} className="victory__line">
-            <span className="victory__pick-label">{game.label}</span> is blank
+          <li key={game.label} className="analysis__line">
+            <span className="analysis__pick-label">{game.label}</span> is blank
             on your sheet, so {NAMES.format(game.needsToMiss)} has to miss.
           </li>
         ))}
@@ -204,15 +204,15 @@ function Routes({
   const shown = isExpanded ? routes : routes.slice(0, ROUTES_SHOWN_AT_FIRST);
   return (
     <Section title={title}>
-      <ol className="victory__routes">
+      <ol className="analysis__routes">
         {shown.map((route) => (
           <li
             key={route.games.map((game) => game.label).join()}
-            className="victory__route"
+            className="analysis__route"
           >
             <Picks games={route.games} />
             {showMondayNight && route.mondayNight.kind === "range" && (
-              <p className="victory__line">
+              <p className="analysis__line">
                 {mondayNightSentence(route.mondayNight)}
               </p>
             )}
@@ -221,7 +221,7 @@ function Routes({
       </ol>
       {folded > 0 && (
         <Button
-          className="victory__more"
+          className="analysis__more"
           variant="soft"
           size="sm"
           ariaExpanded={isExpanded}
@@ -237,11 +237,11 @@ function Routes({
 /** A line absent is one the answer did not call for, so the caller can pass it. */
 function Message({ lines }: { lines: Array<string | undefined> }) {
   return (
-    <div className="victory__message">
+    <div className="analysis__message">
       {lines
         .filter((line) => line != null)
         .map((line) => (
-          <p key={line} className="victory__line">
+          <p key={line} className="analysis__line">
             {line}
           </p>
         ))}
@@ -250,10 +250,10 @@ function Message({ lines }: { lines: Array<string | undefined> }) {
 }
 
 /** What the player has to do, or why there is nothing left to do about it. */
-export default function VictorySummary({
+export default function AnalysisSummary({
   result,
 }: {
-  result?: PathsToVictory;
+  result?: PlayerAnalysis;
 }) {
   // Nothing under the search until a name is picked, which the placeholder in it
   // already asks for.
@@ -294,7 +294,7 @@ export default function VictorySummary({
           ]}
         />
         {/* Why there is nothing below it, in the place the paths count theirs. */}
-        <p className="victory__note">
+        <p className="analysis__note">
           Detailed paths are worked out once ten games are left.
         </p>
       </Answer>
@@ -307,7 +307,7 @@ export default function VictorySummary({
 
       {result.mustWin.length > 0 && (
         <Section title="Must win">
-          <Picks className="victory__must-win" games={result.mustWin} />
+          <Picks className="analysis__must-win" games={result.mustWin} />
         </Section>
       )}
 
@@ -330,7 +330,7 @@ export default function VictorySummary({
       {/* A picked player always reads a sentence. This is the one left where the
           games ask nothing and the line above said nothing either. */}
       {!hasGames(result) && result.mondayNight?.kind !== "notNeeded" && (
-        <p className="victory__line">
+        <p className="analysis__line">
           No clean path to victory. The MNF points tiebreaker decides it.
         </p>
       )}
@@ -340,7 +340,7 @@ export default function VictorySummary({
 
       {/* Worked out, then left off, so the count is what the reader is missing. */}
       {result.hiddenRouteCount > 0 && (
-        <p className="victory__note">
+        <p className="analysis__note">
           {plural(result.hiddenRouteCount, "other path")} found but not shown.
         </p>
       )}

@@ -6,7 +6,7 @@ const props = {
   view: "Scoreboard" as const,
   onViewChange: () => undefined,
   onRefresh: () => undefined,
-  onShowPaths: () => undefined,
+  onShowAnalysis: () => undefined,
   isRefreshing: false,
 };
 
@@ -28,7 +28,7 @@ describe("ScoresNavbar", () => {
 
     expect(screen.getByRole("button", { name: "Refresh" })).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Path to Victory" }),
+      screen.getByRole("button", { name: "Player Analysis" }),
     ).toBeInTheDocument();
     expect(liveWrapper()).not.toHaveClass("--collapsed");
   });
@@ -67,7 +67,7 @@ describe("ScoresNavbar", () => {
 
     expect(liveWrapper()).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Path to Victory" }),
+      screen.queryByRole("button", { name: "Player Analysis" }),
     ).not.toBeInTheDocument();
   });
 });

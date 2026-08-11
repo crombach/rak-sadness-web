@@ -1,14 +1,14 @@
 import { Combobox } from "@base-ui-components/react/combobox";
 import { Dialog } from "@base-ui-components/react/dialog";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { PathsToVictory } from "../../types/PathsToVictory";
+import { PlayerAnalysis } from "../../types/PlayerAnalysis";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import getClasses from "../../utils/getClasses";
-import getPathsToVictory from "../../utils/scoring/getPathsToVictory";
+import getPlayerAnalysis from "../../utils/scoring/getPlayerAnalysis";
 import Button from "../button/Button";
 import { CloseRoundedIcon, SkullIcon, UnfoldMoreIcon } from "../icon/Icon";
-import VictorySummary, { Standing } from "./VictorySummary";
-import "./PathToVictoryDialog.scss";
+import AnalysisSummary, { Standing } from "./AnalysisSummary";
+import "./PlayerAnalysisDialog.scss";
 
 export type PlayerOption = { name: string; isKnockedOut: boolean };
 
@@ -45,7 +45,7 @@ export function playersMatching(
  * are the one Base UI dialog, told apart in the stylesheet, because that is where
  * the rest of the app draws the same line.
  */
-export default function PathToVictoryDialog({
+export default function PlayerAnalysisDialog({
   open,
   onOpenChange,
   scores,
@@ -59,7 +59,7 @@ export default function PathToVictoryDialog({
   const [found, setFound] = useState<{
     scores: RakMadnessScores;
     name: string;
-    paths?: PathsToVictory;
+    paths?: PlayerAnalysis;
   }>();
 
   // Held still between renders, since the combobox reads the chosen player back
@@ -77,7 +77,7 @@ export default function PathToVictoryDialog({
         setFound({
           scores,
           name: player.name,
-          paths: getPathsToVictory(scores, player.name),
+          paths: getPlayerAnalysis(scores, player.name),
         }),
       );
     });
@@ -107,11 +107,11 @@ export default function PathToVictoryDialog({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Backdrop className="path-to-victory__backdrop" />
-        <Dialog.Popup className="path-to-victory__popup">
-          <header className="path-to-victory__header">
-            <Dialog.Title className="path-to-victory__title">
-              Path to Victory
+        <Dialog.Backdrop className="player-analysis__backdrop" />
+        <Dialog.Popup className="player-analysis__popup">
+          <header className="player-analysis__header">
+            <Dialog.Title className="player-analysis__title">
+              Player Analysis
             </Dialog.Title>
             <Button
               ariaLabel="Close"
@@ -141,23 +141,23 @@ export default function PathToVictoryDialog({
             // highlighted saves an arrow key before Enter.
             autoHighlight
           >
-            <div className="path-to-victory__search">
+            <div className="player-analysis__search">
               <Combobox.Input
                 placeholder="Search players..."
                 aria-label="Player"
-                className="path-to-victory__input"
+                className="player-analysis__input"
               />
-              <Combobox.Icon className="path-to-victory__input-icon">
+              <Combobox.Icon className="player-analysis__input-icon">
                 <UnfoldMoreIcon />
               </Combobox.Icon>
             </div>
             <Combobox.Portal>
               <Combobox.Positioner
-                className="path-to-victory__positioner"
+                className="player-analysis__positioner"
                 sideOffset={4}
               >
-                <Combobox.Popup className="path-to-victory__list">
-                  <Combobox.Empty className="path-to-victory__empty">
+                <Combobox.Popup className="player-analysis__list">
+                  <Combobox.Empty className="player-analysis__empty">
                     No matching players
                   </Combobox.Empty>
                   <Combobox.List>
@@ -166,7 +166,7 @@ export default function PathToVictoryDialog({
                         key={option.name}
                         value={option}
                         disabled={option.isKnockedOut}
-                        className={`path-to-victory__option ${getClasses({
+                        className={`player-analysis__option ${getClasses({
                           "--knocked-out": option.isKnockedOut,
                         })}`}
                       >
@@ -180,21 +180,21 @@ export default function PathToVictoryDialog({
             </Combobox.Portal>
           </Combobox.Root>
 
-          <div className="path-to-victory__body" ref={body}>
-            <div className="path-to-victory__content" ref={measure}>
+          <div className="player-analysis__body" ref={body}>
+            <div className="player-analysis__content" ref={measure}>
               <Standing scores={scores} player={player?.name} />
               {isSearching ? (
                 <div
-                  className="path-to-victory__searching"
+                  className="player-analysis__searching"
                   role="status"
                   aria-label="Working out the paths"
                 >
-                  <span className="path-to-victory__spinner" />
+                  <span className="player-analysis__spinner" />
                 </div>
               ) : (
                 // Keyed on the player, so the answer to a new one plays in rather
                 // than replacing the last one in place.
-                <VictorySummary key={player?.name} result={result} />
+                <AnalysisSummary key={player?.name} result={result} />
               )}
             </div>
           </div>

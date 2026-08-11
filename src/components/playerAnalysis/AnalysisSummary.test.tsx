@@ -1,8 +1,8 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { PathsToVictory, VictoryRoute } from "../../types/PathsToVictory";
+import { PlayerAnalysis, VictoryRoute } from "../../types/PlayerAnalysis";
 import { PlayerScore, RakMadnessScores } from "../../types/RakMadnessScores";
-import VictorySummary, { Standing } from "./VictorySummary";
+import AnalysisSummary, { Standing } from "./AnalysisSummary";
 
 /** Routes of one game each, all different, so only their number matters. */
 function routesOf(count: number): Array<VictoryRoute> {
@@ -107,20 +107,20 @@ describe("Standing", () => {
   });
 });
 
-describe("VictorySummary", () => {
+describe("AnalysisSummary", () => {
   it("says nothing until a player is picked", () => {
-    const { container } = render(<VictorySummary />);
+    const { container } = render(<AnalysisSummary />);
 
     expect(container).toBeEmptyDOMElement();
   });
 
   it("gives an eliminated player the reason they carry", () => {
-    const result: PathsToVictory = {
+    const result: PlayerAnalysis = {
       kind: "eliminated",
       player: "Bob",
       explanation: "Knocked out on Total Score by Alice.",
     };
-    render(<VictorySummary result={result} />);
+    render(<AnalysisSummary result={result} />);
 
     expect(screen.getByText("Bob cannot win this week.")).toBeInTheDocument();
     expect(
@@ -129,7 +129,7 @@ describe("VictorySummary", () => {
   });
 
   it("says a clinched week is already won", () => {
-    render(<VictorySummary result={{ kind: "clinched", player: "Alice" }} />);
+    render(<AnalysisSummary result={{ kind: "clinched", player: "Alice" }} />);
 
     expect(
       screen.getByText("Alice has already won the week."),
@@ -137,14 +137,14 @@ describe("VictorySummary", () => {
   });
 
   it("gives a floor rather than paths on a week too big to search", () => {
-    const result: PathsToVictory = {
+    const result: PlayerAnalysis = {
       kind: "headline",
       player: "Alice",
       remainingPickCount: 13,
       minimumWins: 6,
       needsMondayNight: true,
     };
-    render(<VictorySummary result={result} />);
+    render(<AnalysisSummary result={result} />);
 
     expect(
       screen.getByText("Alice needs at least 6 of their 13 remaining picks."),
@@ -153,11 +153,11 @@ describe("VictorySummary", () => {
     const why = screen.getByText(
       "Detailed paths are worked out once ten games are left.",
     );
-    expect(why).toBe(document.querySelector(".victory")?.lastElementChild);
+    expect(why).toBe(document.querySelector(".analysis")?.lastElementChild);
   });
 
   it("lists the must-win games and the pool behind them", () => {
-    const result: PathsToVictory = {
+    const result: PlayerAnalysis = {
       ...base,
       mustWin: [{ label: "C4", pick: "UGA -7" }],
       pool: {
@@ -170,7 +170,7 @@ describe("VictorySummary", () => {
       },
       mondayNight: { kind: "notNeeded" },
     };
-    render(<VictorySummary result={result} />);
+    render(<AnalysisSummary result={result} />);
 
     expect(under("Must win")).toEqual(["C4UGA -7"]);
     expect(under("Then any 2 of these")).toEqual([
@@ -181,11 +181,11 @@ describe("VictorySummary", () => {
   });
 
   it("says something for a player the games can no longer separate", () => {
-    const result: PathsToVictory = {
+    const result: PlayerAnalysis = {
       ...base,
       mondayNight: { kind: "range", max: 45, contenders: ["Rak"] },
     };
-    render(<VictorySummary result={result} />);
+    render(<AnalysisSummary result={result} />);
 
     expect(
       screen.getByText(
@@ -195,7 +195,7 @@ describe("VictorySummary", () => {
   });
 
   it("writes a bounded Monday night range as a sentence", () => {
-    const result: PathsToVictory = {
+    const result: PlayerAnalysis = {
       ...base,
       mustWin: [{ label: "P1", pick: "KC -3" }],
       mondayNight: {
@@ -205,7 +205,7 @@ describe("VictorySummary", () => {
         contenders: ["Rak", "Bill"],
       },
     };
-    render(<VictorySummary result={result} />);
+    render(<AnalysisSummary result={result} />);
 
     expect(
       screen.getByText("38 ≤ MNF points ≤ 44 to beat Rak and Bill."),
@@ -213,12 +213,12 @@ describe("VictorySummary", () => {
   });
 
   it("writes an open-ended range from the end it is bounded on", () => {
-    const result: PathsToVictory = {
+    const result: PlayerAnalysis = {
       ...base,
       mustWin: [{ label: "P1", pick: "KC -3" }],
       mondayNight: { kind: "range", max: 45, contenders: ["Rak"] },
     };
-    render(<VictorySummary result={result} />);
+    render(<AnalysisSummary result={result} />);
 
     expect(
       screen.getByText("MNF points ≤ 45 to beat Rak."),
@@ -226,13 +226,13 @@ describe("VictorySummary", () => {
   });
 
   it("says what it takes to win without the tiebreaker at all", () => {
-    const result: PathsToVictory = {
+    const result: PlayerAnalysis = {
       ...base,
       pool: { choose: 2, games: [{ label: "P1", pick: "KC -3" }] },
       outrightAt: 3,
       mondayNight: { kind: "range", max: 45, contenders: ["Rak"] },
     };
-    render(<VictorySummary result={result} />);
+    render(<AnalysisSummary result={result} />);
 
     expect(
       screen.getByText("Winning 3 games takes it outright. Otherwise:"),
@@ -240,12 +240,12 @@ describe("VictorySummary", () => {
   });
 
   it("leads with taking the week outright, ahead of the games", () => {
-    const result: PathsToVictory = {
+    const result: PlayerAnalysis = {
       ...base,
       mustWin: [{ label: "P1", pick: "KC -3" }],
       mondayNight: { kind: "notNeeded" },
     };
-    render(<VictorySummary result={result} />);
+    render(<AnalysisSummary result={result} />);
 
     const outright = screen.getByText(/Takes the week outright/);
     const mustWin = screen.getByRole("heading", { name: "Must win" });
@@ -256,25 +256,25 @@ describe("VictorySummary", () => {
   });
 
   it("leaves the outright line off where it asks no more than the routes do", () => {
-    const result: PathsToVictory = {
+    const result: PlayerAnalysis = {
       ...base,
       mustWin: [{ label: "P1", pick: "KC -3" }],
       outrightAt: 1,
       mondayNight: { kind: "notNeeded" },
     };
-    render(<VictorySummary result={result} />);
+    render(<AnalysisSummary result={result} />);
 
     expect(screen.queryByText(/takes it outright/)).not.toBeInTheDocument();
   });
 
   it("names the team that has to miss in a game the player left blank", () => {
-    const result: PathsToVictory = {
+    const result: PlayerAnalysis = {
       ...base,
       mustWin: [{ label: "P1", pick: "KC -3" }],
       needsHelp: [{ label: "P7", needsToMiss: ["DEN"] }],
       mondayNight: { kind: "notNeeded" },
     };
-    render(<VictorySummary result={result} />);
+    render(<AnalysisSummary result={result} />);
 
     expect(
       screen.getByText(/is blank on your sheet, so DEN has to miss/),
@@ -282,7 +282,7 @@ describe("VictorySummary", () => {
   });
 
   it("lists routes of different shapes with the ones that need a total marked", () => {
-    const result: PathsToVictory = {
+    const result: PlayerAnalysis = {
       ...base,
       routes: [
         {
@@ -299,22 +299,22 @@ describe("VictorySummary", () => {
       ],
       hiddenRouteCount: 2,
     };
-    render(<VictorySummary result={result} />);
+    render(<AnalysisSummary result={result} />);
 
     // Read off the routes themselves, since each one holds a list of picks of
     // its own and reading every list item at once would flatten the two apart.
-    const routes = [...document.querySelectorAll(".victory__route")];
+    const routes = [...document.querySelectorAll(".analysis__route")];
     expect(routes.map((route) => route.textContent)).toEqual([
       "P1KC -3",
       "P2BUF -1P3SF -6MNF points ≤ 32 to beat Rak.",
     ]);
     const note = screen.getByText("2 other paths found but not shown.");
-    expect(note).toBe(document.querySelector(".victory")?.lastElementChild);
+    expect(note).toBe(document.querySelector(".analysis")?.lastElementChild);
   });
 
   it("states a total every route shares once, not on each of them", () => {
     const shared = { kind: "range" as const, max: 32, contenders: ["Rak"] };
-    const result: PathsToVictory = {
+    const result: PlayerAnalysis = {
       ...base,
       routes: [
         { games: [{ label: "P1", pick: "KC -3" }], mondayNight: shared },
@@ -322,9 +322,9 @@ describe("VictorySummary", () => {
       ],
       mondayNight: shared,
     };
-    render(<VictorySummary result={result} />);
+    render(<AnalysisSummary result={result} />);
 
-    const routes = [...document.querySelectorAll(".victory__route")];
+    const routes = [...document.querySelectorAll(".analysis__route")];
     expect(routes.map((route) => route.textContent)).toEqual([
       "P1KC -3",
       "P2BUF -1",
@@ -335,29 +335,29 @@ describe("VictorySummary", () => {
   });
 
   it("holds four routes open and folds the rest behind a button", () => {
-    const result: PathsToVictory = { ...base, routes: routesOf(8) };
-    render(<VictorySummary result={result} />);
+    const result: PlayerAnalysis = { ...base, routes: routesOf(8) };
+    render(<AnalysisSummary result={result} />);
 
-    expect(document.querySelectorAll(".victory__route")).toHaveLength(4);
+    expect(document.querySelectorAll(".analysis__route")).toHaveLength(4);
     expect(
       screen.getByRole("button", { name: "Show 4 more paths" }),
     ).toBeInTheDocument();
   });
 
   it("shows the rest once the button is clicked", async () => {
-    const result: PathsToVictory = { ...base, routes: routesOf(8) };
-    render(<VictorySummary result={result} />);
+    const result: PlayerAnalysis = { ...base, routes: routesOf(8) };
+    render(<AnalysisSummary result={result} />);
     await userEvent.click(screen.getByRole("button"));
 
-    expect(document.querySelectorAll(".victory__route")).toHaveLength(8);
+    expect(document.querySelectorAll(".analysis__route")).toHaveLength(8);
     expect(
       screen.getByRole("button", { name: "Show fewer" }),
     ).toBeInTheDocument();
   });
 
   it("leaves the button off where every route is already open", () => {
-    const result: PathsToVictory = { ...base, routes: routesOf(4) };
-    render(<VictorySummary result={result} />);
+    const result: PlayerAnalysis = { ...base, routes: routesOf(4) };
+    render(<AnalysisSummary result={result} />);
 
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });

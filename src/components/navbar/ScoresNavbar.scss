@@ -45,14 +45,14 @@
 
 // Same idea, its own rule because the one above would repaint it in the navbar's
 // own blue and lose the accent that tells it apart from the buttons beside it.
-.button.--solid.home__scores-header-paths:disabled {
+.button.--solid.home__scores-header-analysis:disabled {
   background-color: var(--rak-gold-500);
   color: var(--rak-primary-800);
 }
 
 // The divider carries the space on its own side, so this is the only gap left to
 // set between the two buttons past it.
-.home__scores-header-paths {
+.home__scores-header-analysis {
   margin-inline-start: 6px;
 }
 

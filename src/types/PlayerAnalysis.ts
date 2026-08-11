@@ -47,7 +47,7 @@ export type VictoryRoute = {
  * `applyKnockouts` leaves a genuine tie standing and calls both players the winner,
  * and this follows it.
  */
-export type PathsToVictory =
+export type PlayerAnalysis =
   /** `explanation` is the reason `applyKnockouts` already wrote. */
   | { kind: "eliminated"; player: string; explanation?: string }
   /** No result left can take the week off them. */

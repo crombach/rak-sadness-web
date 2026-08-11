@@ -23,7 +23,7 @@ export default function ScoresNavbar({
   view,
   onViewChange,
   onRefresh,
-  onShowPaths,
+  onShowAnalysis,
   isRefreshing,
   disabled = false,
   isWeekLive,
@@ -31,7 +31,7 @@ export default function ScoresNavbar({
   view: ScoresView;
   onViewChange: (view: ScoresView) => void;
   onRefresh: () => void;
-  onShowPaths: () => void;
+  onShowAnalysis: () => void;
   isRefreshing: boolean;
   /** Set while a week is still loading, so the navbar keeps its shape. */
   disabled?: boolean;
@@ -103,11 +103,11 @@ export default function ScoresNavbar({
               <RefreshIcon />
             </Button>
             <Button
-              ariaLabel="Path to Victory"
+              ariaLabel="Player Analysis"
               color="gold"
               disabled={disabled}
-              onClick={onShowPaths}
-              className="home__scores-header-button home__scores-header-paths"
+              onClick={onShowAnalysis}
+              className="home__scores-header-button home__scores-header-analysis"
             >
               <EmojiEventsIcon />
             </Button>

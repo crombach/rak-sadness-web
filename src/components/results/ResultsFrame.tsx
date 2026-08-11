@@ -6,7 +6,7 @@ import getClasses from "../../utils/getClasses";
 import LogoButton from "../navbar/LogoButton/LogoButton";
 import ScoresNavbar, { ScoresView } from "../navbar/ScoresNavbar";
 import PageLayout from "../PageLayout";
-import PathToVictoryDialog from "../pathToVictory/PathToVictoryDialog";
+import PlayerAnalysisDialog from "../playerAnalysis/PlayerAnalysisDialog";
 import SkeletonTable from "../table/SkeletonTable";
 import "./ResultsFrame.scss";
 
@@ -43,7 +43,7 @@ export default function ResultsFrame({
   // to victory left, so the refresh and path buttons and the divider beside them
   // go rather than sit there doing nothing.
   const isWeekDecided = useIsWeekDecided();
-  const [isPathsOpen, setPathsOpen] = useState(false);
+  const [isAnalysisOpen, setAnalysisOpen] = useState(false);
 
   return (
     <PageLayout
@@ -62,7 +62,7 @@ export default function ResultsFrame({
           isWeekLive={!isWeekDecided}
           onViewChange={onViewChange}
           onRefresh={onRefresh}
-          onShowPaths={() => setPathsOpen(true)}
+          onShowAnalysis={() => setAnalysisOpen(true)}
           isRefreshing={isRefreshing}
         />
       }
@@ -70,9 +70,9 @@ export default function ResultsFrame({
       <div className={`home__scores ${getClasses({ "--loading": !isReady })}`}>
         {isReady ? children : <SkeletonTable view={view} />}
       </div>
-      <PathToVictoryDialog
-        open={isPathsOpen}
-        onOpenChange={setPathsOpen}
+      <PlayerAnalysisDialog
+        open={isAnalysisOpen}
+        onOpenChange={setAnalysisOpen}
         scores={scores}
       />
     </PageLayout>

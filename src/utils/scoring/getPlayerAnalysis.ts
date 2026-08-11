@@ -1,10 +1,10 @@
 import {
   MondayNightOutlook,
-  PathsToVictory,
+  PlayerAnalysis,
   RemainingPick,
   UncontrolledGame,
   VictoryRoute,
-} from "../../types/PathsToVictory";
+} from "../../types/PlayerAnalysis";
 import { PlayerScore, RakMadnessScores } from "../../types/RakMadnessScores";
 import { comparePlayerScoresOnMerit } from "./comparePlayerScores";
 import remainingGames, {
@@ -297,7 +297,7 @@ function picksIn(
 }
 
 /** Carries the reason `applyKnockouts` already wrote, rather than writing another. */
-function eliminated(player: PlayerScore): PathsToVictory {
+function eliminated(player: PlayerScore): PlayerAnalysis {
   return {
     kind: "eliminated",
     player: player.name,
@@ -342,7 +342,7 @@ function headline(
   playerIndex: number,
   rivals: Array<{ player: PlayerScore; index: number }>,
   games: Array<RemainingGame>,
-): PathsToVictory {
+): PlayerAnalysis {
   const counts = rivals.map((rival) => {
     const gap = rival.player.score.total - player.score.total;
     const at = (clear: boolean) =>
@@ -351,7 +351,7 @@ function headline(
   });
 
   // `toLevel` is only absent where `applyKnockouts` has already knocked the player
-  // out on total score, which `getPathsToVictory` answers before reaching here.
+  // out on total score, which `getPlayerAnalysis` answers before reaching here.
   const minimumWins = Math.max(
     0,
     ...counts.map((count) => count.toLevel).filter((count) => count != null),
@@ -439,7 +439,7 @@ function uncontrolledGames(
 }
 
 type RouteShape = Pick<
-  Extract<PathsToVictory, { kind: "paths" }>,
+  Extract<PlayerAnalysis, { kind: "paths" }>,
   "mustWin" | "pool" | "routes" | "hiddenRouteCount" | "mondayNight"
 >;
 
@@ -508,10 +508,10 @@ function reduceRoutes(
  * Undefined where the sheet holds nobody by that name, which is the only way the
  * question has no answer at all.
  */
-export default function getPathsToVictory(
+export default function getPlayerAnalysis(
   scores: RakMadnessScores,
   playerName: string,
-): PathsToVictory | undefined {
+): PlayerAnalysis | undefined {
   const players = scores.scores;
   const playerIndex = players.findIndex((it) => it.name === playerName);
   if (playerIndex < 0) return undefined;

@@ -4,7 +4,7 @@
 // Base UI ships the dialog and the combobox unstyled, so these rules carry the
 // whole look of both. State comes off the data attributes they set, the same way
 // the select on the home page reads `[data-highlighted]`.
-.path-to-victory__backdrop {
+.player-analysis__backdrop {
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -17,7 +17,7 @@
   }
 }
 
-.path-to-victory__popup {
+.player-analysis__popup {
   position: fixed;
   z-index: 1001;
   display: flex;
@@ -49,21 +49,21 @@
   }
 }
 
-.path-to-victory__header {
+.player-analysis__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
 
-.path-to-victory__title {
+.player-analysis__title {
   margin: 0;
   color: var(--rak-primary-700);
   font-size: 1.25rem;
   font-weight: 700;
 }
 
-.path-to-victory__search {
+.player-analysis__search {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -79,7 +79,7 @@
   }
 }
 
-.path-to-victory__input {
+.player-analysis__input {
   flex: 1;
   min-width: 0;
   padding: 3px 0;
@@ -95,25 +95,25 @@
   }
 }
 
-.path-to-victory__input-icon {
+.player-analysis__input-icon {
   display: flex;
   align-items: center;
   color: var(--rak-text-tertiary);
 }
 
-.path-to-victory__positioner {
+.player-analysis__positioner {
   // Above the dialog it opens inside of, which the backdrop already sits under.
   z-index: 1002;
   max-height: var(--available-height);
 }
 
-.path-to-victory__list {
+.player-analysis__list {
   @include listbox-popup;
 
   max-height: min(240px, var(--available-height));
 }
 
-.path-to-victory__option {
+.player-analysis__option {
   @include listbox-item;
 
   gap: 8px;
@@ -135,7 +135,7 @@
   }
 }
 
-.path-to-victory__empty {
+.player-analysis__empty {
   padding: 8px 12px;
   color: var(--rak-text-tertiary);
   font-size: 0.875rem;
@@ -145,7 +145,7 @@
 // and shrinks with the answer. Shrinking is what makes it scroll, once the popup
 // has no more room to give. Measured without the padding and the rule, which
 // `content-box` keeps outside the height set on it.
-.path-to-victory__body {
+.player-analysis__body {
   box-sizing: content-box;
   flex: 0 1 auto;
   min-height: 0;
@@ -161,28 +161,28 @@
 
 // The standing reads as a title over what follows, so it sits the same distance
 // from it as a section title sits from its own contents.
-.path-to-victory__content {
+.player-analysis__content {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.path-to-victory__searching {
+.player-analysis__searching {
   display: flex;
   justify-content: center;
   padding: 24px 0;
 }
 
-.path-to-victory__spinner {
+.player-analysis__spinner {
   width: 24px;
   height: 24px;
   border: 3px solid var(--rak-neutral-200);
   border-top-color: var(--rak-primary-500);
   border-radius: 50%;
-  animation: path-to-victory-spin 700ms linear infinite;
+  animation: player-analysis-spin 700ms linear infinite;
 }
 
-@keyframes path-to-victory-spin {
+@keyframes player-analysis-spin {
   to {
     transform: rotate(1turn);
   }
@@ -192,7 +192,7 @@
   // A sheet on the bottom edge, where a centered window would leave no margin
   // either side of it. The same dialog, told apart here rather than in the
   // component, because every other screen split in the app is drawn this way.
-  .path-to-victory__popup {
+  .player-analysis__popup {
     top: auto;
     left: 0;
     right: 0;
