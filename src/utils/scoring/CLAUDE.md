@@ -24,7 +24,9 @@ sequences. `getPathsToVictory` is a second entry point, reading those results ba
   "error" rather than "incomplete" and one row alone would drop a game that row's
   player skipped
 - `getPathsToVictory`: the other half of `applyKnockouts`, for a player still
-  standing. Walks every way the open games can fall, up to twelve of them, and
+  standing. Walks every way the open games can fall, up to ten of them, and
   reduces the winning ones to the games that must go right, the pool the rest come
-  from, and the Monday night totals that settle a dead heat on points. Above twelve
-  it gives a floor from a closed form instead, since the search doubles per game
+  from, and the Monday night totals that settle a dead heat on points. Where they
+  do not reduce to a pool it lists the ten routes asking least of the player and
+  counts the rest. Above ten open games it gives a floor from a closed form
+  instead, since the search doubles per game

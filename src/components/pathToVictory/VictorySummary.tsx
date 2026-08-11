@@ -1,11 +1,16 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import {
   MondayNightOutlook,
   PathsToVictory,
   RemainingPick,
   UncontrolledGame,
+  VictoryRoute,
 } from "../../types/PathsToVictory";
+import Button from "../button/Button";
 import "./VictorySummary.scss";
+
+/** How many routes stand open, the rest being a click away. */
+const ROUTES_SHOWN_AT_FIRST = 5;
 
 function list(names: Array<string>): string {
   if (names.length < 3) return names.join(" and ");
@@ -96,6 +101,56 @@ function NeedsHelp({ games }: { games: Array<UncontrolledGame> }) {
   );
 }
 
+/** The alternatives, fewest games first, with the long tail folded away. */
+function Routes({
+  title,
+  routes,
+  hiddenRouteCount,
+}: {
+  title: string;
+  routes: Array<VictoryRoute>;
+  hiddenRouteCount: number;
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const folded = routes.length - ROUTES_SHOWN_AT_FIRST;
+  const shown = isExpanded ? routes : routes.slice(0, ROUTES_SHOWN_AT_FIRST);
+  return (
+    <Section title={title}>
+      <ol className="victory__routes">
+        {shown.map((route) => (
+          <li
+            key={route.games.map((game) => game.label).join()}
+            className="victory__route"
+          >
+            <Picks games={route.games} />
+            {route.mondayNight.kind === "range" && (
+              <p className="victory__line">
+                {mondayNightSentence(route.mondayNight)}
+              </p>
+            )}
+          </li>
+        ))}
+      </ol>
+      {folded > 0 && (
+        <Button
+          className="victory__more"
+          color="gold"
+          variant="soft"
+          size="sm"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          {isExpanded ? "Show fewer" : `Show ${plural(folded, "more route")}`}
+        </Button>
+      )}
+      {hiddenRouteCount > 0 && (
+        <p className="victory__line">
+          {plural(hiddenRouteCount, "other route")} not shown.
+        </p>
+      )}
+    </Section>
+  );
+}
+
 function Message({ heading, body }: { heading: string; body?: string }) {
   return (
     <div className="victory__message">
@@ -141,17 +196,17 @@ export default function VictorySummary({
   if (result.kind === "headline") {
     return (
       <div className="victory">
-        <p className="victory__standing">
-          {plural(result.remainingGameCount, "game")} still to play
-        </p>
         <Message
           heading={`${result.player} needs at least ${result.minimumWins} of their ${result.remainingPickCount} remaining picks.`}
           body={
             result.needsMondayNight
-              ? "That is only enough to draw level, so the Monday night tiebreaker would still decide it. The routes are worked out once twelve games are left."
-              : "The routes are worked out once twelve games are left."
+              ? "That is only enough to draw level, so the Monday night tiebreaker would still decide it. The routes are worked out once ten games are left."
+              : "The routes are worked out once ten games are left."
           }
         />
+        <p className="victory__standing">
+          {plural(result.remainingGameCount, "game")} still to play
+        </p>
       </div>
     );
   }
@@ -164,14 +219,6 @@ export default function VictorySummary({
 
   return (
     <div className="victory">
-      <p className="victory__standing">
-        {result.pointsBehind > 0
-          ? `${plural(result.pointsBehind, "point")} behind ${result.leader}`
-          : "Level at the top"}
-        {" · "}
-        {plural(result.remainingGameCount, "game")} still to play
-      </p>
-
       {result.mustWin.length > 0 && (
         <Section title="Must win">
           <Picks games={result.mustWin} />
@@ -187,28 +234,12 @@ export default function VictorySummary({
       )}
 
       {result.routes && (
-        <Section title={result.mustWin.length > 0 ? "Then one of" : "One of"}>
-          <ol className="victory__routes">
-            {result.routes.map((route) => (
-              <li
-                key={route.games.map((game) => game.label).join()}
-                className="victory__route"
-              >
-                <Picks games={route.games} />
-                {route.mondayNight.kind === "range" && (
-                  <p className="victory__line">
-                    {mondayNightSentence(route.mondayNight)}
-                  </p>
-                )}
-              </li>
-            ))}
-          </ol>
-          {result.hiddenRouteCount > 0 && (
-            <p className="victory__line">
-              {plural(result.hiddenRouteCount, "other route")} not shown.
-            </p>
-          )}
-        </Section>
+        <Routes
+          key={result.player}
+          title={result.mustWin.length > 0 ? "Then one of" : "One of"}
+          routes={result.routes}
+          hiddenRouteCount={result.hiddenRouteCount}
+        />
       )}
 
       {result.mustWin.length === 0 && !result.pool && !result.routes && (
@@ -223,6 +254,14 @@ export default function VictorySummary({
         outrightAt={result.outrightAt}
         minimumWins={minimumWins}
       />
+
+      <p className="victory__standing">
+        {result.pointsBehind > 0
+          ? `${plural(result.pointsBehind, "point")} behind ${result.leader}`
+          : "Level at the top"}
+        {" · "}
+        {plural(result.remainingGameCount, "game")} still to play
+      </p>
     </div>
   );
 }

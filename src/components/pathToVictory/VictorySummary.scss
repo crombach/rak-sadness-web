@@ -77,6 +77,10 @@
   background-color: var(--rak-level1);
 }
 
+.victory__more {
+  align-self: flex-start;
+}
+
 .victory__help {
   display: flex;
   flex-direction: column;

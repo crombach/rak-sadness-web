@@ -1,6 +1,15 @@
 import { render, screen, within } from "@testing-library/react";
-import { PathsToVictory } from "../../types/PathsToVictory";
+import userEvent from "@testing-library/user-event";
+import { PathsToVictory, VictoryRoute } from "../../types/PathsToVictory";
 import VictorySummary from "./VictorySummary";
+
+/** Routes of one game each, all different, so only their number matters. */
+function routesOf(count: number): Array<VictoryRoute> {
+  return Array.from({ length: count }, (_, index) => ({
+    games: [{ label: `P${index + 1}`, pick: `T${index + 1} -3` }],
+    mondayNight: { kind: "notNeeded" as const },
+  }));
+}
 
 /** The picks under a heading, as the chips read on screen. */
 function under(title: string): Array<string> {
@@ -201,5 +210,33 @@ describe("VictorySummary", () => {
       "P2BUF -1P3SF -6Needs a Monday night total of 32 or less to beat Rak.",
     ]);
     expect(screen.getByText("2 other routes not shown.")).toBeInTheDocument();
+  });
+
+  it("holds five routes open and folds the rest behind a button", () => {
+    const result: PathsToVictory = { ...base, routes: routesOf(8) };
+    render(<VictorySummary result={result} />);
+
+    expect(document.querySelectorAll(".victory__route")).toHaveLength(5);
+    expect(
+      screen.getByRole("button", { name: "Show 3 more routes" }),
+    ).toBeInTheDocument();
+  });
+
+  it("shows the rest once the button is clicked", async () => {
+    const result: PathsToVictory = { ...base, routes: routesOf(8) };
+    render(<VictorySummary result={result} />);
+    await userEvent.click(screen.getByRole("button"));
+
+    expect(document.querySelectorAll(".victory__route")).toHaveLength(8);
+    expect(
+      screen.getByRole("button", { name: "Show fewer" }),
+    ).toBeInTheDocument();
+  });
+
+  it("leaves the button off where every route is already open", () => {
+    const result: PathsToVictory = { ...base, routes: routesOf(5) };
+    render(<VictorySummary result={result} />);
+
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 });

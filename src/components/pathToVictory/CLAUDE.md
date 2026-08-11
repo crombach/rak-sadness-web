@@ -15,8 +15,11 @@ and `[data-highlighted]`, the same way the home page's select is styled.
 
 `VictorySummary`: the must-win games, the pool the rest come from, the games out of
 the player's hands, and the Monday night sentence, plus the eliminated, clinched,
-and too-many-games states. It renders `PathsToVictory` and works nothing out itself,
-which is why every case it can show is testable without a dialog around it.
+and too-many-games states. Must-win leads, and how the player stands closes, since
+the games to back are what the sheet is opened for. A list of routes stands five
+deep and unfolds on a click, keyed on the player so a new one starts folded again.
+It renders `PathsToVictory` and works nothing out itself, which is why every case it
+can show is testable without a dialog around it.
 
 One suite here mounts one dialog, on purpose. Base UI hangs its scroll lock, focus
 guards, and inert markers off the document while a dialog is open, and mounting a

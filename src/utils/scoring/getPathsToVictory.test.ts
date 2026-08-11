@@ -434,11 +434,11 @@ describe("getPathsToVictory, weeks too big to search", () => {
     );
   }
 
-  it("gives a floor rather than routes above twelve open games", () => {
-    // Thirteen games the two picked differently, Alice five points back. Each one
-    // she takes is one Bob does not, so nine of them draw her level and a tenth
+  it("gives a floor rather than routes above ten open games", () => {
+    // Eleven games the two picked differently, Alice five points back. Each one
+    // she takes is one Bob does not, so eight of them draw her level and a ninth
     // takes it outright.
-    const count = 13;
+    const count = 11;
     const scores = week([
       player({
         name: "Alice",
@@ -455,22 +455,22 @@ describe("getPathsToVictory, weeks too big to search", () => {
     expect(getPathsToVictory(scores, "Alice")).toEqual({
       kind: "headline",
       player: "Alice",
-      remainingGameCount: 13,
-      remainingPickCount: 13,
-      minimumWins: 9,
+      remainingGameCount: 11,
+      remainingPickCount: 11,
+      minimumWins: 8,
       needsMondayNight: true,
     });
   });
 
-  it("works the routes out at twelve", () => {
-    const count = 12;
+  it("works the routes out at ten", () => {
+    const count = 10;
     const scores = week([
       player({ name: "Alice", total: 0, pro: opposed(count, "A", "-3") }),
       player({ name: "Bob", total: 0, pro: opposed(count, "B", "+3") }),
     ]);
 
     const result = paths(getPathsToVictory(scores, "Alice"));
-    expect(result.pool?.choose).toBe(6);
-    expect(result.pool?.games).toHaveLength(12);
+    expect(result.pool?.choose).toBe(5);
+    expect(result.pool?.games).toHaveLength(10);
   });
 });

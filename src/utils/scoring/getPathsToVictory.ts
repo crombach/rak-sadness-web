@@ -18,10 +18,10 @@ import parsePick from "./parsePick";
  * one. A Thursday with a full slate left would run to millions of scenarios for an
  * answer too long to read anyway. Above this the caller gets a floor instead.
  */
-const MAX_SEARCHED_GAMES = 12;
+const MAX_SEARCHED_GAMES = 10;
 
-/** How many routes are listed before the rest are only counted. */
-const MAX_LISTED_ROUTES = 6;
+/** How many routes are carried before the rest are only counted. */
+const MAX_LISTED_ROUTES = 10;
 
 type LeagueKey = "college" | "pro";
 
@@ -611,6 +611,8 @@ export default function getPathsToVictory(
     };
   }
 
+  // Fewest games first, so the routes asking least of the player are the ones kept
+  // and the ones shown before the rest are unfolded.
   const routes: Array<VictoryRoute> = rests
     .map((rest) => ({
       games: picksIn(rest.mask, contested, playerIndex),
