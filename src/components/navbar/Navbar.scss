@@ -53,6 +53,9 @@
 // app name beside them keeps its one line.
 @include crowded-navbar {
   .navbar__content .button {
+    // !important because this ties on specificity with `.button.--sm` and
+    // `.button.--icon`, and which one wins would come down to the order the two
+    // stylesheets happen to be imported in.
     padding-inline: 12px !important;
   }
 }

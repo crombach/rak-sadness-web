@@ -63,12 +63,36 @@ describe("parsePick", () => {
     });
   });
 
+  it("keeps the space in an abbreviation of two words", () => {
+    expect(parsePick("OLE MISS -3")).toEqual({
+      teamAbbreviation: "OLE MISS",
+      spread: -3,
+    });
+    expect(parsePick("K ST")).toEqual({
+      teamAbbreviation: "K ST",
+      spread: 0,
+    });
+  });
+
+  it("drops a hyphen left over from a spread written without a space", () => {
+    expect(parsePick("BUF--7")).toEqual({
+      teamAbbreviation: "BUF",
+      spread: -7,
+    });
+  });
+
   it("names no team for a cell holding no team, rather than throwing", () => {
-    ["", " ", "+", "-", "-7"].forEach((cell) => {
-      expect(parsePick(cell)).toEqual({
-        teamAbbreviation: undefined,
-        spread: 0,
-      });
+    ["", " ", "+", "-", "7"].forEach((cell) => {
+      expect(parsePick(cell).teamAbbreviation).toBeUndefined();
+    });
+  });
+
+  it("reports a spread written with no team in front of it", () => {
+    // Harmless, because a pick naming no team is unscoreable either way, and the
+    // spread of an unscoreable pick is never added up.
+    expect(parsePick("-7")).toEqual({
+      teamAbbreviation: undefined,
+      spread: -7,
     });
   });
 });

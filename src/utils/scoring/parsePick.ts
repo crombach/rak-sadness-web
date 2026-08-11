@@ -1,27 +1,33 @@
+/** A spread at the end of the cell, sign optional, space after the sign allowed. */
+const trailingSpread = /([+-]?\s*\d+(?:\.\d+)?)\s*$/;
+
 /**
  * A cell's team abbreviation and its spread, if it carries one.
  *
- * The abbreviation may hold inner hyphens, which several college teams do (`M-OH`),
- * so the spread is anchored to the end of the cell rather than found by looking for
- * the first sign. It has to hold a letter somewhere, which is what tells an
- * abbreviation from a spread nobody put a team in front of.
+ * The spread is taken off the end and whatever is left is the abbreviation, rather
+ * than reading the abbreviation up to the first space or sign. Abbreviations hold
+ * both: `M-OH` has a hyphen and `OLE MISS` has a space, and looking for the first
+ * one would cut either in half.
  *
- * Both are read loosely, because these cells are typed by hand. A spread without a
- * sign is taken as written, and a space between the sign and the number is ignored.
+ * These cells are typed by hand, so a spread with no sign is taken as written, and a
+ * space after the sign is ignored. The abbreviation has to hold a letter, which is
+ * what tells one from a spread nobody put a team in front of.
  */
-const pickRegex =
-  /^\s*((?=[A-Za-z0-9&'.-]*[A-Za-z])[A-Za-z0-9&'.-]+?)\s*([+-]?\s*\d+(?:\.\d+)?)?\s*$/;
-
 export default function parsePick(pickString: string) {
-  const [, teamAbbreviation, spreadText] = pickRegex.exec(pickString) ?? [];
+  const cell = String(pickString ?? "").trim();
+  const spread = trailingSpread.exec(cell);
+  const abbreviation = (spread ? cell.slice(0, spread.index) : cell)
+    .trim()
+    // A cell written `BUF--7` leaves one behind, and no abbreviation ends in one.
+    .replace(/-$/, "")
+    .trim();
   return {
-    // A blank cell reaches here as the string "undefined", and a cell holding
-    // punctuation alone matches nothing. Neither names a team, and a matchup that
-    // took one for a team would never find its real game.
+    // A blank cell reaches here as the string "undefined". It names no team, and a
+    // matchup that took one for a team would never find its real game.
     teamAbbreviation:
-      teamAbbreviation != null && teamAbbreviation !== "undefined"
-        ? teamAbbreviation.toUpperCase()
+      /[A-Za-z]/.test(abbreviation) && abbreviation !== "undefined"
+        ? abbreviation.toUpperCase()
         : undefined,
-    spread: spreadText != null ? Number(spreadText.replace(/\s+/g, "")) : 0,
+    spread: spread != null ? Number(spread[1].replace(/\s+/g, "")) : 0,
   };
 }

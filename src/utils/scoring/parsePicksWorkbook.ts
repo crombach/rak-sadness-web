@@ -41,9 +41,17 @@ export default async function parsePicksWorkbook(
       header: 1,
     },
   );
-  const allKeys = headerRow
-    .map((cell) => (cell == null ? "" : String(cell)))
-    .filter((key) => key !== "" && rows.some((row) => key in row));
+  const timesSeen = new Map<string, number>();
+  const allKeys = headerRow.flatMap((cell) => {
+    const label = cell == null ? "" : String(cell);
+    if (label === "") return [];
+    // A repeated header is suffixed when the row objects are built, so the second
+    // `C1` column is reached as `C1_1`. Counting the repeats rebuilds that name.
+    const seen = timesSeen.get(label) ?? 0;
+    timesSeen.set(label, seen + 1);
+    const key = seen === 0 ? label : `${label}_${seen}`;
+    return rows.some((row) => key in row) ? [key] : [];
+  });
   const collegeKeys = allKeys.filter((key) => key.startsWith("C"));
   const proKeys = allKeys.filter(
     (key) => key.startsWith("P") && key !== TIEBREAKER_PICK_KEY,
