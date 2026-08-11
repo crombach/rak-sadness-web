@@ -19,6 +19,8 @@ type Calendar = {
 
 type LeagueMetadata = {
   slug: string;
+  /** The year the season started in, whatever calendar year its games fall in. */
+  season: { year: number };
   calendar: Calendar[];
 };
 
@@ -28,13 +30,21 @@ type Scoreboard = {
 
 /**
  * Fetches league information from the ESPN API.
+ *
+ * `season` is the year a season started in, which is what ESPN's `dates` means
+ * here: `dates=2025` covers the games played from September 2025 into January
+ * 2026, not the 2026 games of the season after. Left out, ESPN answers with
+ * whichever season is running now.
  */
 export default async function getLeagueInfo(
   league: League,
+  season?: number,
 ): Promise<LeagueInfo | null> {
   // Get the ESPN league data.
   const response = await fetch(
-    `https://site.api.espn.com/apis/site/v2/sports/football/${league}/scoreboard`,
+    `https://site.api.espn.com/apis/site/v2/sports/football/${league}/scoreboard${
+      season != null ? `?dates=${season}` : ""
+    }`,
   );
   if (!response.ok) {
     console.error(
@@ -112,6 +122,7 @@ export default async function getLeagueInfo(
 
   return {
     league,
+    season: leagueMetadata.season.year,
     activeCalendar,
     activeWeek,
     calendars,

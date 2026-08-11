@@ -120,13 +120,18 @@ describe("getPlayerScores, spreadsheet parsing", () => {
         { Name: "Bob", C1: "MICH +3", P1: "KC +7", P2: "PHI +3", Pts: 45 },
       ]),
     );
-    expect(mockGetLeagueResults).toHaveBeenCalledWith(League.COLLEGE, WEEK, [
-      new Set(["OSU", "MICH"]),
-    ]);
-    expect(mockGetLeagueResults).toHaveBeenCalledWith(League.PRO, WEEK, [
-      new Set(["BUF", "KC"]),
-      new Set(["DAL", "PHI"]),
-    ]);
+    expect(mockGetLeagueResults).toHaveBeenCalledWith(
+      League.COLLEGE,
+      WEEK,
+      [new Set(["OSU", "MICH"])],
+      undefined,
+    );
+    expect(mockGetLeagueResults).toHaveBeenCalledWith(
+      League.PRO,
+      WEEK,
+      [new Set(["BUF", "KC"]), new Set(["DAL", "PHI"])],
+      undefined,
+    );
   });
 
   // A game everybody took the same side of names one team, and that is enough to
@@ -141,9 +146,12 @@ describe("getPlayerScores, spreadsheet parsing", () => {
       ]),
     );
 
-    expect(mockGetLeagueResults).toHaveBeenCalledWith(League.COLLEGE, WEEK, [
-      new Set(["OSU"]),
-    ]);
+    expect(mockGetLeagueResults).toHaveBeenCalledWith(
+      League.COLLEGE,
+      WEEK,
+      [new Set(["OSU"])],
+      undefined,
+    );
     expect(result.scores.map((score) => score.college[0].status)).toEqual([
       "yes",
       "yes",

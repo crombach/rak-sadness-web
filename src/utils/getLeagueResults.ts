@@ -30,6 +30,7 @@ const COLLEGE_GROUPS = [
 async function getLeagueEvents(
   league: League,
   week: WeekInfo, // Rak Madness week, corresponds with NFL regular season week
+  season?: number,
 ): Promise<Array<EspnEvent>> {
   // After the regular season is over, ESPN resets the week counter to 1 for the postseason.
   let adjustedWeekNumber =
@@ -50,8 +51,11 @@ async function getLeagueEvents(
     adjustedWeekNumber = 1;
   }
 
-  // Build final request URL.
-  const baseRequestUrl = `https://site.api.espn.com/apis/site/v2/sports/football/${league}/scoreboard?week=${adjustedWeekNumber}&seasontype=${seasonType}`;
+  // Build final request URL. `dates` is the year the season started in, not the
+  // calendar year its games fall in, so `dates=2025&week=18` is the January 2026
+  // game it should be. Left off, ESPN answers with the season running now.
+  const seasonParam = season != null ? `&dates=${season}` : "";
+  const baseRequestUrl = `https://site.api.espn.com/apis/site/v2/sports/football/${league}/scoreboard?week=${adjustedWeekNumber}&seasontype=${seasonType}${seasonParam}`;
 
   // For college, we need to concatenate multiple groups.
   if (league === League.COLLEGE) {
@@ -94,14 +98,17 @@ async function getLeagueEvents(
  *
  * @param league league for which to get results
  * @param week week in the season (week 1 is the first NFL week)
+ * @param matchups the games the picks describe
+ * @param season the year the season started in, current season if left out
  * @returns league results
  */
 export async function getLeagueResults(
   league: League,
   week: WeekInfo,
   matchups: Array<Set<string>>,
+  season?: number,
 ): Promise<Array<LeagueResult>> {
-  const events = await getLeagueEvents(league, week);
+  const events = await getLeagueEvents(league, week, season);
   console.log(`${league} events`, events);
 
   return events

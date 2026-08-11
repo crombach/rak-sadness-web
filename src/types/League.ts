@@ -30,6 +30,12 @@ export type LeagueCalendar = {
 
 export type LeagueInfo = {
   league: League;
+  /**
+   * The year the season started in. A season runs into the following January, so
+   * every week of the 2025 season is a 2025 week, including the ones played in
+   * January 2026.
+   */
+  season: number;
   activeCalendar: LeagueCalendar;
   activeWeek: WeekInfo;
   calendars: LeagueCalendar[];

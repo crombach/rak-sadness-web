@@ -47,11 +47,13 @@ type CalendarFixture = {
   entries?: Array<ReturnType<typeof week>>;
 };
 
+const SEASON = 2024;
+
 function scoreboard(
   slug: string,
   calendar: Array<CalendarFixture> = [REGULAR_SEASON, POST_SEASON],
 ) {
-  return { leagues: [{ slug, calendar }] };
+  return { leagues: [{ slug, season: { year: SEASON }, calendar }] };
 }
 
 function mockFetch(body: unknown, ok = true, status = 200) {

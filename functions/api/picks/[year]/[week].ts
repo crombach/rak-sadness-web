@@ -2,12 +2,21 @@ type Env = {
   RAK_MADNESS_BUCKET: R2Bucket;
 };
 
+/**
+ * One week's picks workbook, from the season that started in `year`. A season
+ * runs into the following January, so the 2025 season's week 18 was played in
+ * January 2026 and is still filed under 2025.
+ */
 export const onRequestGet: PagesFunction<Env> = async (context) => {
+  const year = Number(context.params.year);
   const week = Number(context.params.week);
+  if (!Number.isInteger(year) || !Number.isInteger(week)) {
+    return new Response("Not Found", { status: 404 });
+  }
 
   // Get the spreadsheet from R2.
-  const filePath = `picks/${week}.xlsx`;
-  console.log(`Fetching picks for week ${week} from ${filePath}`);
+  const filePath = `picks/${year}/${week}.xlsx`;
+  console.log(`Fetching picks for ${year} week ${week} from ${filePath}`);
   try {
     const spreadsheet = await context.env.RAK_MADNESS_BUCKET.get(filePath);
     if (!spreadsheet) {
@@ -26,7 +35,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       headers: {
         "Content-Type":
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "Content-Disposition": `attachment; filename=week-${week}-picks.xlsx`,
+        "Content-Disposition": `attachment; filename=${year}-week-${week}-picks.xlsx`,
       },
     });
   } catch {
