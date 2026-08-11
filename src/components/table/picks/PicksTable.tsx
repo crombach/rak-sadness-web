@@ -1,10 +1,11 @@
-import { memo, useCallback } from "react";
+import { memo, useCallback, useMemo } from "react";
 import {
   PickResult,
   PlayerScore,
   RakMadnessScores,
 } from "../../../types/RakMadnessScores";
 import rangeWithPrefix from "../../../utils/rangeWithPrefix";
+import isWeekDecided from "../../../utils/scoring/isWeekDecided";
 import PlayerName from "../playerName/PlayerName";
 import TableShell, { RankCell } from "../TableShell";
 import "./PicksTable.scss";
@@ -42,6 +43,11 @@ function PicksTable({ scores }: { scores?: RakMadnessScores | null }) {
     [clearToasts, showToast],
   );
 
+  const isDecided = useMemo(
+    () => scores != null && isWeekDecided(scores),
+    [scores],
+  );
+
   if (scores == null) {
     return null;
   }
@@ -70,7 +76,7 @@ function PicksTable({ scores }: { scores?: RakMadnessScores | null }) {
         return (
           <tr key={player.name}>
             <RankCell rank={index + 1} />
-            <PlayerName player={player} />
+            <PlayerName player={player} isWeekDecided={isDecided} />
             {player.college.map((result, index) => (
               <td
                 key={`${player.name}-C${index + 1}`}
