@@ -14,6 +14,11 @@
   --rak-radius-md: 8px;
   --rak-radius-lg: 12px;
 
+  // Every line the app draws around or between things: the table's dividers and a
+  // toast's frame. Named so those two cannot drift apart. `--rak-border` below is a
+  // color, not a width.
+  --rak-border-width: 2px;
+
   --rak-shadow-xs: 0 1px 2px 0 rgb(21 21 21 / 8%);
   --rak-shadow-md:
     0 2px 8px -2px rgb(21 21 21 / 8%), 0 6px 12px -2px rgb(21 21 21 / 8%);

@@ -21,8 +21,9 @@ $toasterWidth: min(calc(100% - 48px), 400px);
   width: 100%;
   padding: 12px;
   border-radius: var(--rak-radius-sm);
-  // A toast lands over the table, which is busy behind it.
-  border: 2px solid var(--rak-primary-500);
+  // A toast lands over the table, which is busy behind it. The same width as the
+  // table's own dividers.
+  border: var(--rak-border-width) solid var(--rak-primary-500);
   font-size: 1rem;
   font-weight: 500;
   line-height: 1.5;

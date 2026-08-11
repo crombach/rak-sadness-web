@@ -12,8 +12,9 @@
   --rak-table-cell-padding-x: 6px;
   --rak-table-cell-padding-y: 2px;
   --rak-table-header-padding-x: 8px;
-  --rak-table-border: 2px solid var(--rak-primary-800);
-  --rak-table-header-border: 2px solid var(--rak-primary-600);
+  --rak-table-border: var(--rak-border-width) solid var(--rak-primary-800);
+  --rak-table-header-border: var(--rak-border-width) solid
+    var(--rak-primary-600);
   // The status icon beside a player's name, in `PlayerName.scss`. Sized here
   // because the wireframe has to leave the same room without drawing one.
   --rak-player-icon-size: 16px;
