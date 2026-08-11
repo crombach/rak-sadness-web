@@ -715,6 +715,34 @@ describe("the app, week routes", () => {
     });
   });
 
+  it("sends /scoreboard to the current week of the newest season with picks", async () => {
+    // ESPN answers with whichever season was asked for, which is what tells the
+    // app the schedule on hand is the one the redirect is waiting for.
+    getLeagueInfoMock.mockImplementation(async (_league, season) => ({
+      ...leagueInfo,
+      season: season ?? SEASON,
+    }));
+    global.fetch = routedFetch(spreadsheetResponse, [SEASON - 1]);
+    await mountApp("/scoreboard");
+
+    await waitFor(() => {
+      expect(getLeagueInfoMock).toHaveBeenCalledWith(League.PRO, SEASON - 1);
+    });
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        `/api/picks/${SEASON - 1}/${CURRENT_WEEK}`,
+      );
+    });
+  });
+
+  it("sends /picks to the picks view of that week", async () => {
+    global.fetch = routedFetch(spreadsheetResponse, [SEASON]);
+    await mountApp("/picks");
+
+    expect(await screen.findByText("College Score")).toBeInTheDocument();
+    expect(screen.queryByText("MNF Points Pick")).not.toBeInTheDocument();
+  });
+
   it("sends a season that is not a year home", async () => {
     await mountLoadedApp(`/nope/${CURRENT_WEEK}/scoreboard`);
 
