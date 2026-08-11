@@ -73,6 +73,12 @@
   &[data-selected] {
     background-color: var(--rak-neutral-200);
   }
+
+  // A rule between rows rather than around them, so a long list reads down
+  // without a line closing the popup off from its own edge.
+  & + & {
+    border-top: 1px solid var(--rak-neutral-200);
+  }
 }
 
 .home__controls {
