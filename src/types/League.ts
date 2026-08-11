@@ -36,13 +36,6 @@ export type LeagueInfo = {
    * January 2026.
    */
   season: number;
-  /**
-   * Every week the season can be scored on, regular season then postseason,
-   * numbered straight through. The NFL's week 19 is the Wild Card round and its
-   * week 23 is the Super Bowl, which is how a pool that runs past week 18 lines
-   * up with ESPN's own numbering.
-   */
-  seasonWeeks: Array<WeekInfo>;
   activeCalendar: LeagueCalendar;
   activeWeek: WeekInfo;
   calendars: LeagueCalendar[];

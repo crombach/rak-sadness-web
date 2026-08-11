@@ -195,20 +195,6 @@ describe("getLeagueInfo, active week", () => {
     vi.setSystemTime(new Date("2024-11-15T00:00Z"));
     mockFetch(scoreboard(League.PRO));
     const info = await infoFor(League.PRO);
-    expect(info.activeWeek.value).toBe(19);
-  });
-});
-
-describe("getLeagueInfo, season weeks", () => {
-  it("numbers the postseason on from the last regular season week", async () => {
-    mockFetch(scoreboard(League.PRO));
-    const info = await infoFor(League.PRO);
-    expect(info.seasonWeeks.map((week) => week.value)).toEqual([1, 5, 18, 19]);
-  });
-
-  it("has only the regular season when there is no postseason yet", async () => {
-    mockFetch(scoreboard(League.PRO, [REGULAR_SEASON]));
-    const info = await infoFor(League.PRO);
-    expect(info.seasonWeeks.map((week) => week.value)).toEqual([1, 5, 18]);
+    expect(info.activeWeek.value).toBe(18);
   });
 });

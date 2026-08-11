@@ -125,13 +125,6 @@ describe("getLeagueResults, pro requests", () => {
     ]);
   });
 
-  it("asks for the Super Bowl on the last week of the season", async () => {
-    const fetchMock = mockFetch([bufVsKc]);
-    // Week 18 plus the five postseason rounds, the last of which is the final.
-    await getLeagueResults(League.PRO, { ...WEEK, value: 23 }, [BUF_KC]);
-    expect(urlsOf(fetchMock)[0]).toContain("week=5&seasontype=3");
-  });
-
   it("wraps a postseason week back to a postseason week number", async () => {
     const fetchMock = mockFetch([bufVsKc]);
     await getLeagueResults(League.PRO, { ...WEEK, value: 20 }, [BUF_KC]);

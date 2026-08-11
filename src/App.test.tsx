@@ -50,7 +50,6 @@ const weeks = [week(1), week(2), week(3), week(4), week(5)];
 const leagueInfo: LeagueInfo = {
   league: League.PRO,
   season: SEASON,
-  seasonWeeks: weeks,
   activeCalendar: {
     seasonType: SeasonType.REGULAR,
     startDate: new Date(2024, 8, 1),
