@@ -32,15 +32,21 @@ type Column = {
   isPick?: boolean;
 };
 
-const SCOREBOARD_COLUMNS: Array<Column> = [
+/** Both views open on these and close on a total. */
+const RANK_AND_PLAYER: Array<Column> = [
   { header: "Rank", cell: RANK },
   { header: "Player", cell: PLAYER },
+];
+const TOTAL_SCORE: Column = { header: "Total Score", cell: SCORE };
+
+const SCOREBOARD_COLUMNS: Array<Column> = [
+  ...RANK_AND_PLAYER,
   { header: "MNF Points Pick", cell: SCORE },
   { header: "MNF Points Distance", cell: SCORE },
   { header: "College Score", cell: SCORE },
   { header: "Pro Score", cell: SCORE },
   { header: "Pro Score ATS", cell: SCORE },
-  { header: "Total Score", cell: SCORE },
+  TOTAL_SCORE,
 ];
 
 function leagueColumns(count: number, prefix: string): Array<Column> {
@@ -52,13 +58,12 @@ function leagueColumns(count: number, prefix: string): Array<Column> {
 }
 
 const PICKS_COLUMNS: Array<Column> = [
-  { header: "Rank", cell: RANK },
-  { header: "Player", cell: PLAYER },
+  ...RANK_AND_PLAYER,
   ...leagueColumns(COLLEGE_COUNT, "C"),
   { header: "College Score", cell: SCORE },
   ...leagueColumns(PRO_COUNT, "P"),
   { header: "Pro Score", cell: SCORE },
-  { header: "Total Score", cell: SCORE },
+  TOTAL_SCORE,
 ];
 
 /**

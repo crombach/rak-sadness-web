@@ -5,9 +5,10 @@
   // Read back by useFillerRows, which needs a row height to work out how many
   // rows fit below the real ones.
   --rak-table-row-height: 32px;
-  // The rest are read back by `SkeletonTable.scss`. The wireframe draws a table
-  // nobody has the numbers for yet, so every measurement it stands in for has to
-  // come from here rather than be written down twice.
+  // The rest are the measurements the wireframe has to reproduce. It draws a
+  // table nobody has the numbers for yet, so it reaches them here, either through
+  // the selectors below that it shares or by name in `SkeletonTable.scss`. Either
+  // way none of them is written down twice.
   --rak-table-cell-padding-x: 6px;
   --rak-table-cell-padding-y: 2px;
   --rak-table-header-padding-x: 8px;

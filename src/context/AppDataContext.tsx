@@ -10,7 +10,7 @@ import { useLocation } from "react-router";
 import useLeagueWeeks from "../hooks/useLeagueWeeks";
 import usePlayerScores from "../hooks/usePlayerScores";
 import { WeekInfo } from "../types/League";
-import isWeekSettled from "../utils/scoring/isWeekDecided";
+import isWeekDecided from "../utils/scoring/isWeekDecided";
 
 type AppData = ReturnType<typeof useLeagueWeeks> &
   ReturnType<typeof usePlayerScores> & {
@@ -66,8 +66,8 @@ export function AppDataContextProvider({
   );
 
   const { scores } = playerScores;
-  const isWeekDecided = useMemo(
-    () => scores != null && isWeekSettled(scores),
+  const weekDecided = useMemo(
+    () => scores != null && isWeekDecided(scores),
     [scores],
   );
 
@@ -78,7 +78,7 @@ export function AppDataContextProvider({
 
   return (
     <AppDataContext.Provider value={value}>
-      <WeekDecidedContext.Provider value={isWeekDecided}>
+      <WeekDecidedContext.Provider value={weekDecided}>
         {children}
       </WeekDecidedContext.Provider>
     </AppDataContext.Provider>
