@@ -6,42 +6,17 @@ import {
   VictoryRoute,
 } from "../../types/PathsToVictory";
 import { PlayerScore, RakMadnessScores } from "../../types/RakMadnessScores";
-import rangeWithPrefix from "../rangeWithPrefix";
-import { remainingGameIndices } from "./applyKnockouts";
 import { comparePlayerScoresOnMerit } from "./comparePlayerScores";
-import parsePick from "./parsePick";
+import remainingGames, { RemainingGame } from "./remainingGames";
 
 /**
- * The most games still to be played that the routes are worked out for.
- *
- * The search walks every way the open games can fall, so its cost doubles with each
- * one. A Thursday with a full slate left would run to millions of scenarios for an
- * answer too long to read anyway. Above this the caller gets a floor instead.
+ * The most contested games the routes are worked out for. The search doubles in
+ * cost with each one, and a fuller slate is too long an answer to read anyway.
  */
 const MAX_SEARCHED_GAMES = 10;
 
 /** How many routes are carried before the rest are only counted. */
 const MAX_LISTED_ROUTES = 10;
-
-type LeagueKey = "college" | "pro";
-
-const LEAGUES: Array<LeagueKey> = ["college", "pro"];
-
-const LEAGUE_PREFIX: Record<LeagueKey, string> = { college: "C", pro: "P" };
-
-type Cell = {
-  /** Absent where the player left the game blank, which scores them nothing. */
-  team?: string;
-  hasSpread: boolean;
-  text: string;
-};
-
-type RemainingGame = {
-  label: string;
-  league: LeagueKey;
-  /** Every row's cell, in the order the scores hold their players. */
-  cells: Array<Cell>;
-};
 
 /**
  * Where a player takes a point, as one bit per open game.
@@ -93,29 +68,6 @@ function subMasks(mask: number): Array<number> {
     if (subset === 0) break;
   }
   return masks;
-}
-
-/**
- * The games still to be played, read a column at a time.
- *
- * `remainingGameIndices` is the same reading `applyKnockouts` does, and for the same
- * reason: a blank cell scores "error" rather than "incomplete", so one row alone
- * would drop a game that row's player happened to skip.
- */
-function remainingGames(players: Array<PlayerScore>): Array<RemainingGame> {
-  const [first] = players;
-  return LEAGUES.flatMap((league) => {
-    const labels = rangeWithPrefix(first[league].length, LEAGUE_PREFIX[league]);
-    return remainingGameIndices(players, league).map((index) => ({
-      label: labels[index],
-      league,
-      cells: players.map((player) => {
-        const text = player[league][index].pick ?? "";
-        const { teamAbbreviation, spread } = parsePick(text);
-        return { team: teamAbbreviation, hasSpread: spread !== 0, text };
-      }),
-    }));
-  });
 }
 
 function gainsFor(
@@ -254,7 +206,7 @@ type RouteOutcome = {
  */
 function verdictFor(
   hits: number,
-  luckMask: number,
+  luckOutcomes: Array<number>,
   guaranteed: boolean,
   read: (outcome: number) => Verdict,
 ): RouteOutcome {
@@ -264,7 +216,7 @@ function verdictFor(
   let best: Verdict | undefined;
   let bestLuck = 0;
 
-  for (const luck of subMasks(luckMask)) {
+  for (const luck of luckOutcomes) {
     const verdict = read(hits | luck);
     if (!guaranteed) {
       const improved = betterOf(best, verdict);
@@ -340,6 +292,15 @@ function picksIn(
     .filter((pick) => pick != null);
 }
 
+/** Carries the reason `applyKnockouts` already wrote, rather than writing another. */
+function eliminated(player: PlayerScore): PathsToVictory {
+  return {
+    kind: "eliminated",
+    player: player.name,
+    explanation: player.status.explanation,
+  };
+}
+
 /**
  * The fewest of their own remaining picks the player has to win to reach a rival.
  *
@@ -380,34 +341,17 @@ function headline(
   rivals: Array<{ player: PlayerScore; index: number }>,
   games: Array<RemainingGame>,
 ): PathsToVictory {
-  let minimumWins = 0;
-  let needsMondayNight = false;
-  for (const rival of rivals) {
+  const counts = rivals.map((rival) => {
     const gap = rival.player.score.total - player.score.total;
-    const toLevel = fewestWinsToCatch(
-      playerIndex,
-      rival.index,
-      games,
-      gap,
-      false,
-    );
-    if (toLevel == null) {
-      return {
-        kind: "eliminated",
-        player: player.name,
-        explanation: player.status.explanation,
-      };
-    }
-    minimumWins = Math.max(minimumWins, toLevel);
-    const toClear = fewestWinsToCatch(
-      playerIndex,
-      rival.index,
-      games,
-      gap,
-      true,
-    );
-    if (toClear == null || toClear > toLevel) needsMondayNight = true;
+    const at = (clear: boolean) =>
+      fewestWinsToCatch(playerIndex, rival.index, games, gap, clear);
+    return { toLevel: at(false), toClear: at(true) };
+  });
+  if (counts.some((count) => count.toLevel == null)) {
+    return eliminated(player);
   }
+
+  const minimumWins = Math.max(...counts.map((count) => count.toLevel ?? 0));
   return {
     kind: "headline",
     player: player.name,
@@ -416,7 +360,11 @@ function headline(
       (game) => game.cells[playerIndex].team != null,
     ).length,
     minimumWins,
-    needsMondayNight,
+    // Winning that many still only draws level with somebody, so the tiebreaker
+    // would decide it.
+    needsMondayNight: counts.some(
+      (count) => count.toClear == null || count.toClear > minimumWins,
+    ),
   };
 }
 
@@ -436,15 +384,11 @@ export default function getPathsToVictory(
 
   const player = players[playerIndex];
   if (player.status.isKnockedOut) {
-    return {
-      kind: "eliminated",
-      player: player.name,
-      explanation: player.status.explanation,
-    };
+    return eliminated(player);
   }
 
-  // A player already knocked out cannot take the week off anyone, so they are not
-  // measured against. That is what keeps the search small late in a week.
+  // A knocked out player cannot take the week off anyone, so they are not measured
+  // against. That is what keeps the search small late in a week.
   const rivals = players
     .map((it, index) => ({ player: it, index }))
     .filter((it) => it.index !== playerIndex && !it.player.status.isKnockedOut);
@@ -452,32 +396,24 @@ export default function getPathsToVictory(
     return { kind: "clinched", player: player.name };
   }
 
-  const games = remainingGames(players);
-  if (games.length > MAX_SEARCHED_GAMES) {
-    return headline(player, playerIndex, rivals, games);
-  }
-
   // A game every live player picked the same way moves all their scores together,
-  // in the total and in both tiebreaker tiers, so it cannot change the order and
-  // does not need searching.
+  // in the total and in both tiebreaker tiers, so it cannot change the order.
+  const games = remainingGames(players);
   const live = [playerIndex, ...rivals.map((it) => it.index)];
   const contested = games.filter(
     (game) => new Set(live.map((index) => game.cells[index].team)).size > 1,
   );
+  if (contested.length > MAX_SEARCHED_GAMES) {
+    return headline(player, playerIndex, rivals, games);
+  }
 
-  // The bit for a game reads as the player's own pick landing. Where they have no
-  // pick it reads as the first team a live rival took covering, which is a side to
-  // measure from and nothing more.
-  const coverers = contested.map((game) => {
-    const mine = game.cells[playerIndex].team;
-    if (mine != null) return mine;
-    // A contested game always holds one, since a column every live player left
-    // blank cannot differ between them.
-    const anyRival = live
-      .map((index) => game.cells[index].team)
-      .find((team) => team != null);
-    return anyRival ?? "";
-  });
+  // The bit for a game reads as the player's own pick landing, or where they have
+  // no pick, as a live rival's. A contested game always holds one of those.
+  const coverers = contested.map(
+    (game) =>
+      game.cells[playerIndex].team ??
+      live.map((index) => game.cells[index].team).find((team) => team != null)!,
+  );
 
   const gains = gainsFor(playerIndex, contested, coverers);
   const contenders: Array<Contender> = rivals.map((rival) => ({
@@ -498,6 +434,7 @@ export default function getPathsToVictory(
   const ordered = subMasks(mineMask).sort(
     (a, b) => bitCount(a) - bitCount(b) || a - b,
   );
+  const luckOutcomes = subMasks(luckMask);
   const search = (guaranteed: boolean) => {
     const minimal: Array<{ hits: number; outcome: RouteOutcome }> = [];
     let outrightAt: number | undefined;
@@ -506,7 +443,7 @@ export default function getPathsToVictory(
         (found) => (found.hits & hits) === found.hits,
       );
       if (isRedundant && outrightAt != null) continue;
-      const outcome = verdictFor(hits, luckMask, guaranteed, read);
+      const outcome = verdictFor(hits, luckOutcomes, guaranteed, read);
       if (outcome.verdict.kind === "loss") continue;
       if (outcome.verdict.kind === "win" && outrightAt == null) {
         outrightAt = bitCount(hits);
@@ -520,10 +457,18 @@ export default function getPathsToVictory(
   // they left blank can fall is reported without conditions.
   let found = search(true);
   let needsHelp: Array<UncontrolledGame> = [];
+  let dropped = 0;
   if (found.minimal.length === 0 && luckMask !== 0) {
     found = search(false);
     const [best] = found.minimal;
     if (best != null) {
+      // The games below are written once for every route shown, so the routes
+      // wanting those to fall some other way are counted rather than listed.
+      const kept = found.minimal.filter(
+        (route) => route.outcome.luck === best.outcome.luck,
+      );
+      dropped = found.minimal.length - kept.length;
+      found = { ...found, minimal: kept };
       needsHelp = contested
         .map((game, bit): UncontrolledGame | null => {
           const mask = 1 << bit;
@@ -549,11 +494,7 @@ export default function getPathsToVictory(
 
   const { minimal, outrightAt } = found;
   if (minimal.length === 0) {
-    return {
-      kind: "eliminated",
-      player: player.name,
-      explanation: player.status.explanation,
-    };
+    return eliminated(player);
   }
   // Nothing left to win, and nothing the games they left blank can do about it.
   // A route that only survives because those fell right is not a clinch.
@@ -583,6 +524,7 @@ export default function getPathsToVictory(
   // Every way of choosing that many of the pool is a route only when there are as
   // many routes as there are ways, since each route is a different one of them.
   const isPool =
+    dropped === 0 &&
     isOneOutlook &&
     sizes.size === 1 &&
     rests.length === combinations(bitCount(poolMask), choose);
@@ -622,7 +564,7 @@ export default function getPathsToVictory(
   return {
     ...base,
     routes: routes.slice(0, MAX_LISTED_ROUTES),
-    hiddenRouteCount: Math.max(0, routes.length - MAX_LISTED_ROUTES),
+    hiddenRouteCount: Math.max(0, routes.length - MAX_LISTED_ROUTES) + dropped,
     mondayNight: isOneOutlook ? rests[0].outlook : undefined,
   };
 }

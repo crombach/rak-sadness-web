@@ -462,6 +462,21 @@ describe("getPathsToVictory, weeks too big to search", () => {
     });
   });
 
+  it("counts the games in dispute, not the games left", () => {
+    // Eleven games left, ten of them picked the same way by both, so only one
+    // can change the order and the routes are worth working out.
+    const agreed = Array.from({ length: 10 }, (_, index) =>
+      pick(`S${index} -3`),
+    );
+    const scores = week([
+      player({ name: "Alice", total: 0, pro: [...agreed, pick("KC -3")] }),
+      player({ name: "Bob", total: 1, pro: [...agreed, pick("DEN +3")] }),
+    ]);
+
+    const result = paths(getPathsToVictory(scores, "Alice"));
+    expect(labels(result.mustWin)).toEqual(["P11"]);
+  });
+
   it("works the routes out at ten", () => {
     const count = 10;
     const scores = week([

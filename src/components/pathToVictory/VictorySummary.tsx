@@ -12,10 +12,7 @@ import "./VictorySummary.scss";
 /** How many routes stand open, the rest being a click away. */
 const ROUTES_SHOWN_AT_FIRST = 5;
 
-function list(names: Array<string>): string {
-  if (names.length < 3) return names.join(" and ");
-  return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
-}
+const NAMES = new Intl.ListFormat("en-US");
 
 function plural(count: number, noun: string): string {
   return `${count} ${noun}${count === 1 ? "" : "s"}`;
@@ -58,7 +55,7 @@ function mondayNightSentence(outlook: MondayNightOutlook): string | null {
       : min != null
         ? `of ${min} or more`
         : `of ${max} or less`;
-  return `Needs a Monday night total ${total} to beat ${list(outlook.contenders)}.`;
+  return `Monday night total ${total} to beat ${NAMES.format(outlook.contenders)}.`;
 }
 
 function MondayNight({
@@ -93,7 +90,7 @@ function NeedsHelp({ games }: { games: Array<UncontrolledGame> }) {
         {games.map((game) => (
           <li key={game.label} className="victory__line">
             <span className="victory__pick-label">{game.label}</span> is blank
-            on your sheet, so {list(game.needsToMiss)} has to miss.
+            on your sheet, so {NAMES.format(game.needsToMiss)} has to miss.
           </li>
         ))}
       </ul>
@@ -134,9 +131,9 @@ function Routes({
       {folded > 0 && (
         <Button
           className="victory__more"
-          color="gold"
           variant="soft"
           size="sm"
+          ariaExpanded={isExpanded}
           onClick={() => setIsExpanded(!isExpanded)}
         >
           {isExpanded ? "Show fewer" : `Show ${plural(folded, "more route")}`}

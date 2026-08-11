@@ -121,6 +121,7 @@
 .path-to-victory__option {
   display: flex;
   align-items: center;
+  gap: 8px;
   min-height: 36px;
   padding: 4px 12px;
   cursor: pointer;
@@ -131,6 +132,17 @@
 
   &[data-selected] {
     background-color: var(--rak-neutral-200);
+  }
+
+  // Only ever offered where nobody still standing shares the letters typed, so it
+  // reads as the answer rather than as a choice.
+  &.--eliminated {
+    color: var(--rak-danger-600);
+    cursor: default;
+
+    &[data-highlighted] {
+      background-color: transparent;
+    }
   }
 }
 

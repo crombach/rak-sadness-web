@@ -124,7 +124,7 @@ describe("VictorySummary", () => {
 
     expect(
       screen.getByText(
-        "Needs a Monday night total between 38 and 44 to beat Rak and Bill.",
+        "Monday night total between 38 and 44 to beat Rak and Bill.",
       ),
     ).toBeInTheDocument();
   });
@@ -138,7 +138,7 @@ describe("VictorySummary", () => {
     render(<VictorySummary result={result} />);
 
     expect(
-      screen.getByText("Needs a Monday night total of 45 or less to beat Rak."),
+      screen.getByText("Monday night total of 45 or less to beat Rak."),
     ).toBeInTheDocument();
   });
 
@@ -207,7 +207,7 @@ describe("VictorySummary", () => {
     const routes = [...document.querySelectorAll(".victory__route")];
     expect(routes.map((route) => route.textContent)).toEqual([
       "P1KC -3",
-      "P2BUF -1P3SF -6Needs a Monday night total of 32 or less to beat Rak.",
+      "P2BUF -1P3SF -6Monday night total of 32 or less to beat Rak.",
     ]);
     expect(screen.getByText("2 other routes not shown.")).toBeInTheDocument();
   });

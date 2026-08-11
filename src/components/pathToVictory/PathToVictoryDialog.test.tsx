@@ -5,7 +5,10 @@ import {
   PlayerScore,
   RakMadnessScores,
 } from "../../types/RakMadnessScores";
-import PathToVictoryDialog, { eligiblePlayers } from "./PathToVictoryDialog";
+import PathToVictoryDialog, {
+  playerOptions,
+  playersMatching,
+} from "./PathToVictoryDialog";
 
 function proPick(pick: string): PickResult {
   return {
@@ -43,13 +46,30 @@ const scores: RakMadnessScores = {
   ],
 };
 
-describe("eligiblePlayers", () => {
-  it("offers everyone who can still win the week", () => {
-    expect(eligiblePlayers(scores)).toEqual(["Alice", "Bob"]);
+describe("playersMatching", () => {
+  const options = playerOptions(scores);
+
+  it("holds a knocked out player back while anyone standing matches", () => {
+    expect(playersMatching(options, "Bob")).toEqual([
+      { name: "Bob", isKnockedOut: false },
+    ]);
+  });
+
+  it("offers the knocked out player where they are the only match", () => {
+    expect(playersMatching(options, "Bobby")).toEqual([
+      { name: "Bobby", isKnockedOut: true },
+    ]);
+  });
+
+  it("offers everyone still standing before anything is typed", () => {
+    expect(playersMatching(options, "").map((it) => it.name)).toEqual([
+      "Alice",
+      "Bob",
+    ]);
   });
 
   it("has nobody to offer before a week is scored", () => {
-    expect(eligiblePlayers(undefined)).toEqual([]);
+    expect(playersMatching(playerOptions(undefined), "")).toEqual([]);
   });
 });
 

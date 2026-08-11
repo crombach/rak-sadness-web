@@ -2,24 +2,38 @@ import { Combobox } from "@base-ui-components/react/combobox";
 import { Dialog } from "@base-ui-components/react/dialog";
 import { useMemo, useState } from "react";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
+import getClasses from "../../utils/getClasses";
 import getPathsToVictory from "../../utils/scoring/getPathsToVictory";
 import Button from "../button/Button";
-import { CloseRoundedIcon, UnfoldMoreIcon } from "../icon/Icon";
+import { CloseRoundedIcon, SkullIcon, UnfoldMoreIcon } from "../icon/Icon";
 import VictorySummary from "./VictorySummary";
 import "./PathToVictoryDialog.scss";
 
-/**
- * The players worth asking about: the ones who can still win it.
- *
- * A knocked out player has no route to offer, so listing them would only ever be
- * offering an answer of "no".
- */
-export function eligiblePlayers(scores?: RakMadnessScores): Array<string> {
+export type PlayerOption = { name: string; isKnockedOut: boolean };
+
+export function playerOptions(scores?: RakMadnessScores): Array<PlayerOption> {
   return (
-    scores?.scores
-      .filter((player) => !player.status.isKnockedOut)
-      .map((player) => player.name) ?? []
+    scores?.scores.map((player) => ({
+      name: player.name,
+      isKnockedOut: player.status.isKnockedOut,
+    })) ?? []
   );
+}
+
+/**
+ * The players a query offers. A knocked out one is held back while anyone still
+ * standing answers to the same letters, since their only answer is "no".
+ */
+export function playersMatching(
+  options: Array<PlayerOption>,
+  query: string,
+): Array<PlayerOption> {
+  const needle = query.trim().toLowerCase();
+  const matches = options.filter((option) =>
+    option.name.toLowerCase().includes(needle),
+  );
+  const standing = matches.filter((option) => !option.isKnockedOut);
+  return standing.length > 0 ? standing : matches;
 }
 
 /**
@@ -38,15 +52,18 @@ export default function PathToVictoryDialog({
   onOpenChange: (open: boolean) => void;
   scores?: RakMadnessScores;
 }) {
-  const [player, setPlayer] = useState<string | null>(null);
+  const [player, setPlayer] = useState<PlayerOption>();
+  const [query, setQuery] = useState("");
 
-  const names = useMemo(() => eligiblePlayers(scores), [scores]);
+  // Held still between renders, since the combobox reads the chosen player back
+  // off this list by identity.
+  const options = useMemo(() => playerOptions(scores), [scores]);
   // The search is thousands of scenarios, so it runs on the player chosen rather
   // than on every render of the dialog around them.
   const result = useMemo(
     () =>
       scores != null && player != null
-        ? getPathsToVictory(scores, player)
+        ? getPathsToVictory(scores, player.name)
         : undefined,
     [scores, player],
   );
@@ -71,9 +88,16 @@ export default function PathToVictoryDialog({
           </header>
 
           <Combobox.Root
-            items={names}
-            value={player}
-            onValueChange={setPlayer}
+            items={options}
+            filteredItems={playersMatching(options, query)}
+            itemToStringLabel={(option: PlayerOption) => option.name}
+            // The combobox keeps the choice itself. Naming it here as well would
+            // hand it a value it started without, which it reads as a controlled
+            // input arriving late.
+            onValueChange={(chosen: PlayerOption | null) =>
+              setPlayer(chosen ?? undefined)
+            }
+            onInputValueChange={setQuery}
             // The list is short and already on screen, so the first match being
             // highlighted saves an arrow key before Enter.
             autoHighlight
@@ -98,13 +122,17 @@ export default function PathToVictoryDialog({
                     No player by that name.
                   </Combobox.Empty>
                   <Combobox.List>
-                    {(name: string) => (
+                    {(option: PlayerOption) => (
                       <Combobox.Item
-                        key={name}
-                        value={name}
-                        className="path-to-victory__option"
+                        key={option.name}
+                        value={option}
+                        disabled={option.isKnockedOut}
+                        className={`path-to-victory__option ${getClasses({
+                          "--eliminated": option.isKnockedOut,
+                        })}`}
                       >
-                        {name}
+                        {option.name}
+                        {option.isKnockedOut && <SkullIcon />}
                       </Combobox.Item>
                     )}
                   </Combobox.List>

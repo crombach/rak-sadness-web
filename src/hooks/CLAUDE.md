@@ -1,7 +1,7 @@
 # hooks
 
 The app's data layer. Everything that talks to ESPN, the picks API, or the scoring
-pipeline lives here, so components only render. The first three are mounted once, in
+pipeline lives here, so components only render. The first four are mounted once, in
 `AppDataContext`, above the routes.
 
 - `usePicksSeasons`: the seasons that have picks, from `/api/picks`, newest first.

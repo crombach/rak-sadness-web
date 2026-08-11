@@ -77,8 +77,12 @@
   background-color: var(--rak-level1);
 }
 
+// A soft button takes the color around it, so the gold is set here rather than by
+// the color prop, which only paints a solid fill.
 .victory__more {
   align-self: flex-start;
+  color: var(--rak-gold-700);
+  font-weight: 700;
 }
 
 .victory__help {
