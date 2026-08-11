@@ -8,7 +8,8 @@ export type ParsedPicks = {
   rows: Array<any>;
   collegeKeys: Array<string>;
   proKeys: Array<string>;
-  tiebreakerGameKey: string;
+  /** Undefined when the sheet has no `Pts` column, so no game decides ties. */
+  tiebreakerGameKey?: string;
   collegeMatchups: Array<Set<string>>;
   proMatchups: Array<Set<string>>;
   /** Game key to the disagreement, for the games that cannot be scored. */
@@ -27,40 +28,57 @@ export default async function parsePicksWorkbook(
   const picksSheet = workbook.Sheets[Object.keys(workbook.Sheets)[0]];
   const rows: Array<any> = XLSX.utils.sheet_to_json(picksSheet);
 
-  // Determine property keys for different game types.
-  const allKeys = Object.keys(rows[0]);
+  // From the header row, not from a player's row: `sheet_to_json` leaves a blank
+  // cell out of the object it builds, so a game the first player skipped would go
+  // unscored for everyone, and the tiebreaker game would shift a column.
+  //
+  // Kept only where some row actually carries the key. A header cell that is not
+  // text, or one repeated, does not name a property of any row, and reading a
+  // column nobody can be looked up by is worse than not knowing about it.
+  const [headerRow = []] = XLSX.utils.sheet_to_json<Array<unknown>>(
+    picksSheet,
+    {
+      header: 1,
+    },
+  );
+  const timesSeen = new Map<string, number>();
+  const allKeys = headerRow.flatMap((cell) => {
+    const label = cell == null ? "" : String(cell);
+    if (label === "") return [];
+    // A repeated header is suffixed when the row objects are built, so the second
+    // `C1` column is reached as `C1_1`. Counting the repeats rebuilds that name.
+    const seen = timesSeen.get(label) ?? 0;
+    timesSeen.set(label, seen + 1);
+    const key = seen === 0 ? label : `${label}_${seen}`;
+    return rows.some((row) => key in row) ? [key] : [];
+  });
   const collegeKeys = allKeys.filter((key) => key.startsWith("C"));
   const proKeys = allKeys.filter(
     (key) => key.startsWith("P") && key !== TIEBREAKER_PICK_KEY,
   );
-  // The tiebreaker game key should always be the last one before the tiebreaker score pick.
-  const tiebreakerGameKey = allKeys[allKeys.indexOf(TIEBREAKER_PICK_KEY) - 1];
+  // The tiebreaker game is the last one before the tiebreaker score column.
+  const tiebreakerPickIndex = allKeys.indexOf(TIEBREAKER_PICK_KEY);
+  const tiebreakerGameKey =
+    tiebreakerPickIndex > 0 ? allKeys[tiebreakerPickIndex - 1] : undefined;
 
   // Determine team matchups.
   const matchups: { [gameKey: string]: Set<string> } = {};
   rows.forEach((playerRow: any) => {
     const addToMatchups = (key: string) => {
-      if (playerRow[key]) {
-        const { teamAbbreviation } = parsePick(playerRow[key]);
-        if (!matchups[key]) {
-          matchups[key] = new Set<string>();
-        }
-        // A cell reading "undefined" parses to no team. Adding it would make the
-        // matchup look like it has two sides, so the real game never matches.
-        if (teamAbbreviation != null) {
-          matchups[key].add(teamAbbreviation);
-        }
+      const { teamAbbreviation } = parsePick(playerRow[key]);
+      if (teamAbbreviation == null) return;
+      if (!matchups[key]) {
+        matchups[key] = new Set<string>();
       }
+      matchups[key].add(teamAbbreviation);
     };
     collegeKeys.forEach(addToMatchups);
     proKeys.forEach(addToMatchups);
   });
-  const collegeMatchups: Array<Set<string>> = Object.keys(matchups)
-    .filter((key) => key.startsWith("C"))
-    .map((key) => matchups[key]);
-  const proMatchups: Array<Set<string>> = Object.keys(matchups)
-    .filter((key) => key.startsWith("P"))
-    .map((key) => matchups[key]);
+  const matchupsFor = (keys: Array<string>) =>
+    keys.map((key) => matchups[key]).filter((matchup) => matchup != null);
+  const collegeMatchups = matchupsFor(collegeKeys);
+  const proMatchups = matchupsFor(proKeys);
   debugLog("matchups", { collegeMatchups, proMatchups });
 
   const inconsistentSpreadGames = findInconsistentSpreadGames(rows, [

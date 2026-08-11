@@ -7,4 +7,5 @@ in step, and holds the navbar so switching views does not restart the refresh
 throttle. `ScoreboardRoute` and `PicksRoute` each render one table from context.
 `ResultsFrame` is the page and wireframe both `ResultsLayout` and
 `CurrentWeekRedirect` render into, and `ResultsFrame.scss` colors the scores area
-so the gap below it reads as part of the table.
+so the gap below it reads as part of the table. It reads `useIsWeekDecided` to
+pass `ScoresNavbar` its `canRefresh` prop.

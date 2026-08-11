@@ -12,6 +12,7 @@ export default function ScoresNavbar({
   onRefresh,
   isRefreshing,
   disabled = false,
+  canRefresh = true,
 }: {
   view: ScoresView;
   onViewChange: (view: ScoresView) => void;
@@ -19,6 +20,8 @@ export default function ScoresNavbar({
   isRefreshing: boolean;
   /** Set while a week is still loading, so the navbar keeps its shape. */
   disabled?: boolean;
+  /** Cleared once the week is over, when rescoring cannot change anything. */
+  canRefresh?: boolean;
 }) {
   return (
     <>
@@ -44,16 +47,21 @@ export default function ScoresNavbar({
         <FactCheckIcon />
         <span className="home__scores-header-label">Picks</span>
       </Button>
-      <div className="home__scores-header-divider" />
-      <Button
-        disabled={disabled}
-        onClick={onRefresh}
-        className={`home__scores-header-button ${getClasses({
-          "--spinning": isRefreshing,
-        })}`}
-      >
-        <RefreshIcon />
-      </Button>
+      {canRefresh && (
+        <>
+          <div className="home__scores-header-divider" />
+          <Button
+            ariaLabel="Refresh"
+            disabled={disabled}
+            onClick={onRefresh}
+            className={`home__scores-header-button ${getClasses({
+              "--spinning": isRefreshing,
+            })}`}
+          >
+            <RefreshIcon />
+          </Button>
+        </>
+      )}
     </>
   );
 }

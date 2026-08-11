@@ -22,14 +22,15 @@ Single build root, one `package.json`, one `package-lock.json`. No module bounda
 
 ## Safe in parallel
 
-- Leaf components under `src/components/` (`footer/`, `navbar/`, `toaster/`, `table/picks/`, `table/playerName/`) — each is its own `.tsx` + `.scss` pair, no cross-imports between them.
+- Leaf components under `src/components/` (`footer/`, `navbar/`, `toaster/`) — each is its own `.tsx` + `.scss` pair, no cross-imports between them.
+- `table/picks/` and `table/playerName/` — `PicksTable` imports `PlayerName`, so a change to `PlayerName`'s props touches both.
 - Route components: `home/HomePage.tsx` and the route files in `results/`
   (`CurrentWeekRedirect.tsx`, `PicksRoute.tsx`, `ResultsLayout.tsx`,
   `ScoreboardRoute.tsx`), each owning one route. `ResultsFrame.tsx` is the page
   frame `ResultsLayout` and `CurrentWeekRedirect` share.
 - `src/hooks/` — one hook per file (including `usePicksSeasons.ts`), and only
   `AppDataContext` mounts more than one.
-- `src/utils/scoring/` — one concern per file. Scoring work no longer serializes on a single module, though `getPlayerScores.ts` sequences the others, so a change to the pipeline's shape still touches it.
+- `src/utils/scoring/` — one concern per file, so it does not serialize on a single module, though `getPlayerScores.ts` sequences the others, so a change to the pipeline's shape still touches it.
 - `src/utils/` leaves: `getLeagueInfo.ts`, `getLeagueResults.ts`, `buildSpreadsheetBuffer.ts`, `picksCache.ts`, `debugLog.ts`, `getClasses.ts`, `rangeWithPrefix.ts`.
 - `functions/api/picks/index.ts` and `functions/api/picks/[year]/[week].ts` — Cloudflare Pages Functions, touched by nothing in `src/` except the fetch URLs.
 - `public/` static assets.
@@ -42,4 +43,4 @@ Single build root, one `package.json`, one `package-lock.json`. No module bounda
 
 ## Note
 
-`src/types/` is imported by 5 files, but type files are append-mostly and rarely conflict. Watch it, don't serialize on it.
+`src/types/` is imported by 31 files, but type files are append-mostly and rarely conflict. Watch it, don't serialize on it.

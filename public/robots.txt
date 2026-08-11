@@ -1,3 +1,5 @@
 # https://www.robotstxt.org/robotstxt.html
+# A private pool's results. No crawler has any business here, so nothing is
+# offered to any of them.
 User-agent: *
-Disallow:
+Disallow: /

@@ -1,6 +1,6 @@
 import { Mock } from "vitest";
 import { League, SeasonType } from "../types/League";
-import getLeagueInfo from "./getLeagueInfo";
+import getLeagueInfo, { getRegularSeasonWeekCount } from "./getLeagueInfo";
 
 const NOW = new Date("2024-10-06T12:00:00Z");
 
@@ -54,6 +54,14 @@ function scoreboard(
   calendar: Array<CalendarFixture> = [REGULAR_SEASON, POST_SEASON],
 ) {
   return { leagues: [{ slug, season: { year: SEASON }, calendar }] };
+}
+
+function scoreboardForSeason(slug: string, seasonYear: number) {
+  return {
+    leagues: [
+      { slug, season: { year: seasonYear }, calendar: [REGULAR_SEASON] },
+    ],
+  };
 }
 
 function mockFetch(body: unknown, ok = true, status = 200) {
@@ -196,5 +204,28 @@ describe("getLeagueInfo, active week", () => {
     mockFetch(scoreboard(League.PRO));
     const info = await infoFor(League.PRO);
     expect(info.activeWeek.value).toBe(18);
+  });
+});
+
+describe("getRegularSeasonWeekCount, caching", () => {
+  it("refetches every time when no season is given, since the current season changes over time", async () => {
+    const fetchMock = mockFetch(scoreboardForSeason(League.PRO, 3001));
+    await getRegularSeasonWeekCount(League.PRO);
+    await getRegularSeasonWeekCount(League.PRO);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("caches a week count fetched with an explicit season", async () => {
+    const fetchMock = mockFetch(scoreboardForSeason(League.PRO, 3002));
+    await getRegularSeasonWeekCount(League.PRO, 3002);
+    await getRegularSeasonWeekCount(League.PRO, 3002);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("keys the cache on the season the response reports, not the request", async () => {
+    const fetchMock = mockFetch(scoreboardForSeason(League.COLLEGE, 3003));
+    await getRegularSeasonWeekCount(League.COLLEGE);
+    await getRegularSeasonWeekCount(League.COLLEGE, 3003);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

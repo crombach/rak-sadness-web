@@ -27,7 +27,7 @@ export type EspnStatus = {
 
 export type EspnCompetition = {
   competitors: Array<EspnCompetitor>;
-  situation: EspnSituation;
+  situation?: EspnSituation;
   date: string;
 };
 

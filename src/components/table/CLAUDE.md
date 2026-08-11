@@ -23,6 +23,6 @@ reads as a header where a real heading fits on one.
 
 ## Subdirectories
 
-- [`picks/`](picks/CLAUDE.md) — picks-view table with per-pick toasts
-- [`playerName/`](playerName/CLAUDE.md) — player name cell with knocked-out icon
-- [`scores/`](scores/CLAUDE.md) — ranked score table, the default results view
+- [`picks/`](picks/CLAUDE.md) — picks table, per-pick toasts
+- [`playerName/`](playerName/CLAUDE.md) — name cell, knockout icon
+- [`scores/`](scores/CLAUDE.md) — ranked score table, default view

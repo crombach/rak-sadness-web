@@ -48,8 +48,13 @@ export default function useLeagueWeeks(
 
   useEffect(() => {
     if (!enabled) return;
+    // A season switched away from while its lookup was still out must not land.
+    // It would leave `seasonYear` naming a season nobody asked for, which reads as
+    // loading forever, with no further lookup queued to end it.
+    let isCurrent = true;
     const getLeagueInfoAsync = async () => {
       const proLeagueInfo = await getLeagueInfo(League.PRO, season);
+      if (!isCurrent) return;
       if (proLeagueInfo == null) {
         // The season that was asked for, even though nothing came back for it.
         // Everything the season we came from told us goes, or its weeks would
@@ -65,11 +70,12 @@ export default function useLeagueWeeks(
         );
         return;
       }
-      // Set to the current regular season week, or the max if it's the post- or off-season.
       const calendarWeeks = proLeagueInfo.activeCalendar.weeks;
       setWeeks(calendarWeeks);
       setCurrentWeek(proLeagueInfo.activeWeek.value);
       setSeasonYear(proLeagueInfo.season);
+      // The week the URL named, or the one the season has reached. That is the
+      // last regular week once the season is over.
       setSelectedWeek(
         calendarWeeks.find((week) => week.value === initialWeekRef.current) ??
           proLeagueInfo.activeWeek,
@@ -77,6 +83,9 @@ export default function useLeagueWeeks(
       setLoading(false);
     };
     getLeagueInfoAsync();
+    return () => {
+      isCurrent = false;
+    };
   }, [showToast, season, enabled]);
 
   // Derived rather than a flag set when the season changes, so the switch counts

@@ -85,7 +85,8 @@ async function getLeagueEvents(
         });
     });
 
-    // Sort by competition date so later games come first in the array.
+    // Latest first. The postseason arrives as one bowl week spanning a month, so a
+    // team can appear twice, and the later game is the one that week is about.
     return (await Promise.all(collegePromises)).flat(1).sort((a, b) => {
       return new Date(b.date).valueOf() - new Date(a.date).valueOf();
     });
@@ -178,6 +179,9 @@ export async function getLeagueResults(
 
       const winnerScore = winner === home ? homeScore : awayScore;
       const loserScore = winner === home ? awayScore : homeScore;
+      // Unsigned, so a live game the home team leads never reads as a negative
+      // margin just because there is no winner yet.
+      const scoreMargin = Math.abs(homeScore - awayScore);
 
       // Calculate possession object
       const possession: Possession = {
@@ -216,7 +220,7 @@ export async function getLeagueResults(
             abbreviation: winner.team.abbreviation?.toUpperCase(),
           },
           homeAway: winnerHomeAway,
-          by: winnerScore - loserScore,
+          by: scoreMargin,
         },
         loser: {
           team: loser && {
@@ -224,7 +228,7 @@ export async function getLeagueResults(
             abbreviation: loser.team.abbreviation?.toUpperCase(),
           },
           homeAway: loserHomeAway,
-          by: winnerScore - loserScore,
+          by: scoreMargin,
         },
         totalScore: winnerScore + loserScore,
       };

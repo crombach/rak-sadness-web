@@ -1,3 +1,8 @@
+.footer,
+.footer > * {
+  color: #888888;
+}
+
 .footer {
   position: fixed;
   bottom: 0;
@@ -9,10 +14,8 @@
   // so the links keep clear of the home indicator here.
   padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   text-align: center;
-  color: #888888;
 
   > * {
-    color: #888888;
     text-decoration: none;
   }
 }

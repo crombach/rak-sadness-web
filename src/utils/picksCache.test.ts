@@ -82,4 +82,32 @@ describe("picksCache", () => {
     expect(readCachedPicks(SEASON, 4)).toBeUndefined();
     setItem.mockRestore();
   });
+
+  it("misses rather than throws when every localStorage method throws", () => {
+    const blocked = () => {
+      throw new Error("storage blocked");
+    };
+    const getItem = vi
+      .spyOn(Storage.prototype, "getItem")
+      .mockImplementation(blocked);
+    const setItem = vi
+      .spyOn(Storage.prototype, "setItem")
+      .mockImplementation(blocked);
+    const removeItem = vi
+      .spyOn(Storage.prototype, "removeItem")
+      .mockImplementation(blocked);
+    const key = vi.spyOn(Storage.prototype, "key").mockImplementation(blocked);
+    const length = vi
+      .spyOn(Storage.prototype, "length", "get")
+      .mockImplementation(blocked);
+
+    expect(() => readCachedPicks(SEASON, 3)).not.toThrow();
+    expect(() => writeCachedPicks(SEASON, 3, buffer(1))).not.toThrow();
+
+    getItem.mockRestore();
+    setItem.mockRestore();
+    removeItem.mockRestore();
+    key.mockRestore();
+    length.mockRestore();
+  });
 });

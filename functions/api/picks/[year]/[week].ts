@@ -17,28 +17,27 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   // Get the spreadsheet from R2.
   const filePath = `picks/${year}/${week}.xlsx`;
   console.log(`Fetching picks for ${year} week ${week} from ${filePath}`);
+  let spreadsheet;
   try {
-    const spreadsheet = await context.env.RAK_MADNESS_BUCKET.get(filePath);
-    if (!spreadsheet) {
-      return new Response("Not Found", { status: 404 });
-    }
-
-    // Create an identity TransformStream (a.k.a. a pipe).
-    // The readable side will become our new response body.
-    const { readable, writable } = new TransformStream();
-
-    // Start pumping the body.
-    spreadsheet.body.pipeTo(writable);
-
-    return new Response(readable, {
-      status: 200,
-      headers: {
-        "Content-Type":
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "Content-Disposition": `attachment; filename=${year}-week-${week}-picks.xlsx`,
-      },
-    });
-  } catch {
+    spreadsheet = await context.env.RAK_MADNESS_BUCKET.get(filePath);
+  } catch (error) {
+    console.error("Failed to fetch picks", error);
+    return new Response("Service Unavailable", { status: 503 });
+  }
+  if (!spreadsheet) {
     return new Response("Not Found", { status: 404 });
   }
+
+  return new Response(spreadsheet.body, {
+    status: 200,
+    headers: {
+      // Keep in sync with XLSX_CONTENT_TYPE in src/utils/buildSpreadsheetBuffer.ts;
+      // the Functions bundle separately and can't import it.
+      "Content-Type":
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "Content-Disposition": `attachment; filename=${year}-week-${week}-picks.xlsx`,
+      // A given year and week's picks never change once uploaded.
+      "Cache-Control": "public, max-age=31536000, immutable",
+    },
+  });
 };

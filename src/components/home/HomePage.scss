@@ -5,19 +5,23 @@
 }
 
 // Base UI ships the select unstyled, so these rules carry its whole look.
+.select__trigger,
+.select__popup {
+  border: 1px solid var(--rak-border);
+  border-radius: var(--rak-radius-sm);
+  color: var(--rak-text-secondary);
+  font-size: 1rem;
+}
+
 .select__trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
   padding: 3px 12px;
-  border: 1px solid var(--rak-border);
-  border-radius: var(--rak-radius-sm);
   background-color: var(--rak-surface);
-  color: var(--rak-text-secondary);
   box-shadow: var(--rak-shadow-xs);
   font-family: inherit;
-  font-size: 1rem;
   line-height: 1.5;
   text-align: left;
   cursor: pointer;
@@ -51,12 +55,8 @@
   max-height: var(--available-height);
   overflow-y: auto;
   padding: 6px 0;
-  border: 1px solid var(--rak-border);
-  border-radius: var(--rak-radius-sm);
-  background-color: #fff;
-  color: var(--rak-text-secondary);
+  background-color: var(--rak-on-solid);
   box-shadow: var(--rak-shadow-md);
-  font-size: 1rem;
 }
 
 .select__item {

@@ -179,7 +179,7 @@ describe("getLeagueResults, college requests", () => {
     ]);
   });
 
-  it("returns the latest game first", async () => {
+  it("returns the latest game first, which is the one a bowl week is about", async () => {
     mockFetch([
       espnEvent({ home: "OSU", away: "MICH", date: "2024-10-02T17:00Z" }),
       espnEvent({ home: "PSU", away: "IOWA", date: "2024-10-05T17:00Z" }),
@@ -241,6 +241,21 @@ describe("getLeagueResults, mapping", () => {
     expect(result.status).toBe(GameStatus.LIVE);
     expect(result.winner.team).toBeNull();
     expect(result.detailMessage).toBe("3rd Quarter");
+  });
+
+  it("reports an unsigned margin for a live game, even one the home team leads", async () => {
+    mockFetch([
+      espnEvent({
+        home: "BUF",
+        away: "KC",
+        homeScore: 30,
+        awayScore: 20,
+        status: GameStatus.LIVE,
+      }),
+    ]);
+    const [result] = await getLeagueResults(League.PRO, WEEK, [BUF_KC]);
+    expect(result.winner.by).toBe(10);
+    expect(result.loser.by).toBe(10);
   });
 
   it("reads down and distance and which side has the ball", async () => {

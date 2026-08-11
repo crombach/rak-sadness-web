@@ -41,20 +41,24 @@ export async function getRegularSeasonWeekCount(
   league: League,
   season?: number,
 ): Promise<number | undefined> {
-  const key = `${league}:${season ?? "current"}`;
-  const cached = regularSeasonWeekCounts.get(key);
-  if (cached != null) {
-    return cached;
+  // A season left unspecified means "whichever one is current", which changes
+  // over time, so there is nothing to key a cache lookup on until the response
+  // names the season it actually described.
+  if (season != null) {
+    const cached = regularSeasonWeekCounts.get(`${league}:${season}`);
+    if (cached != null) {
+      return cached;
+    }
   }
   const info = await getLeagueInfo(league, season);
   const regularSeason = info?.calendars.find(
     (calendar) => calendar.seasonType === SeasonType.REGULAR,
   );
   const count = regularSeason?.weeks.length;
-  if (count == null || count === 0) {
+  if (info == null || count == null || count === 0) {
     return undefined;
   }
-  regularSeasonWeekCounts.set(key, count);
+  regularSeasonWeekCounts.set(`${league}:${info.season}`, count);
   return count;
 }
 

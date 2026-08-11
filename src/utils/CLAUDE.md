@@ -5,4 +5,4 @@ leagueResultFixtures: `finalGame`/`upcomingGame` builders shared by the tests he
 
 ## Subdirectories
 
-- [`scoring/`](scoring/CLAUDE.md) — picks to scoreboard: parsing, scoring, knockouts
+- [`scoring/`](scoring/CLAUDE.md) — the picks-to-scoreboard pipeline
