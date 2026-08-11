@@ -13,6 +13,32 @@
   flex-direction: column;
   align-items: center;
   overflow: hidden;
+  // Makes this a stacking context, which is what lets the tiles below sit above
+  // this element's own background and below everything on the page.
+  isolation: isolate;
+
+  // The tiled logo. Drawn here rather than on `.home` itself so it can be faded
+  // in: a background image cannot be, and the tiles arriving at full strength
+  // all at once is disorienting.
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: var(--rak-background-tile);
+    opacity: 0;
+    transition: opacity 400ms ease-in;
+  }
+
+  &.--tiles-loaded::before {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home::before {
+    transition: none;
+  }
 }
 
 .home__content {
