@@ -42,15 +42,37 @@ describe("isWeekDecided", () => {
   it("holds off while a game is still to finish", () => {
     expect(
       isWeekDecided(
-        week([player("Alice", ["yes"]), player("Bob", ["incomplete"])], 41),
+        week(
+          [
+            player("Alice", ["yes", "incomplete"]),
+            player("Bob", ["no", "incomplete"]),
+          ],
+          41,
+        ),
       ),
     ).toBe(false);
   });
 
-  it("holds off when a pick could not be scored", () => {
-    expect(isWeekDecided(week([player("Alice", ["yes", "error"])], 41))).toBe(
-      false,
-    );
+  it("holds off when a game could not be scored for anyone", () => {
+    expect(
+      isWeekDecided(
+        week(
+          [player("Alice", ["yes", "error"]), player("Bob", ["no", "error"])],
+          41,
+        ),
+      ),
+    ).toBe(false);
+  });
+
+  it("calls a week decided when one player alone left a pick blank", () => {
+    expect(
+      isWeekDecided(
+        week(
+          [player("Alice", ["yes", "no"]), player("Bob", ["yes", "error"])],
+          41,
+        ),
+      ),
+    ).toBe(true);
   });
 
   it("holds off until the Monday night tiebreaker is settled", () => {
