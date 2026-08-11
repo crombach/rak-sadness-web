@@ -1,6 +1,6 @@
 import debugLog from "../debugLog";
 import parsePick from "./parsePick";
-import findInconsistentSpreadGames from "./validateSpreads";
+import resolveGameSpreads, { GameSpread } from "./validateSpreads";
 
 export const TIEBREAKER_PICK_KEY = "Pts";
 
@@ -13,6 +13,8 @@ export type ParsedPicks = {
   proMatchups: Array<Set<string>>;
   /** Game key to the disagreement, for the games that cannot be scored. */
   inconsistentSpreadGames: Map<string, string>;
+  /** Game key to the spread the sheet settled on. */
+  gameSpreads: Map<string, GameSpread>;
 };
 
 /**
@@ -63,10 +65,8 @@ export default async function parsePicksWorkbook(
     .map((key) => matchups[key]);
   debugLog("matchups", { collegeMatchups, proMatchups });
 
-  const inconsistentSpreadGames = findInconsistentSpreadGames(rows, [
-    ...collegeKeys,
-    ...proKeys,
-  ]);
+  const { agreed: gameSpreads, unresolved: inconsistentSpreadGames } =
+    resolveGameSpreads(rows, [...collegeKeys, ...proKeys]);
   // Warned about in production, not just in a dev server: it means the workbook
   // needs fixing, and only whoever published it can do that.
   inconsistentSpreadGames.forEach((reason, gameKey) => {
@@ -81,5 +81,6 @@ export default async function parsePicksWorkbook(
     collegeMatchups,
     proMatchups,
     inconsistentSpreadGames,
+    gameSpreads,
   };
 }

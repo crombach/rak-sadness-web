@@ -4,6 +4,7 @@ import { LeagueResult } from "../../types/LeagueResult";
 import { Status } from "../../types/RakMadnessScores";
 import debugLog from "../debugLog";
 import parsePick from "./parsePick";
+import { GameSpread } from "./validateSpreads";
 
 export function getStatus(score: GameScore): Status {
   if (score.isInvalid) {
@@ -58,19 +59,33 @@ function unscoreable(
 /**
  * Takes the index rather than the games, so scoring builds it once per week.
  *
- * `spreadDisagreements` maps a position in `picks` to the workbook's own
- * contradiction about that game's spread. A game described two ways scores for
- * nobody, so the whole column comes back unscoreable rather than resolving the
- * contradiction one way and quietly handing out points on it.
+ * `spreadDisagreements` maps a position in `picks` to a contradiction the sheet
+ * could not settle, which leaves that game unscoreable for everybody.
+ * `gameSpreads` maps a position to the spread the sheet did settle on, which is
+ * what every row is scored at. A row that wrote a different number mistyped it,
+ * and the number is the game's rather than the player's, so the typo costs
+ * nobody the pick.
  */
 export function getPickResults(
   picks: Array<string>,
   resultsByTeam: Map<string, LeagueResult>,
   spreadDisagreements: Map<number, string> = new Map(),
+  gameSpreads: Map<number, GameSpread> = new Map(),
 ): Array<GameScore> {
   return picks.map((pick: string, index: number) => {
     // Parse the pick text to extract the selected team abbreviation and spread (if present).
-    const { teamAbbreviation: selectedTeam, spread } = parsePick(pick);
+    const { teamAbbreviation: selectedTeam, spread: writtenSpread } =
+      parsePick(pick);
+    // The spread belongs to the game, so a row that mistyped it is still scored
+    // at the number the rest of the sheet agreed on, from this row's side of the
+    // game. Only the typo is discarded, not the pick.
+    const gameSpread = gameSpreads.get(index);
+    const spread =
+      gameSpread != null && selectedTeam != null
+        ? selectedTeam === gameSpread.team
+          ? gameSpread.spread
+          : -gameSpread.spread
+        : writtenSpread;
     const hasSpread = spread !== 0;
 
     const spreadDisagreement = spreadDisagreements.get(index);

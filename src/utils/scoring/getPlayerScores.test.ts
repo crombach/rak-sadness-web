@@ -441,6 +441,14 @@ describe("getPlayerScores, league requests", () => {
 });
 
 describe("getPlayerScores, spreads the workbook contradicts", () => {
+  // One row out of many mistyped the spread. The number belongs to the game, so
+  // the rest of the sheet settles it and the typo costs nobody the pick.
+  const mistypedP1 = [
+    { Name: "Alice", C1: "OSU -3", P1: "BUF -7", P2: "DAL -3", Pts: 41 },
+    { Name: "Bob", C1: "OSU -3", P1: "BUF -7", P2: "DAL -3", Pts: 45 },
+    { Name: "Carol", C1: "OSU -3", P1: "BUF 7", P2: "DAL -3", Pts: 45 },
+  ];
+
   // KC's spread should be +7 against Alice's BUF -7. It is not, so there is no
   // way to know which number the pool was playing.
   const contradictoryP1 = [
@@ -477,6 +485,14 @@ describe("getPlayerScores, spreads the workbook contradicts", () => {
       proAgainstTheSpread: 1,
     });
     expect(alice?.pro[1].status).toBe("yes");
+  });
+
+  it("scores a lone mistyped spread at the number the sheet agreed on", async () => {
+    const result = await getPlayerScores(WEEK, picksBuffer(mistypedP1));
+
+    result.scores.forEach((score) => {
+      expect(score.pro[0].status).toBe("yes");
+    });
   });
 
   it("reports the workbook problem to the console", async () => {
