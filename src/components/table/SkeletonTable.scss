@@ -42,6 +42,12 @@
     background-color: white;
   }
 
+  // A real table draws this edge from its sticky player column, which the
+  // wireframe has no stand-in for, so the rank column would run into the next one.
+  td:nth-child(2) {
+    border-left: 2px solid var(--rak-primary-800);
+  }
+
   td,
   th {
     // `min-width: max-content` measures an empty cell as nothing, and the columns
