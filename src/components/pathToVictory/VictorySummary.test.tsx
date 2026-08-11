@@ -23,28 +23,25 @@ function under(title: string): Array<string> {
 const base = {
   kind: "paths" as const,
   player: "Alice",
-  remainingGameCount: 4,
-  pointsBehind: 2,
-  leader: "Rak",
   mustWin: [],
   hiddenRouteCount: 0,
   needsHelp: [],
 };
 
 describe("Standing", () => {
+  /** One game already settled and one still open, which is a week under way. */
   function player(name: string, total: number, pick: string): PlayerScore {
+    const result = (status: PlayerScore["pro"][number]["status"]) => ({
+      pick,
+      status,
+      explanation: { header: "", message: "" },
+    });
     return {
       name,
       score: { total, college: 0, pro: total, proAgainstTheSpread: 0 },
       tiebreaker: {},
       college: [],
-      pro: [
-        {
-          pick,
-          status: "incomplete",
-          explanation: { header: "", message: "" },
-        },
-      ],
+      pro: [result("yes"), result("incomplete")],
       status: { hasNoPicks: false, isKnockedOut: false },
     };
   }
@@ -88,6 +85,21 @@ describe("Standing", () => {
     ).toBeInTheDocument();
   });
 
+  it("names no leader before a game has been played", () => {
+    const fresh: RakMadnessScores = {
+      scores: scores.scores.map((it) => ({
+        ...it,
+        score: { total: 0, college: 0, pro: 0, proAgainstTheSpread: 0 },
+        pro: it.pro.map((pick) => ({ ...pick, status: "incomplete" as const })),
+      })),
+    };
+    render(<Standing scores={fresh} />);
+
+    expect(
+      screen.getByText("No finished games · 2 games still to play"),
+    ).toBeInTheDocument();
+  });
+
   it("has nothing to say before a week is scored", () => {
     const { container } = render(<Standing />);
 
@@ -128,7 +140,6 @@ describe("VictorySummary", () => {
     const result: PathsToVictory = {
       kind: "headline",
       player: "Alice",
-      remainingGameCount: 14,
       remainingPickCount: 13,
       minimumWins: 6,
       needsMondayNight: true,
@@ -167,6 +178,20 @@ describe("VictorySummary", () => {
       "P9BUF +1",
       "P11SF -6",
     ]);
+  });
+
+  it("says something for a player the games can no longer separate", () => {
+    const result: PathsToVictory = {
+      ...base,
+      mondayNight: { kind: "range", max: 45, contenders: ["Rak"] },
+    };
+    render(<VictorySummary result={result} />);
+
+    expect(
+      screen.getByText(
+        "No clean path to victory. The MNF points tiebreaker decides it.",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("writes a bounded Monday night range as a sentence", () => {

@@ -26,7 +26,7 @@ export default function ScoresNavbar({
   onShowPaths,
   isRefreshing,
   disabled = false,
-  isWeekLive = true,
+  isWeekLive,
 }: {
   view: ScoresView;
   onViewChange: (view: ScoresView) => void;
@@ -39,7 +39,7 @@ export default function ScoresNavbar({
    * Cleared once the week is over, when rescoring cannot change anything and
    * nobody has a path to victory left to work out.
    */
-  isWeekLive?: boolean;
+  isWeekLive: boolean;
 }) {
   // A week arrives loading, so these are usually on screen by the time it turns
   // out to be decided. Kept mounted for the length of the collapse so they animate

@@ -76,9 +76,8 @@ export default function getLeagueInfo(
   league: League,
   season?: number,
 ): Promise<LeagueInfo | null> {
-  // Two hooks can want the same calendar on the same render, and the season
-  // running now is the one they both ask for by name. One request answers both,
-  // and is dropped as it settles so the next ask is a fresh one.
+  // `useLeagueWeeks` and `getRegularSeasonWeekCount` ask for one season's calendar
+  // together. One request answers both, and is dropped as it settles.
   const key = `${league}:${season ?? "current"}`;
   const inFlight = requests.get(key);
   if (inFlight != null) {

@@ -25,9 +25,9 @@ sequences. `getPathsToVictory` is a second entry point, reading those results ba
   question below read it
 - `applyKnockouts`: who can still win, and why not
 - `getPathsToVictory`: the other half of `applyKnockouts`, for a player still
-  standing. Walks every way the contested games can fall, up to ten of them, and
-  reduces the winning ones to the games that must go right, the pool the rest come
-  from, and the Monday night totals that settle a dead heat on points. Where they
-  do not reduce to a pool it lists the ten routes asking least of the player and
-  counts the rest. Past ten it gives a floor from a closed form instead, since the
-  search doubles per game
+  standing, once ten or fewer games are left. Walks every way the contested ones
+  can fall, and reduces the winning ones to the games that must go right, the pool
+  the rest come from, and the Monday night totals that settle a dead heat on
+  points. Where they do not reduce to a pool it lists the ten routes asking least
+  of the player and counts the rest. Above ten games it gives a floor from a closed
+  form instead, since the search doubles per game

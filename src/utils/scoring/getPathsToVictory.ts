@@ -7,11 +7,14 @@ import {
 } from "../../types/PathsToVictory";
 import { PlayerScore, RakMadnessScores } from "../../types/RakMadnessScores";
 import { comparePlayerScoresOnMerit } from "./comparePlayerScores";
-import remainingGames, { RemainingGame } from "./remainingGames";
+import remainingGames, {
+  pickDifference,
+  RemainingGame,
+} from "./remainingGames";
 
 /**
- * The most contested games the routes are worked out for. The search doubles in
- * cost with each one, and a fuller slate is too long an answer to read anyway.
+ * The most games still to play the routes are worked out for. The search doubles
+ * in cost with each one, and a fuller slate is too long an answer to read anyway.
  */
 const MAX_SEARCHED_GAMES = 10;
 
@@ -183,12 +186,13 @@ function evaluate(
     : { kind: "onTotal", lo, hi, contenders: level };
 }
 
-/** Prefers a win, then the outcome that leaves the widest range of totals. */
-function betterOf(a: Verdict | undefined, b: Verdict): Verdict {
-  if (a == null || a.kind === "loss") return b;
-  if (b.kind === "loss" || a.kind === "win") return a;
-  if (b.kind === "win") return b;
-  return b.hi - b.lo > a.hi - a.lo ? b : a;
+/** Whether `a` takes the week on more totals than `b`: a win, or a wider range. */
+function isBetter(a: Verdict, b: Verdict): boolean {
+  if (a.kind === "loss") return false;
+  if (b.kind === "loss") return true;
+  if (a.kind === "win") return b.kind !== "win";
+  if (b.kind === "win") return false;
+  return a.hi - a.lo > b.hi - b.lo;
 }
 
 type RouteOutcome = {
@@ -198,35 +202,21 @@ type RouteOutcome = {
 };
 
 /**
- * What a set of the player's own picks landing is worth.
- *
- * `guaranteed` holds the games the player left blank against them, so a route that
- * survives it wins however those fall. Only when nothing survives that are they
- * allowed to fall the player's way, which is where `needsHelp` comes from.
+ * What a set of the player's own picks landing is worth however the games they left
+ * blank fall, which is a route that can be reported without conditions.
  */
-function verdictFor(
+function guaranteedVerdict(
   hits: number,
   luckOutcomes: Array<number>,
-  guaranteed: boolean,
   read: (outcome: number) => Verdict,
-): RouteOutcome {
+): Verdict {
   let lo = 0;
   let hi = Number.POSITIVE_INFINITY;
   const level = new Set<string>();
-  let best: Verdict | undefined;
-  let bestLuck = 0;
 
   for (const luck of luckOutcomes) {
     const verdict = read(hits | luck);
-    if (!guaranteed) {
-      const improved = betterOf(best, verdict);
-      if (improved !== best) {
-        best = improved;
-        bestLuck = luck;
-      }
-      continue;
-    }
-    if (verdict.kind === "loss") return { verdict: LOSS, luck: 0 };
+    if (verdict.kind === "loss") return LOSS;
     if (verdict.kind === "onTotal") {
       lo = Math.max(lo, verdict.lo);
       hi = Math.min(hi, verdict.hi);
@@ -234,17 +224,32 @@ function verdictFor(
     }
   }
 
-  if (!guaranteed) {
-    return { verdict: best ?? LOSS, luck: bestLuck };
+  if (lo > hi) return LOSS;
+  return level.size === 0
+    ? WIN
+    : { kind: "onTotal", lo, hi, contenders: [...level] };
+}
+
+/**
+ * The best those same picks can do once the games the player left blank are allowed
+ * to fall their way, and the way they have to fall, which is where `needsHelp` comes
+ * from.
+ */
+function bestVerdict(
+  hits: number,
+  luckOutcomes: Array<number>,
+  read: (outcome: number) => Verdict,
+): RouteOutcome {
+  let best: Verdict = LOSS;
+  let bestLuck = 0;
+  for (const luck of luckOutcomes) {
+    const verdict = read(hits | luck);
+    if (isBetter(verdict, best)) {
+      best = verdict;
+      bestLuck = luck;
+    }
   }
-  if (lo > hi) return { verdict: LOSS, luck: 0 };
-  return {
-    verdict:
-      level.size === 0
-        ? WIN
-        : { kind: "onTotal", lo, hi, contenders: [...level] },
-    luck: 0,
-  };
+  return { verdict: best, luck: bestLuck };
 }
 
 function outlookOf(verdict: Verdict, isSettled: boolean): MondayNightOutlook {
@@ -269,7 +274,6 @@ function sameOutlook(a: MondayNightOutlook, b: MondayNightOutlook): boolean {
   );
 }
 
-/** How many ways `size` of `count` games can be chosen. */
 function combinations(count: number, size: number): number {
   let total = 1;
   for (let step = 0; step < size; step++) {
@@ -321,11 +325,9 @@ function fewestWinsToCatch(
   let different = 0;
   let playerOnly = 0;
   games.forEach((game) => {
-    const mine = game.cells[playerIndex].team;
-    const theirs = game.cells[rivalIndex].team;
-    if (mine == null) return;
-    if (theirs == null) playerOnly += 1;
-    else if (theirs !== mine) different += 1;
+    const difference = pickDifference(game, playerIndex, rivalIndex);
+    if (difference === "opposed") different += 1;
+    else if (difference === "playerOnly") playerOnly += 1;
   });
 
   const target = gap + different + (clear ? 1 : 0);
@@ -347,15 +349,16 @@ function headline(
       fewestWinsToCatch(playerIndex, rival.index, games, gap, clear);
     return { toLevel: at(false), toClear: at(true) };
   });
-  if (counts.some((count) => count.toLevel == null)) {
-    return eliminated(player);
-  }
 
-  const minimumWins = Math.max(...counts.map((count) => count.toLevel ?? 0));
+  // `toLevel` is only absent where `applyKnockouts` has already knocked the player
+  // out on total score, which `getPathsToVictory` answers before reaching here.
+  const minimumWins = Math.max(
+    0,
+    ...counts.map((count) => count.toLevel).filter((count) => count != null),
+  );
   return {
     kind: "headline",
     player: player.name,
-    remainingGameCount: games.length,
     remainingPickCount: games.filter(
       (game) => game.cells[playerIndex].team != null,
     ).length,
@@ -365,6 +368,144 @@ function headline(
     needsMondayNight: counts.some(
       (count) => count.toClear == null || count.toClear > minimumWins,
     ),
+  };
+}
+
+type Route = { hits: number; outcome: RouteOutcome };
+
+type Search = { minimal: Array<Route>; outrightAt?: number };
+
+/**
+ * The sets of the player's own picks that take the week, each one minimal.
+ *
+ * `ordered` is read fewest games first, so a set holding a winner already found adds
+ * nothing. It is still read while `outrightAt` is open, since a bigger set can win
+ * outright where the one inside it only draws level.
+ */
+function search(
+  ordered: Array<number>,
+  luckOutcomes: Array<number>,
+  guaranteed: boolean,
+  read: (outcome: number) => Verdict,
+): Search {
+  const minimal: Array<Route> = [];
+  let outrightAt: number | undefined;
+  for (const hits of ordered) {
+    const isRedundant = minimal.some(
+      (found) => (found.hits & hits) === found.hits,
+    );
+    if (isRedundant && outrightAt != null) continue;
+    const outcome = guaranteed
+      ? { verdict: guaranteedVerdict(hits, luckOutcomes, read), luck: 0 }
+      : bestVerdict(hits, luckOutcomes, read);
+    if (outcome.verdict.kind === "loss") continue;
+    if (outcome.verdict.kind === "win" && outrightAt == null) {
+      outrightAt = bitCount(hits);
+    }
+    if (!isRedundant) minimal.push({ hits, outcome });
+  }
+  return { minimal, outrightAt };
+}
+
+/**
+ * The games the player left blank, and who has to miss in each for `luck` to land.
+ *
+ * A bit set in `luck` is the game's coverer covering, so every other team a player
+ * still standing picked there has to miss. A bit clear is the coverer missing.
+ */
+function uncontrolledGames(
+  contested: Array<RemainingGame>,
+  live: Array<number>,
+  coverers: Array<string>,
+  luckMask: number,
+  luck: number,
+): Array<UncontrolledGame> {
+  return contested
+    .map((game, bit): UncontrolledGame | null => {
+      const mask = 1 << bit;
+      if ((luckMask & mask) === 0) return null;
+      const covers = (luck & mask) !== 0;
+      const teams = live
+        .map((index) => game.cells[index].team)
+        .filter((team) => team != null);
+      return {
+        label: game.label,
+        needsToMiss: [
+          ...new Set(
+            covers
+              ? teams.filter((team) => team !== coverers[bit])
+              : [coverers[bit]],
+          ),
+        ],
+      };
+    })
+    .filter((game) => game != null);
+}
+
+type RouteShape = {
+  mustWin: Array<RemainingPick>;
+  pool?: { choose: number; games: Array<RemainingPick> };
+  routes?: Array<VictoryRoute>;
+  hiddenRouteCount: number;
+  mondayNight?: MondayNightOutlook;
+};
+
+/** The games every route needs, and the ways past them: one pool, or a list. */
+function reduceRoutes(
+  minimal: Array<Route>,
+  dropped: number,
+  contested: Array<RemainingGame>,
+  playerIndex: number,
+  isMondayNightSettled: boolean,
+): RouteShape {
+  const mustWinMask = minimal.reduce(
+    (shared, route) => shared & route.hits,
+    minimal[0].hits,
+  );
+  const mustWin = picksIn(mustWinMask, contested, playerIndex);
+  const rests = minimal.map((route) => ({
+    mask: route.hits & ~mustWinMask,
+    outlook: outlookOf(route.outcome.verdict, isMondayNightSettled),
+  }));
+  const isOneOutlook = rests.every((rest) =>
+    sameOutlook(rest.outlook, rests[0].outlook),
+  );
+  const sizes = new Set(rests.map((rest) => bitCount(rest.mask)));
+  const poolMask = rests.reduce((all, rest) => all | rest.mask, 0);
+  const choose = bitCount(rests[0].mask);
+  // Every way of choosing that many of the pool is a route only when there are as
+  // many routes as there are ways, since each route is a different one of them.
+  const isPool =
+    dropped === 0 &&
+    isOneOutlook &&
+    sizes.size === 1 &&
+    rests.length === combinations(bitCount(poolMask), choose);
+
+  if (isPool) {
+    return {
+      mustWin,
+      pool:
+        choose > 0
+          ? { choose, games: picksIn(poolMask, contested, playerIndex) }
+          : undefined,
+      hiddenRouteCount: 0,
+      mondayNight: rests[0].outlook,
+    };
+  }
+
+  // Fewest games first, so the routes asking least of the player are the ones kept
+  // and the ones shown before the rest are unfolded.
+  const routes: Array<VictoryRoute> = rests
+    .map((rest) => ({
+      games: picksIn(rest.mask, contested, playerIndex),
+      mondayNight: rest.outlook,
+    }))
+    .sort((a, b) => a.games.length - b.games.length);
+  return {
+    mustWin,
+    routes: routes.slice(0, MAX_LISTED_ROUTES),
+    hiddenRouteCount: Math.max(0, routes.length - MAX_LISTED_ROUTES) + dropped,
+    mondayNight: isOneOutlook ? rests[0].outlook : undefined,
   };
 }
 
@@ -399,13 +540,14 @@ export default function getPathsToVictory(
   // A game every live player picked the same way moves all their scores together,
   // in the total and in both tiebreaker tiers, so it cannot change the order.
   const games = remainingGames(players);
+  if (games.length > MAX_SEARCHED_GAMES) {
+    return headline(player, playerIndex, rivals, games);
+  }
+
   const live = [playerIndex, ...rivals.map((it) => it.index)];
   const contested = games.filter(
     (game) => new Set(live.map((index) => game.cells[index].team)).size > 1,
   );
-  if (contested.length > MAX_SEARCHED_GAMES) {
-    return headline(player, playerIndex, rivals, games);
-  }
 
   // The bit for a game reads as the player's own pick landing, or where they have
   // no pick, as a live rival's. A contested game always holds one of those.
@@ -435,64 +577,34 @@ export default function getPathsToVictory(
     (a, b) => bitCount(a) - bitCount(b) || a - b,
   );
   const luckOutcomes = subMasks(luckMask);
-  const search = (guaranteed: boolean) => {
-    const minimal: Array<{ hits: number; outcome: RouteOutcome }> = [];
-    let outrightAt: number | undefined;
-    for (const hits of ordered) {
-      const isRedundant = minimal.some(
-        (found) => (found.hits & hits) === found.hits,
-      );
-      if (isRedundant && outrightAt != null) continue;
-      const outcome = verdictFor(hits, luckOutcomes, guaranteed, read);
-      if (outcome.verdict.kind === "loss") continue;
-      if (outcome.verdict.kind === "win" && outrightAt == null) {
-        outrightAt = bitCount(hits);
-      }
-      if (!isRedundant) minimal.push({ hits, outcome });
-    }
-    return { minimal, outrightAt };
-  };
 
   // Held against the player first, so a route that survives every way the games
   // they left blank can fall is reported without conditions.
-  let found = search(true);
+  let { minimal, outrightAt } = search(ordered, luckOutcomes, true, read);
   let needsHelp: Array<UncontrolledGame> = [];
   let dropped = 0;
-  if (found.minimal.length === 0 && luckMask !== 0) {
-    found = search(false);
-    const [best] = found.minimal;
+  if (minimal.length === 0 && luckMask !== 0) {
+    const helped = search(ordered, luckOutcomes, false, read);
+    const [best] = helped.minimal;
     if (best != null) {
-      // The games below are written once for every route shown, so the routes
-      // wanting those to fall some other way are counted rather than listed.
-      const kept = found.minimal.filter(
+      // `needsHelp` is written once for every route shown, so the routes wanting
+      // those games to fall some other way are counted rather than listed.
+      const kept = helped.minimal.filter(
         (route) => route.outcome.luck === best.outcome.luck,
       );
-      dropped = found.minimal.length - kept.length;
-      found = { ...found, minimal: kept };
-      needsHelp = contested
-        .map((game, bit): UncontrolledGame | null => {
-          const mask = 1 << bit;
-          if ((luckMask & mask) === 0) return null;
-          const covers = (best.outcome.luck & mask) !== 0;
-          const teams = live
-            .map((index) => game.cells[index].team)
-            .filter((team) => team != null);
-          return {
-            label: game.label,
-            needsToMiss: [
-              ...new Set(
-                covers
-                  ? teams.filter((team) => team !== coverers[bit])
-                  : [coverers[bit]],
-              ),
-            ],
-          };
-        })
-        .filter((game) => game != null);
+      minimal = kept;
+      dropped = helped.minimal.length - kept.length;
+      outrightAt = helped.outrightAt;
+      needsHelp = uncontrolledGames(
+        contested,
+        live,
+        coverers,
+        luckMask,
+        best.outcome.luck,
+      );
     }
   }
 
-  const { minimal, outrightAt } = found;
   if (minimal.length === 0) {
     return eliminated(player);
   }
@@ -507,64 +619,17 @@ export default function getPathsToVictory(
     return { kind: "clinched", player: player.name };
   }
 
-  const mustWinMask = minimal.reduce(
-    (shared, route) => shared & route.hits,
-    minimal[0].hits,
-  );
-  const rests = minimal.map((route) => ({
-    mask: route.hits & ~mustWinMask,
-    outlook: outlookOf(route.outcome.verdict, isMondayNightSettled),
-  }));
-  const isOneOutlook = rests.every((rest) =>
-    sameOutlook(rest.outlook, rests[0].outlook),
-  );
-  const sizes = new Set(rests.map((rest) => bitCount(rest.mask)));
-  const poolMask = rests.reduce((all, rest) => all | rest.mask, 0);
-  const choose = bitCount(rests[0].mask);
-  // Every way of choosing that many of the pool is a route only when there are as
-  // many routes as there are ways, since each route is a different one of them.
-  const isPool =
-    dropped === 0 &&
-    isOneOutlook &&
-    sizes.size === 1 &&
-    rests.length === combinations(bitCount(poolMask), choose);
-
-  const leader = players[0];
-  const base = {
-    kind: "paths" as const,
+  return {
+    kind: "paths",
     player: player.name,
-    remainingGameCount: games.length,
-    pointsBehind: Math.max(0, leader.score.total - player.score.total),
-    leader: leader.name,
-    mustWin: picksIn(mustWinMask, contested, playerIndex),
+    ...reduceRoutes(
+      minimal,
+      dropped,
+      contested,
+      playerIndex,
+      isMondayNightSettled,
+    ),
     outrightAt,
     needsHelp,
-  };
-
-  if (isPool) {
-    return {
-      ...base,
-      pool:
-        choose > 0
-          ? { choose, games: picksIn(poolMask, contested, playerIndex) }
-          : undefined,
-      hiddenRouteCount: 0,
-      mondayNight: rests[0].outlook,
-    };
-  }
-
-  // Fewest games first, so the routes asking least of the player are the ones kept
-  // and the ones shown before the rest are unfolded.
-  const routes: Array<VictoryRoute> = rests
-    .map((rest) => ({
-      games: picksIn(rest.mask, contested, playerIndex),
-      mondayNight: rest.outlook,
-    }))
-    .sort((a, b) => a.games.length - b.games.length);
-  return {
-    ...base,
-    routes: routes.slice(0, MAX_LISTED_ROUTES),
-    hiddenRouteCount: Math.max(0, routes.length - MAX_LISTED_ROUTES) + dropped,
-    mondayNight: isOneOutlook ? rests[0].outlook : undefined,
   };
 }

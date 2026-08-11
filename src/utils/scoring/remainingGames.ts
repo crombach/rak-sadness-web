@@ -45,6 +45,27 @@ function remainingGameIndices(
 }
 
 /**
+ * What one game still to be played is worth to a player against a rival.
+ *
+ * `opposed` swings two points, since the point one takes is one the other does not.
+ * `playerOnly` swings one, and covers a game the rival left blank as well as one
+ * only the player picked. `none` is a game the player cannot score.
+ */
+export type PickDifference = "none" | "opposed" | "playerOnly";
+
+export function pickDifference(
+  game: RemainingGame,
+  playerIndex: number,
+  rivalIndex: number,
+): PickDifference {
+  const mine = game.cells[playerIndex].team;
+  if (mine == null) return "none";
+  const theirs = game.cells[rivalIndex].team;
+  if (theirs == null) return "playerOnly";
+  return theirs === mine ? "none" : "opposed";
+}
+
+/**
  * The games still to be played, read a column at a time.
  *
  * Both halves of the app that ask what is still open read them this way: the

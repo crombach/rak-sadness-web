@@ -16,8 +16,7 @@ import isWeekDecided from "../utils/scoring/isWeekDecided";
 
 type AppData = ReturnType<typeof useLeagueWeeks> &
   ReturnType<typeof usePlayerScores> &
-  ReturnType<typeof usePicksSeasons> &
-  ReturnType<typeof useCurrentSeason> & {
+  ReturnType<typeof usePicksSeasons> & {
     /**
      * The `WeekInfo` for a week number, or undefined if the season has no such
      * week. Always the calendar's own object: the week picker compares options by
@@ -126,21 +125,20 @@ export function AppDataContextProvider({
   const { seasonYear } = leagueWeeks;
   const selectableSeasons = useMemo(() => {
     const offered = new Set(picksSeasons.seasons ?? []);
-    if (currentSeason.currentSeason != null) {
-      offered.add(currentSeason.currentSeason);
+    if (currentSeason != null) {
+      offered.add(currentSeason);
     }
     if (offered.size === 0 && seasonYear != null) {
       offered.add(seasonYear);
     }
     return [...offered].sort((a, b) => b - a);
-  }, [picksSeasons.seasons, currentSeason.currentSeason, seasonYear]);
+  }, [picksSeasons.seasons, currentSeason, seasonYear]);
 
   const value = useMemo(
     () => ({
       ...leagueWeeks,
       ...playerScores,
       ...picksSeasons,
-      ...currentSeason,
       findWeek,
       setSelectedSeason,
       requestedSeason,
@@ -150,7 +148,6 @@ export function AppDataContextProvider({
       leagueWeeks,
       playerScores,
       picksSeasons,
-      currentSeason,
       findWeek,
       requestedSeason,
       selectableSeasons,

@@ -6,7 +6,7 @@ import {
   UncontrolledGame,
   VictoryRoute,
 } from "../../types/PathsToVictory";
-import { RakMadnessScores } from "../../types/RakMadnessScores";
+import { PlayerScore, RakMadnessScores } from "../../types/RakMadnessScores";
 import remainingGames from "../../utils/scoring/remainingGames";
 import Button from "../button/Button";
 import "./VictorySummary.scss";
@@ -14,10 +14,24 @@ import "./VictorySummary.scss";
 /** How many routes stand open, the rest being a click away. */
 const ROUTES_SHOWN_AT_FIRST = 4;
 
+type PathsResult = Extract<PathsToVictory, { kind: "paths" }>;
+
+/** The outlooks worth a sentence: a week won outright says so on its own line. */
+type DecidingOutlook = Exclude<MondayNightOutlook, { kind: "notNeeded" }>;
+
 const NAMES = new Intl.ListFormat("en-US");
 
 function plural(count: number, noun: string): string {
   return `${count} ${noun}${count === 1 ? "" : "s"}`;
+}
+
+/** Whether any pick has been settled, which is when a standing means anything. */
+function hasKickedOff(players: Array<PlayerScore>): boolean {
+  return players.some((player) =>
+    [...player.college, ...player.pro].some(
+      (pick) => pick.status === "yes" || pick.status === "no",
+    ),
+  );
 }
 
 /**
@@ -44,11 +58,13 @@ export function Standing({
   const behind = chosen != null ? top - chosen.score.total : null;
   return (
     <p className="victory__standing">
-      {behind == null
-        ? lead
-        : behind > 0
-          ? `${plural(behind, "point")} behind ${leader.name}`
-          : "Tied for the lead"}
+      {!hasKickedOff(players)
+        ? "No finished games"
+        : behind == null
+          ? lead
+          : behind > 0
+            ? `${plural(behind, "point")} behind ${leader.name}`
+            : "Tied for the lead"}
       {" · "}
       {plural(remainingGames(players).length, "game")} still to play
     </p>
@@ -64,9 +80,17 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function Picks({ games }: { games: Array<RemainingPick> }) {
+function Picks({
+  games,
+  className,
+}: {
+  games: Array<RemainingPick>;
+  className?: string;
+}) {
   return (
-    <ul className="victory__picks">
+    <ul
+      className={className ? `victory__picks ${className}` : "victory__picks"}
+    >
       {games.map((game) => (
         <li key={game.label} className="victory__pick">
           <span className="victory__pick-label">{game.label}</span>
@@ -78,12 +102,9 @@ function Picks({ games }: { games: Array<RemainingPick> }) {
 }
 
 /** The MNF points that win, named the way the scoreboard column is. */
-function mondayNightSentence(outlook: MondayNightOutlook): string | null {
+function mondayNightSentence(outlook: DecidingOutlook): string {
   if (outlook.kind === "settled") {
     return "MNF points are already final, so the games above settle it.";
-  }
-  if (outlook.kind === "notNeeded") {
-    return "Takes the week outright, whatever the MNF points come to.";
   }
   const { min, max } = outlook;
   const points =
@@ -97,33 +118,41 @@ function mondayNightSentence(outlook: MondayNightOutlook): string | null {
   return `${points} to beat ${NAMES.format(outlook.contenders)}.`;
 }
 
+/** Whether anything below the outright line asks the player for a game. */
+function hasGames(result: PathsResult): boolean {
+  return (
+    result.mustWin.length > 0 ||
+    result.pool != null ||
+    (result.routes?.length ?? 0) > 0
+  );
+}
+
+/** The fewest games any route asks for, which the outright line is measured on. */
+function fewestWins(result: PathsResult): number {
+  const fromPool = result.pool?.choose ?? 0;
+  const fromRoutes = result.routes?.length
+    ? Math.min(...result.routes.map((route) => route.games.length))
+    : 0;
+  return result.mustWin.length + Math.max(fromPool, fromRoutes);
+}
+
 /**
  * Winning the week on points alone leads, since it settles the tiebreaker before
  * the reader has to think about it.
  */
-function Outright({
-  outlook,
-  outrightAt,
-  minimumWins,
-  hasGames,
-}: {
-  outlook?: MondayNightOutlook;
-  outrightAt?: number;
-  minimumWins: number;
-  hasGames: boolean;
-}) {
+function Outright({ result }: { result: PathsResult }) {
   const lines = [
-    outlook?.kind === "notNeeded"
+    result.mondayNight?.kind === "notNeeded"
       ? "Takes the week outright, whatever the MNF points come to."
       : null,
     // Only worth saying where it asks for more than the routes below already do.
-    outrightAt != null && outrightAt > minimumWins
-      ? `Winning ${plural(outrightAt, "game")} takes it outright.`
+    result.outrightAt != null && result.outrightAt > fewestWins(result)
+      ? `Winning ${plural(result.outrightAt, "game")} takes it outright.`
       : null,
   ].filter((line) => line != null);
   if (lines.length === 0) return null;
   // The last of them hands over to the sections under it, which ask for less.
-  const last = hasGames ? " Otherwise:" : "";
+  const last = hasGames(result) ? " Otherwise:" : "";
   return lines.map((line, index) => (
     <p key={line} className="victory__line">
       {line}
@@ -133,14 +162,10 @@ function Outright({
 }
 
 function MondayNight({ outlook }: { outlook?: MondayNightOutlook }) {
-  const sentence =
-    outlook != null && outlook.kind !== "notNeeded"
-      ? mondayNightSentence(outlook)
-      : null;
-  if (sentence == null) return null;
+  if (outlook == null || outlook.kind === "notNeeded") return null;
   return (
     <Section title="MNF points">
-      <p className="victory__line">{sentence}</p>
+      <p className="victory__line">{mondayNightSentence(outlook)}</p>
     </Section>
   );
 }
@@ -208,11 +233,14 @@ function Routes({
   );
 }
 
-function Message({ heading, body }: { heading: string; body?: string }) {
+function Message({ lines }: { lines: Array<string> }) {
   return (
     <div className="victory__message">
-      <p className="victory__heading">{heading}</p>
-      {body && <p className="victory__line">{body}</p>}
+      {lines.map((line) => (
+        <p key={line} className="victory__line">
+          {line}
+        </p>
+      ))}
     </div>
   );
 }
@@ -229,19 +257,27 @@ export default function VictorySummary({
 
   if (result.kind === "eliminated") {
     return (
-      <Message
-        heading={`${result.player} cannot win this week.`}
-        body={result.explanation}
-      />
+      <div className="victory">
+        <Message
+          lines={[
+            `${result.player} cannot win this week.`,
+            ...(result.explanation ? [result.explanation] : []),
+          ]}
+        />
+      </div>
     );
   }
 
   if (result.kind === "clinched") {
     return (
-      <Message
-        heading={`${result.player} has already won the week.`}
-        body="Nothing still to be played can take it away."
-      />
+      <div className="victory">
+        <Message
+          lines={[
+            `${result.player} has already won the week.`,
+            "Nothing still to be played can take it away.",
+          ]}
+        />
+      </div>
     );
   }
 
@@ -249,44 +285,30 @@ export default function VictorySummary({
     return (
       <div className="victory">
         <Message
-          heading={`${result.player} needs at least ${result.minimumWins} of their ${result.remainingPickCount} remaining picks.`}
-          body={
-            result.needsMondayNight
-              ? "That is only enough to draw level, so the MNF points tiebreaker would still decide it."
-              : undefined
-          }
+          lines={[
+            `${result.player} needs at least ${result.minimumWins} of their ${result.remainingPickCount} remaining picks.`,
+            ...(result.needsMondayNight
+              ? [
+                  "That is only enough to draw level, so the MNF points tiebreaker would still decide it.",
+                ]
+              : []),
+          ]}
         />
         {/* Why there is nothing below it, in the place the paths count theirs. */}
-        <p className="victory__standing">
+        <p className="victory__note">
           Detailed paths are worked out once ten games are left.
         </p>
       </div>
     );
   }
 
-  const fromPool = result.pool?.choose ?? 0;
-  const fromRoutes = result.routes?.length
-    ? Math.min(...result.routes.map((route) => route.games.length))
-    : 0;
-  const minimumWins = result.mustWin.length + Math.max(fromPool, fromRoutes);
-
-  const hasGames =
-    result.mustWin.length > 0 || result.pool != null || result.routes != null;
-
   return (
     <div className="victory">
-      <Outright
-        outlook={result.mondayNight}
-        outrightAt={result.outrightAt}
-        minimumWins={minimumWins}
-        hasGames={hasGames}
-      />
+      <Outright result={result} />
 
       {result.mustWin.length > 0 && (
         <Section title="Must win">
-          <div className="victory__must-win">
-            <Picks games={result.mustWin} />
-          </div>
+          <Picks className="victory__must-win" games={result.mustWin} />
         </Section>
       )}
 
@@ -298,18 +320,18 @@ export default function VictorySummary({
         </Section>
       )}
 
-      {result.routes && (
+      {result.routes != null && result.routes.length > 0 && (
         <Routes
-          key={result.player}
           title={result.mustWin.length > 0 ? "Then one of" : "One of"}
           routes={result.routes}
           showMondayNight={result.mondayNight == null}
         />
       )}
 
-      {result.mustWin.length === 0 && !result.pool && !result.routes && (
+      {/* A picked player always reads a sentence, whatever the search turned up. */}
+      {!hasGames(result) && (
         <p className="victory__line">
-          Nothing left to win. The tiebreaker below decides it.
+          No clean path to victory. The MNF points tiebreaker decides it.
         </p>
       )}
 
@@ -318,7 +340,7 @@ export default function VictorySummary({
 
       {/* Worked out, then left off, so the count is what the reader is missing. */}
       {result.hiddenRouteCount > 0 && (
-        <p className="victory__standing">
+        <p className="victory__note">
           {plural(result.hiddenRouteCount, "other path")} found but not shown.
         </p>
       )}

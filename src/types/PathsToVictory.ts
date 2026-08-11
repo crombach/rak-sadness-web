@@ -59,8 +59,7 @@ export type PathsToVictory =
   | {
       kind: "headline";
       player: string;
-      remainingGameCount: number;
-      /** How many of those games the player has a pick in. */
+      /** How many of the games still to be played the player has a pick in. */
       remainingPickCount: number;
       minimumWins: number;
       /** Whether the player only draws level at that count, leaving Monday night to decide. */
@@ -69,10 +68,6 @@ export type PathsToVictory =
   | {
       kind: "paths";
       player: string;
-      remainingGameCount: number;
-      /** How many points behind `leader` the player is now, zero when they lead. */
-      pointsBehind: number;
-      leader: string;
       /** Games every route needs. */
       mustWin: Array<RemainingPick>;
       /** Set when the routes past `mustWin` are exactly "any `choose` of these". */
@@ -81,7 +76,7 @@ export type PathsToVictory =
       routes?: Array<VictoryRoute>;
       /** Routes past the ones `routes` lists. */
       hiddenRouteCount: number;
-      /** Set when every route ends the same way, which is when `routes` is absent. */
+      /** Set when every route ends the same way, whether or not `routes` lists them. */
       mondayNight?: MondayNightOutlook;
       /** The fewest wins that take the week whatever Monday night's total is. */
       outrightAt?: number;

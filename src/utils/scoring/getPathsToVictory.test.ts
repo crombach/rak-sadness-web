@@ -209,18 +209,6 @@ describe("getPathsToVictory, the routes", () => {
     ]);
     expect(result.hiddenRouteCount).toBe(0);
   });
-
-  it("counts how far behind the leader the player is", () => {
-    const scores = week([
-      player({ name: "Alice", total: 3, pro: [pick("KC -3")] }),
-      player({ name: "Bob", total: 2, pro: [pick("DEN +3")] }),
-    ]);
-
-    const result = paths(getPathsToVictory(scores, "Bob"));
-    expect(result.leader).toBe("Alice");
-    expect(result.pointsBehind).toBe(1);
-    expect(result.remainingGameCount).toBe(1);
-  });
 });
 
 describe("getPathsToVictory, the Monday night tiebreaker", () => {
@@ -413,6 +401,40 @@ describe("getPathsToVictory, games out of the player's hands", () => {
     expect(result.needsHelp).toEqual([{ label: "P1", needsToMiss: ["KC"] }]);
   });
 
+  it("counts the routes wanting those games to fall some other way", () => {
+    // Winning P1 is enough, and so is winning P3, but the two need P2 and P4 to
+    // fall different ways. Only the P1 route is spelled out, since `needsHelp` is
+    // written once for every route shown, so the other is counted instead.
+    const scores = week([
+      player({
+        name: "Alice",
+        total: 1,
+        pro: [pick("KC -3"), pick(""), pick("SEA +6"), pick("")],
+      }),
+      player({
+        name: "Bob",
+        total: 1,
+        pro: [pick("KC -3"), pick("BUF -1"), pick(""), pick("CHI -2")],
+      }),
+      player({
+        name: "Carl",
+        total: 1,
+        pro: [pick("DEN +3"), pick("NYJ +1"), pick(""), pick("")],
+      }),
+    ]);
+
+    const result = paths(getPathsToVictory(scores, "Alice"));
+    expect(result.mustWin).toEqual([{ label: "P1", pick: "KC -3" }]);
+    expect(result.routes).toEqual([
+      { games: [], mondayNight: { kind: "notNeeded" } },
+    ]);
+    expect(result.hiddenRouteCount).toBe(1);
+    expect(result.needsHelp).toEqual([
+      { label: "P2", needsToMiss: ["BUF"] },
+      { label: "P4", needsToMiss: ["CHI"] },
+    ]);
+  });
+
   it("leaves it empty where a route wins however that game falls", () => {
     const scores = week([
       player({ name: "Alice", total: 5, pro: [pick("")] }),
@@ -455,16 +477,35 @@ describe("getPathsToVictory, weeks too big to search", () => {
     expect(getPathsToVictory(scores, "Alice")).toEqual({
       kind: "headline",
       player: "Alice",
-      remainingGameCount: 11,
       remainingPickCount: 11,
       minimumWins: 8,
       needsMondayNight: true,
     });
   });
 
-  it("counts the games in dispute, not the games left", () => {
-    // Eleven games left, ten of them picked the same way by both, so only one
-    // can change the order and the routes are worth working out.
+  it("leaves Monday night out where winning enough clears every rival", () => {
+    // The same eleven games with Alice four points back. Eight of them put her on
+    // eight and Bob on seven, so the count that draws her level is the count that
+    // takes the week, and the guesses never come into it.
+    const count = 11;
+    const scores = week([
+      player({ name: "Alice", total: 0, pro: opposed(count, "A", "-3") }),
+      player({ name: "Bob", total: 4, pro: opposed(count, "B", "+3") }),
+    ]);
+
+    expect(getPathsToVictory(scores, "Alice")).toEqual({
+      kind: "headline",
+      player: "Alice",
+      remainingPickCount: 11,
+      minimumWins: 8,
+      needsMondayNight: false,
+    });
+  });
+
+  it("counts the games left, whether or not they are in dispute", () => {
+    // Eleven games left, ten of them picked the same way by both. Only one can
+    // change the order, and a week this far out still gives a floor rather than
+    // routes.
     const agreed = Array.from({ length: 10 }, (_, index) =>
       pick(`S${index} -3`),
     );
@@ -473,8 +514,7 @@ describe("getPathsToVictory, weeks too big to search", () => {
       player({ name: "Bob", total: 1, pro: [...agreed, pick("DEN +3")] }),
     ]);
 
-    const result = paths(getPathsToVictory(scores, "Alice"));
-    expect(labels(result.mustWin)).toEqual(["P11"]);
+    expect(getPathsToVictory(scores, "Alice")?.kind).toBe("headline");
   });
 
   it("works the routes out at ten", () => {

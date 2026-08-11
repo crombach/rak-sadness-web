@@ -1,13 +1,10 @@
+// Whatever the answer turns out to be, it plays in under a dialog already growing
+// to hold it.
 .victory {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
 
-// Whichever of the two the answer turns out to be, it plays in under a dialog
-// already growing to hold it.
-.victory,
-.victory__message {
   @media (prefers-reduced-motion: no-preference) {
     animation: victory-in 220ms ease both;
   }
@@ -20,10 +17,11 @@
   }
 }
 
-.victory__standing {
+.victory__note {
   margin: 0;
   color: var(--rak-text-tertiary);
   font-size: 0.875rem;
+  font-style: italic;
 }
 
 .victory__section {
@@ -32,6 +30,7 @@
   gap: 8px;
 }
 
+.victory__standing,
 .victory__section-title {
   margin: 0;
   color: var(--rak-text-tertiary);
@@ -87,9 +86,6 @@
 
 .victory__route,
 .victory__must-win {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
   padding: 8px 10px;
   // Drawn on the left alone, so a stack of routes reads as a list of alternatives
   // rather than as a stack of boxes.
@@ -97,10 +93,16 @@
   background-color: var(--rak-level1);
 }
 
-// Green against the routes' gold, since these games are what has to happen
-// rather than one way among several of getting there.
+.victory__route {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+// Red against the routes' gold, since these games are what has to happen rather
+// than one way among several of getting there.
 .victory__must-win {
-  border-inline-start-color: var(--rak-success-500);
+  border-inline-start-color: var(--rak-danger-500);
 }
 
 // A soft button takes the color around it, so the gold is set here rather than by
@@ -126,16 +128,8 @@
   font-size: 0.875rem;
 }
 
-// No padding of its own, so it starts where a summary of routes would.
 .victory__message {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-}
-
-.victory__heading {
-  margin: 0;
-  color: var(--rak-text);
-  font-size: 0.9375rem;
-  font-weight: 600;
+  gap: 8px;
 }

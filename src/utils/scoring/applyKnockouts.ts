@@ -1,5 +1,8 @@
 import { PlayerScore } from "../../types/RakMadnessScores";
-import remainingGames, { RemainingGame } from "./remainingGames";
+import remainingGames, {
+  pickDifference,
+  RemainingGame,
+} from "./remainingGames";
 
 function ifNotOne(num: number, otherwise: string): string {
   return num !== 1 ? otherwise : "";
@@ -20,11 +23,7 @@ type PairDifferences = {
 
 /**
  * How many of the games still to be played these two players have picked
- * differently, which is the most ground the active player can still make up.
- *
- * A game the opponent left blank counts, because the active player can win a point
- * there that the opponent cannot. Only the active player's own blank is skipped:
- * neither of them can score it.
+ * differently, split by the tiebreaker tier each one can move.
  */
 function countDifferences(
   games: Array<RemainingGame>,
@@ -37,8 +36,8 @@ function countDifferences(
     differentProPicksWithSpreads: 0,
   };
   games.forEach((game) => {
+    if (pickDifference(game, activeIndex, oppIndex) === "none") return;
     const mine = game.cells[activeIndex];
-    if (mine.team == null || mine.team === game.cells[oppIndex].team) return;
     if (game.league === "college") {
       differences.differentCollegePicks += 1;
       return;

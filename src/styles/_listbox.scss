@@ -1,0 +1,35 @@
+// The shape every Base UI popup list in the app shares: the season and week
+// selects on the home page, and the player combobox in the path to victory
+// dialog. Mixins only, so this emits no CSS of its own however many files pull it
+// in. Each caller adds what makes its own list different.
+
+@mixin listbox-popup {
+  box-sizing: border-box;
+  min-width: var(--anchor-width);
+  overflow-y: auto;
+  padding: 6px 0;
+  background-color: var(--rak-on-solid);
+  box-shadow: var(--rak-shadow-md);
+}
+
+@mixin listbox-item {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 4px 12px;
+  cursor: pointer;
+
+  &[data-highlighted] {
+    background-color: var(--rak-level1);
+  }
+
+  &[data-selected] {
+    background-color: var(--rak-neutral-200);
+  }
+
+  // A rule between rows rather than around them, so a long list reads down
+  // without a line closing the popup off from its own edge.
+  & + & {
+    border-top: 1px solid var(--rak-neutral-200);
+  }
+}

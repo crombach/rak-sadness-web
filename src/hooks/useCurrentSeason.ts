@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { League } from "../types/League";
 import getLeagueInfo from "../utils/getLeagueInfo";
 
@@ -36,5 +36,5 @@ export default function useCurrentSeason() {
     };
   }, []);
 
-  return useMemo(() => ({ currentSeason }), [currentSeason]);
+  return currentSeason;
 }
