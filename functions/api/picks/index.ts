@@ -3,7 +3,7 @@ type Env = {
 };
 
 const PICKS_PREFIX = "picks/";
-/** `picks/2025/` and nothing else. */
+/** A whole season folder, `picks/2025/`, and nothing else. */
 const YEAR_PREFIX = /^picks\/(\d{4})\/$/;
 
 /**

@@ -4,9 +4,10 @@ name = "rak-sadness"
 # The date the runtime behavior was last verified against, not the project's age.
 compatibility_date = "2026-08-10"
 
-# Serves picks/<week>.xlsx to functions/api/picks/[week].ts.
+# Serves picks/<year>/<week>.xlsx to functions/api/picks/[year]/[week].ts, and
+# lists seasons for functions/api/picks/index.ts.
 # Simulated locally by `wrangler pages dev`; seed it with
-# `wrangler r2 object put rak-madness-calculator/picks/1.xlsx --file <path> --local`.
+# `wrangler r2 object put rak-madness-calculator/picks/2025/1.xlsx --file <path> --local`.
 # The binding also has to exist on the Pages project, for preview and production
 # both, or the deployed Function has nothing to read.
 [[r2_buckets]]
