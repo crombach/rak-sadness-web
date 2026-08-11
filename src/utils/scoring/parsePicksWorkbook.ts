@@ -31,10 +31,19 @@ export default async function parsePicksWorkbook(
   // From the header row, not from a player's row: `sheet_to_json` leaves a blank
   // cell out of the object it builds, so a game the first player skipped would go
   // unscored for everyone, and the tiebreaker game would shift a column.
-  const [headerRow = []] = XLSX.utils.sheet_to_json<Array<string>>(picksSheet, {
-    header: 1,
-  });
-  const allKeys = headerRow.filter((key) => key != null && key !== "");
+  //
+  // Kept only where some row actually carries the key. A header cell that is not
+  // text, or one repeated, does not name a property of any row, and reading a
+  // column nobody can be looked up by is worse than not knowing about it.
+  const [headerRow = []] = XLSX.utils.sheet_to_json<Array<unknown>>(
+    picksSheet,
+    {
+      header: 1,
+    },
+  );
+  const allKeys = headerRow
+    .map((cell) => (cell == null ? "" : String(cell)))
+    .filter((key) => key !== "" && rows.some((row) => key in row));
   const collegeKeys = allKeys.filter((key) => key.startsWith("C"));
   const proKeys = allKeys.filter(
     (key) => key.startsWith("P") && key !== TIEBREAKER_PICK_KEY,

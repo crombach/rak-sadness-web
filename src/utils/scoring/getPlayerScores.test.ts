@@ -98,6 +98,29 @@ describe("getPlayerScores, spreadsheet parsing", () => {
     expect(namesOf(result.scores)).toEqual(["Alice", "Bob"]);
   });
 
+  it("scores a game the first player left blank", async () => {
+    // `json_to_sheet` writes the header from the union of the rows, and
+    // `sheet_to_json` leaves Alice's blank P2 out of her object. Read from her row
+    // alone, P2 would be nobody's game and P1 would decide the tiebreaker.
+    const result = await getPlayerScores(
+      WEEK,
+      picksBuffer([
+        { Name: "Alice", C1: "OSU -3", P1: "BUF -7", Pts: 41 },
+        { Name: "Bob", C1: "MICH +3", P1: "KC +7", P2: "PHI +3", Pts: 45 },
+      ]),
+    );
+
+    const byName = new Map(result.scores.map((score) => [score.name, score]));
+    expect(byName.get("Alice")?.pro.map((it) => it.pick)).toEqual([
+      "BUF -7",
+      undefined,
+    ]);
+    expect(byName.get("Bob")?.pro.map((it) => it.pick)).toEqual([
+      "KC +7",
+      "PHI +3",
+    ]);
+  });
+
   it("reads C columns as college and P columns as pro, excluding Pts", async () => {
     const result = await getPlayerScores(
       WEEK,
