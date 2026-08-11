@@ -60,7 +60,8 @@ export default function useLeagueWeeks(initialWeek?: number, season?: number) {
   // as loading from the render that asks for it. `seasonYear` is the season the
   // week list actually describes, so they differ exactly while a new one is on
   // its way.
-  const isWeekInfoLoading = isLookupPending || (season != null && season !== seasonYear);
+  const isWeekInfoLoading =
+    isLookupPending || (season != null && season !== seasonYear);
 
   // Newest first, and never a week the season has not reached.
   const selectableWeeks = useMemo(

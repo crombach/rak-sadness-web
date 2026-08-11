@@ -271,8 +271,8 @@ describe("the app, automatic picks fetch", () => {
     await mountLoadedApp();
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
-      `/api/picks/${SEASON}/${CURRENT_WEEK}`,
-    );
+        `/api/picks/${SEASON}/${CURRENT_WEEK}`,
+      );
     });
   });
 

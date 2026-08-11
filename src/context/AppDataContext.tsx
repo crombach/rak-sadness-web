@@ -109,13 +109,7 @@ export function AppDataContextProvider({
       setSelectedSeason,
       selectableSeasons,
     }),
-    [
-      leagueWeeks,
-      playerScores,
-      picksSeasons,
-      findWeek,
-      selectableSeasons,
-    ],
+    [leagueWeeks, playerScores, picksSeasons, findWeek, selectableSeasons],
   );
 
   return (

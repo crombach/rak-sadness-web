@@ -50,7 +50,9 @@ describe("picksCache", () => {
   });
 
   it("caps how many weeks it holds, keeping the one just written", () => {
-    [1, 2, 3, 4].forEach((week) => writeCachedPicks(SEASON, week, buffer(week)));
+    [1, 2, 3, 4].forEach((week) =>
+      writeCachedPicks(SEASON, week, buffer(week)),
+    );
 
     expect(bytesOf(readCachedPicks(SEASON, 4))).toEqual([4]);
     const cached = [1, 2, 3, 4].filter(

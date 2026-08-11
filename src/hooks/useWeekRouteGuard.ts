@@ -5,8 +5,7 @@ import { Toast, useToastActions } from "../context/ToastContext";
 import { WeekInfo } from "../types/League";
 
 type GuardResult =
-  | { status: "loading"; week?: WeekInfo }
-  | { status: "ready"; week: WeekInfo };
+  { status: "loading"; week?: WeekInfo } | { status: "ready"; week: WeekInfo };
 
 type Redirect = { header: string; message: string } | "silent";
 
