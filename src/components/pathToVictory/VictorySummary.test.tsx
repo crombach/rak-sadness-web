@@ -150,7 +150,7 @@ describe("VictorySummary", () => {
     render(<VictorySummary result={result} />);
 
     expect(
-      screen.getByText("Winning 3 games instead takes it outright."),
+      screen.getByText("Winning 3 games takes it outright."),
     ).toBeInTheDocument();
   });
 

@@ -79,7 +79,7 @@ function Outright({
       : null,
     // Only worth saying where it asks for more than the routes below already do.
     outrightAt != null && outrightAt > minimumWins
-      ? `Winning ${plural(outrightAt, "game")} instead takes it outright.`
+      ? `Winning ${plural(outrightAt, "game")} takes it outright.`
       : null,
   ].filter((line) => line != null);
   if (lines.length === 0) return null;
@@ -232,6 +232,14 @@ export default function VictorySummary({
 
   return (
     <div className="victory">
+      <p className="victory__standing">
+        {result.pointsBehind > 0
+          ? `${plural(result.pointsBehind, "point")} behind ${result.leader}`
+          : "Level at the top"}
+        {" · "}
+        {plural(result.remainingGameCount, "game")} still to play
+      </p>
+
       <Outright
         outlook={result.mondayNight}
         outrightAt={result.outrightAt}
@@ -271,14 +279,6 @@ export default function VictorySummary({
 
       <NeedsHelp games={result.needsHelp} />
       <MondayNight outlook={result.mondayNight} />
-
-      <p className="victory__standing">
-        {result.pointsBehind > 0
-          ? `${plural(result.pointsBehind, "point")} behind ${result.leader}`
-          : "Level at the top"}
-        {" · "}
-        {plural(result.remainingGameCount, "game")} still to play
-      </p>
     </div>
   );
 }
