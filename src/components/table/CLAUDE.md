@@ -12,7 +12,10 @@ colors, striped rows).
 worked out, shaped like the view it stands in for. Its cells hold no text: each
 carries a `data-skeleton-text` stand-in that the stylesheet draws invisibly, so the
 table's own `max-content` sizing gives the wireframe a real table's measurements at
-any font size, and no placeholder reaches the page's text.
+any font size, and no placeholder reaches the page's text. No stand-in for a value
+wraps, because no real value does either, so a wireframe row is one line tall like
+a real one. Its header wraps on its own, so it is as tall as the real header at
+whatever width the table is being drawn.
 
 ## Subdirectories
 

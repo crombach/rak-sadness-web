@@ -29,10 +29,11 @@
     }
   }
 
-  // Body text stands for a value, so it breaks only where the stand-in says. A
-  // header still wraps on its own, the way the real one does.
+  // No value in a real table wraps, so no stand-in for one does either, and every
+  // body row comes out a single line tall. A header still wraps on its own, the
+  // way the real one does.
   td::before {
-    white-space: pre;
+    white-space: nowrap;
   }
 
   .skeleton__bar {
@@ -56,6 +57,13 @@
   // wireframe has no stand-in for, so the rank column would run into the next one.
   td:nth-child(2) {
     border-left: 2px solid var(--rak-primary-800);
+
+    // Room for the status icon that sits beside a real name: a 16px box and the
+    // 8px gap before it, both from `PlayerName.scss`. Without it this column comes
+    // out narrower than the one it stands in for.
+    &::before {
+      padding-right: 24px;
+    }
   }
 }
 

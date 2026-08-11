@@ -25,7 +25,7 @@ function PlayerName({ player }: { player: PlayerScore }) {
       }}
     >
       <div className="player-name">
-        <span>{player.name}</span>
+        <span className="player-name__name">{player.name}</span>
         <span className="player-name__status-icon">
           {player.status.isKnockedOut ? (
             <SentimentVeryDissatisfiedIcon />

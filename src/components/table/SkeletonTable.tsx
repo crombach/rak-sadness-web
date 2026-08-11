@@ -18,11 +18,8 @@ const PLAYER_COUNT = 61;
  * stays out of the DOM's text so nothing reads or matches a placeholder.
  */
 const RANK = "10";
-/**
- * Two lines, because a pool full of long names leaves the real player column two
- * lines tall, and that is what sets the height of every row.
- */
-const PLAYER = "Why is the Runn\nGone?";
+/** Twenty characters, the longest a real name gets before it is cut short. */
+const PLAYER = "Why is the Runn Gone";
 const PICK = "TCU -13.5";
 const SCORE = "10";
 

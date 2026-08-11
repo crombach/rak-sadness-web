@@ -5,6 +5,17 @@
   justify-content: space-between;
   gap: 8px;
 
+  // The cell's font is monospace, so 20ch is exactly 20 characters. A longer name
+  // is cut short rather than wrapped, because a wrapped name would make its row
+  // taller than every other row in the table. The whole name is in the toast the
+  // cell opens.
+  .player-name__name {
+    max-width: 20ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .player-name__status-icon {
     display: flex;
     align-items: center;
