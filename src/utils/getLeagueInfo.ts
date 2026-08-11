@@ -72,7 +72,27 @@ const regularSeasonWeekCounts = new Map<string, number>();
  * 2026, not the 2026 games of the season after. Left out, ESPN answers with
  * whichever season is running now.
  */
-export default async function getLeagueInfo(
+export default function getLeagueInfo(
+  league: League,
+  season?: number,
+): Promise<LeagueInfo | null> {
+  // `useCurrentSeason` asks for whichever season is running, `useLeagueWeeks` and
+  // `getRegularSeasonWeekCount` for a named one. One request answers each, then drops.
+  const key = `${league}:${season ?? "current"}`;
+  const inFlight = requests.get(key);
+  if (inFlight != null) {
+    return inFlight;
+  }
+  const request = fetchLeagueInfo(league, season).finally(() =>
+    requests.delete(key),
+  );
+  requests.set(key, request);
+  return request;
+}
+
+const requests = new Map<string, Promise<LeagueInfo | null>>();
+
+async function fetchLeagueInfo(
   league: League,
   season?: number,
 ): Promise<LeagueInfo | null> {

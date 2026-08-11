@@ -1,0 +1,135 @@
+// Whatever the answer turns out to be, it plays in under a dialog already growing
+// to hold it.
+.victory {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: victory-in 220ms ease both;
+  }
+}
+
+@keyframes victory-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.victory__note {
+  margin: 0;
+  color: var(--rak-text-tertiary);
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+.victory__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.victory__standing,
+.victory__section-title {
+  margin: 0;
+  color: var(--rak-text-tertiary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+// Columns rather than a wrapping row, so the same game sits at the same x down
+// every route. Each list is the same width, so each divides the same way.
+.victory__picks {
+  display: grid;
+  // The floor is what the longest pick a sheet can hold measures, so a column
+  // never has to cut one short or wrap it.
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// One pick reads as a chip of two halves: which game, then what to back in it.
+.victory__pick {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: var(--rak-radius-sm);
+  background-color: var(--rak-level1);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.victory__pick-label {
+  color: var(--rak-text-tertiary);
+  font-weight: 700;
+}
+
+.victory__pick-team {
+  color: var(--rak-text);
+}
+
+.victory__routes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.victory__route,
+.victory__must-win {
+  padding: 8px 10px;
+  // Drawn on the left alone, so a stack of routes reads as a list of alternatives
+  // rather than as a stack of boxes.
+  border-inline-start: var(--rak-border-width) solid var(--rak-gold-500);
+  background-color: var(--rak-level1);
+}
+
+.victory__route {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+// Red against the routes' gold, since these games are what has to happen rather
+// than one way among several of getting there.
+.victory__must-win {
+  border-inline-start-color: var(--rak-danger-500);
+}
+
+// A soft button takes the color around it, so the gold is set here rather than by
+// the color prop, which only paints a solid fill.
+.victory__more {
+  align-self: flex-start;
+  color: var(--rak-gold-700);
+  font-weight: 700;
+}
+
+.victory__help {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.victory__line {
+  margin: 0;
+  color: var(--rak-text-secondary);
+  font-size: 0.875rem;
+}
+
+.victory__message {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

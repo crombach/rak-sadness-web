@@ -7,6 +7,15 @@ import { vi } from "vitest";
 // per call site, because any of them can be the one that runs slowly.
 configure({ asyncUtilTimeout: 5000 });
 
+// jsdom lays nothing out, so it ships no ResizeObserver. The dialog that grows to
+// its content asks for one, and a stub that never reports leaves it at the height
+// the stylesheet gives it.
+globalThis.ResizeObserver = class {
+  observe(): void {}
+  unobserve(): void {}
+  disconnect(): void {}
+};
+
 // @testing-library/dom decides whether fake timers are installed by looking for
 // a `jest` global, then advances the clock through it. Without this shim its
 // waiting helpers schedule work on the faked clock and never resolve, so every

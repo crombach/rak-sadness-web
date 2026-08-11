@@ -105,7 +105,7 @@
       border-left: var(--rak-table-border);
 
       &.--knocked-out {
-        background-color: #fac99e;
+        background-color: var(--rak-knocked-out);
       }
 
       &:not(.--knocked-out) {
@@ -115,7 +115,7 @@
 
     tr:nth-child(even) .table__player-col {
       &.--knocked-out {
-        background-color: #deaa7c;
+        background-color: var(--rak-knocked-out-dark);
       }
 
       &:not(.--knocked-out) {

@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 import getClasses from "../../utils/getClasses";
 import "./Button.scss";
 
-export type ButtonColor = "primary" | "success" | "danger";
+export type ButtonColor = "primary" | "success" | "danger" | "gold";
 
 export default function Button({
   children,
@@ -15,6 +15,7 @@ export default function Button({
   disabled = false,
   className = "",
   ariaLabel,
+  ariaExpanded,
 }: {
   children: ReactNode;
   onClick: () => void;
@@ -26,6 +27,8 @@ export default function Button({
   className?: string;
   /** The accessible name. Required of a button whose content is an icon alone. */
   ariaLabel?: string;
+  /** Set where the button opens and closes something below it. */
+  ariaExpanded?: boolean;
 }) {
   const modifiers = getClasses({
     [`--${variant}`]: true,
@@ -37,6 +40,7 @@ export default function Button({
     <BaseButton
       type="button"
       aria-label={ariaLabel}
+      aria-expanded={ariaExpanded}
       className={`button ${modifiers} ${className}`}
       disabled={disabled}
       onClick={onClick}

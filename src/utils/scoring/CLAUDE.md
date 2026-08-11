@@ -1,7 +1,8 @@
 # scoring
 
 The picks-to-scoreboard pipeline, one concern per file. `getPlayerScores` is the only
-entry point the app calls; everything else is a step it sequences.
+entry point the app calls for a week's results; everything else is a step it
+sequences. `getPathsToVictory` is a second entry point, reading those results back.
 
 - `parsePicksWorkbook`: xlsx buffer to rows, column keys, and per-game matchups.
   Async because it imports `xlsx-js-style` on demand, which is over half the bundle.
@@ -13,7 +14,20 @@ entry point the app calls; everything else is a step it sequences.
 - `getPickResults`: scores picks against game results, plus `getStatus`
 - `getTiebreakerScore`: the Monday night game's real total, once it is final
 - `scorePlayers`: per-player totals, sorted
-- `comparePlayerScores`: the rank order and every tiebreaker tier
+- `comparePlayerScores`: the rank order. `comparePlayerScoresOnMerit` is every
+  tiebreaker tier without the name that settles a dead heat, since two players the
+  tiers leave tied have both won the week
 - `isWeekDecided`: whether every game and the tiebreaker are settled, which is when
   whoever the knockouts left standing has won
+- `remainingGames`: the open games a column at a time, each row's cell parsed. Read
+  a column at a time because a blank cell scores "error" rather than "incomplete",
+  so one row alone would drop a game that row's player skipped. Both halves of the
+  question below read it
 - `applyKnockouts`: who can still win, and why not
+- `getPathsToVictory`: the other half of `applyKnockouts`, for a player still
+  standing, once ten or fewer games are left. Walks every way the contested ones
+  can fall, and reduces the winning ones to the games that must go right, the pool
+  the rest come from, and the Monday night totals that settle a dead heat on
+  points. Where they do not reduce to a pool it lists the ten routes asking least
+  of the player and counts the rest. Above ten games it gives a floor from a closed
+  form instead, since the search doubles per game

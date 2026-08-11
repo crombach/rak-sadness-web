@@ -1,10 +1,13 @@
 # hooks
 
 The app's data layer. Everything that talks to ESPN, the picks API, or the scoring
-pipeline lives here, so components only render. The first three are mounted once, in
+pipeline lives here, so components only render. The first four are mounted once, in
 `AppDataContext`, above the routes.
 
 - `usePicksSeasons`: the seasons that have picks, from `/api/picks`, newest first.
+- `useCurrentSeason`: the season running now, asked of ESPN with no season named.
+  Its own lookup, because the picker has to offer that season whether or not it has
+  picks yet, and the list above holds only the ones that do.
 - `useLeagueWeeks`: the season's weeks from ESPN, and which one is selected. Takes
   the week the URL names and the season to fetch, so a results URL is not preceded
   by scoring the wrong week, and stays disabled until the season is known. The

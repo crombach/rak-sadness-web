@@ -7,6 +7,6 @@
 - [`components/`](components/CLAUDE.md) — React UI, layout, routes
 - [`context/`](context/CLAUDE.md) — app data and toast providers
 - [`hooks/`](hooks/CLAUDE.md) — picks, scoring, export, route guard
-- [`styles/`](styles/CLAUDE.md) — Sass mixins: two breakpoints
+- [`styles/`](styles/CLAUDE.md) — Sass mixins: breakpoints, listbox shape
 - [`types/`](types/CLAUDE.md) — ESPN, league, and scoring types
 - [`utils/`](utils/CLAUDE.md) — scoring, ESPN, export, picks cache

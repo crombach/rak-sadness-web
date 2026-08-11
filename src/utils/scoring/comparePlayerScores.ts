@@ -38,10 +38,10 @@ const TIERS: Array<Tier> = [
   (a, b) => highestFirst(a.score.college, b.score.college),
   (a, b) =>
     highestFirst(a.score.proAgainstTheSpread, b.score.proAgainstTheSpread),
-  (a, b) => firstAlphabetically(a.name.toUpperCase(), b.name.toUpperCase()),
 ];
 
-export default function comparePlayerScores(
+/** Which of two players the pool itself ranks higher, ties left tied. */
+export function comparePlayerScoresOnMerit(
   a: PlayerScore,
   b: PlayerScore,
 ): number {
@@ -52,4 +52,20 @@ export default function comparePlayerScores(
     }
   }
   return 0;
+}
+
+/**
+ * The row order, which needs every pair separated even where the rules do not
+ * separate them. Two players the tiers leave tied have both won the week, so the
+ * name is a row order and not a tiebreaker, which is why it lives here rather than
+ * in `TIERS`.
+ */
+export default function comparePlayerScores(
+  a: PlayerScore,
+  b: PlayerScore,
+): number {
+  const onMerit = comparePlayerScoresOnMerit(a, b);
+  return onMerit !== 0
+    ? onMerit
+    : firstAlphabetically(a.name.toUpperCase(), b.name.toUpperCase());
 }

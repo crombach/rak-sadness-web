@@ -1,5 +1,5 @@
 import { MockedFunction } from "vitest";
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import { League, LeagueInfo } from "./types/League";
 
 vi.mock("./utils/getLeagueInfo");
@@ -41,12 +41,17 @@ describe("the app, week routes", () => {
     expect(await screen.findByText("MNF Points Pick")).toBeInTheDocument();
   });
 
+  // Read inside the table, because the navbar's path to victory button carries
+  // the same trophy while a week that is still being played collapses it away.
+  const crown = () =>
+    within(screen.getByRole("table")).queryByTestId("EmojiEventsIcon");
+
   it("crowns a player still standing at the end of the week", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
     await mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
 
     await screen.findByText("MNF Points Pick");
-    expect(screen.getByTestId("EmojiEventsIcon")).toBeInTheDocument();
+    expect(crown()).toBeInTheDocument();
   });
 
   it("holds the crown back while a game is still to finish", async () => {
@@ -72,7 +77,7 @@ describe("the app, week routes", () => {
     expect(
       screen.getByTestId("SentimentVerySatisfiedIcon"),
     ).toBeInTheDocument();
-    expect(screen.queryByTestId("EmojiEventsIcon")).not.toBeInTheDocument();
+    expect(crown()).not.toBeInTheDocument();
   });
 
   it("shows a wireframe table until the results are ready", async () => {
@@ -85,12 +90,13 @@ describe("the app, week routes", () => {
     expect(document.querySelector(".table.--skeleton")).not.toBeInTheDocument();
   });
 
-  it("shows the view and refresh buttons disabled while the week loads", async () => {
+  it("shows every navbar button disabled while the week loads", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
     mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
 
+    // Scoreboard, picks, refresh, and path to victory.
     const loading = scoresHeaderButtons();
-    expect(loading).toHaveLength(3);
+    expect(loading).toHaveLength(4);
     loading.forEach((button) => expect(button).toBeDisabled());
 
     await screen.findByText("MNF Points Pick");

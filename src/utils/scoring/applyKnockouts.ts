@@ -1,5 +1,8 @@
 import { PlayerScore } from "../../types/RakMadnessScores";
-import parsePick from "./parsePick";
+import remainingGames, {
+  pickDifference,
+  RemainingGame,
+} from "./remainingGames";
 
 function ifNotOne(num: number, otherwise: string): string {
   return num !== 1 ? otherwise : "";
@@ -12,27 +15,6 @@ function knockedOut(score: PlayerScore, explanation: string): PlayerScore {
   };
 }
 
-/**
- * The positions of the games still to be played, read across every row.
- *
- * A row that left a game blank scores it "error", not "incomplete", so reading one
- * row alone would drop a game the leader happened to skip and knock out everybody
- * who needed it.
- */
-function remainingGameIndices(
-  scores: Array<PlayerScore>,
-  league: "college" | "pro",
-): Array<number> {
-  const [firstPlayer] = scores;
-  return firstPlayer[league]
-    .map((_, index) =>
-      scores.some((score) => score[league][index].status === "incomplete")
-        ? index
-        : null,
-    )
-    .filter((index) => index != null);
-}
-
 type PairDifferences = {
   differentCollegePicks: number;
   differentProPicks: number;
@@ -41,49 +23,34 @@ type PairDifferences = {
 
 /**
  * How many of the games still to be played these two players have picked
- * differently, which is the most ground the active player can still make up.
+ * differently, split by the tiebreaker tier each one can move.
  *
- * A game the opponent left blank counts, because the active player can win a point
- * there that the opponent cannot. Only the active player's own blank is skipped:
- * neither of them can score it.
- *
- * A spread describes the game, so either row answers whether one is on it.
- * `parsePicksWorkbook` refuses to score a game whose rows disagree, which is what
- * makes reading the active player's own pick equivalent to reading the opponent's.
+ * A game the rival left blank counts, because the active player can take a point
+ * there that the rival cannot.
  */
 function countDifferences(
-  activeScore: PlayerScore,
-  oppScore: PlayerScore,
-  remainingCollegeIndices: Array<number>,
-  remainingProIndices: Array<number>,
+  games: Array<RemainingGame>,
+  activeIndex: number,
+  oppIndex: number,
 ): PairDifferences {
-  const differentCollegePicks = remainingCollegeIndices.reduce(
-    (sum, gameIndex) => {
-      const oppPick = oppScore.college[gameIndex].pick;
-      const activePick = activeScore.college[gameIndex].pick;
-      return activePick != null && oppPick !== activePick ? sum + 1 : sum;
-    },
-    0,
-  );
-
-  let differentProPicks = 0;
-  let differentProPicksWithSpreads = 0;
-  remainingProIndices.forEach((gameIndex) => {
-    const oppPick = oppScore.pro[gameIndex].pick;
-    const activePick = activeScore.pro[gameIndex].pick;
-    if (activePick != null && oppPick !== activePick) {
-      differentProPicks += 1;
-      if (parsePick(activePick).spread !== 0) {
-        differentProPicksWithSpreads += 1;
-      }
+  const differences = {
+    differentCollegePicks: 0,
+    differentProPicks: 0,
+    differentProPicksWithSpreads: 0,
+  };
+  games.forEach((game) => {
+    if (pickDifference(game, activeIndex, oppIndex) === "none") return;
+    const activeCell = game.cells[activeIndex];
+    if (game.league === "college") {
+      differences.differentCollegePicks += 1;
+      return;
+    }
+    differences.differentProPicks += 1;
+    if (activeCell.hasSpread) {
+      differences.differentProPicksWithSpreads += 1;
     }
   });
-
-  return {
-    differentCollegePicks,
-    differentProPicks,
-    differentProPicksWithSpreads,
-  };
+  return differences;
 }
 
 /**
@@ -96,8 +63,8 @@ export default function applyKnockouts(
   sortedScores: Array<PlayerScore>,
   tiebreakerScore?: number,
 ): Array<PlayerScore> {
-  const remainingCollegeIndices = remainingGameIndices(sortedScores, "college");
-  const remainingProIndices = remainingGameIndices(sortedScores, "pro");
+  const games = remainingGames(sortedScores);
+  const isCollegeDone = games.every((game) => game.league !== "college");
 
   return sortedScores.map((activeScore, activeIndex) => {
     // If a player has no picks, they're knocked out.
@@ -125,12 +92,7 @@ export default function applyKnockouts(
           differentCollegePicks,
           differentProPicks,
           differentProPicksWithSpreads,
-        } = countDifferences(
-          activeScore,
-          oppScore,
-          remainingCollegeIndices,
-          remainingProIndices,
-        );
+        } = countDifferences(games, activeIndex, oppIndex);
 
         const totalScoreDiff = oppScore.score.total - activeScore.score.total;
         const totalDifferentPicks = differentCollegePicks + differentProPicks;
@@ -166,10 +128,7 @@ export default function applyKnockouts(
               );
             }
             // If college games are done and players are tied, check pro against the spread tiebreaker.
-            if (
-              collegeScoreDiff === 0 &&
-              remainingCollegeIndices.length === 0
-            ) {
+            if (collegeScoreDiff === 0 && isCollegeDone) {
               const proAgainstTheSpreadScoreDiff =
                 oppScore.score.proAgainstTheSpread -
                 activeScore.score.proAgainstTheSpread;

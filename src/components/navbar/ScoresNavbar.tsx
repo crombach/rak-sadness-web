@@ -1,5 +1,10 @@
 import { CSSProperties, useEffect, useState } from "react";
-import { FactCheckIcon, LeaderboardIcon, RefreshIcon } from "../icon/Icon";
+import {
+  EmojiEventsIcon,
+  FactCheckIcon,
+  LeaderboardIcon,
+  RefreshIcon,
+} from "../icon/Icon";
 import getClasses from "../../utils/getClasses";
 import Button from "../button/Button";
 import "./ScoresNavbar.scss";
@@ -7,43 +12,45 @@ import "./ScoresNavbar.scss";
 export type ScoresView = "Scoreboard" | "Picks";
 
 /**
- * How long the refresh button takes to fade and narrow away. Held here because the
- * button has to stay mounted for exactly that long. The stylesheet reads it back as
+ * How long the live-week buttons take to fade and narrow away. Held here because
+ * they have to stay mounted for exactly that long. The stylesheet reads it back as
  * `--collapse-duration`, so the two cannot drift apart.
  */
 export const COLLAPSE_DURATION_MS = 300;
 
-/** The scoreboard/picks switch and the refresh button. */
+/** The scoreboard/picks switch, and the buttons a week still being played gets. */
 export default function ScoresNavbar({
   view,
   onViewChange,
   onRefresh,
+  onShowPaths,
   isRefreshing,
   disabled = false,
-  canRefresh = true,
+  isWeekLive,
 }: {
   view: ScoresView;
   onViewChange: (view: ScoresView) => void;
   onRefresh: () => void;
+  onShowPaths: () => void;
   isRefreshing: boolean;
   /** Set while a week is still loading, so the navbar keeps its shape. */
   disabled?: boolean;
-  /** Cleared once the week is over, when rescoring cannot change anything. */
-  canRefresh?: boolean;
+  /**
+   * Cleared once the week is over, when rescoring cannot change anything and
+   * nobody has a path to victory left to work out.
+   */
+  isWeekLive: boolean;
 }) {
-  // A week arrives loading, so the button is usually on screen by the time it turns
-  // out to be decided. Kept mounted for the length of the collapse so it animates
-  // out, and a week already known to be decided never renders it at all.
-  const [isRefreshMounted, setRefreshMounted] = useState(canRefresh);
-  if (canRefresh && !isRefreshMounted) setRefreshMounted(true);
+  // A week arrives loading, so these are usually on screen by the time it turns
+  // out to be decided. Kept mounted for the length of the collapse so they animate
+  // out, and a week already known to be decided never renders them at all.
+  const [isLiveMounted, setLiveMounted] = useState(isWeekLive);
+  if (isWeekLive && !isLiveMounted) setLiveMounted(true);
   useEffect(() => {
-    if (canRefresh || !isRefreshMounted) return;
-    const timer = setTimeout(
-      () => setRefreshMounted(false),
-      COLLAPSE_DURATION_MS,
-    );
+    if (isWeekLive || !isLiveMounted) return;
+    const timer = setTimeout(() => setLiveMounted(false), COLLAPSE_DURATION_MS);
     return () => clearTimeout(timer);
-  }, [canRefresh, isRefreshMounted]);
+  }, [isWeekLive, isLiveMounted]);
 
   return (
     <>
@@ -69,10 +76,10 @@ export default function ScoresNavbar({
         <FactCheckIcon />
         <span className="home__scores-header-label">Picks</span>
       </Button>
-      {isRefreshMounted && (
+      {isLiveMounted && (
         <div
-          className={`home__scores-header-refresh ${getClasses({
-            "--collapsed": !canRefresh,
+          className={`home__scores-header-live ${getClasses({
+            "--collapsed": !isWeekLive,
           })}`}
           style={
             {
@@ -81,9 +88,9 @@ export default function ScoresNavbar({
           }
           // On its way out it is still painted, so it has to stop being reachable
           // by pointer, keyboard, and screen reader on its own.
-          inert={!canRefresh}
+          inert={!isWeekLive}
         >
-          <div className="home__scores-header-refresh-content">
+          <div className="home__scores-header-live-content">
             <div className="home__scores-header-divider" />
             <Button
               ariaLabel="Refresh"
@@ -94,6 +101,15 @@ export default function ScoresNavbar({
               })}`}
             >
               <RefreshIcon />
+            </Button>
+            <Button
+              ariaLabel="Path to Victory"
+              color="gold"
+              disabled={disabled}
+              onClick={onShowPaths}
+              className="home__scores-header-button home__scores-header-paths"
+            >
+              <EmojiEventsIcon />
             </Button>
           </div>
         </div>

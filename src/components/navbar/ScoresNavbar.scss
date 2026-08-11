@@ -43,6 +43,19 @@
   }
 }
 
+// Same idea, its own rule because the one above would repaint it in the navbar's
+// own blue and lose the accent that tells it apart from the buttons beside it.
+.button.--solid.home__scores-header-paths:disabled {
+  background-color: var(--rak-gold-500);
+  color: var(--rak-primary-800);
+}
+
+// The divider carries the space on its own side, so this is the only gap left to
+// set between the two buttons past it.
+.home__scores-header-paths {
+  margin-inline-start: 6px;
+}
+
 .home__scores-header-divider {
   width: 2px;
   height: 1.5rem;
@@ -50,11 +63,12 @@
   background-color: var(--rak-on-solid);
 }
 
-// The refresh button and its divider, collapsed together once the week is decided.
-// A grid column from `1fr` to `0fr` narrows them, because they measure whatever
-// their padding and the icon come to, and `auto` cannot be interpolated.
+// What a week still being played gets: the refresh and path to victory buttons,
+// and the divider before them, collapsed together once the week is decided. A grid
+// column from `1fr` to `0fr` narrows them, because they measure whatever their
+// padding and their icons come to, and `auto` cannot be interpolated.
 // `--collapse-duration` comes from `ScoresNavbar`, which unmounts this after it.
-.home__scores-header-refresh {
+.home__scores-header-live {
   display: grid;
   grid-template-columns: 1fr;
   transition-property: grid-template-columns, margin-inline-start, opacity;
@@ -69,15 +83,15 @@
     margin-inline-start: calc(-1 * var(--navbar-gap));
 
     // Only while collapsing. Expanded, this would clip the button's focus outline.
-    .home__scores-header-refresh-content {
+    .home__scores-header-live-content {
       overflow: hidden;
     }
   }
 }
 
-.home__scores-header-refresh-content {
+.home__scores-header-live-content {
   display: flex;
   align-items: center;
-  // So the column can narrow past what the divider and button measure.
+  // So the column can narrow past what the divider and buttons measure.
   min-width: 0;
 }
