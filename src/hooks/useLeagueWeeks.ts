@@ -17,8 +17,16 @@ import getLeagueInfo from "../utils/getLeagueInfo";
  * `season` is the year a season started in. Left out, ESPN answers with the
  * season running now, and `seasonYear` comes back saying which one that was. A
  * season that has ended has every week behind it, so all of them are selectable.
+ *
+ * `enabled` holds the lookup back until the caller knows which season to ask for.
+ * Without it the season running now would be fetched first and shown for a moment,
+ * which is the wrong season whenever the pool is between seasons.
  */
-export default function useLeagueWeeks(initialWeek?: number, season?: number) {
+export default function useLeagueWeeks(
+  initialWeek?: number,
+  season?: number,
+  enabled = true,
+) {
   const { showToast } = useToastActions();
 
   const [weeks, setWeeks] = useState<Array<WeekInfo>>();
@@ -28,6 +36,7 @@ export default function useLeagueWeeks(initialWeek?: number, season?: number) {
   const [isLookupPending, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!enabled) return;
     const getLeagueInfoAsync = async () => {
       const proLeagueInfo = await getLeagueInfo(League.PRO, season);
       if (proLeagueInfo == null) {
@@ -54,14 +63,14 @@ export default function useLeagueWeeks(initialWeek?: number, season?: number) {
       setLoading(false);
     };
     getLeagueInfoAsync();
-  }, [showToast, initialWeek, season]);
+  }, [showToast, initialWeek, season, enabled]);
 
   // Derived rather than a flag set when the season changes, so the switch counts
   // as loading from the render that asks for it. `seasonYear` is the season the
   // week list actually describes, so they differ exactly while a new one is on
   // its way.
   const isWeekInfoLoading =
-    isLookupPending || (season != null && season !== seasonYear);
+    !enabled || isLookupPending || (season != null && season !== seasonYear);
 
   // Newest first, and never a week the season has not reached.
   const selectableWeeks = useMemo(

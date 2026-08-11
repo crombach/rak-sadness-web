@@ -72,7 +72,15 @@ export function AppDataContextProvider({
   const [selectedSeason, setSelectedSeason] = useState(arrivedAt.season);
 
   const picksSeasons = usePicksSeasons();
-  const leagueWeeks = useLeagueWeeks(arrivedAt.week, selectedSeason);
+  // The newest season with picks, unless the URL or the picker named one. ESPN
+  // moves on to the season about to start as soon as the last one ends, and that
+  // season has nothing to show.
+  const requestedSeason = selectedSeason ?? picksSeasons.seasons?.[0];
+  const leagueWeeks = useLeagueWeeks(
+    arrivedAt.week,
+    requestedSeason,
+    !picksSeasons.isSeasonsLoading,
+  );
   const playerScores = usePlayerScores(
     leagueWeeks.selectedWeek,
     leagueWeeks.seasonYear,

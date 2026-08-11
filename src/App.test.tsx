@@ -236,6 +236,20 @@ describe("the app, first load", () => {
     expect(options).toEqual([`${SEASON} season`, `${SEASON - 1} season`]);
   });
 
+  it("opens on the newest season with picks, not the one ESPN calls current", async () => {
+    getLeagueInfoMock.mockImplementation(async (_league, season) => ({
+      ...leagueInfo,
+      season: season ?? SEASON,
+    }));
+    global.fetch = routedFetch(notFoundResponse, [SEASON - 1, SEASON - 2]);
+    await mountLoadedApp();
+
+    expect(screen.getByRole("combobox", { name: "Season" })).toHaveTextContent(
+      `${SEASON - 1} season`,
+    );
+    expect(getLeagueInfoMock).not.toHaveBeenCalledWith(League.PRO, undefined);
+  });
+
   it("offers the current season alone when the list cannot be had", async () => {
     const user = await mountLoadedApp();
 
