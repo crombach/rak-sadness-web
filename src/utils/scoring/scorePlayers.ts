@@ -13,16 +13,16 @@ function sumPointValues(scores: Array<GameScore>): number {
   return scores.reduce((sum, score) => sum + score.pointValue, 0);
 }
 
-/** Restates a per-game map as positions, which is how a row's picks arrive. */
-function byPickIndex<T>(
+/** Restates the flagged games as positions, which is how a row's picks arrive. */
+function byPickIndex(
   gameKeys: Array<string>,
-  byGameKey: Map<string, T>,
-): Map<number, T> {
-  const byIndex = new Map<number, T>();
+  reasonByGameKey: Map<string, string>,
+): Map<number, string> {
+  const byIndex = new Map<number, string>();
   gameKeys.forEach((gameKey, index) => {
-    const value = byGameKey.get(gameKey);
-    if (value != null) {
-      byIndex.set(index, value);
+    const reason = reasonByGameKey.get(gameKey);
+    if (reason != null) {
+      byIndex.set(index, reason);
     }
   });
   return byIndex;
@@ -46,8 +46,6 @@ export default function scorePlayers(
     parsed.proKeys,
     parsed.inconsistentSpreadGames,
   );
-  const collegeSpreads = byPickIndex(parsed.collegeKeys, parsed.gameSpreads);
-  const proSpreads = byPickIndex(parsed.proKeys, parsed.gameSpreads);
 
   const scores: Array<PlayerScore> = parsed.rows.map((playerRow: any) => {
     const collegePicks = parsed.collegeKeys.map((key) => playerRow[key]);
@@ -60,7 +58,6 @@ export default function scorePlayers(
       collegePicks,
       collegeResultsByTeam,
       unscoreableCollege,
-      collegeSpreads,
     );
     const scoreCollege = sumPointValues(
       collegePickResults.filter((result) => result.isCompleted),
@@ -70,7 +67,6 @@ export default function scorePlayers(
       proPicks,
       proResultsByTeam,
       unscoreablePro,
-      proSpreads,
     );
     const proPickResultsCompleted = proPickResults.filter(
       (result) => result.isCompleted,
