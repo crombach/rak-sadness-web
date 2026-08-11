@@ -124,7 +124,7 @@ describe("VictorySummary", () => {
     ).toBeInTheDocument();
   });
 
-  it("gives a floor rather than routes on a week too big to search", () => {
+  it("gives a floor rather than paths on a week too big to search", () => {
     const result: PathsToVictory = {
       kind: "headline",
       player: "Alice",
@@ -139,6 +139,10 @@ describe("VictorySummary", () => {
       screen.getByText("Alice needs at least 6 of their 13 remaining picks."),
     ).toBeInTheDocument();
     expect(screen.getByText(/MNF points tiebreaker/)).toBeInTheDocument();
+    const why = screen.getByText(
+      "Detailed paths are worked out once ten games are left.",
+    );
+    expect(why).toBe(document.querySelector(".victory")?.lastElementChild);
   });
 
   it("lists the must-win games and the pool behind them", () => {

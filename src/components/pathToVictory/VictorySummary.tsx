@@ -247,14 +247,20 @@ export default function VictorySummary({
 
   if (result.kind === "headline") {
     return (
-      <Message
-        heading={`${result.player} needs at least ${result.minimumWins} of their ${result.remainingPickCount} remaining picks.`}
-        body={
-          result.needsMondayNight
-            ? "That is only enough to draw level, so the MNF points tiebreaker would still decide it. Detailed paths are worked out once ten games are left."
-            : "Detailed paths are worked out once ten games are left."
-        }
-      />
+      <div className="victory">
+        <Message
+          heading={`${result.player} needs at least ${result.minimumWins} of their ${result.remainingPickCount} remaining picks.`}
+          body={
+            result.needsMondayNight
+              ? "That is only enough to draw level, so the MNF points tiebreaker would still decide it."
+              : undefined
+          }
+        />
+        {/* Why there is nothing below it, in the place the paths count theirs. */}
+        <p className="victory__standing">
+          Detailed paths are worked out once ten games are left.
+        </p>
+      </div>
     );
   }
 
