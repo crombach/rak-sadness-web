@@ -13,6 +13,32 @@
   flex-direction: column;
   align-items: center;
   overflow: hidden;
+  // Makes this a stacking context, which is what lets the tiles below sit above
+  // this element's own background and below everything on the page.
+  isolation: isolate;
+
+  // The tiled logo. Drawn here rather than on `.home` itself so it can be faded
+  // in: a background image cannot be, and the tiles arriving at full strength
+  // all at once is disorienting.
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: var(--rak-background-tile);
+    opacity: 0;
+    transition: opacity 400ms ease-in;
+  }
+
+  &.--tiles-loaded::before {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home::before {
+    transition: none;
+  }
 }
 
 .home__content {
@@ -31,10 +57,12 @@
     width: max-content;
   }
 
-  // 100% rather than 100vw, so a landscape notch's inset still holds the edges
-  // back. Wider than the usual column, which is what the picks table itself is
-  // once it loads.
-  &.--full-width {
-    width: 100%;
+  // The wireframe is the size of the table it stands in for, so the surest way to
+  // get the scrollbars it will need is to stay scrollable and let it ask for them
+  // itself. `hidden` plus `scrollbar-gutter` cannot: the gutter is only reserved
+  // on the vertical bar, so the horizontal one arrived with the real table and took
+  // its band out of the page. Refusing the pointer is what keeps this unscrollable.
+  &.--frozen {
+    pointer-events: none;
   }
 }

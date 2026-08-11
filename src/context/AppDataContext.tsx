@@ -10,6 +10,7 @@ import { useLocation } from "react-router";
 import useLeagueWeeks from "../hooks/useLeagueWeeks";
 import usePlayerScores from "../hooks/usePlayerScores";
 import { WeekInfo } from "../types/League";
+import isWeekDecided from "../utils/scoring/isWeekDecided";
 
 type AppData = ReturnType<typeof useLeagueWeeks> &
   ReturnType<typeof usePlayerScores> & {
@@ -22,6 +23,17 @@ type AppData = ReturnType<typeof useLeagueWeeks> &
   };
 
 const AppDataContext = createContext<AppData | undefined>(undefined);
+
+/**
+ * Whether the week on screen is over, so whoever is left standing has won.
+ *
+ * Its own context rather than a field on `AppData`, because every player cell
+ * reads it. On `AppData` they would each re-render on every loading flag the app
+ * data carries, which is the same reason the toast list and its actions are
+ * split. False with no provider above, so a table can still be rendered on its
+ * own with scores handed straight to it.
+ */
+const WeekDecidedContext = createContext(false);
 
 function weekFromPath(pathname: string): number | undefined {
   const match = /^\/week\/(\d+)/.exec(pathname);
@@ -53,13 +65,23 @@ export function AppDataContextProvider({
     [weeks],
   );
 
+  const { scores } = playerScores;
+  const weekDecided = useMemo(
+    () => scores != null && isWeekDecided(scores),
+    [scores],
+  );
+
   const value = useMemo(
     () => ({ ...leagueWeeks, ...playerScores, findWeek }),
     [leagueWeeks, playerScores, findWeek],
   );
 
   return (
-    <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>
+    <AppDataContext.Provider value={value}>
+      <WeekDecidedContext.Provider value={weekDecided}>
+        {children}
+      </WeekDecidedContext.Provider>
+    </AppDataContext.Provider>
   );
 }
 
@@ -69,4 +91,8 @@ export function useAppData(): AppData {
     throw new Error("useAppData needs an AppDataContextProvider above it");
   }
   return value;
+}
+
+export function useIsWeekDecided(): boolean {
+  return useContext(WeekDecidedContext);
 }

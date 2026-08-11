@@ -9,12 +9,26 @@ import "./Icon.scss";
  * `@mui/material`'s `createSvgIcon`, which pulled `@mui/material` and emotion into
  * the bundle for the sake of ten shapes. The `<svg>` here carries the same box and
  * fill rules that `SvgIcon` applied, so nothing downstream had to be resized.
+ *
+ * One shape comes from Material Symbols instead, which that package does not
+ * carry. Same icons, same licence, drawn on a taller box, which is what `viewBox`
+ * is for.
  */
-function Icon({ name, children }: { name: string; children: ReactNode }) {
+const SYMBOLS_VIEW_BOX = "0 -960 960 960";
+
+function Icon({
+  name,
+  viewBox = "0 0 24 24",
+  children,
+}: {
+  name: string;
+  viewBox?: string;
+  children: ReactNode;
+}) {
   return (
     <svg
       className="icon"
-      viewBox="0 0 24 24"
+      viewBox={viewBox}
       aria-hidden="true"
       focusable="false"
       // The name `@mui/icons-material` put here, which the toaster suite looks an
@@ -42,6 +56,14 @@ export function InfoIcon() {
   );
 }
 
+export function FactCheckIcon() {
+  return (
+    <Icon name="FactCheckIcon">
+      <path d="M20 3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2M10 17H5v-2h5zm0-4H5v-2h5zm0-4H5V7h5zm4.82 6L12 12.16l1.41-1.41 1.41 1.42L17.99 9l1.42 1.42z" />
+    </Icon>
+  );
+}
+
 export function LeaderboardIcon() {
   return (
     <Icon name="LeaderboardIcon">
@@ -58,12 +80,18 @@ export function RefreshIcon() {
   );
 }
 
-export function SentimentVeryDissatisfiedIcon() {
+export function EmojiEventsIcon() {
   return (
-    <Icon name="SentimentVeryDissatisfiedIcon">
-      <circle cx="15.5" cy="9.5" r="1.5" />
-      <circle cx="8.5" cy="9.5" r="1.5" />
-      <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2M12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8m0-6c-2.33 0-4.32 1.45-5.12 3.5h1.67c.69-1.19 1.97-2 3.45-2s2.75.81 3.45 2h1.67c-.8-2.05-2.79-3.5-5.12-3.5" />
+    <Icon name="EmojiEventsIcon">
+      <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2M5 8V7h2v3.82C5.84 10.4 5 9.3 5 8m14 0c0 1.3-.84 2.4-2 2.82V7h2z" />
+    </Icon>
+  );
+}
+
+export function SkullIcon() {
+  return (
+    <Icon name="SkullIcon" viewBox={SYMBOLS_VIEW_BOX}>
+      <path d="M240-80v-170q-39-17-68.5-45.5t-50-64.5q-20.5-36-31-77T80-520q0-158 112-259t288-101q176 0 288 101t112 259q0 42-10.5 83t-31 77q-20.5 36-50 64.5T720-250v170H240Zm80-80h40v-80h80v80h80v-80h80v80h40v-142q38-9 67.5-30t50-50q20.5-29 31.5-64t11-74q0-125-88.5-202.5T480-800q-143 0-231.5 77.5T160-520q0 39 11 74t31.5 64q20.5 29 50.5 50t67 30v142Zm100-200h120l-60-120-60 120Zm-80-80q33 0 56.5-23.5T420-520q0-33-23.5-56.5T340-600q-33 0-56.5 23.5T260-520q0 33 23.5 56.5T340-440Zm280 0q33 0 56.5-23.5T700-520q0-33-23.5-56.5T620-600q-33 0-56.5 23.5T540-520q0 33 23.5 56.5T620-440ZM480-160Z" />
     </Icon>
   );
 }

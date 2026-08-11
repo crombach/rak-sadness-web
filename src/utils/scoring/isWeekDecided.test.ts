@@ -1,0 +1,81 @@
+import {
+  PickResult,
+  PlayerScore,
+  RakMadnessScores,
+  Status,
+} from "../../types/RakMadnessScores";
+import isWeekDecided from "./isWeekDecided";
+
+function pickResult(status: Status): PickResult {
+  return {
+    pick: "TCU -13.5",
+    status,
+    explanation: { header: "Final Score", message: "" },
+  };
+}
+
+function player(name: string, statuses: Array<Status>): PlayerScore {
+  return {
+    name,
+    score: { total: 10, college: 5, pro: 5, proAgainstTheSpread: 5 },
+    tiebreaker: { pick: 40, distance: 1 },
+    college: statuses.map(pickResult),
+    pro: statuses.map(pickResult),
+    status: { hasNoPicks: false, isKnockedOut: false },
+  };
+}
+
+function week(
+  players: Array<PlayerScore>,
+  tiebreaker?: number,
+): RakMadnessScores {
+  return { tiebreaker, scores: players };
+}
+
+describe("isWeekDecided", () => {
+  it("calls a week decided once every pick is scored", () => {
+    expect(isWeekDecided(week([player("Alice", ["yes", "no"])], 41))).toBe(
+      true,
+    );
+  });
+
+  it("holds off while a game is still to finish", () => {
+    expect(
+      isWeekDecided(
+        week(
+          [
+            player("Alice", ["yes", "incomplete"]),
+            player("Bob", ["no", "incomplete"]),
+          ],
+          41,
+        ),
+      ),
+    ).toBe(false);
+  });
+
+  it("holds off when a game could not be scored for anyone", () => {
+    expect(
+      isWeekDecided(
+        week(
+          [player("Alice", ["yes", "error"]), player("Bob", ["no", "error"])],
+          41,
+        ),
+      ),
+    ).toBe(false);
+  });
+
+  it("calls a week decided when one player alone left a pick blank", () => {
+    expect(
+      isWeekDecided(
+        week(
+          [player("Alice", ["yes", "no"]), player("Bob", ["yes", "error"])],
+          41,
+        ),
+      ),
+    ).toBe(true);
+  });
+
+  it("holds off until the Monday night tiebreaker is settled", () => {
+    expect(isWeekDecided(week([player("Alice", ["yes"])]))).toBe(false);
+  });
+});

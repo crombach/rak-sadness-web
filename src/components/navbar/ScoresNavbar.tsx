@@ -1,4 +1,4 @@
-import { InfoIcon, LeaderboardIcon, RefreshIcon } from "../icon/Icon";
+import { FactCheckIcon, LeaderboardIcon, RefreshIcon } from "../icon/Icon";
 import getClasses from "../../utils/getClasses";
 import Button from "../button/Button";
 import "./ScoresNavbar.scss";
@@ -41,7 +41,7 @@ export default function ScoresNavbar({
           "--active": view === "Picks",
         })}`}
       >
-        <InfoIcon />
+        <FactCheckIcon />
         <span className="home__scores-header-label">Picks</span>
       </Button>
       <div className="home__scores-header-divider" />

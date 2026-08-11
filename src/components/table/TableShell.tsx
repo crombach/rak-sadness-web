@@ -15,14 +15,11 @@ export default function TableShell({
   columnCount,
   header,
   className = "",
-  fillerCellContent,
   children,
 }: {
   columnCount: number;
   header: ReactNode;
   className?: string;
-  /** Placed in every cell of every filler row. Empty cells without it. */
-  fillerCellContent?: ReactNode;
   children?: ReactNode;
 }) {
   const tableRef = useRef<HTMLTableElement>(null);
@@ -38,7 +35,7 @@ export default function TableShell({
         {Array.from({ length: fillerRows }, (_, row) => (
           <tr key={`filler-${row}`} className="table__filler-row">
             {Array.from({ length: columnCount }, (_, column) => (
-              <td key={column}>{fillerCellContent}</td>
+              <td key={column} />
             ))}
           </tr>
         ))}

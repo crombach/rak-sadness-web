@@ -5,7 +5,7 @@ const OUTLINE_FILTER_ID = "logo-button-outline";
 const OUTLINE_RADIUS_PX = 1;
 
 /** Shown in the navbar on every page, whichever view is open. */
-export const APP_NAME = "Rak Madness Calculator";
+export const APP_NAME = "The Rakulator";
 
 export default function LogoButton({ onClick }: { onClick: () => void }) {
   return (

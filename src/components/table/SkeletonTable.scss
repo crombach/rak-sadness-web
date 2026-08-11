@@ -1,5 +1,3 @@
-@use "../../styles/breakpoints" as *;
-
 @keyframes skeleton-pulse {
   from {
     opacity: 0.45;
@@ -10,34 +8,44 @@
 }
 
 .table.--skeleton {
-  --rak-skeleton-header-lines: calc(2 * 1.5em + 4px);
-  // Spans the content column, where a real table is only as wide as its columns.
-  width: 100%;
-  // Honors the per-column widths the header cells carry, which is what gives the
-  // wireframe the shape of the table it stands in for.
-  table-layout: fixed;
   // `.table` centers itself vertically, which would split the leftover space into
   // a band above and below. Flush to the top instead, so the whole remainder is at
   // the bottom and the row count can claim it.
   margin-block: 0;
-  // The wireframe is decoration, so it never invites a click.
-  pointer-events: none;
+
+  th,
+  td {
+    // Containing block for the bar, which is taken out of flow so the invisible
+    // text below is what sizes the cell.
+    position: relative;
+
+    // Drawn from the attribute rather than written into the cell, so a placeholder
+    // never lands in the page's text for a screen reader or a query to find.
+    &::before {
+      content: attr(data-skeleton-text);
+      visibility: hidden;
+    }
+  }
+
+  // No value in a real table wraps, so no stand-in for one does either, and every
+  // body row comes out a single line tall. A header still wraps on its own, the
+  // way the real one does.
+  td::before {
+    white-space: nowrap;
+  }
 
   .skeleton__bar {
-    display: block;
-    width: 100%;
+    position: absolute;
+    top: 50%;
+    // Absolute insets run from the padding box, so the cell's own padding is what
+    // lands a bar on the content a real cell would hold.
+    left: var(--rak-table-cell-padding-x);
+    right: var(--rak-table-cell-padding-x);
     height: 0.7rem;
+    transform: translateY(-50%);
     border-radius: 3px;
     background-color: var(--rak-text-tertiary);
     animation: skeleton-pulse 1s ease-in-out infinite alternate;
-  }
-
-  .table__header th {
-    // A real header needs no height, since its own text gives it one, and that text
-    // wraps: two lines at any width below roughly 1100px, three once the columns
-    // are phone-narrow. The wireframe has no text to wrap, so it is handed the
-    // height that text would have made. Assumes the inherited line-height of 1.5.
-    height: var(--rak-skeleton-header-lines);
   }
 
   .table__header .skeleton__bar {
@@ -48,21 +56,16 @@
   // A real table draws this edge from its sticky player column, which the
   // wireframe has no stand-in for, so the rank column would run into the next one.
   td:nth-child(2) {
-    border-left: 2px solid var(--rak-primary-800);
-  }
+    border-left: var(--rak-table-border);
 
-  td,
-  th {
-    // `min-width: max-content` measures an empty cell as nothing, and the columns
-    // then divide the table's width evenly. Overriding it also keeps the wireframe
-    // from being wider than a phone and scrolling sideways.
-    min-width: 0;
-  }
-}
-
-@include narrow-screen {
-  .table.--skeleton {
-    --rak-skeleton-header-lines: calc(3 * 1.5em + 4px);
+    // Room for the status icon that sits beside a real name, which this column has
+    // no stand-in for. Without it the column comes out narrower than the one it
+    // stands in for.
+    &::before {
+      padding-right: calc(
+        var(--rak-player-icon-size) + var(--rak-player-icon-gap)
+      );
+    }
   }
 }
 

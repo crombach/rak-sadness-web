@@ -11,4 +11,6 @@ entry point the app calls; everything else is a step it sequences.
 - `getTiebreakerScore`: the Monday night game's real total, once it is final
 - `scorePlayers`: per-player totals, sorted
 - `comparePlayerScores`: the rank order and every tiebreaker tier
+- `isWeekDecided`: whether every game and the tiebreaker are settled, which is when
+  whoever the knockouts left standing has won
 - `applyKnockouts`: who can still win, and why not

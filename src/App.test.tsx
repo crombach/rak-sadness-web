@@ -134,7 +134,7 @@ function notFoundResponse(): Response {
 }
 
 function htmlResponse(): Response {
-  return new Response("<!doctype html><title>Rak Madness Calculator</title>", {
+  return new Response("<!doctype html><title>The Rakulator</title>", {
     status: 200,
     headers: { "content-type": "text/html" },
   });
@@ -205,7 +205,7 @@ describe("the app, first load", () => {
 
   it("shows the app title in the navbar", async () => {
     await mountLoadedApp();
-    expect(screen.getByText("Rak Madness Calculator")).toBeInTheDocument();
+    expect(screen.getByText("The Rakulator")).toBeInTheDocument();
   });
 });
 
@@ -482,6 +482,40 @@ describe("the app, week routes", () => {
     expect(await screen.findByText("MNF Points Pick")).toBeInTheDocument();
   });
 
+  it("crowns a player still standing at the end of the week", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    await screen.findByText("MNF Points Pick");
+    expect(screen.getByTestId("EmojiEventsIcon")).toBeInTheDocument();
+  });
+
+  it("holds the crown back while a game is still to finish", async () => {
+    getPlayerScoresMock.mockResolvedValue({
+      ...scores,
+      scores: [
+        {
+          ...scores.scores[0],
+          pro: [
+            {
+              pick: "BUF",
+              status: "incomplete",
+              explanation: { header: "P1", message: "in progress" },
+            },
+          ],
+        },
+      ],
+    });
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    await screen.findByText("MNF Points Pick");
+    expect(
+      screen.getByTestId("SentimentVerySatisfiedIcon"),
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("EmojiEventsIcon")).not.toBeInTheDocument();
+  });
+
   it("shows a wireframe table until the results are ready", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
     mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
@@ -534,28 +568,26 @@ describe("the app, week routes", () => {
     ).toHaveLength(24);
   });
 
-  it("widens the content area for the picks wireframe only", async () => {
+  it("gives the wireframe a row per player of a middling week", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
     mountApp(`/week/${CURRENT_WEEK}/picks`);
 
-    // The loaded picks table is wider than the content column, so its wireframe
-    // starts out that wide too.
-    expect(document.querySelector(".home__content")).toHaveClass(
-      "--full-width",
-    );
+    expect(
+      document.querySelectorAll(
+        ".table.--skeleton tbody tr:not(.table__last-row):not(.table__filler-row)",
+      ),
+    ).toHaveLength(61);
+  });
+
+  it("holds the content still while the week loads, keeping the scrollbar's room", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    mountApp(`/week/${CURRENT_WEEK}/picks`);
+
+    expect(document.querySelector(".home__content")).toHaveClass("--frozen");
 
     await screen.findByText("College Score");
     expect(document.querySelector(".home__content")).not.toHaveClass(
-      "--full-width",
-    );
-  });
-
-  it("keeps the content area narrow for the scoreboard wireframe", async () => {
-    fetchMock.mockResolvedValue(spreadsheetResponse());
-    mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
-
-    expect(document.querySelector(".home__content")).not.toHaveClass(
-      "--full-width",
+      "--frozen",
     );
   });
 
