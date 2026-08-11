@@ -6,6 +6,8 @@ import {
   UncontrolledGame,
   VictoryRoute,
 } from "../../types/PathsToVictory";
+import { RakMadnessScores } from "../../types/RakMadnessScores";
+import remainingGames from "../../utils/scoring/remainingGames";
 import Button from "../button/Button";
 import "./VictorySummary.scss";
 
@@ -16,6 +18,40 @@ const NAMES = new Intl.ListFormat("en-US");
 
 function plural(count: number, noun: string): string {
   return `${count} ${noun}${count === 1 ? "" : "s"}`;
+}
+
+/**
+ * Where the week stands, which the scores already say. Read straight off them so
+ * it is on screen before anyone is picked, and while their routes are worked out.
+ */
+export function Standing({
+  scores,
+  player,
+}: {
+  scores?: RakMadnessScores;
+  player?: string;
+}) {
+  const [leader, runnerUp] = scores?.scores ?? [];
+  if (leader == null) return null;
+  const chosen = scores?.scores.find((it) => it.name === player);
+  const behind =
+    chosen != null ? leader.score.total - chosen.score.total : undefined;
+  const isLevel =
+    behind != null
+      ? behind === 0
+      : runnerUp?.score.total === leader.score.total;
+  return (
+    <p className="victory__standing">
+      {isLevel
+        ? "Level at the top"
+        : behind != null
+          ? `${plural(behind, "point")} behind ${leader.name}`
+          : `${leader.name} leads`}
+      {" · "}
+      {plural(remainingGames(scores?.scores ?? []).length, "game")} still to
+      play
+    </p>
+  );
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -68,10 +104,12 @@ function Outright({
   outlook,
   outrightAt,
   minimumWins,
+  hasGames,
 }: {
   outlook?: MondayNightOutlook;
   outrightAt?: number;
   minimumWins: number;
+  hasGames: boolean;
 }) {
   const lines = [
     outlook?.kind === "notNeeded"
@@ -83,9 +121,12 @@ function Outright({
       : null,
   ].filter((line) => line != null);
   if (lines.length === 0) return null;
-  return lines.map((line) => (
+  // The last of them hands over to the sections under it, which ask for less.
+  const last = hasGames ? " Otherwise:" : "";
+  return lines.map((line, index) => (
     <p key={line} className="victory__line">
       {line}
+      {index === lines.length - 1 && last}
     </p>
   ));
 }
@@ -208,19 +249,14 @@ export default function VictorySummary({
 
   if (result.kind === "headline") {
     return (
-      <div className="victory">
-        <Message
-          heading={`${result.player} needs at least ${result.minimumWins} of their ${result.remainingPickCount} remaining picks.`}
-          body={
-            result.needsMondayNight
-              ? "That is only enough to draw level, so the MNF points tiebreaker would still decide it. The routes are worked out once ten games are left."
-              : "The routes are worked out once ten games are left."
-          }
-        />
-        <p className="victory__standing">
-          {plural(result.remainingGameCount, "game")} still to play
-        </p>
-      </div>
+      <Message
+        heading={`${result.player} needs at least ${result.minimumWins} of their ${result.remainingPickCount} remaining picks.`}
+        body={
+          result.needsMondayNight
+            ? "That is only enough to draw level, so the MNF points tiebreaker would still decide it. The routes are worked out once ten games are left."
+            : "The routes are worked out once ten games are left."
+        }
+      />
     );
   }
 
@@ -230,20 +266,16 @@ export default function VictorySummary({
     : 0;
   const minimumWins = result.mustWin.length + Math.max(fromPool, fromRoutes);
 
+  const hasGames =
+    result.mustWin.length > 0 || result.pool != null || result.routes != null;
+
   return (
     <div className="victory">
-      <p className="victory__standing">
-        {result.pointsBehind > 0
-          ? `${plural(result.pointsBehind, "point")} behind ${result.leader}`
-          : "Level at the top"}
-        {" · "}
-        {plural(result.remainingGameCount, "game")} still to play
-      </p>
-
       <Outright
         outlook={result.mondayNight}
         outrightAt={result.outrightAt}
         minimumWins={minimumWins}
+        hasGames={hasGames}
       />
 
       {result.mustWin.length > 0 && (

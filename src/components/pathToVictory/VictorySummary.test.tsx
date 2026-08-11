@@ -1,7 +1,8 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PathsToVictory, VictoryRoute } from "../../types/PathsToVictory";
-import VictorySummary from "./VictorySummary";
+import { PlayerScore, RakMadnessScores } from "../../types/RakMadnessScores";
+import VictorySummary, { Standing } from "./VictorySummary";
 
 /** Routes of one game each, all different, so only their number matters. */
 function routesOf(count: number): Array<VictoryRoute> {
@@ -29,6 +30,47 @@ const base = {
   hiddenRouteCount: 0,
   needsHelp: [],
 };
+
+describe("Standing", () => {
+  function player(name: string, total: number, pick: string): PlayerScore {
+    return {
+      name,
+      score: { total, college: 0, pro: total, proAgainstTheSpread: 0 },
+      tiebreaker: {},
+      college: [],
+      pro: [
+        {
+          pick,
+          status: "incomplete",
+          explanation: { header: "", message: "" },
+        },
+      ],
+      status: { hasNoPicks: false, isKnockedOut: false },
+    };
+  }
+
+  const scores: RakMadnessScores = {
+    scores: [player("Rak", 3, "KC -3"), player("Alice", 1, "DEN +3")],
+  };
+
+  it("names the leader before anyone is picked", () => {
+    render(<Standing scores={scores} />);
+
+    expect(screen.getByText("Rak leads · 1 game still to play"));
+  });
+
+  it("counts the player picked back to the leader", () => {
+    render(<Standing scores={scores} player="Alice" />);
+
+    expect(screen.getByText("2 points behind Rak · 1 game still to play"));
+  });
+
+  it("has nothing to say before a week is scored", () => {
+    const { container } = render(<Standing />);
+
+    expect(container).toBeEmptyDOMElement();
+  });
+});
 
 describe("VictorySummary", () => {
   it("says nothing until a player is picked", () => {
@@ -74,15 +116,6 @@ describe("VictorySummary", () => {
       screen.getByText("Alice needs at least 6 of their 13 remaining picks."),
     ).toBeInTheDocument();
     expect(screen.getByText(/MNF points tiebreaker/)).toBeInTheDocument();
-    expect(screen.getByText("14 games still to play")).toBeInTheDocument();
-  });
-
-  it("shows how far back the player is and what is left to play", () => {
-    render(<VictorySummary result={{ ...base, mustWin: [] }} />);
-
-    expect(
-      screen.getByText("2 points behind Rak · 4 games still to play"),
-    ).toBeInTheDocument();
   });
 
   it("lists the must-win games and the pool behind them", () => {
@@ -150,7 +183,7 @@ describe("VictorySummary", () => {
     render(<VictorySummary result={result} />);
 
     expect(
-      screen.getByText("Winning 3 games takes it outright."),
+      screen.getByText("Winning 3 games takes it outright. Otherwise:"),
     ).toBeInTheDocument();
   });
 
@@ -162,9 +195,7 @@ describe("VictorySummary", () => {
     };
     render(<VictorySummary result={result} />);
 
-    const outright = screen.getByText(
-      "Takes the week outright, whatever the MNF points come to.",
-    );
+    const outright = screen.getByText(/Takes the week outright/);
     const mustWin = screen.getByRole("heading", { name: "Must win" });
     expect(
       outright.compareDocumentPosition(mustWin) &

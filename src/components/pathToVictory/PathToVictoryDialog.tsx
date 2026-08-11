@@ -7,7 +7,7 @@ import getClasses from "../../utils/getClasses";
 import getPathsToVictory from "../../utils/scoring/getPathsToVictory";
 import Button from "../button/Button";
 import { CloseRoundedIcon, SkullIcon, UnfoldMoreIcon } from "../icon/Icon";
-import VictorySummary from "./VictorySummary";
+import VictorySummary, { Standing } from "./VictorySummary";
 import "./PathToVictoryDialog.scss";
 
 export type PlayerOption = { name: string; isKnockedOut: boolean };
@@ -179,6 +179,8 @@ export default function PathToVictoryDialog({
               </Combobox.Positioner>
             </Combobox.Portal>
           </Combobox.Root>
+
+          <Standing scores={scores} player={player?.name} />
 
           <div className="path-to-victory__body" ref={body}>
             <div ref={measure}>
