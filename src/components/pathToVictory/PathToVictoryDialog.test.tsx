@@ -68,6 +68,13 @@ describe("playersMatching", () => {
     ]);
   });
 
+  it("names nobody knocked out before anything is typed", () => {
+    const allOut = playerOptions({
+      scores: [player("Bobby", 0, "DEN +3", true)],
+    });
+    expect(playersMatching(allOut, "")).toEqual([]);
+  });
+
   it("has nobody to offer before a week is scored", () => {
     expect(playersMatching(playerOptions(undefined), "")).toEqual([]);
   });

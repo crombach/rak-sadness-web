@@ -4,10 +4,9 @@ What a player still has to do to win a week being played, opened from the navbar
 gold trophy button.
 
 `PathToVictoryDialog`: a Base UI dialog over a Base UI combobox, with
-`VictorySummary` under it. `playersMatching` holds a knocked out player back while
-anyone still standing shares the letters typed, and offers them disabled when they
-are the only match, named in `--rak-knocked-out-text` with the same skull the table
-gives them. The search is thousands of scenarios, so it runs on the player chosen
+`VictorySummary` under it. `playersMatching` names a knocked out player only where
+the letters typed reach nobody still standing, disabled, in
+`--rak-knocked-out-text` with the same skull the table gives them. The search is thousands of scenarios, so it runs on the player chosen
 rather than on every render. `PathToVictoryDialog.scss`
 centers the one dialog as a modal and stands it on the bottom edge as a sheet below
 `compact-screen`, replacing both ends of the transition, since a sheet cannot inherit

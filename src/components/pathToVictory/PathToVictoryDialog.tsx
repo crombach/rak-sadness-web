@@ -21,8 +21,8 @@ export function playerOptions(scores?: RakMadnessScores): Array<PlayerOption> {
 }
 
 /**
- * The players a query offers. A knocked out one is held back while anyone still
- * standing answers to the same letters, since their only answer is "no".
+ * The players a query offers. A knocked out one is named only where the letters
+ * typed reach nobody still standing, since their only answer is "no".
  */
 export function playersMatching(
   options: Array<PlayerOption>,
@@ -33,7 +33,8 @@ export function playersMatching(
     option.name.toLowerCase().includes(needle),
   );
   const standing = matches.filter((option) => !option.isKnockedOut);
-  return standing.length > 0 ? standing : matches;
+  if (needle.length === 0 || standing.length > 0) return standing;
+  return matches;
 }
 
 /**
