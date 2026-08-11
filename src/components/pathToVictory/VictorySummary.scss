@@ -41,7 +41,7 @@
 // One pick reads as a chip of two halves: which game, then what to back in it.
 .victory__pick {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 6px;
   padding: 4px 8px;
   border-radius: var(--rak-radius-sm);
@@ -53,7 +53,6 @@
 
 .victory__pick-label {
   color: var(--rak-text-tertiary);
-  font-size: 0.75rem;
   font-weight: 700;
 }
 
