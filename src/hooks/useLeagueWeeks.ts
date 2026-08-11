@@ -41,10 +41,13 @@ export default function useLeagueWeeks(
       const proLeagueInfo = await getLeagueInfo(League.PRO, season);
       if (proLeagueInfo == null) {
         // The season that was asked for, even though nothing came back for it.
-        // Without both of these the season we came from would look current, and
-        // its weeks would answer for a season nobody has the schedule of.
+        // Everything the season we came from told us goes, or its weeks would
+        // answer for a season nobody has the schedule of, and a week of it would
+        // be scored against this one.
         setSeasonYear(season);
         setWeeks(undefined);
+        setCurrentWeek(undefined);
+        setSelectedWeek(undefined);
         setLoading(false);
         showToast(
           new Toast("danger", "Error", "Failed to load the NFL schedule."),
