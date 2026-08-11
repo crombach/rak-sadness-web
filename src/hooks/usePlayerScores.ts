@@ -1,5 +1,5 @@
 import throttle from "lodash.throttle";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Toast, useToastActions } from "../context/ToastContext";
 import { WeekInfo } from "../types/League";
 import { RakMadnessScores } from "../types/RakMadnessScores";
@@ -47,6 +47,10 @@ export default function usePlayerScores(
   const [isScoresLoading, setScoresLoading] = useState(true);
   const [isRefreshing, setRefreshing] = useState(false);
   const [settledWeek, setSettledWeek] = useState<number>();
+  // Counts scoring attempts, so a superseded one cannot write its week's scores
+  // over the week that replaced it. Two can be in flight whenever the selected
+  // week changes while the first is still loading.
+  const latestAttempt = useRef(0);
 
   const clearScores = useCallback(() => {
     setScores(undefined);
@@ -63,14 +67,18 @@ export default function usePlayerScores(
       onSuccess,
     }: ScoringRequest) => {
       if (!selectedWeek || season == null) return;
+      const attempt = ++latestAttempt.current;
+      const isLatest = () => latestAttempt.current === attempt;
       setPicksLoading(true);
       setScoresLoading(true);
 
       let buffer: ArrayBuffer;
       try {
         buffer = await loadPicks();
+        if (!isLatest()) return;
         setPicksBuffer(buffer);
       } catch (error) {
+        if (!isLatest()) return;
         setSettledWeek(selectedWeek.value);
         console.warn(
           `Failed to load week ${selectedWeek.value} picks spreadsheet. Has it been uploaded yet?`,
@@ -85,18 +93,23 @@ export default function usePlayerScores(
       setPicksLoading(false);
 
       try {
-        setScores(await getPlayerScores(selectedWeek, buffer, season));
+        const weekScores = await getPlayerScores(selectedWeek, buffer, season);
+        if (!isLatest()) return;
+        setScores(weekScores);
         setScoresWeek(selectedWeek.value);
         if (onSuccess) {
           showToast(onSuccess);
         }
       } catch (error) {
+        if (!isLatest()) return;
         console.error("Failed to calculate scores", error);
         clearScores();
         showToast(onScoreFailure);
       } finally {
-        setScoresLoading(false);
-        setSettledWeek(selectedWeek.value);
+        if (isLatest()) {
+          setScoresLoading(false);
+          setSettledWeek(selectedWeek.value);
+        }
       }
     },
     [selectedWeek, season, showToast, clearScores],
