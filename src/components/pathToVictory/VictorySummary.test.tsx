@@ -279,7 +279,8 @@ describe("VictorySummary", () => {
       "P1KC -3",
       "P2BUF -1P3SF -6MNF points ≤ 32 to beat Rak.",
     ]);
-    expect(screen.getByText("2 other routes not shown.")).toBeInTheDocument();
+    const note = screen.getByText("2 other routes worked out but not shown.");
+    expect(note).toBe(document.querySelector(".victory")?.lastElementChild);
   });
 
   it("holds four routes open and folds the rest behind a button", () => {

@@ -165,11 +165,9 @@ function NeedsHelp({ games }: { games: Array<UncontrolledGame> }) {
 function Routes({
   title,
   routes,
-  hiddenRouteCount,
 }: {
   title: string;
   routes: Array<VictoryRoute>;
-  hiddenRouteCount: number;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const folded = routes.length - ROUTES_SHOWN_AT_FIRST;
@@ -201,11 +199,6 @@ function Routes({
         >
           {isExpanded ? "Show fewer" : `Show ${plural(folded, "more route")}`}
         </Button>
-      )}
-      {hiddenRouteCount > 0 && (
-        <p className="victory__line">
-          {plural(hiddenRouteCount, "other route")} not shown.
-        </p>
       )}
     </Section>
   );
@@ -300,7 +293,6 @@ export default function VictorySummary({
           key={result.player}
           title={result.mustWin.length > 0 ? "Then one of" : "One of"}
           routes={result.routes}
-          hiddenRouteCount={result.hiddenRouteCount}
         />
       )}
 
@@ -312,6 +304,14 @@ export default function VictorySummary({
 
       <NeedsHelp games={result.needsHelp} />
       <MondayNight outlook={result.mondayNight} />
+
+      {/* Worked out, then left off, so the count is what the reader is missing. */}
+      {result.hiddenRouteCount > 0 && (
+        <p className="victory__standing">
+          {plural(result.hiddenRouteCount, "other route")} worked out but not
+          shown.
+        </p>
+      )}
     </div>
   );
 }
