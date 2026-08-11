@@ -21,8 +21,8 @@ $toasterWidth: min(calc(100% - 48px), 400px);
   padding: 12px;
   border-radius: var(--rak-radius-sm);
   // A toast lands over the table, which is busy behind it. The same width as the
-  // table's own dividers, and the same shadow the navbar sits on. Every type
-  // repaints the color, in the strong shade of its own fill.
+  // table's own dividers, and the same shadow the navbar sits on. The color is the
+  // strong shade of the fill each type carries, primary here and repainted below.
   border: var(--rak-border-width) solid var(--rak-primary-500);
   box-shadow: var(--rak-shadow-xs);
   font-size: 1rem;
@@ -30,7 +30,6 @@ $toasterWidth: min(calc(100% - 48px), 400px);
   line-height: 1.5;
 
   &.--primary {
-    border-color: var(--rak-primary-500);
     background-color: var(--rak-soft-primary-bg);
     color: var(--rak-soft-primary-text);
   }

@@ -1,9 +1,9 @@
 @use "sass:math";
 
-// How much of the table's width the sheen covers. A translation in percent is of
-// the sheen's own width, so the table is that same translation divided by this. The
-// sheen starts with its right edge on the table's left, and ends with its left edge
-// on the table's right.
+// The fraction of the table's width the sheen covers. A transform percentage is of
+// the sheen's own width, so crossing the whole table takes 100% divided by that
+// fraction. The sheen starts with its right edge on the table's left, and ends with
+// its left edge on the table's right.
 $sheen-fraction: 0.6;
 
 @keyframes skeleton-sweep {

@@ -57,10 +57,9 @@
 .home__scores-header-refresh {
   display: grid;
   grid-template-columns: 1fr;
-  transition:
-    grid-template-columns var(--collapse-duration) ease,
-    margin-inline-start var(--collapse-duration) ease,
-    opacity var(--collapse-duration) ease;
+  transition-property: grid-template-columns, margin-inline-start, opacity;
+  transition-duration: var(--collapse-duration);
+  transition-timing-function: ease;
 
   &.--collapsed {
     grid-template-columns: 0fr;

@@ -18,6 +18,10 @@
   --rak-table-border: var(--rak-border-width) solid var(--rak-primary-800);
   --rak-table-header-border: var(--rak-border-width) solid
     var(--rak-primary-600);
+  // For an edge that draws nothing. Never `none`, which resets the color to
+  // `currentColor`: Dark Reader forces a zero-width border visible, and white is
+  // what it would then draw between the rank and the player.
+  --rak-table-no-border: 0 solid var(--rak-primary-800);
   // The status icon beside a player's name, in `PlayerName.scss`. Sized here
   // because the wireframe has to leave the same room without drawing one.
   --rak-player-icon-size: 16px;
@@ -48,11 +52,8 @@
         border-right: var(--rak-table-header-border);
       }
       &:first-child {
-        // Zero width rather than `none`, and colored: the shorthand resets the
-        // color to `currentColor`, which is white here, and Dark Reader draws that
-        // as a line between the rank and the player. The header's own background
-        // gives it nothing to show.
-        border-right: 0 solid var(--rak-primary-800);
+        // The rank and the player read as one block, so nothing divides them.
+        border-right: var(--rak-table-no-border);
       }
       &:nth-child(2) {
         border-left: var(--rak-table-header-border);
@@ -133,9 +134,8 @@
       border-right: var(--rak-table-border);
       &:first-child {
         border-left: var(--rak-table-border);
-        // Zero width, but colored like the divider the player column draws on its
-        // own left edge. See the header, where the same reset shows up white.
-        border-right: 0 solid var(--rak-primary-800);
+        // The player column draws this divider on its own left edge.
+        border-right: var(--rak-table-no-border);
       }
     }
 
@@ -152,9 +152,8 @@
         var(--rak-table-row-height) + env(safe-area-inset-bottom, 0px)
       );
       padding: 0;
-      // The last real row already carries the table's bottom edge. Zero width
-      // rather than `none`, as in the header.
-      border: 0 solid var(--rak-primary-800);
+      // The last real row already carries the table's bottom edge.
+      border: var(--rak-table-no-border);
       background-color: var(--rak-primary-800);
     }
   }

@@ -37,13 +37,13 @@ export default function ScoresNavbar({
   const [isRefreshMounted, setRefreshMounted] = useState(canRefresh);
   if (canRefresh && !isRefreshMounted) setRefreshMounted(true);
   useEffect(() => {
-    if (canRefresh) return;
+    if (canRefresh || !isRefreshMounted) return;
     const timer = setTimeout(
       () => setRefreshMounted(false),
       COLLAPSE_DURATION_MS,
     );
     return () => clearTimeout(timer);
-  }, [canRefresh]);
+  }, [canRefresh, isRefreshMounted]);
 
   return (
     <>
