@@ -24,6 +24,9 @@
 
   @include narrow-screen {
     gap: 4px;
+    // Tighter than a desktop's, because on a phone the room is better spent on
+    // the buttons than around them.
+    padding: 6px 8px;
   }
 }
 
@@ -46,9 +49,8 @@
   }
 }
 
-// Two tiers, both there to keep the app name off a third line. 16px puts it
-// there around 420px, and 12px still does at 360px and below. Measured with the
-// name inside the logo button, so its own padding counts too.
+// Narrower than a desktop's, from the width the buttons lose their labels, so the
+// app name beside them keeps its one line.
 @include crowded-navbar {
   .navbar__content .button {
     padding-inline: 12px !important;
@@ -57,6 +59,7 @@
 
 @include narrow-screen {
   .navbar__content .button {
-    padding-inline: 6px !important;
+    // A finger's worth of button on a phone, where these are the only controls.
+    min-height: 44px;
   }
 }
