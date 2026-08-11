@@ -59,6 +59,7 @@ export default function PathToVictoryDialog({
   // Held still between renders, since the combobox reads the chosen player back
   // off this list by identity.
   const options = useMemo(() => playerOptions(scores), [scores]);
+  const standing = useMemo(() => playersMatching(options, ""), [options]);
   // The search is thousands of scenarios, so it runs on the player chosen rather
   // than on every render of the dialog around them.
   const result = useMemo(
@@ -89,7 +90,10 @@ export default function PathToVictoryDialog({
           </header>
 
           <Combobox.Root
-            items={options}
+            // Only the players still standing, since the combobox falls back to
+            // this list whole once a name has been chosen, rather than to the
+            // filtered one below.
+            items={standing}
             filteredItems={playersMatching(options, query)}
             itemToStringLabel={(option: PlayerOption) => option.name}
             // The combobox keeps the choice itself. Naming it here as well would
