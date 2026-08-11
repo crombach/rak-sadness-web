@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Toast, useToastActions } from "../context/ToastContext";
 import { League, WeekInfo } from "../types/League";
 import getLeagueInfo from "../utils/getLeagueInfo";
@@ -12,7 +12,8 @@ import getLeagueInfo from "../utils/getLeagueInfo";
  *
  * `initialWeek` wins over the season's active week when the season has such a
  * week. A results URL names the week it wants, and without this the current week
- * would be selected and scored first, only to be replaced.
+ * would be selected and scored first, only to be replaced. It is read when the
+ * calendar lands, so it can change without costing another lookup.
  *
  * `season` is the year a season started in. Left out, ESPN answers with the
  * season running now, and `seasonYear` comes back saying which one that was. A
@@ -34,6 +35,16 @@ export default function useLeagueWeeks(
   const [seasonYear, setSeasonYear] = useState<number>();
   const [selectedWeek, setSelectedWeek] = useState<WeekInfo>();
   const [isLookupPending, setLoading] = useState(true);
+
+  // Read when the calendar lands rather than depended on, so changing week does
+  // not fetch the whole season again. The URL is what moves it, and the schedule
+  // is the same either way.
+  const initialWeekRef = useRef(initialWeek);
+  // Declared above the lookup, so a season and week that change together are in
+  // step before the lookup they both belong to starts.
+  useEffect(() => {
+    initialWeekRef.current = initialWeek;
+  }, [initialWeek]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -60,13 +71,13 @@ export default function useLeagueWeeks(
       setCurrentWeek(proLeagueInfo.activeWeek.value);
       setSeasonYear(proLeagueInfo.season);
       setSelectedWeek(
-        calendarWeeks.find((week) => week.value === initialWeek) ??
+        calendarWeeks.find((week) => week.value === initialWeekRef.current) ??
           proLeagueInfo.activeWeek,
       );
       setLoading(false);
     };
     getLeagueInfoAsync();
-  }, [showToast, initialWeek, season, enabled]);
+  }, [showToast, season, enabled]);
 
   // Derived rather than a flag set when the season changes, so the switch counts
   // as loading from the render that asks for it. `seasonYear` is the season the

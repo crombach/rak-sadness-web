@@ -6,9 +6,10 @@ pipeline lives here, so components only render. The first three are mounted once
 
 - `usePicksSeasons`: the seasons that have picks, from `/api/picks`, newest first.
 - `useLeagueWeeks`: the season's weeks from ESPN, and which one is selected. Takes
-  the week the user arrived asking for and the season to fetch, so a results URL is
-  not preceded by scoring the wrong week, and stays disabled until the season is
-  known. `seasonYear` says which season the week list actually describes.
+  the week the URL names and the season to fetch, so a results URL is not preceded
+  by scoring the wrong week, and stays disabled until the season is known. The
+  week is read when the calendar lands, so changing it costs no lookup.
+  `seasonYear` says which season the week list actually describes.
   `selectableWeeks` holds the calendar's own `WeekInfo` objects, because the week
   picker compares options by reference.
 - `usePlayerScores`: the scores for a week, from the API, the local cache of an
