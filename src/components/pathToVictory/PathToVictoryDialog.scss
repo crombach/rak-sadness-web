@@ -143,6 +143,12 @@
     color: var(--rak-knocked-out-text);
     cursor: default;
   }
+
+  // As tall as the name beside it, which is the proportion the tables draw the
+  // same skull at.
+  > svg {
+    font-size: 1em;
+  }
 }
 
 .path-to-victory__empty {
