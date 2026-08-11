@@ -42,8 +42,9 @@ export default function useLeagueWeeks(initialWeek?: number, season?: number) {
         );
         return;
       }
-      // Set to the current regular season week, or the max if it's the post- or off-season.
-      const calendarWeeks = proLeagueInfo.activeCalendar.weeks;
+      // The regular season and the postseason together, so a pool that runs to
+      // the Super Bowl has a week for every round of it.
+      const calendarWeeks = proLeagueInfo.seasonWeeks;
       setWeeks(calendarWeeks);
       setCurrentWeek(proLeagueInfo.activeWeek.value);
       setSeasonYear(proLeagueInfo.season);

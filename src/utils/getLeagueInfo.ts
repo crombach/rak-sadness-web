@@ -134,12 +134,34 @@ export default async function getLeagueInfo(
           );
         });
 
+  // The regular season and the postseason as one run of weeks, so a pool can be
+  // scored through the Super Bowl. ESPN restarts its own numbering at the
+  // postseason, so the Wild Card round is its week 1 and this is what maps it
+  // back to the week a pool would call it.
+  const weeksOf = (seasonType: SeasonType) =>
+    calendars.find((cal) => cal.seasonType === seasonType)?.weeks ?? [];
+  const regularSeasonWeeks = weeksOf(SeasonType.REGULAR);
+  // Counted from the last regular season week's own number rather than from how
+  // many weeks there are, so a calendar that skips one still puts the Wild Card
+  // round after week 18 instead of on top of it.
+  const lastRegularSeasonWeek = Math.max(
+    0,
+    ...regularSeasonWeeks.map((week) => week.value),
+  );
+  const seasonWeeks = [
+    ...regularSeasonWeeks,
+    ...weeksOf(SeasonType.POST).map((week, index) => ({
+      ...week,
+      value: lastRegularSeasonWeek + index + 1,
+    })),
+  ];
+
   // Find the active week for the current date/time, if applicable.
-  // Fall back to the last week in the active calendar.
-  const activeWeek = activeCalendar?.weeks.find((week, index) => {
+  // Fall back to the last week of the season.
+  const activeWeek = seasonWeeks.find((week, index) => {
     return (
       (week.startDate <= now && week.endDate >= now) ||
-      index === activeCalendar.weeks.length - 1
+      index === seasonWeeks.length - 1
     );
   });
 
@@ -155,6 +177,7 @@ export default async function getLeagueInfo(
   return {
     league,
     season: leagueMetadata.season.year,
+    seasonWeeks,
     activeCalendar,
     activeWeek,
     calendars,
