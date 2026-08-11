@@ -1,9 +1,9 @@
-@keyframes skeleton-pulse {
+@keyframes skeleton-sweep {
   from {
-    opacity: 0.45;
+    transform: translate3d(-100%, 0, 0);
   }
   to {
-    opacity: 0.15;
+    transform: translate3d(100vw, 0, 0);
   }
 }
 
@@ -12,6 +12,34 @@
   // a band above and below. Flush to the top instead, so the whole remainder is at
   // the bottom and the row count can claim it.
   margin-block: 0;
+
+  // One sheen crossing the screen, rather than a pulse in each of the fifteen
+  // hundred bars. Animating them all cost three quarters of the frame budget on a
+  // throttled phone, over the same seconds the week is being scored. This is one
+  // transform on the compositor, so it costs the same whatever the table's size.
+  //
+  // Fixed, so the table's own width, which runs well past the screen on the picks
+  // view, has no say in how far the sheen travels. Above the sticky header, below
+  // the navbar.
+  &::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 60vw;
+    z-index: 30;
+    pointer-events: none;
+    background: linear-gradient(
+      100deg,
+      transparent 30%,
+      rgb(255 255 255 / 30%) 50%,
+      transparent 70%
+    );
+    transform: translate3d(-100%, 0, 0);
+    will-change: transform;
+    animation: skeleton-sweep 2s linear infinite;
+  }
 
   th,
   td {
@@ -45,7 +73,8 @@
     transform: translateY(-50%);
     border-radius: 3px;
     background-color: var(--rak-text-tertiary);
-    animation: skeleton-pulse 1s ease-in-out infinite alternate;
+    // Midway between the ends of the pulse this replaces.
+    opacity: 0.3;
   }
 
   .table__header .skeleton__bar {
@@ -70,7 +99,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .table.--skeleton .skeleton__bar {
-    animation: none;
+  // Taken away rather than held still, because a sheen parked across the screen
+  // reads as part of the page rather than as something that was moving.
+  .table.--skeleton::after {
+    display: none;
   }
 }

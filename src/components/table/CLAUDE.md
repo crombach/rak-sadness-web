@@ -10,8 +10,10 @@ feedback both clickable cells share, striped rows). Every measurement the wirefr
 has to reproduce is a custom property on `.table`: cell padding, cell borders, and
 the size of the icon beside a player's name. Change one there, not in two files.
 
-`SkeletonTable`: the pulsing wireframe shown while a week's results are being
-worked out, shaped like the view it stands in for. Its cells hold no text: each
+`SkeletonTable`: the wireframe shown while a week's results are being worked out,
+shaped like the view it stands in for. One sheen sweeps across the screen rather
+than each of its ~1500 bars pulsing, which is a single compositor transform in
+place of an animation per bar. Its cells hold no text: each
 carries a `data-skeleton-text` stand-in that the stylesheet draws invisibly, so the
 table's own `max-content` sizing gives the wireframe a real table's measurements at
 any font size, and no placeholder reaches the page's text. No stand-in for a value
