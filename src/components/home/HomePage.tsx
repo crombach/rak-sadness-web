@@ -20,9 +20,9 @@ export default function HomePage() {
     setSelectedWeek,
     selectableSeasons,
     seasonYear,
+    requestedSeason,
     setSelectedSeason,
     isWeekInfoLoading,
-    isSeasonsLoading,
     scores,
     isPicksLoading,
     isScoresLoading,
@@ -45,14 +45,18 @@ export default function HomePage() {
     [scoreLocalFile],
   );
 
-  // Anything that has to finish before the controls mean anything.
-  const isBusy =
-    isWeekInfoLoading || isSeasonsLoading || isPicksLoading || isScoresLoading;
+  // Anything that has to finish before the controls mean anything. The week
+  // lookup waits on the season list, so its flag covers that too.
+  const isBusy = isWeekInfoLoading || isPicksLoading || isScoresLoading;
   const hasNoScoresYet = !selectedWeek || isBusy || !scores;
 
   return (
     <PageLayout navbarLeft={<LogoButton onClick={() => navigate("/")} />}>
-      {!isWeekInfoLoading && (
+      {/*
+        Only the first load hides the controls. Switching seasons disables them
+        instead, so the picker the user just used does not vanish under them.
+      */}
+      {seasonYear != null && (
         <>
           <div className="home__controls">
             {/*
@@ -60,11 +64,14 @@ export default function HomePage() {
               covers the games played from September 2025 into January 2026.
             */}
             <Select.Root
-              value={seasonYear ?? null}
+              // The season asked for, not the one loaded, so the trigger shows
+              // the switch immediately. Falls back for `make run`, where there
+              // is no season list to have asked from.
+              value={requestedSeason ?? seasonYear ?? null}
               onValueChange={(season) =>
                 season != null && setSelectedSeason(season)
               }
-              disabled={isWeekInfoLoading || isSeasonsLoading}
+              disabled={isWeekInfoLoading}
             >
               <Select.Trigger
                 aria-label="Season"

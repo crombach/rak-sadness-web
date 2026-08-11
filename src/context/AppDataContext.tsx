@@ -25,6 +25,12 @@ type AppData = ReturnType<typeof useLeagueWeeks> &
     /** Which season the user is looking at, by the year it started in. */
     setSelectedSeason: (season: number) => void;
     /**
+     * The season being asked for, which is the one the picker should show.
+     * `seasonYear` is the season already loaded, so the two differ for the length
+     * of a switch.
+     */
+    requestedSeason?: number;
+    /**
      * The seasons that can be chosen, newest first. The ones with picks in the
      * database, or the season running now when that list cannot be had.
      */
@@ -115,9 +121,17 @@ export function AppDataContextProvider({
       ...picksSeasons,
       findWeek,
       setSelectedSeason,
+      requestedSeason,
       selectableSeasons,
     }),
-    [leagueWeeks, playerScores, picksSeasons, findWeek, selectableSeasons],
+    [
+      leagueWeeks,
+      playerScores,
+      picksSeasons,
+      findWeek,
+      requestedSeason,
+      selectableSeasons,
+    ],
   );
 
   return (
