@@ -5,7 +5,7 @@
 ## Subdirectories
 
 - [`components/`](components/CLAUDE.md) — React UI, layout, routes
-- [`context/`](context/CLAUDE.md) — app data and toast context providers
+- [`context/`](context/CLAUDE.md) — app data and toast providers
 - [`hooks/`](hooks/CLAUDE.md) — picks, scoring, export, route guard
 - [`styles/`](styles/CLAUDE.md) — Sass mixins: two breakpoints
 - [`types/`](types/CLAUDE.md) — ESPN, league, and scoring types

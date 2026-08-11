@@ -9,4 +9,4 @@ week is decided, since rescoring cannot change a finished week.
 
 ## Subdirectories
 
-- [`LogoButton/`](LogoButton/CLAUDE.md) — logo button, navbar left slot
+- [`LogoButton/`](LogoButton/CLAUDE.md) — logo button, navbar left
