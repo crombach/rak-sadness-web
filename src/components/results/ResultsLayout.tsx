@@ -1,12 +1,8 @@
 import { Outlet, useMatch, useNavigate, useParams } from "react-router";
 import { useAppData } from "../../context/AppDataContext";
 import useWeekRouteGuard from "../../hooks/useWeekRouteGuard";
-import getClasses from "../../utils/getClasses";
-import LogoButton from "../navbar/LogoButton/LogoButton";
-import ScoresNavbar, { ScoresView } from "../navbar/ScoresNavbar";
-import PageLayout from "../PageLayout";
-import SkeletonTable from "../table/SkeletonTable";
-import "./ResultsLayout.scss";
+import { ScoresView } from "../navbar/ScoresNavbar";
+import ResultsFrame from "./ResultsFrame";
 
 /**
  * Chrome for a week's results, shared by both views.
@@ -26,35 +22,19 @@ export default function ResultsLayout() {
     ? "Picks"
     : "Scoreboard";
 
-  const isReady = guard.status === "ready";
-
   return (
-    <PageLayout
-      // True while loading too: the wireframe is shaped like the table it stands
-      // in for, so it wants the same content area.
-      showingScores
-      scrollable={isReady}
-      navbarLeft={<LogoButton onClick={() => navigate("/")} />}
-      navbarRight={
-        // Rendered while the week loads, so the navbar does not change shape
-        // under the pointer once it arrives. Disabled until there is something to
-        // switch between.
-        <ScoresNavbar
-          view={view}
-          disabled={!isReady}
-          onViewChange={(next) =>
-            navigate(`/${rawSeason}/${rawWeek}/${next.toLowerCase()}`, {
-              replace: true,
-            })
-          }
-          onRefresh={refresh}
-          isRefreshing={isRefreshing}
-        />
+    <ResultsFrame
+      view={view}
+      isReady={guard.status === "ready"}
+      onViewChange={(next) =>
+        navigate(`/${rawSeason}/${rawWeek}/${next.toLowerCase()}`, {
+          replace: true,
+        })
       }
+      onRefresh={refresh}
+      isRefreshing={isRefreshing}
     >
-      <div className={`home__scores ${getClasses({ "--loading": !isReady })}`}>
-        {isReady ? <Outlet /> : <SkeletonTable view={view} />}
-      </div>
-    </PageLayout>
+      <Outlet />
+    </ResultsFrame>
   );
 }
