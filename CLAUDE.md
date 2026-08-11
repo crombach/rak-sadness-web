@@ -4,7 +4,7 @@ Auto-scoring web app for the Rak Madness football pool. Vite + React 19 + TypeSc
 
 ## Subdirectories
 
-- [`public/`](public/CLAUDE.md) — static assets copied to the build root
+- [`public/`](public/CLAUDE.md) — static assets for the build root
 - [`src/`](src/CLAUDE.md) — application source
 
 ## Maintaining this tree
