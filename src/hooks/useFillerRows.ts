@@ -1,33 +1,37 @@
 import { RefObject, useCallback, useLayoutEffect, useState } from "react";
 
+/** The rows this hook adds, which `TableShell` renders and this measures back. */
+export const FILLER_ROW_CLASS = "table__filler-row";
+
 /** Matches `--rak-table-row-height`, for the render before the table is measured. */
 const DEFAULT_ROW_HEIGHT = 32;
 
 /**
  * How many empty rows fit below the table's real ones.
  *
- * `currentCount` is what the table is already padded by, so the spare space is
- * measured against the content alone. Feeding the answer back in leaves it
- * unchanged, which is what keeps this from oscillating as the rows it adds change
- * the height it measures.
+ * `fillerHeight` is what the rows this already added take up, measured rather than
+ * assumed, so the spare space is worked out from the real content alone. That is
+ * what stops it oscillating as the rows it adds change the height it measures. A
+ * filler row a fraction of a pixel off `rowHeight` would otherwise move the answer
+ * every time it ran.
  */
 export function fillerRowCount({
   viewportHeight,
   tableTop,
   tableHeight,
   rowHeight,
-  currentCount,
+  fillerHeight,
 }: {
   viewportHeight: number;
   tableTop: number;
   tableHeight: number;
   rowHeight: number;
-  currentCount: number;
+  fillerHeight: number;
 }): number {
   if (rowHeight <= 0) {
     return 0;
   }
-  const contentHeight = tableHeight - currentCount * rowHeight;
+  const contentHeight = tableHeight - fillerHeight;
   const spare = viewportHeight - tableTop - contentHeight;
   return Math.max(Math.floor(spare / rowHeight), 0);
 }
@@ -53,13 +57,16 @@ export default function useFillerRows(
     const table = tableRef.current;
     if (table == null) return;
     const { top, height } = table.getBoundingClientRect();
-    setCount((currentCount) =>
+    const fillerHeight = Array.from(
+      table.querySelectorAll<HTMLElement>(`tr.${FILLER_ROW_CLASS}`),
+    ).reduce((sum, row) => sum + row.getBoundingClientRect().height, 0);
+    setCount(
       fillerRowCount({
         viewportHeight: window.innerHeight,
         tableTop: top,
         tableHeight: height,
         rowHeight: readRowHeight(table),
-        currentCount,
+        fillerHeight,
       }),
     );
   }, [tableRef]);

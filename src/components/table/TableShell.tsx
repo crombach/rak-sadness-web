@@ -1,5 +1,5 @@
 import { ReactNode, useRef } from "react";
-import useFillerRows from "../../hooks/useFillerRows";
+import useFillerRows, { FILLER_ROW_CLASS } from "../../hooks/useFillerRows";
 import "./Table.scss";
 
 /**
@@ -33,7 +33,7 @@ export default function TableShell({
       <tbody>
         {children}
         {Array.from({ length: fillerRows }, (_, row) => (
-          <tr key={`filler-${row}`} className="table__filler-row">
+          <tr key={`filler-${row}`} className={FILLER_ROW_CLASS}>
             {Array.from({ length: columnCount }, (_, column) => (
               <td key={column} />
             ))}

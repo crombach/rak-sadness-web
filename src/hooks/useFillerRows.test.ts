@@ -5,13 +5,13 @@ const ROW_HEIGHT = 32;
 
 function count({
   tableHeight,
-  currentCount = 0,
+  fillerHeight = 0,
   tableTop = 100,
   viewportHeight = 800,
   rowHeight = ROW_HEIGHT,
 }: {
   tableHeight: number;
-  currentCount?: number;
+  fillerHeight?: number;
   tableTop?: number;
   viewportHeight?: number;
   rowHeight?: number;
@@ -21,7 +21,7 @@ function count({
     tableTop,
     tableHeight,
     rowHeight,
-    currentCount,
+    fillerHeight,
   });
 }
 
@@ -42,7 +42,24 @@ describe("fillerRowCount", () => {
   it("counts the rows it already added as filler, not content", () => {
     // The same table, once padded: 300px of content plus 12 filler rows.
     const padded = 300 + 12 * ROW_HEIGHT;
-    expect(count({ tableHeight: padded, currentCount: 12 })).toBe(12);
+    expect(count({ tableHeight: padded, fillerHeight: 12 * ROW_HEIGHT })).toBe(
+      12,
+    );
+  });
+
+  it("settles even when a filler row is not exactly one row tall", () => {
+    // Subpixel rounding used to move the answer on every pass, because the height
+    // of the rows already added was assumed rather than measured.
+    const content = 260;
+    const realRowHeight = ROW_HEIGHT + 0.4;
+    let current = 0;
+    for (let pass = 0; pass < 5; pass++) {
+      current = count({
+        tableHeight: content + current * realRowHeight,
+        fillerHeight: current * realRowHeight,
+      });
+    }
+    expect(current).toBe(13);
   });
 
   it("settles at the same answer when fed its own result", () => {
@@ -51,7 +68,7 @@ describe("fillerRowCount", () => {
     for (let pass = 0; pass < 5; pass++) {
       current = count({
         tableHeight: content + current * ROW_HEIGHT,
-        currentCount: current,
+        fillerHeight: current * ROW_HEIGHT,
       });
     }
     expect(current).toBe(13);
