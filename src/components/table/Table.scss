@@ -2,6 +2,9 @@
 
 .table {
   margin: auto;
+  // Tapping a cell opens a toast about it, and a drag across one selected the text
+  // instead of reading as a tap.
+  user-select: none;
   // Read back by useFillerRows, which needs a row height to work out how many
   // rows fit below the real ones.
   --rak-table-row-height: 32px;
