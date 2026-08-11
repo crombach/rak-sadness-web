@@ -88,6 +88,23 @@ const scores: RakMadnessScores = {
   ],
 };
 
+/** The same week with a game still to be played, so it is not over yet. */
+const openWeekScores: RakMadnessScores = {
+  ...scores,
+  scores: [
+    {
+      ...scores.scores[0],
+      pro: [
+        {
+          pick: "BUF",
+          status: "incomplete",
+          explanation: { header: "P1", message: "kicks off later" },
+        },
+      ],
+    },
+  ],
+};
+
 /** Mirrors index.tsx, with the entry URL as a parameter. */
 function mountApp(path = "/") {
   const user = userEvent.setup();
@@ -533,11 +550,12 @@ describe("the app, results views", () => {
   });
 
   it("recalculates on refresh", async () => {
+    getPlayerScoresMock.mockResolvedValue(openWeekScores);
     const user = await mountWithScores();
     await user.click(screen.getByText("View Results"));
     expect(getPlayerScoresMock).toHaveBeenCalledTimes(1);
 
-    await user.click(scoresHeaderButtons()[2]);
+    await user.click(screen.getByRole("button", { name: "Refresh" }));
 
     await waitFor(() => {
       expect(
@@ -547,12 +565,36 @@ describe("the app, results views", () => {
     expect(getPlayerScoresMock).toHaveBeenCalledTimes(2);
   });
 
+  it("offers no refresh once every game is final", async () => {
+    const user = await mountWithScores();
+    await user.click(screen.getByText("View Results"));
+
+    expect(
+      screen.queryByRole("button", { name: "Refresh" }),
+    ).not.toBeInTheDocument();
+    expect(
+      document.querySelector(".home__scores-header-divider"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("offers refresh while a game is still to be played", async () => {
+    getPlayerScoresMock.mockResolvedValue(openWeekScores);
+    const user = await mountWithScores();
+    await user.click(screen.getByText("View Results"));
+
+    expect(screen.getByRole("button", { name: "Refresh" })).toBeInTheDocument();
+    expect(
+      document.querySelector(".home__scores-header-divider"),
+    ).toBeInTheDocument();
+  });
+
   it("reports a scoring failure instead of crashing", async () => {
+    getPlayerScoresMock.mockResolvedValue(openWeekScores);
     const user = await mountWithScores();
     await user.click(screen.getByText("View Results"));
     getPlayerScoresMock.mockRejectedValueOnce(new Error("bad spreadsheet"));
 
-    await user.click(scoresHeaderButtons()[2]);
+    await user.click(screen.getByRole("button", { name: "Refresh" }));
 
     await waitFor(() => {
       expect(
