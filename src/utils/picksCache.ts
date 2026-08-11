@@ -46,7 +46,13 @@ function cachedKeys(): Array<string> {
 }
 
 function clearCache(): void {
-  cachedKeys().forEach((key) => localStorage.removeItem(key));
+  try {
+    cachedKeys().forEach((key) => localStorage.removeItem(key));
+  } catch (error) {
+    // Called from catch blocks that turn a storage failure into a cache miss.
+    // If storage is blocked outright, this must not throw past them.
+    console.warn("Could not clear picks cache", error);
+  }
 }
 
 /** The cached workbook for a week, or undefined if there isn't a usable one. */
