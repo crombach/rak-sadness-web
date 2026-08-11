@@ -10,7 +10,7 @@ import Button from "../button/Button";
 import "./VictorySummary.scss";
 
 /** How many routes stand open, the rest being a click away. */
-const ROUTES_SHOWN_AT_FIRST = 5;
+const ROUTES_SHOWN_AT_FIRST = 4;
 
 const NAMES = new Intl.ListFormat("en-US");
 
@@ -60,7 +60,11 @@ function mondayNightSentence(outlook: MondayNightOutlook): string | null {
   return `${points} to beat ${NAMES.format(outlook.contenders)}.`;
 }
 
-function MondayNight({
+/**
+ * Winning the week on points alone leads, since it settles the tiebreaker before
+ * the reader has to think about it.
+ */
+function Outright({
   outlook,
   outrightAt,
   minimumWins,
@@ -69,17 +73,32 @@ function MondayNight({
   outrightAt?: number;
   minimumWins: number;
 }) {
-  const sentence = outlook != null ? mondayNightSentence(outlook) : null;
-  // Only worth saying where it asks for more than the routes above already do.
-  const outright =
+  const lines = [
+    outlook?.kind === "notNeeded"
+      ? "Takes the week outright, whatever the MNF points come to."
+      : null,
+    // Only worth saying where it asks for more than the routes below already do.
     outrightAt != null && outrightAt > minimumWins
       ? `Winning ${plural(outrightAt, "game")} instead takes it outright.`
+      : null,
+  ].filter((line) => line != null);
+  if (lines.length === 0) return null;
+  return lines.map((line) => (
+    <p key={line} className="victory__line">
+      {line}
+    </p>
+  ));
+}
+
+function MondayNight({ outlook }: { outlook?: MondayNightOutlook }) {
+  const sentence =
+    outlook != null && outlook.kind !== "notNeeded"
+      ? mondayNightSentence(outlook)
       : null;
-  if (sentence == null && outright == null) return null;
+  if (sentence == null) return null;
   return (
     <Section title="MNF points">
-      {sentence && <p className="victory__line">{sentence}</p>}
-      {outright && <p className="victory__line">{outright}</p>}
+      <p className="victory__line">{sentence}</p>
     </Section>
   );
 }
@@ -165,14 +184,9 @@ export default function VictorySummary({
 }: {
   result?: PathsToVictory;
 }) {
-  if (result == null) {
-    return (
-      <Message
-        heading="Pick a player"
-        body="Search above for anyone who made picks this week."
-      />
-    );
-  }
+  // Nothing under the search until a name is picked, which the placeholder in it
+  // already asks for.
+  if (result == null) return null;
 
   if (result.kind === "eliminated") {
     return (
@@ -218,9 +232,17 @@ export default function VictorySummary({
 
   return (
     <div className="victory">
+      <Outright
+        outlook={result.mondayNight}
+        outrightAt={result.outrightAt}
+        minimumWins={minimumWins}
+      />
+
       {result.mustWin.length > 0 && (
         <Section title="Must win">
-          <Picks games={result.mustWin} />
+          <div className="victory__must-win">
+            <Picks games={result.mustWin} />
+          </div>
         </Section>
       )}
 
@@ -248,11 +270,7 @@ export default function VictorySummary({
       )}
 
       <NeedsHelp games={result.needsHelp} />
-      <MondayNight
-        outlook={result.mondayNight}
-        outrightAt={result.outrightAt}
-        minimumWins={minimumWins}
-      />
+      <MondayNight outlook={result.mondayNight} />
 
       <p className="victory__standing">
         {result.pointsBehind > 0

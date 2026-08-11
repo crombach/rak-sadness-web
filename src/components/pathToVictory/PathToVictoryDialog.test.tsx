@@ -103,8 +103,6 @@ describe("PathToVictoryDialog", () => {
       />,
     );
 
-    expect(screen.getByText("Pick a player")).toBeInTheDocument();
-
     const search = screen.getByRole("combobox", { name: "Player" });
     await user.type(search, "zzz");
     expect(await screen.findByText("No matching players")).toBeInTheDocument();
@@ -113,7 +111,8 @@ describe("PathToVictoryDialog", () => {
     await user.type(search, "Ali");
     await user.click(await screen.findByRole("option", { name: "Alice" }));
 
-    const mustWin = screen.getByRole("heading", { name: "Must win" });
+    // The search runs a frame after the spinner it replaces.
+    const mustWin = await screen.findByRole("heading", { name: "Must win" });
     const pick = within(mustWin.parentElement as HTMLElement).getByRole(
       "listitem",
     );

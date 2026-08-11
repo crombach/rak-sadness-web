@@ -1,6 +1,7 @@
 import { Combobox } from "@base-ui-components/react/combobox";
 import { Dialog } from "@base-ui-components/react/dialog";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { PathsToVictory } from "../../types/PathsToVictory";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import getClasses from "../../utils/getClasses";
 import getPathsToVictory from "../../utils/scoring/getPathsToVictory";
@@ -55,20 +56,53 @@ export default function PathToVictoryDialog({
 }) {
   const [player, setPlayer] = useState<PlayerOption>();
   const [query, setQuery] = useState("");
+  const [found, setFound] = useState<{
+    scores: RakMadnessScores;
+    name: string;
+    paths?: PathsToVictory;
+  }>();
 
   // Held still between renders, since the combobox reads the chosen player back
   // off this list by identity.
   const options = useMemo(() => playerOptions(scores), [scores]);
   const standing = useMemo(() => playersMatching(options, ""), [options]);
-  // The search is thousands of scenarios, so it runs on the player chosen rather
-  // than on every render of the dialog around them.
-  const result = useMemo(
-    () =>
-      scores != null && player != null
-        ? getPathsToVictory(scores, player.name)
-        : undefined,
-    [scores, player],
-  );
+
+  // The search is thousands of scenarios and holds the thread while it runs, so
+  // it waits for the spinner beside it to paint first.
+  useEffect(() => {
+    if (scores == null || player == null) return;
+    let timer = 0;
+    const frame = requestAnimationFrame(() => {
+      timer = window.setTimeout(() =>
+        setFound({
+          scores,
+          name: player.name,
+          paths: getPathsToVictory(scores, player.name),
+        }),
+      );
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
+  }, [scores, player]);
+
+  const isCurrent = found?.scores === scores && found?.name === player?.name;
+  const isSearching = player != null && !isCurrent;
+  const result = isCurrent ? found?.paths : undefined;
+
+  const body = useRef<HTMLDivElement>(null);
+  // The dialog grows to what the answer measures rather than jumping to it. Only
+  // the wrapper carries a height, so the summary inside is laid out as usual.
+  // Hung off the node itself, since the portal holding it mounts after this.
+  const measure = useCallback((content: HTMLDivElement) => {
+    const observer = new ResizeObserver(([entry]) => {
+      if (body.current == null) return;
+      body.current.style.height = `${entry.contentRect.height}px`;
+    });
+    observer.observe(content);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -146,8 +180,22 @@ export default function PathToVictoryDialog({
             </Combobox.Portal>
           </Combobox.Root>
 
-          <div className="path-to-victory__body">
-            <VictorySummary result={result} />
+          <div className="path-to-victory__body" ref={body}>
+            <div ref={measure}>
+              {isSearching ? (
+                <div
+                  className="path-to-victory__searching"
+                  role="status"
+                  aria-label="Working out the routes"
+                >
+                  <span className="path-to-victory__spinner" />
+                </div>
+              ) : (
+                // Keyed on the player, so the answer to a new one plays in rather
+                // than replacing the last one in place.
+                <VictorySummary key={player?.name} result={result} />
+              )}
+            </div>
           </div>
         </Dialog.Popup>
       </Dialog.Portal>

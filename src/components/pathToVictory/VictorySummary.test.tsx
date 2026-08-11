@@ -31,10 +31,10 @@ const base = {
 };
 
 describe("VictorySummary", () => {
-  it("asks for a player when it has no result yet", () => {
-    render(<VictorySummary />);
+  it("says nothing until a player is picked", () => {
+    const { container } = render(<VictorySummary />);
 
-    expect(screen.getByText("Pick a player")).toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it("gives an eliminated player the reason they carry", () => {
@@ -154,6 +154,24 @@ describe("VictorySummary", () => {
     ).toBeInTheDocument();
   });
 
+  it("leads with taking the week outright, ahead of the games", () => {
+    const result: PathsToVictory = {
+      ...base,
+      mustWin: [{ label: "P1", pick: "KC -3" }],
+      mondayNight: { kind: "notNeeded" },
+    };
+    render(<VictorySummary result={result} />);
+
+    const outright = screen.getByText(
+      "Takes the week outright, whatever the MNF points come to.",
+    );
+    const mustWin = screen.getByRole("heading", { name: "Must win" });
+    expect(
+      outright.compareDocumentPosition(mustWin) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it("leaves the outright line off where it asks no more than the routes do", () => {
     const result: PathsToVictory = {
       ...base,
@@ -210,13 +228,13 @@ describe("VictorySummary", () => {
     expect(screen.getByText("2 other routes not shown.")).toBeInTheDocument();
   });
 
-  it("holds five routes open and folds the rest behind a button", () => {
+  it("holds four routes open and folds the rest behind a button", () => {
     const result: PathsToVictory = { ...base, routes: routesOf(8) };
     render(<VictorySummary result={result} />);
 
-    expect(document.querySelectorAll(".victory__route")).toHaveLength(5);
+    expect(document.querySelectorAll(".victory__route")).toHaveLength(4);
     expect(
-      screen.getByRole("button", { name: "Show 3 more routes" }),
+      screen.getByRole("button", { name: "Show 4 more routes" }),
     ).toBeInTheDocument();
   });
 
@@ -232,7 +250,7 @@ describe("VictorySummary", () => {
   });
 
   it("leaves the button off where every route is already open", () => {
-    const result: PathsToVictory = { ...base, routes: routesOf(5) };
+    const result: PathsToVictory = { ...base, routes: routesOf(4) };
     render(<VictorySummary result={result} />);
 
     expect(screen.queryByRole("button")).not.toBeInTheDocument();

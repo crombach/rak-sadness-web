@@ -14,8 +14,9 @@ a centered transform.
 
 `VictorySummary`: renders `PathsToVictory`, working out only what it takes to say
 it. Must-win leads and the standing line closes. Picks sit in a grid rather than a
-wrapping row, so the same game holds the same column down every route. Routes stand
-five deep and unfold on a click, keyed on the player so a new one starts folded.
+wrapping row, so the same game holds the same column down every route. A must-win
+game carries a green line where a route carries gold. Routes stand four deep and
+unfold on a click, keyed on the player so a new one starts folded.
 
 One suite here mounts one dialog, on purpose. Base UI leaves its scroll lock, focus
 guards, and inert markers on the document when a second one mounts, which puts the

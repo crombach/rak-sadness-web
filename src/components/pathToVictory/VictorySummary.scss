@@ -4,6 +4,22 @@
   gap: 16px;
 }
 
+// Whichever of the two the answer turns out to be, it plays in under a dialog
+// already growing to hold it.
+.victory,
+.victory__message {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: victory-in 220ms ease both;
+  }
+}
+
+@keyframes victory-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
 .victory__standing {
   margin: 0;
   color: var(--rak-text-tertiary);
@@ -69,7 +85,8 @@
   list-style: none;
 }
 
-.victory__route {
+.victory__route,
+.victory__must-win {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -78,6 +95,12 @@
   // rather than as a stack of boxes.
   border-inline-start: var(--rak-border-width) solid var(--rak-gold-500);
   background-color: var(--rak-level1);
+}
+
+// Green against the routes' gold, since these games are what has to happen
+// rather than one way among several of getting there.
+.victory__must-win {
+  border-inline-start-color: var(--rak-success-500);
 }
 
 // A soft button takes the color around it, so the gold is set here rather than by

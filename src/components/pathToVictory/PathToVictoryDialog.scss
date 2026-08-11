@@ -161,10 +161,38 @@
   font-size: 0.875rem;
 }
 
+// Its height is set from what the summary inside measures, so the dialog grows
+// and shrinks with the answer. Shrinking is what makes it scroll, once the popup
+// has no more room to give.
 .path-to-victory__body {
-  flex: 1;
+  flex: 0 1 auto;
   min-height: 0;
   overflow-y: auto;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: height 220ms ease;
+  }
+}
+
+.path-to-victory__searching {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.path-to-victory__spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--rak-neutral-200);
+  border-top-color: var(--rak-primary-500);
+  border-radius: 50%;
+  animation: path-to-victory-spin 700ms linear infinite;
+}
+
+@keyframes path-to-victory-spin {
+  to {
+    transform: rotate(1turn);
+  }
 }
 
 @include compact-screen {
