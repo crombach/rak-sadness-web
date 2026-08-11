@@ -29,6 +29,11 @@
       color: white;
       background-color: var(--rak-primary-800);
       min-width: max-content;
+      // Two lines tall even where the headings fit on one. `height` on a table
+      // cell is a minimum, so a narrow screen still stacks them higher, and
+      // `border-box` counts the cell's own padding into this. The wireframe holds
+      // to the same floor, so the header does not jump when the week arrives.
+      height: calc(2lh + 2 * var(--rak-table-cell-padding-y));
       padding: var(--rak-table-cell-padding-y) var(--rak-table-header-padding-x);
       // Named even on the edges that carry no border, because a zero-width border
       // takes `currentColor`, which is white here. Dark Reader forces borders
