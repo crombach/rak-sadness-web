@@ -10,7 +10,6 @@ $toasterWidth: min(calc(100% - 48px), 400px);
   right: calc(50% - $toasterWidth / 2 - 24px);
   margin: 24px;
   width: $toasterWidth;
-  box-shadow: var(--rak-shadow-lg);
   border-radius: var(--rak-radius-lg);
 }
 
@@ -22,29 +21,36 @@ $toasterWidth: min(calc(100% - 48px), 400px);
   padding: 12px;
   border-radius: var(--rak-radius-sm);
   // A toast lands over the table, which is busy behind it. The same width as the
-  // table's own dividers.
+  // table's own dividers, and the same shadow the navbar sits on. Every type
+  // repaints the color, in the strong shade of its own fill.
   border: var(--rak-border-width) solid var(--rak-primary-500);
+  box-shadow: var(--rak-shadow-xs);
   font-size: 1rem;
   font-weight: 500;
   line-height: 1.5;
 
   &.--primary {
+    border-color: var(--rak-primary-500);
     background-color: var(--rak-soft-primary-bg);
     color: var(--rak-soft-primary-text);
   }
   &.--neutral {
+    border-color: var(--rak-text-secondary);
     background-color: var(--rak-soft-neutral-bg);
     color: var(--rak-soft-neutral-text);
   }
   &.--success {
+    border-color: var(--rak-success-500);
     background-color: var(--rak-soft-success-bg);
     color: var(--rak-soft-success-text);
   }
   &.--warning {
+    border-color: var(--rak-warning-500);
     background-color: var(--rak-soft-warning-bg);
     color: var(--rak-soft-warning-text);
   }
   &.--danger {
+    border-color: var(--rak-danger-500);
     background-color: var(--rak-soft-danger-bg);
     color: var(--rak-soft-danger-text);
   }
