@@ -283,6 +283,28 @@ describe("VictorySummary", () => {
     expect(note).toBe(document.querySelector(".victory")?.lastElementChild);
   });
 
+  it("states a total every route shares once, not on each of them", () => {
+    const shared = { kind: "range" as const, max: 32, contenders: ["Rak"] };
+    const result: PathsToVictory = {
+      ...base,
+      routes: [
+        { games: [{ label: "P1", pick: "KC -3" }], mondayNight: shared },
+        { games: [{ label: "P2", pick: "BUF -1" }], mondayNight: shared },
+      ],
+      mondayNight: shared,
+    };
+    render(<VictorySummary result={result} />);
+
+    const routes = [...document.querySelectorAll(".victory__route")];
+    expect(routes.map((route) => route.textContent)).toEqual([
+      "P1KC -3",
+      "P2BUF -1",
+    ]);
+    expect(
+      screen.getByText("MNF points ≤ 32 to beat Rak."),
+    ).toBeInTheDocument();
+  });
+
   it("holds four routes open and folds the rest behind a button", () => {
     const result: PathsToVictory = { ...base, routes: routesOf(8) };
     render(<VictorySummary result={result} />);

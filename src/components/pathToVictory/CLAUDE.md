@@ -13,11 +13,15 @@ centers the one dialog as a modal and stands it on the bottom edge as a sheet be
 a centered transform.
 
 `VictorySummary`: renders `PathsToVictory`, working out only what it takes to say
-it. Must-win leads and the standing line closes. Picks sit in a grid rather than a
-wrapping row, so the same game holds the same column down every route. A must-win
-game carries a green line where a route carries gold. Routes stand four deep and
-unfold on a click, keyed on the player so a new one starts folded. A closing note
-counts the routes worked out past the ten kept.
+it. The standing leads, from `Standing`, which reads the scores rather than the
+search. Picks sit in a grid rather than a wrapping row, so the same game holds the
+same column down every route. A must-win game carries a green line where a route
+carries gold. Routes stand four deep and unfold on a click, keyed on the player so
+a new one starts folded. A closing note counts the routes found past the ten kept.
+
+A tiebreaker every route shares is stated once under `MNF points`, and left off
+the routes themselves. Where they disagree each route carries its own, and that
+section does not render.
 
 One suite here mounts one dialog, on purpose. Base UI leaves its scroll lock, focus
 guards, and inert markers on the document when a second one mounts, which puts the

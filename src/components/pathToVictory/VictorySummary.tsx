@@ -165,9 +165,13 @@ function NeedsHelp({ games }: { games: Array<UncontrolledGame> }) {
 function Routes({
   title,
   routes,
+  // Off where every route asks the same of the tiebreaker, which the section
+  // below then states once rather than on each of them.
+  showMondayNight,
 }: {
   title: string;
   routes: Array<VictoryRoute>;
+  showMondayNight: boolean;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const folded = routes.length - ROUTES_SHOWN_AT_FIRST;
@@ -181,7 +185,7 @@ function Routes({
             className="victory__route"
           >
             <Picks games={route.games} />
-            {route.mondayNight.kind === "range" && (
+            {showMondayNight && route.mondayNight.kind === "range" && (
               <p className="victory__line">
                 {mondayNightSentence(route.mondayNight)}
               </p>
@@ -293,6 +297,7 @@ export default function VictorySummary({
           key={result.player}
           title={result.mustWin.length > 0 ? "Then one of" : "One of"}
           routes={result.routes}
+          showMondayNight={result.mondayNight == null}
         />
       )}
 
