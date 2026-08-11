@@ -62,8 +62,8 @@ export default function PageLayout({
   navbarRight?: ReactNode;
   showingScores?: boolean;
   /**
-   * Set false to hold the content still while keeping the room a scrollbar would
-   * take, so nothing shifts sideways when scrolling comes back.
+   * Set false to refuse the pointer, so what is on screen cannot be scrolled or
+   * clicked. The content keeps whatever scrollbars it asks for either way.
    */
   scrollable?: boolean;
 }>) {

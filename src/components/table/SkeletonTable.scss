@@ -12,8 +12,6 @@
   // a band above and below. Flush to the top instead, so the whole remainder is at
   // the bottom and the row count can claim it.
   margin-block: 0;
-  // The wireframe is decoration, so it never invites a click.
-  pointer-events: none;
 
   th,
   td {

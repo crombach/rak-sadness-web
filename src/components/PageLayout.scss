@@ -57,11 +57,12 @@
     width: max-content;
   }
 
-  // `hidden` is still a scroll container, so `stable` keeps whatever room a
-  // scrollbar takes on this browser while nobody can scroll yet. Without it the
-  // wireframe would jump sideways the moment the real table brings scrolling back.
+  // The wireframe is the size of the table it stands in for, so the surest way to
+  // get the scrollbars it will need is to stay scrollable and let it ask for them
+  // itself. `hidden` plus `scrollbar-gutter` cannot: the gutter is only reserved
+  // on the vertical bar, so the horizontal one arrived with the real table and took
+  // its band out of the page. Refusing the pointer is what keeps this unscrollable.
   &.--frozen {
-    overflow: hidden;
-    scrollbar-gutter: stable;
+    pointer-events: none;
   }
 }
