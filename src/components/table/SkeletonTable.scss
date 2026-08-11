@@ -13,6 +13,9 @@
   --rak-skeleton-header-lines: calc(2 * 1.5em + 4px);
   // Spans the content column, where a real table is only as wide as its columns.
   width: 100%;
+  // Honors the per-column widths the header cells carry, which is what gives the
+  // wireframe the shape of the table it stands in for.
+  table-layout: fixed;
   // `.table` centers itself vertically, which would split the leftover space into
   // a band above and below. Flush to the top instead, so the whole remainder is at
   // the bottom and the row count can claim it.

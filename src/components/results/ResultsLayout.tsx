@@ -53,7 +53,7 @@ export default function ResultsLayout() {
       }
     >
       <div className={`home__scores ${getClasses({ "--loading": !isReady })}`}>
-        {isReady ? <Outlet /> : <SkeletonTable />}
+        {isReady ? <Outlet /> : <SkeletonTable view={view} />}
       </div>
     </PageLayout>
   );

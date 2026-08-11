@@ -514,6 +514,26 @@ describe("the app, week routes", () => {
     expect(rows.length).toBe(Math.floor(window.innerHeight / 32));
   });
 
+  it("shapes the scoreboard wireframe like the scoreboard", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    mountApp(`/week/${CURRENT_WEEK}/scoreboard`);
+
+    expect(
+      document.querySelectorAll(".table.--skeleton thead th"),
+    ).toHaveLength(8);
+  });
+
+  it("shapes the picks wireframe with a column per game", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    mountApp(`/week/${CURRENT_WEEK}/picks`);
+
+    // Rank, player, and three score columns, plus a middling week's worth of
+    // games. The real count is not known until the picks have been read.
+    expect(
+      document.querySelectorAll(".table.--skeleton thead th"),
+    ).toHaveLength(24);
+  });
+
   it("widens the content area for the picks wireframe only", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
     mountApp(`/week/${CURRENT_WEEK}/picks`);
