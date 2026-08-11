@@ -31,6 +31,7 @@ export default function HomePage() {
   const { exportResults, isExportLoading } = useExportScores(
     scores,
     selectedWeek,
+    seasonYear,
   );
 
   const fileInputRef = useRef<HTMLInputElement>(null);

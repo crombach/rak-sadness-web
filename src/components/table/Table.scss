@@ -25,9 +25,8 @@
     top: 0;
     background-color: var(--rak-primary-800);
 
-    // Style header cells
     th {
-      color: white;
+      color: var(--rak-on-solid);
       background-color: var(--rak-primary-800);
       min-width: max-content;
       // Two lines tall even where the headings fit on one. `height` on a table
@@ -41,7 +40,6 @@
       // visible and draws that white against the dividers below.
       border-color: var(--rak-primary-600);
 
-      // Add a border between header cells
       &:not(:last-child) {
         border-right: var(--rak-table-header-border);
       }
@@ -94,7 +92,6 @@
       }
     }
 
-    // Style non-header player cells
     .table__player-col {
       border-left: var(--rak-table-border);
 
@@ -107,7 +104,6 @@
       }
     }
 
-    // Style every other player cell
     tr:nth-child(even) .table__player-col {
       &.--knocked-out {
         background-color: #deaa7c;
@@ -118,10 +114,9 @@
       }
     }
 
-    // Style all non-header cells
     td {
       color: black;
-      background-color: white;
+      background-color: var(--rak-on-solid);
       font-family: monospace;
       min-width: max-content;
       height: var(--rak-table-row-height);
@@ -134,7 +129,6 @@
       }
     }
 
-    // Style every other non-header cell
     tr:nth-child(even) td {
       background-color: var(--rak-neutral-200);
     }

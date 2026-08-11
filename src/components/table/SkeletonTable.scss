@@ -79,7 +79,7 @@
 
   .table__header .skeleton__bar {
     // The header is already dark, so the bars read as light gaps in it.
-    background-color: white;
+    background-color: var(--rak-on-solid);
   }
 
   // A real table draws this edge from its sticky player column, which the

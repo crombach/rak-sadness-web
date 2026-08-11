@@ -1,5 +1,6 @@
 import { PropsWithChildren } from "react";
 import { useNavigate } from "react-router";
+import { useIsWeekDecided } from "../../context/AppDataContext";
 import getClasses from "../../utils/getClasses";
 import LogoButton from "../navbar/LogoButton/LogoButton";
 import ScoresNavbar, { ScoresView } from "../navbar/ScoresNavbar";
@@ -33,6 +34,9 @@ export default function ResultsFrame({
   isRefreshing?: boolean;
 }>) {
   const navigate = useNavigate();
+  // Once every game is final there is nothing left to fetch, so the refresh
+  // button and the divider beside it go rather than sit there doing nothing.
+  const isWeekDecided = useIsWeekDecided();
 
   return (
     <PageLayout
@@ -48,6 +52,7 @@ export default function ResultsFrame({
         <ScoresNavbar
           view={view}
           disabled={!isReady}
+          canRefresh={!isWeekDecided}
           onViewChange={onViewChange}
           onRefresh={onRefresh}
           isRefreshing={isRefreshing}

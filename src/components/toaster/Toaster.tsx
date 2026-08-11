@@ -37,6 +37,7 @@ export default function Toaster() {
               <div className="toast__message">{toast.message}</div>
             </div>
             <Button
+              ariaLabel="Dismiss"
               variant="soft"
               size="sm"
               iconOnly

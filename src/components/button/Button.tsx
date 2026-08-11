@@ -1,5 +1,5 @@
 import { Button as BaseButton } from "@base-ui-components/react/button";
-import { ReactNode, Ref } from "react";
+import { ReactNode } from "react";
 import getClasses from "../../utils/getClasses";
 import "./Button.scss";
 
@@ -14,7 +14,7 @@ export default function Button({
   iconOnly = false,
   disabled = false,
   className = "",
-  buttonRef,
+  ariaLabel,
 }: {
   children: ReactNode;
   onClick: () => void;
@@ -24,7 +24,8 @@ export default function Button({
   iconOnly?: boolean;
   disabled?: boolean;
   className?: string;
-  buttonRef?: Ref<HTMLElement>;
+  /** The accessible name. Required of a button whose content is an icon alone. */
+  ariaLabel?: string;
 }) {
   const modifiers = getClasses({
     [`--${variant}`]: true,
@@ -34,8 +35,8 @@ export default function Button({
   });
   return (
     <BaseButton
-      ref={buttonRef}
       type="button"
+      aria-label={ariaLabel}
       className={`button ${modifiers} ${className}`}
       disabled={disabled}
       onClick={onClick}

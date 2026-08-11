@@ -8,5 +8,5 @@ Every color rule is scoped to `:not(:disabled)`. The variant selectors are more
 specific than `&:disabled`, so without that scoping a disabled button keeps its
 solid fill.
 
-`buttonRef` forwards to the underlying element, for a caller that has to toggle a
-spin class on the refresh button.
+`ariaLabel` sets the accessible name, required of a button whose content is an
+icon alone.

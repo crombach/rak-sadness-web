@@ -6,11 +6,11 @@ Route components live in `home/` and `results/`; the routes themselves are in
 
 ## Subdirectories
 
-- [`button/`](button/CLAUDE.md) — shared button over Base UI's unstyled primitive
+- [`button/`](button/CLAUDE.md) — shared button, Base UI's primitive
 - [`footer/`](footer/CLAUDE.md) — bottom links bar
-- [`home/`](home/CLAUDE.md) — home route: week select, upload, view, export
-- [`icon/`](icon/CLAUDE.md) — the app's SVG icons, inlined from Material Design
-- [`navbar/`](navbar/CLAUDE.md) — top nav bar and the results view switch
+- [`home/`](home/CLAUDE.md) — home route: season/week, upload, export
+- [`icon/`](icon/CLAUDE.md) — SVG icons inlined from Material Design
+- [`navbar/`](navbar/CLAUDE.md) — top nav bar and results view switch
 - [`results/`](results/CLAUDE.md) — results routes, layout, redirect
-- [`table/`](table/CLAUDE.md) — shared table frame and the two results tables
+- [`table/`](table/CLAUDE.md) — shared frame and the results tables
 - [`toaster/`](toaster/CLAUDE.md) — toast notification renderer
