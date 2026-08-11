@@ -14,8 +14,8 @@ carries a `data-skeleton-text` stand-in that the stylesheet draws invisibly, so 
 table's own `max-content` sizing gives the wireframe a real table's measurements at
 any font size, and no placeholder reaches the page's text. No stand-in for a value
 wraps, because no real value does either, so a wireframe row is one line tall like
-a real one. Its header wraps on its own, so it is as tall as the real header at
-whatever width the table is being drawn.
+a real one. Its header wraps on its own, with a floor of two lines so it still
+reads as a header where a real heading fits on one.
 
 ## Subdirectories
 

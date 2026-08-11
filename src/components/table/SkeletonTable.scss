@@ -48,6 +48,14 @@
     animation: skeleton-pulse 1s ease-in-out infinite alternate;
   }
 
+  // Two lines tall whatever the stand-in headings do, so the wireframe still reads
+  // as a header at a width where a real heading fits on one line. `height` on a
+  // table cell is a minimum, so a narrow screen can still stack a heading higher.
+  // The 4px is the cell's own vertical padding, which `border-box` counts in here.
+  .table__header th {
+    height: calc(2lh + 4px);
+  }
+
   .table__header .skeleton__bar {
     // The header is already dark, so the bars read as light gaps in it.
     background-color: white;
