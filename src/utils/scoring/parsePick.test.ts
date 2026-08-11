@@ -42,6 +42,27 @@ describe("parsePick", () => {
     });
   });
 
+  it("reads a spread written with a space after its sign", () => {
+    expect(parsePick("BUF - 7")).toEqual({
+      teamAbbreviation: "BUF",
+      spread: -7,
+    });
+  });
+
+  it("ignores space around the whole cell", () => {
+    expect(parsePick("  BUF -7  ")).toEqual({
+      teamAbbreviation: "BUF",
+      spread: -7,
+    });
+  });
+
+  it("reads an abbreviation that opens with a digit", () => {
+    expect(parsePick("49ERS -3")).toEqual({
+      teamAbbreviation: "49ERS",
+      spread: -3,
+    });
+  });
+
   it("names no team for a cell holding no team, rather than throwing", () => {
     ["", " ", "+", "-", "-7"].forEach((cell) => {
       expect(parsePick(cell)).toEqual({
