@@ -36,7 +36,6 @@ export default function useWeekRouteGuard(
     findWeek,
     selectedWeek,
     setSelectedWeek,
-    setSelectedSeason,
     scores,
     scoresWeek,
     settledWeek,
@@ -49,20 +48,10 @@ export default function useWeekRouteGuard(
   const isSelectableWeek =
     week != null && currentWeek != null && weekNumber <= currentWeek;
 
-  // The URL is the source of truth for both. Comparing before writing matters:
-  // setting the same value again would restart the fetch chain behind it.
-  useEffect(() => {
-    if (isKnownSeason && !isWeekInfoLoading && seasonNumber !== seasonYear) {
-      setSelectedSeason(seasonNumber);
-    }
-  }, [
-    isKnownSeason,
-    isWeekInfoLoading,
-    seasonNumber,
-    seasonYear,
-    setSelectedSeason,
-  ]);
-
+  // The URL is the source of truth. Comparing before writing matters: setting
+  // the same week again would restart the fetch chain behind it. The season is
+  // the provider's to follow, which it does while rendering, so it is already
+  // right by the time this runs.
   useEffect(() => {
     if (isSelectableWeek && week !== selectedWeek) {
       setSelectedWeek(week);

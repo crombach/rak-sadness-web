@@ -50,7 +50,7 @@ const AppDataContext = createContext<AppData | undefined>(undefined);
  */
 const WeekDecidedContext = createContext(false);
 
-/** The season and week a results URL names, from `/<year>/<week>/…`. */
+/** The season and week a results URL names, from `/<year>/<week>/…`. Empty elsewhere. */
 function routeFromPath(pathname: string): { season?: number; week?: number } {
   const match = /^\/(\d{4})\/(\d+)/.exec(pathname);
   return match != null
@@ -70,12 +70,23 @@ export function AppDataContextProvider({
   children,
 }: PropsWithChildren<object>) {
   const { pathname } = useLocation();
-  // State with no setter, so this stays the week the user arrived asking for
-  // even once they are looking at another one.
-  const [arrivedAt] = useState(() => routeFromPath(pathname));
-  // Undefined until the user picks one, which is what asks ESPN for the season
-  // running now. `seasonYear` then comes back saying which one that was.
-  const [selectedSeason, setSelectedSeason] = useState(arrivedAt.season);
+  const route = routeFromPath(pathname);
+  // Undefined until a URL or the picker names one, which is what asks ESPN for
+  // the season running now. `seasonYear` then comes back saying which one that
+  // was.
+  const [selectedSeason, setSelectedSeason] = useState(route.season);
+
+  // A results URL is the last word on which season is being looked at. Adjusted
+  // while rendering rather than in an effect, so the request below carries the
+  // new season on the very render that navigates, instead of asking for the old
+  // one first and throwing the answer away.
+  const [seasonInUrl, setSeasonInUrl] = useState(route.season);
+  if (route.season !== seasonInUrl) {
+    setSeasonInUrl(route.season);
+    if (route.season != null) {
+      setSelectedSeason(route.season);
+    }
+  }
 
   const picksSeasons = usePicksSeasons();
   // The newest season with picks, unless the URL or the picker named one. ESPN
@@ -83,7 +94,7 @@ export function AppDataContextProvider({
   // season has nothing to show.
   const requestedSeason = selectedSeason ?? picksSeasons.seasons?.[0];
   const leagueWeeks = useLeagueWeeks(
-    arrivedAt.week,
+    route.week,
     requestedSeason,
     !picksSeasons.isSeasonsLoading,
   );

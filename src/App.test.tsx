@@ -278,6 +278,49 @@ describe("the app, first load", () => {
     await mountLoadedApp();
     expect(screen.getByText("The Rakulator")).toBeInTheDocument();
   });
+
+  it("opens a newly picked season on that season's current week", async () => {
+    getLeagueInfoMock.mockImplementation(async (_league, season) => ({
+      ...leagueInfo,
+      season: season ?? SEASON,
+    }));
+    global.fetch = routedFetch(spreadsheetResponse, [SEASON, SEASON - 1]);
+    // Arrive on week 1, so the week the URL asked for is not the current one.
+    const user = mountApp(`/${SEASON}/1/scoreboard`);
+    await screen.findByText("MNF Points Pick");
+
+    await user.click(document.querySelector(".logo-button") as HTMLElement);
+    await user.click(screen.getByRole("combobox", { name: "Season" }));
+    await user.click(
+      await screen.findByRole("option", { name: `${SEASON - 1} season` }),
+    );
+
+    // The week that URL named belongs to the season it named, not to this one.
+    await waitFor(() => {
+      expect(screen.getByRole("combobox", { name: "Week" })).toHaveTextContent(
+        `Week ${CURRENT_WEEK}`,
+      );
+    });
+  });
+
+  it("keeps the schedule it has when only the week changes", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    const user = mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
+    await screen.findByText("MNF Points Pick");
+    const lookups = getLeagueInfoMock.mock.calls.length;
+
+    // Home, then back to another week of the same season.
+    await user.click(document.querySelector(".logo-button") as HTMLElement);
+    await user.click(screen.getByRole("combobox", { name: "Week" }));
+    await user.click(await screen.findByRole("option", { name: "Week 1" }));
+    await user.click(screen.getByText("View Results"));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(`/api/picks/${SEASON}/1`);
+    });
+    // The season did not change, so neither did its calendar.
+    expect(getLeagueInfoMock).toHaveBeenCalledTimes(lookups);
+  });
 });
 
 describe("the app, automatic picks fetch", () => {
