@@ -76,14 +76,14 @@ describe("the app, first load", () => {
     global.fetch = routedFetch(notFoundResponse);
     const user = await mountLoadedApp();
     expect(screen.getByRole("combobox", { name: "Season" })).toHaveTextContent(
-      `${SEASON} season`,
+      `${SEASON} Season`,
     );
 
     await user.click(screen.getByRole("combobox", { name: "Season" }));
     const options = (await screen.findAllByRole("option")).map(
       (option) => option.textContent,
     );
-    expect(options).toEqual([`${SEASON} season`, `${SEASON - 1} season`]);
+    expect(options).toEqual([`${SEASON} Season`, `${SEASON - 1} Season`]);
   });
 
   it("opens on the newest season with picks, not the one ESPN calls current", async () => {
@@ -95,7 +95,7 @@ describe("the app, first load", () => {
     await mountLoadedApp();
 
     expect(screen.getByRole("combobox", { name: "Season" })).toHaveTextContent(
-      `${SEASON - 1} season`,
+      `${SEASON - 1} Season`,
     );
     expect(getLeagueInfoMock).not.toHaveBeenCalledWith(League.PRO, undefined);
   });
@@ -107,7 +107,7 @@ describe("the app, first load", () => {
     const options = (await screen.findAllByRole("option")).map(
       (option) => option.textContent,
     );
-    expect(options).toEqual([`${SEASON} season`]);
+    expect(options).toEqual([`${SEASON} Season`]);
   });
 
   it("asks ESPN for the season the user picked", async () => {
@@ -116,7 +116,7 @@ describe("the app, first load", () => {
 
     await user.click(screen.getByRole("combobox", { name: "Season" }));
     await user.click(
-      await screen.findByRole("option", { name: `${SEASON - 1} season` }),
+      await screen.findByRole("option", { name: `${SEASON - 1} Season` }),
     );
 
     await waitFor(() => {
@@ -142,7 +142,7 @@ describe("the app, first load", () => {
     await user.click(document.querySelector(".logo-button") as HTMLElement);
     await user.click(screen.getByRole("combobox", { name: "Season" }));
     await user.click(
-      await screen.findByRole("option", { name: `${SEASON - 1} season` }),
+      await screen.findByRole("option", { name: `${SEASON - 1} Season` }),
     );
 
     // The week that URL named belongs to the season it named, not to this one.
