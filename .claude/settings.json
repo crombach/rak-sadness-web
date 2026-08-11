@@ -52,10 +52,7 @@
       "Bash(git *)",
       "Bash(gh *)"
     ],
-    "ask": [
-      "Bash(wrangler *)",
-      "Bash(npx wrangler *)"
-    ],
+    "ask": ["Bash(wrangler *)", "Bash(npx wrangler *)"],
     "deny": [
       "Read(**/.env)",
       "Read(**/.env.*)",
