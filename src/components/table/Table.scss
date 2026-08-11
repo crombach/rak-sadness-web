@@ -161,7 +161,11 @@
 
 @include narrow-screen {
   .table {
-    font-size: 0.8rem;
+    // 14px against the 16px a wide screen gets. A point smaller than this was hard
+    // to read on a phone.
+    font-size: 0.875rem;
     --rak-table-row-height: 28px;
+    // Grown with the text, so a knockout still reads at a glance beside a name.
+    --rak-player-icon-size: 18px;
   }
 }
