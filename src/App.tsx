@@ -8,7 +8,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
-      <Route path="/week/:week" element={<ResultsLayout />}>
+      <Route path="/:season/:week" element={<ResultsLayout />}>
         <Route index element={<Navigate to="scoreboard" replace />} />
         <Route path="scoreboard" element={<ScoreboardRoute />} />
         <Route path="picks" element={<PicksRoute />} />

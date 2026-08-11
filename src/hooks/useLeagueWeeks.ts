@@ -13,19 +13,29 @@ import getLeagueInfo from "../utils/getLeagueInfo";
  * `initialWeek` wins over the season's active week when the season has such a
  * week. A results URL names the week it wants, and without this the current week
  * would be selected and scored first, only to be replaced.
+ *
+ * `season` is the year a season started in. Left out, ESPN answers with the
+ * season running now, and `seasonYear` comes back saying which one that was. A
+ * season that has ended has every week behind it, so all of them are selectable.
  */
-export default function useLeagueWeeks(initialWeek?: number) {
+export default function useLeagueWeeks(initialWeek?: number, season?: number) {
   const { showToast } = useToastActions();
 
   const [weeks, setWeeks] = useState<Array<WeekInfo>>();
   const [currentWeek, setCurrentWeek] = useState<number>();
+  const [seasonYear, setSeasonYear] = useState<number>();
   const [selectedWeek, setSelectedWeek] = useState<WeekInfo>();
-  const [isWeekInfoLoading, setLoading] = useState(true);
+  const [isLookupPending, setLoading] = useState(true);
 
   useEffect(() => {
     const getLeagueInfoAsync = async () => {
-      const proLeagueInfo = await getLeagueInfo(League.PRO);
+      const proLeagueInfo = await getLeagueInfo(League.PRO, season);
       if (proLeagueInfo == null) {
+        // The season that was asked for, even though nothing came back for it.
+        // Without both of these the season we came from would look current, and
+        // its weeks would answer for a season nobody has the schedule of.
+        setSeasonYear(season);
+        setWeeks(undefined);
         setLoading(false);
         showToast(
           new Toast("danger", "Error", "Failed to load the NFL schedule."),
@@ -36,6 +46,7 @@ export default function useLeagueWeeks(initialWeek?: number) {
       const calendarWeeks = proLeagueInfo.activeCalendar.weeks;
       setWeeks(calendarWeeks);
       setCurrentWeek(proLeagueInfo.activeWeek.value);
+      setSeasonYear(proLeagueInfo.season);
       setSelectedWeek(
         calendarWeeks.find((week) => week.value === initialWeek) ??
           proLeagueInfo.activeWeek,
@@ -43,7 +54,13 @@ export default function useLeagueWeeks(initialWeek?: number) {
       setLoading(false);
     };
     getLeagueInfoAsync();
-  }, [showToast, initialWeek]);
+  }, [showToast, initialWeek, season]);
+
+  // Derived rather than a flag set when the season changes, so the switch counts
+  // as loading from the render that asks for it. `seasonYear` is the season the
+  // week list actually describes, so they differ exactly while a new one is on
+  // its way.
+  const isWeekInfoLoading = isLookupPending || (season != null && season !== seasonYear);
 
   // Newest first, and never a week the season has not reached.
   const selectableWeeks = useMemo(
@@ -57,10 +74,18 @@ export default function useLeagueWeeks(initialWeek?: number) {
       weeks,
       selectableWeeks,
       currentWeek,
+      seasonYear,
       selectedWeek,
       setSelectedWeek,
       isWeekInfoLoading,
     }),
-    [weeks, selectableWeeks, currentWeek, selectedWeek, isWeekInfoLoading],
+    [
+      weeks,
+      selectableWeeks,
+      currentWeek,
+      seasonYear,
+      selectedWeek,
+      isWeekInfoLoading,
+    ],
   );
 }

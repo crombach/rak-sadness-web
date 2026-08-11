@@ -18,7 +18,11 @@ export default function HomePage() {
     selectableWeeks,
     selectedWeek,
     setSelectedWeek,
+    selectableSeasons,
+    seasonYear,
+    setSelectedSeason,
     isWeekInfoLoading,
+    isSeasonsLoading,
     scores,
     isPicksLoading,
     isScoresLoading,
@@ -42,7 +46,8 @@ export default function HomePage() {
   );
 
   // Anything that has to finish before the controls mean anything.
-  const isBusy = isWeekInfoLoading || isPicksLoading || isScoresLoading;
+  const isBusy =
+    isWeekInfoLoading || isSeasonsLoading || isPicksLoading || isScoresLoading;
   const hasNoScoresYet = !selectedWeek || isBusy || !scores;
 
   return (
@@ -50,6 +55,50 @@ export default function HomePage() {
       {!isWeekInfoLoading && (
         <>
           <div className="home__controls">
+            {/*
+              Seasons are named by the year they started in, so the 2025 season
+              covers the games played from September 2025 into January 2026.
+            */}
+            <Select.Root
+              value={seasonYear ?? null}
+              onValueChange={(season) =>
+                season != null && setSelectedSeason(season)
+              }
+              disabled={isWeekInfoLoading || isSeasonsLoading}
+            >
+              <Select.Trigger
+                aria-label="Season"
+                className="home__week-input home__season-input select__trigger"
+              >
+                <Select.Value>
+                  {(season: number | null) =>
+                    season != null ? `${season} season` : "Select a season..."
+                  }
+                </Select.Value>
+                <Select.Icon className="select__icon">
+                  <UnfoldMoreIcon />
+                </Select.Icon>
+              </Select.Trigger>
+              <Select.Portal>
+                <Select.Positioner
+                  className="select__positioner"
+                  sideOffset={4}
+                >
+                  <Select.Popup className="select__popup">
+                    {selectableSeasons.map((season) => (
+                      <Select.Item
+                        key={season}
+                        value={season}
+                        className="select__item"
+                      >
+                        <Select.ItemText>{season} season</Select.ItemText>
+                      </Select.Item>
+                    ))}
+                  </Select.Popup>
+                </Select.Positioner>
+              </Select.Portal>
+            </Select.Root>
+
             {/*
               `value` holds the WeekInfo object itself, and Base UI compares with
               Object.is by default, so an option only reads as selected when it is
@@ -60,7 +109,10 @@ export default function HomePage() {
               onValueChange={(week) => setSelectedWeek(week ?? undefined)}
               disabled={isWeekInfoLoading}
             >
-              <Select.Trigger className="home__week-input select__trigger">
+              <Select.Trigger
+                aria-label="Week"
+                className="home__week-input select__trigger"
+              >
                 <Select.Value>
                   {(week: WeekInfo | null) => week?.label ?? "Select a week..."}
                 </Select.Value>
@@ -112,7 +164,7 @@ export default function HomePage() {
               disabled={hasNoScoresYet}
               color="success"
               onClick={() =>
-                navigate(`/week/${selectedWeek?.value}/scoreboard`)
+                navigate(`/${seasonYear}/${selectedWeek?.value}/scoreboard`)
               }
             >
               View Results

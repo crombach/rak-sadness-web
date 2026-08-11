@@ -96,6 +96,19 @@ describe("getLeagueInfo, requests", () => {
     );
   });
 
+  it("asks for a past season by the year it started in", async () => {
+    const fetchMock = mockFetch(scoreboard(League.PRO));
+    await getLeagueInfo(League.PRO, 2022);
+    expect(urlOf(fetchMock)).toBe(
+      "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=2022",
+    );
+  });
+
+  it("reports the season the response describes", async () => {
+    mockFetch(scoreboard(League.PRO));
+    expect((await infoFor(League.PRO)).season).toBe(SEASON);
+  });
+
   it("fetches the college scoreboard endpoint", async () => {
     const fetchMock = mockFetch(scoreboard(League.COLLEGE));
     await getLeagueInfo(League.COLLEGE);

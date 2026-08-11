@@ -105,6 +105,14 @@ describe("getLeagueResults, pro requests", () => {
     ]);
   });
 
+  it("asks for a past season by the year it started in", async () => {
+    const fetchMock = mockFetch([bufVsKc]);
+    await getLeagueResults(League.PRO, WEEK, [BUF_KC], 2022);
+    expect(urlsOf(fetchMock)).toEqual([
+      "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?week=5&seasontype=2&dates=2022",
+    ]);
+  });
+
   it("wraps a postseason week back to a postseason week number", async () => {
     const fetchMock = mockFetch([bufVsKc]);
     await getLeagueResults(League.PRO, { ...WEEK, value: 20 }, [BUF_KC]);

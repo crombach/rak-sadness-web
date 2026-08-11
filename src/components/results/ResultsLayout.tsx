@@ -16,13 +16,13 @@ import "./ResultsLayout.scss";
  * its throttle window.
  */
 export default function ResultsLayout() {
-  const { week: rawWeek } = useParams();
+  const { season: rawSeason, week: rawWeek } = useParams();
   const navigate = useNavigate();
   const { refresh, isRefreshing } = useAppData();
-  const guard = useWeekRouteGuard(rawWeek);
+  const guard = useWeekRouteGuard(rawSeason, rawWeek);
 
   // The route decides which view is showing, not component state.
-  const view: ScoresView = useMatch("/week/:week/picks")
+  const view: ScoresView = useMatch("/:season/:week/picks")
     ? "Picks"
     : "Scoreboard";
 
@@ -43,7 +43,7 @@ export default function ResultsLayout() {
           view={view}
           disabled={!isReady}
           onViewChange={(next) =>
-            navigate(`/week/${rawWeek}/${next.toLowerCase()}`, {
+            navigate(`/${rawSeason}/${rawWeek}/${next.toLowerCase()}`, {
               replace: true,
             })
           }
