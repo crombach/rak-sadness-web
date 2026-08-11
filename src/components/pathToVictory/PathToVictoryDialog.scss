@@ -161,17 +161,28 @@
   font-size: 0.875rem;
 }
 
-// Its height is set from what the summary inside measures, so the dialog grows
+// Its height is set from what the content inside measures, so the dialog grows
 // and shrinks with the answer. Shrinking is what makes it scroll, once the popup
-// has no more room to give.
+// has no more room to give. Measured without the padding and the rule, which
+// `content-box` keeps outside the height set on it.
 .path-to-victory__body {
+  box-sizing: content-box;
   flex: 0 1 auto;
   min-height: 0;
+  padding-top: 12px;
+  // Everything under here scrolls. Only the search above it holds still.
+  border-top: 1px solid var(--rak-border);
   overflow-y: auto;
 
   @media (prefers-reduced-motion: no-preference) {
     transition: height 220ms ease;
   }
+}
+
+.path-to-victory__content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .path-to-victory__searching {

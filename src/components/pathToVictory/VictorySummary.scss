@@ -126,16 +126,16 @@
   font-size: 0.875rem;
 }
 
+// No padding of its own, so it starts where a summary of routes would.
 .victory__message {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 16px 0;
 }
 
 .victory__heading {
   margin: 0;
   color: var(--rak-text);
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 600;
 }

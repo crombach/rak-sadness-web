@@ -180,15 +180,14 @@ export default function PathToVictoryDialog({
             </Combobox.Portal>
           </Combobox.Root>
 
-          <Standing scores={scores} player={player?.name} />
-
           <div className="path-to-victory__body" ref={body}>
-            <div ref={measure}>
+            <div className="path-to-victory__content" ref={measure}>
+              <Standing scores={scores} player={player?.name} />
               {isSearching ? (
                 <div
                   className="path-to-victory__searching"
                   role="status"
-                  aria-label="Working out the routes"
+                  aria-label="Working out the paths"
                 >
                   <span className="path-to-victory__spinner" />
                 </div>

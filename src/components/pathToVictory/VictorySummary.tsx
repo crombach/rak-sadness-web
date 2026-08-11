@@ -201,7 +201,7 @@ function Routes({
           ariaExpanded={isExpanded}
           onClick={() => setIsExpanded(!isExpanded)}
         >
-          {isExpanded ? "Show fewer" : `Show ${plural(folded, "more route")}`}
+          {isExpanded ? "Show fewer" : `Show ${plural(folded, "more path")}`}
         </Button>
       )}
     </Section>
@@ -251,8 +251,8 @@ export default function VictorySummary({
         heading={`${result.player} needs at least ${result.minimumWins} of their ${result.remainingPickCount} remaining picks.`}
         body={
           result.needsMondayNight
-            ? "That is only enough to draw level, so the MNF points tiebreaker would still decide it. The routes are worked out once ten games are left."
-            : "The routes are worked out once ten games are left."
+            ? "That is only enough to draw level, so the MNF points tiebreaker would still decide it. Detailed paths are worked out once ten games are left."
+            : "Detailed paths are worked out once ten games are left."
         }
       />
     );
@@ -313,7 +313,7 @@ export default function VictorySummary({
       {/* Worked out, then left off, so the count is what the reader is missing. */}
       {result.hiddenRouteCount > 0 && (
         <p className="victory__standing">
-          {plural(result.hiddenRouteCount, "other route")} found but not shown.
+          {plural(result.hiddenRouteCount, "other path")} found but not shown.
         </p>
       )}
     </div>

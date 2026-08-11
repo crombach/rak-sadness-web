@@ -7,7 +7,8 @@ gold trophy button.
 `VictorySummary` under it. `playersMatching` names a knocked out player only where
 the letters typed reach nobody still standing, disabled, in
 `--rak-knocked-out-text` with the same skull the table gives them. The search is thousands of scenarios, so it runs on the player chosen
-rather than on every render. `PathToVictoryDialog.scss`
+rather than on every render. Only the search holds still: everything under the rule below it scrolls.
+`PathToVictoryDialog.scss`
 centers the one dialog as a modal and stands it on the bottom edge as a sheet below
 `compact-screen`, replacing both ends of the transition, since a sheet cannot inherit
 a centered transform.
