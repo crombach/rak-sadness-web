@@ -3,7 +3,9 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  // Both from `Table.scss`, so the wireframe can leave the same room for an icon
+  // it never draws.
+  gap: var(--rak-player-icon-gap);
 
   // The cell's font is monospace, so 20ch is exactly 20 characters. A longer name
   // is cut short rather than wrapped, because a wrapped name would make its row
@@ -23,8 +25,8 @@
 
     > svg {
       fill: black;
-      width: 16px;
-      height: 16px;
+      width: var(--rak-player-icon-size);
+      height: var(--rak-player-icon-size);
     }
   }
 }

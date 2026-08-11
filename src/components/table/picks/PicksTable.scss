@@ -1,17 +1,6 @@
 .table {
   tbody {
     .table__pick {
-      cursor: pointer;
-      transition: filter 150ms;
-
-      &:hover {
-        filter: brightness(0.85);
-      }
-
-      &:active {
-        filter: brightness(0.7);
-      }
-
       &.--yes {
         background-color: var(--rak-pick-yes);
       }

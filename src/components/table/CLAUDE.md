@@ -5,8 +5,10 @@ short table down to the bottom of the viewport, and the trailing row that keeps 
 last real row clear of a phone's rounded corners. `Table.scss` sizes that row from
 `env(safe-area-inset-bottom)`, so it has no height on a screen without an inset,
 publishes `--rak-table-row-height` for `useFillerRows` to measure against, and
-holds the shared `.table` styles (sticky header and player column, pick status
-colors, striped rows).
+holds the shared `.table` styles (sticky header and player column, the touch
+feedback both clickable cells share, striped rows). Every measurement the wireframe
+has to reproduce is a custom property on `.table`: cell padding, cell borders, and
+the size of the icon beside a player's name. Change one there, not in two files.
 
 `SkeletonTable`: the pulsing wireframe shown while a week's results are being
 worked out, shaped like the view it stands in for. Its cells hold no text: each

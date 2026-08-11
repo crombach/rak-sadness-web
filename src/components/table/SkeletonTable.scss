@@ -39,8 +39,10 @@
   .skeleton__bar {
     position: absolute;
     top: 50%;
-    left: 6px;
-    right: 6px;
+    // Absolute insets run from the padding box, so the cell's own padding is what
+    // lands a bar on the content a real cell would hold.
+    left: var(--rak-table-cell-padding-x);
+    right: var(--rak-table-cell-padding-x);
     height: 0.7rem;
     transform: translateY(-50%);
     border-radius: 3px;
@@ -51,9 +53,9 @@
   // Two lines tall whatever the stand-in headings do, so the wireframe still reads
   // as a header at a width where a real heading fits on one line. `height` on a
   // table cell is a minimum, so a narrow screen can still stack a heading higher.
-  // The 4px is the cell's own vertical padding, which `border-box` counts in here.
+  // `border-box` counts the cell's own padding into that height.
   .table__header th {
-    height: calc(2lh + 4px);
+    height: calc(2lh + 2 * var(--rak-table-cell-padding-y));
   }
 
   .table__header .skeleton__bar {
@@ -64,13 +66,15 @@
   // A real table draws this edge from its sticky player column, which the
   // wireframe has no stand-in for, so the rank column would run into the next one.
   td:nth-child(2) {
-    border-left: 2px solid var(--rak-primary-800);
+    border-left: var(--rak-table-border);
 
-    // Room for the status icon that sits beside a real name: a 16px box and the
-    // 8px gap before it, both from `PlayerName.scss`. Without it this column comes
-    // out narrower than the one it stands in for.
+    // Room for the status icon that sits beside a real name, which this column has
+    // no stand-in for. Without it the column comes out narrower than the one it
+    // stands in for.
     &::before {
-      padding-right: 24px;
+      padding-right: calc(
+        var(--rak-player-icon-size) + var(--rak-player-icon-gap)
+      );
     }
   }
 }
