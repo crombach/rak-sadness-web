@@ -11,6 +11,9 @@ import { getPlayerScores } from "../utils/scoring/getPlayerScores";
 /** Long enough that holding the refresh button down sends one request. */
 const REFRESH_THROTTLE_MS = 500;
 
+/** The season and week a scoring attempt has finished, however it turned out. */
+type SettledAttempt = { season: number; week: number };
+
 type ScoringRequest = {
   loadPicks: () => Promise<ArrayBuffer>;
   /** Shown when the picks could not be obtained at all. */
@@ -29,10 +32,11 @@ type ScoringRequest = {
  * played in January still scores against the season it belongs to. Nothing is
  * attempted until it is known.
  *
- * `scoresWeek` says which week `scores` describes, and `settledWeek` says which
- * week this hook has finished trying. Switching weeks leaves the old values in
- * place for a moment, so anything reacting to a missing score has to wait for
- * `settledWeek` to catch up or it will act on the previous week's outcome.
+ * `settled` names the season and week this hook has finished trying, which is not
+ * always the pair asked for: switching either leaves the old scores in place until
+ * the new ones arrive. Anything reacting to a missing score has to wait for
+ * `settled` to catch up, or it will act on the previous week's outcome. The season
+ * belongs there as much as the week, since week 5 exists in every season.
  */
 export default function usePlayerScores(
   selectedWeek?: WeekInfo,
@@ -42,20 +46,14 @@ export default function usePlayerScores(
 
   const [picksBuffer, setPicksBuffer] = useState<ArrayBuffer>();
   const [scores, setScores] = useState<RakMadnessScores>();
-  const [scoresWeek, setScoresWeek] = useState<number>();
+  const [settled, setSettled] = useState<SettledAttempt>();
   const [isPicksLoading, setPicksLoading] = useState(true);
   const [isScoresLoading, setScoresLoading] = useState(true);
   const [isRefreshing, setRefreshing] = useState(false);
-  const [settledWeek, setSettledWeek] = useState<number>();
   // Counts scoring attempts, so a superseded one cannot write its week's scores
   // over the week that replaced it. Two can be in flight whenever the selected
   // week changes while the first is still loading.
   const latestAttempt = useRef(0);
-
-  const clearScores = useCallback(() => {
-    setScores(undefined);
-    setScoresWeek(undefined);
-  }, []);
 
   // Every path into the scores runs through here, so the loading flags and the
   // failure toasts cannot drift between them.
@@ -72,6 +70,8 @@ export default function usePlayerScores(
       setPicksLoading(true);
       setScoresLoading(true);
 
+      const attempted = { season, week: selectedWeek.value };
+
       let buffer: ArrayBuffer;
       try {
         buffer = await loadPicks();
@@ -79,12 +79,12 @@ export default function usePlayerScores(
         setPicksBuffer(buffer);
       } catch (error) {
         if (!isLatest()) return;
-        setSettledWeek(selectedWeek.value);
         console.warn(
           `Failed to load week ${selectedWeek.value} picks spreadsheet. Has it been uploaded yet?`,
           error,
         );
-        clearScores();
+        setScores(undefined);
+        setSettled(attempted);
         setPicksLoading(false);
         setScoresLoading(false);
         showToast(onLoadFailure);
@@ -96,23 +96,22 @@ export default function usePlayerScores(
         const weekScores = await getPlayerScores(selectedWeek, buffer, season);
         if (!isLatest()) return;
         setScores(weekScores);
-        setScoresWeek(selectedWeek.value);
         if (onSuccess) {
           showToast(onSuccess);
         }
       } catch (error) {
         if (!isLatest()) return;
         console.error("Failed to calculate scores", error);
-        clearScores();
+        setScores(undefined);
         showToast(onScoreFailure);
       } finally {
         if (isLatest()) {
           setScoresLoading(false);
-          setSettledWeek(selectedWeek.value);
+          setSettled(attempted);
         }
       }
     },
-    [selectedWeek, season, showToast, clearScores],
+    [selectedWeek, season, showToast],
   );
 
   // Fetch the week's picks from the API, falling back to whatever this browser
@@ -174,9 +173,9 @@ export default function usePlayerScores(
   const scoreLocalFile = useCallback(
     async (file?: File) => {
       if (!selectedWeek || season == null) return;
+      // Dismissing the file dialog picked nothing, so it changes nothing. Results
+      // already on screen stay there.
       if (!file) {
-        clearScores();
-        setScoresLoading(false);
         showToast(
           new Toast("neutral", "Info", "Aborted picks spreadsheet selection"),
         );
@@ -204,7 +203,7 @@ export default function usePlayerScores(
         ),
       });
     },
-    [selectedWeek, season, attemptScoring, showToast, clearScores],
+    [selectedWeek, season, attemptScoring, showToast],
   );
 
   // useMemo, not useCallback: the value is throttle()'s wrapper, not the
@@ -249,8 +248,7 @@ export default function usePlayerScores(
   return useMemo(
     () => ({
       scores,
-      scoresWeek,
-      settledWeek,
+      settled,
       isPicksLoading,
       isScoresLoading,
       isRefreshing,
@@ -259,8 +257,7 @@ export default function usePlayerScores(
     }),
     [
       scores,
-      scoresWeek,
-      settledWeek,
+      settled,
       isPicksLoading,
       isScoresLoading,
       isRefreshing,

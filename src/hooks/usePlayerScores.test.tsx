@@ -52,6 +52,29 @@ beforeEach(() => {
 });
 
 describe("usePlayerScores", () => {
+  it("names the season it settled, so the same week of another one waits", async () => {
+    getPlayerScoresMock.mockImplementation(async (selectedWeek) =>
+      scoresFor(selectedWeek.value),
+    );
+
+    const { result, rerender } = renderHook(
+      ({ season }: { season: number }) => usePlayerScores(week(5), season),
+      { initialProps: { season: SEASON }, wrapper },
+    );
+    await waitFor(() =>
+      expect(result.current.settled).toEqual({ season: SEASON, week: 5 }),
+    );
+
+    // Week 5 of the season before. Same week number, different season, so the
+    // scores on hand describe neither until this attempt finishes.
+    rerender({ season: SEASON - 1 });
+    expect(result.current.settled).toEqual({ season: SEASON, week: 5 });
+
+    await waitFor(() =>
+      expect(result.current.settled).toEqual({ season: SEASON - 1, week: 5 }),
+    );
+  });
+
   it("keeps the newer week's scores when an older run finishes last", async () => {
     let finishWeekOne: (scores: RakMadnessScores) => void = () => undefined;
     getPlayerScoresMock.mockImplementation(
@@ -73,7 +96,7 @@ describe("usePlayerScores", () => {
 
     // Week 2 supersedes week 1 while week 1 is still being scored.
     rerender({ selectedWeek: week(2) });
-    await waitFor(() => expect(result.current.scoresWeek).toBe(2));
+    await waitFor(() => expect(result.current.settled?.week).toBe(2));
 
     // Let week 1 finish and everything it queued run to the end.
     await act(async () => {
@@ -81,8 +104,7 @@ describe("usePlayerScores", () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    expect(result.current.scoresWeek).toBe(2);
-    expect(result.current.settledWeek).toBe(2);
+    expect(result.current.settled).toEqual({ season: SEASON, week: 2 });
     expect(result.current.scores?.tiebreaker).toBe(2);
   });
 });

@@ -18,9 +18,9 @@ const SEASON_PATTERN = /^\d{4}$/;
  *
  * The waiting rules matter more than the redirect ones. A results URL is opened
  * before the schedule has loaded and before the picks have been looked for, so
- * anything that redirects on missing scores has to be sure the week it is judging
- * is the week that was actually tried. That is what `settledWeek` is for, and
- * `seasonYear` is the same guarantee for the season.
+ * anything that redirects on missing scores has to be sure the season and week it
+ * is judging are the ones actually tried. That is what `settled` is for, and
+ * `seasonYear` is the same guarantee for the schedule.
  */
 export default function useWeekRouteGuard(
   rawSeason?: string,
@@ -37,8 +37,7 @@ export default function useWeekRouteGuard(
     selectedWeek,
     setSelectedWeek,
     scores,
-    scoresWeek,
-    settledWeek,
+    settled,
   } = useAppData();
 
   const seasonNumber = Number(rawSeason);
@@ -81,9 +80,11 @@ export default function useWeekRouteGuard(
       header: "Unknown Week",
       message: `Week ${rawWeek} isn't part of the ${seasonNumber} season, so there is nothing to show.`,
     };
-  } else if (settledWeek !== weekNumber) {
+  } else if (settled?.season !== seasonNumber || settled.week !== weekNumber) {
+    // Scores from the week before this one are still on hand until the new ones
+    // land, and week 5 of one season is not week 5 of another.
     result = { status: "loading", week };
-  } else if (scoresWeek !== weekNumber || !scores?.scores.length) {
+  } else if (!scores?.scores.length) {
     result = { status: "loading", week };
     redirect = {
       header: "No Results",
