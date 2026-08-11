@@ -101,13 +101,16 @@ describe("the app, results views", () => {
     expect(getPlayerScoresMock).toHaveBeenCalledTimes(2);
   });
 
-  it("offers no refresh once every game is final", async () => {
+  it("collapses refresh away once every game is final", async () => {
     const user = await mountWithScores();
     await user.click(screen.getByText("View Results"));
 
-    expect(
-      screen.queryByRole("button", { name: "Refresh" }),
-    ).not.toBeInTheDocument();
+    // Waited for, because the button stays mounted while it animates out.
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("button", { name: "Refresh" }),
+      ).not.toBeInTheDocument();
+    });
     expect(
       document.querySelector(".home__scores-header-divider"),
     ).not.toBeInTheDocument();
