@@ -28,42 +28,22 @@ $toasterWidth: min(calc(100% - 48px), 400px);
   &.--primary {
     background-color: var(--rak-soft-primary-bg);
     color: var(--rak-soft-primary-text);
-
-    .toast__header {
-      color: var(--rak-soft-primary-title);
-    }
   }
   &.--neutral {
     background-color: var(--rak-soft-neutral-bg);
     color: var(--rak-soft-neutral-text);
-
-    .toast__header {
-      color: var(--rak-soft-neutral-title);
-    }
   }
   &.--success {
     background-color: var(--rak-soft-success-bg);
     color: var(--rak-soft-success-text);
-
-    .toast__header {
-      color: var(--rak-soft-success-title);
-    }
   }
   &.--warning {
     background-color: var(--rak-soft-warning-bg);
     color: var(--rak-soft-warning-text);
-
-    .toast__header {
-      color: var(--rak-soft-warning-title);
-    }
   }
   &.--danger {
     background-color: var(--rak-soft-danger-bg);
     color: var(--rak-soft-danger-text);
-
-    .toast__header {
-      color: var(--rak-soft-danger-title);
-    }
   }
 
   .toast__icon {
@@ -76,8 +56,10 @@ $toasterWidth: min(calc(100% - 48px), 400px);
     flex: 1;
   }
 
+  // Takes the body's own text color, which is darker than the title tint it used
+  // to have, and carries the weight the message does not.
   .toast__header {
-    font-weight: 600;
+    font-weight: 700;
   }
 
   .toast__close {
