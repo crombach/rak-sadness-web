@@ -54,8 +54,15 @@ export function Standing({
   const top = leader.score.total;
   const chosen = players.find((it) => it.name === player);
   const leaders = players.filter((it) => it.score.total === top).length;
-  const lead =
-    leaders > 1
+  // Nothing left to play, so the standing is the result. A leader is a winner,
+  // and there is no count of what is still to come to give.
+  const remaining = remainingGames(players).length;
+  const isOver = remaining === 0;
+  const lead = isOver
+    ? leaders > 1
+      ? `${leaders} players win with ${plural(top, "point")}`
+      : `${leader.name} wins with ${plural(top, "point")}`
+    : leaders > 1
       ? `${leaders} players lead with ${plural(top, "point")}`
       : `${leader.name} leads with ${plural(top, "point")}`;
   const behind = chosen != null ? top - chosen.score.total : null;
@@ -67,9 +74,13 @@ export function Standing({
           ? lead
           : behind > 0
             ? `${plural(behind, "point")} behind ${leader.name}`
-            : "Tied for the lead"}
+            : isOver
+              ? leaders > 1
+                ? "Tied for the win"
+                : "Winner"
+              : "Tied for the lead"}
       {" · "}
-      {plural(remainingGames(players).length, "game")} still to play
+      {isOver ? "Week complete" : `${plural(remaining, "game")} still to play`}
     </p>
   );
 }

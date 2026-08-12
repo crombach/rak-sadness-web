@@ -23,7 +23,10 @@ takes its shape from `styles/_listbox.scss`, which the home page selects share.
 
 `AnalysisSummary`: renders `PlayerAnalysis`, working out only what it takes to say
 it. The standing leads, from `Standing`, which reads the scores rather than the
-search, and names no leader until a pick is settled. Picks sit in a
+search, and names no leader until a pick is settled. With nothing left to play it
+reads as a result rather than a standing: a leader wins, the player picked is the
+winner rather than tied for the lead, and the tail says the week is complete
+instead of counting no games. Picks sit in a
 grid rather than a wrapping row, so the same game holds the same column down every
 route, and a pick is drawn monospace and given the width of the widest team
 abbreviation and spread a sheet can hold, so a column fits as many as it can and

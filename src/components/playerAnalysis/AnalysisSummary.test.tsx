@@ -85,6 +85,41 @@ describe("Standing", () => {
     ).toBeInTheDocument();
   });
 
+  /** The same week with nothing left open, which is a week that has a winner. */
+  function finished(week: RakMadnessScores): RakMadnessScores {
+    return {
+      scores: week.scores.map((it) => ({
+        ...it,
+        pro: it.pro.map((pick) => ({ ...pick, status: "yes" as const })),
+      })),
+    };
+  }
+
+  it("declares a winner once the week is over", () => {
+    render(<Standing scores={finished(scores)} />);
+
+    expect(
+      screen.getByText("Rak wins with 3 points · Week complete"),
+    ).toBeInTheDocument();
+  });
+
+  it("calls the player picked the winner rather than tied for the lead", () => {
+    render(<Standing scores={finished(scores)} player="Rak" />);
+
+    expect(screen.getByText("Winner · Week complete")).toBeInTheDocument();
+  });
+
+  it("ties the player picked for the win where the top is shared", () => {
+    const tied: RakMadnessScores = {
+      scores: [...scores.scores, player("Bill", 3, "KC -3")],
+    };
+    render(<Standing scores={finished(tied)} player="Rak" />);
+
+    expect(
+      screen.getByText("Tied for the win · Week complete"),
+    ).toBeInTheDocument();
+  });
+
   it("names no leader before a game has been played", () => {
     const fresh: RakMadnessScores = {
       scores: scores.scores.map((it) => ({
