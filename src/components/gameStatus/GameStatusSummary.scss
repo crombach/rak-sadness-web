@@ -125,31 +125,36 @@
 // Held to a square whatever shape the mark is, so a wide logo and a tall one take
 // the same room out of the name beside them. Smaller on a phone, where it stands
 // beside an abbreviation rather than a name.
+//
+// As big as the three lines of text beside it are tall, which is as much as either
+// can take without the name it stands over having to wrap sooner.
 .game-status__logo {
   align-self: center;
   object-fit: contain;
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
 
   @include roomy-screen {
-    width: 32px;
-    height: 32px;
+    width: 44px;
+    height: 44px;
   }
 }
 
-// Each side out on its own edge with its score inboard, and how the game stands
-// between them. Both sides are laid into the one grid rather than each into its own,
-// so a label, a mark, a name and a record line up with the other side's however many
-// lines the name beside them took.
+// Each side out on its own edge with its score inboard, the two scores meeting at a
+// dash. Both sides are laid into the one grid rather than each into its own, so a
+// label, a mark, a name and a record line up with the other side's however many lines
+// the name beside them took.
 //
-// On a phone there is no room for the middle between the scores, so they meet either
-// side of a dash and the middle drops below both.
+// Where the game is up to and what the offense faces are bands over and under all of
+// it, rather than a column between the scores. Given the dialog's full width they hold
+// a long down and distance on one line, and the scores keep the middle at every width.
 .game-status__scoreline {
   display: grid;
-  // Mark, text, score, then the middle, then the same three mirrored.
+  // Mark, text, score, then the dash, then the same three mirrored. The two sides are
+  // given the same share of what is left, which is what holds the dash in the middle.
   grid-template-columns: auto minmax(0, 1fr) auto auto auto minmax(0, 1fr) auto;
-  // Label, name, record, then how the game stands.
-  grid-template-rows: auto auto auto auto;
+  // Where the game is up to, then label, name and record, then the down and distance.
+  grid-template-rows: auto auto auto auto auto;
   column-gap: var(--rak-space-2);
   row-gap: var(--rak-space-1);
 }
@@ -167,26 +172,27 @@
   text-align: left;
 
   .game-status__logo {
-    grid-row: 1 / 4;
+    grid-row: 2 / 5;
     grid-column: 1;
   }
 
   .game-status__side-label {
-    grid-column: 2;
-  }
-
-  .game-status__team-name {
     grid-row: 2;
     grid-column: 2;
   }
 
-  .game-status__record {
+  .game-status__team-name {
     grid-row: 3;
     grid-column: 2;
   }
 
+  .game-status__record {
+    grid-row: 4;
+    grid-column: 2;
+  }
+
   .game-status__score {
-    grid-row: 1 / 4;
+    grid-row: 2 / 5;
     grid-column: 3;
   }
 }
@@ -195,43 +201,38 @@
   text-align: right;
 
   .game-status__logo {
-    grid-row: 1 / 4;
+    grid-row: 2 / 5;
     grid-column: 7;
   }
 
   .game-status__side-label {
-    grid-column: 6;
-  }
-
-  .game-status__team-name {
     grid-row: 2;
     grid-column: 6;
   }
 
-  .game-status__record {
+  .game-status__team-name {
     grid-row: 3;
     grid-column: 6;
   }
 
+  .game-status__record {
+    grid-row: 4;
+    grid-column: 6;
+  }
+
   .game-status__score {
-    grid-row: 1 / 4;
+    grid-row: 2 / 5;
     grid-column: 5;
   }
 }
 
-// Only where the scores are next to each other. With the middle between them there
-// is nothing for a dash to join.
 .game-status__dash {
-  grid-row: 1 / 4;
+  grid-row: 2 / 5;
   grid-column: 4;
   align-self: center;
   color: var(--rak-primary-700);
   font-size: 2rem;
   line-height: 1.1;
-
-  @include roomy-screen {
-    display: none;
-  }
 }
 
 .game-status__side-label {
@@ -299,36 +300,29 @@
   font-size: 1.5rem;
 }
 
-// Under both sides on a phone, and between them once there is room for a column of
-// its own.
-.game-status__center {
-  grid-row: 4;
+// The two bands, each across everything and centered over the dash the scores meet
+// at. Set apart from the scoreline by a margin rather than by the row gap, which is
+// the space between a label and the name under it.
+.game-status__detail,
+.game-status__down {
   grid-column: 1 / -1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--rak-space-1);
+  justify-self: center;
   min-width: 0;
-  margin-top: var(--rak-space-3);
+  margin: 0;
   text-align: center;
-
-  @include roomy-screen {
-    grid-row: 1 / 4;
-    grid-column: 4;
-    align-self: center;
-    margin-top: 0;
-  }
 }
 
 .game-status__detail {
-  margin: 0;
+  grid-row: 1;
+  margin-bottom: var(--rak-space-2);
   color: var(--rak-text-primary);
   font-size: var(--rak-text-md);
   font-weight: var(--rak-weight-semibold);
 }
 
 .game-status__down {
-  margin: 0;
+  grid-row: 5;
+  margin-top: var(--rak-space-2);
   color: var(--rak-text-secondary);
   font-size: var(--rak-text-sm);
 }

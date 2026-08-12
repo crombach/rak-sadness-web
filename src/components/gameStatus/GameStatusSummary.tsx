@@ -7,8 +7,7 @@ import "./GameStatusSummary.scss";
 /** Regulation is four quarters, and anything past them is overtime. */
 const REGULATION_PERIODS = 4;
 
-/** Joins the two scores where they meet, which is on a screen too narrow for three
- * columns. */
+/** Joins the two scores, which meet in the middle of the scoreline at every width. */
 const SCORE_DASH = "–";
 
 /**
@@ -111,28 +110,26 @@ function detailText(result: LeagueResult): string {
     : period;
 }
 
+/**
+ * Where the game is up to, over the scores rather than between them.
+ *
+ * No points by quarter: the pool is scored on the game's own result, so a quarter's
+ * points are of no use to anyone reading this.
+ */
 function Detail({ result }: { result: LeagueResult }) {
   return <p className="game-status__detail">{detailText(result)}</p>;
 }
 
 /**
- * How the game stands, which is where it is up to and, while it is being played, what
- * the offense is facing. Who has the ball is left to the marker beside their score.
- *
- * No points by quarter: the pool is scored on the game's own result, so a quarter's
- * points are of no use to anyone reading this.
+ * What the offense is facing, under the scores. Who has the ball is left to the
+ * marker beside their score.
  */
-function Center({ result }: { result: LeagueResult }) {
-  return (
-    <>
-      <Detail result={result} />
-      {result.possession.downDistanceText != null && (
-        <p className="game-status__down">
-          {result.possession.downDistanceText}
-        </p>
-      )}
-    </>
-  );
+function Down({ result }: { result: LeagueResult }) {
+  const { downDistanceText } = result.possession;
+  if (downDistanceText == null) {
+    return null;
+  }
+  return <p className="game-status__down">{downDistanceText}</p>;
 }
 
 /** A side of the scoreline with nothing in it yet, at the size it will come out. */
@@ -169,13 +166,13 @@ function Wireframe() {
         <span className="game-status__bar --meta" />
       </div>
       <div aria-hidden="true" className="game-status__scoreline">
+        {/* The classes the two lines carry as well as a bar's, so each is laid in the
+            row the line it stands in for is laid in. */}
+        <span className="game-status__detail game-status__bar --detail" />
         <WireframeSide homeAway={HomeAway.HOME} />
         <span className="game-status__dash">{SCORE_DASH}</span>
-        <div className="game-status__center">
-          <span className="game-status__bar --detail" />
-          <span className="game-status__bar --detail-narrow" />
-        </div>
         <WireframeSide homeAway={HomeAway.AWAY} />
+        <span className="game-status__down game-status__bar --detail-narrow" />
       </div>
     </div>
   );
@@ -237,8 +234,9 @@ function Side({
 }
 
 /**
- * A game the way ESPN's own boxscore says it: each side out on its own edge with
- * its score inboard, and how the game stands between them.
+ * A game the way ESPN's own boxscore says it: each side out on its own edge with its
+ * score inboard against a dash, where the game is up to written over the two scores and
+ * what the offense faces under them.
  *
  * `result` is the game as it was last fetched, and `isLoading` says it is not yet the
  * game `game` names. A wireframe stands in until it is, so a live game is never shown
@@ -296,6 +294,7 @@ export default function GameStatusSummary({
         {venue != null && <MetaGroup parts={venue} />}
       </div>
       <div className="game-status__scoreline">
+        <Detail result={result} />
         <Side
           side={result.home}
           homeAway={HomeAway.HOME}
@@ -306,9 +305,6 @@ export default function GameStatusSummary({
         <span aria-hidden="true" className="game-status__dash">
           {SCORE_DASH}
         </span>
-        <div className="game-status__center">
-          <Center result={result} />
-        </div>
         <Side
           side={result.away}
           homeAway={HomeAway.AWAY}
@@ -316,6 +312,7 @@ export default function GameStatusSummary({
           logoUrl={logos ? result.away.team.logoUrl : undefined}
           onLogoError={dropLogos}
         />
+        <Down result={result} />
       </div>
     </div>
   );

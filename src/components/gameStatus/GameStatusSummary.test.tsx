@@ -138,6 +138,12 @@ describe("GameStatusSummary, a game that is over", () => {
     expect(screen.queryByLabelText("Has the ball")).toBeNull();
   });
 
+  it("joins the two scores at a dash, and leaves the down out with none to say", () => {
+    renderFinal();
+    expect(document.querySelectorAll(".game-status__dash")).toHaveLength(1);
+    expect(document.querySelector(".game-status__down")).toBeNull();
+  });
+
   it("stands the home side on the left", () => {
     renderFinal();
     expect(
@@ -241,6 +247,23 @@ describe("GameStatusSummary, a game still being played", () => {
     expect(screen.getByText("Q3 8:42")).toBeInTheDocument();
     expect(screen.queryByText("8:42 - 3rd Quarter")).toBeNull();
     expect(screen.getByText("2nd & 7")).toBeInTheDocument();
+  });
+
+  it("bands the status over the two scores and the down under them", () => {
+    renderLive();
+    // Grid placement is what stacks the scoreline, and it follows this order, so what
+    // is asserted is which band each line ends up in.
+    expect(
+      [...document.querySelectorAll(".game-status__scoreline > *")].map(
+        (it) => it.className,
+      ),
+    ).toEqual([
+      "game-status__detail",
+      "game-status__side --home",
+      "game-status__dash",
+      "game-status__side --away",
+      "game-status__down",
+    ]);
   });
 
   it("says who has the ball with the marker alone", () => {
