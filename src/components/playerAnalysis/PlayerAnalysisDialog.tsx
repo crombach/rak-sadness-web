@@ -6,6 +6,7 @@ import { RakMadnessScores } from "../../types/RakMadnessScores";
 import getClasses from "../../utils/getClasses";
 import getPlayerAnalysis from "../../utils/scoring/getPlayerAnalysis";
 import remainingGames from "../../utils/scoring/remainingGames";
+import unscoreableGames from "../../utils/scoring/unscoreableGames";
 import Button from "../button/Button";
 import { CloseRoundedIcon, UnfoldMoreIcon } from "../icon/Icon";
 import PlayerStatusIcon from "../table/playerName/PlayerStatusIcon";
@@ -103,7 +104,12 @@ export default function PlayerAnalysisDialog({
   // `remainingGames` reads the first row unguarded, so an empty week is short
   // circuited rather than handed to it.
   const players = scores?.scores ?? [];
-  const isOver = players.length > 0 && remainingGames(players).length === 0;
+  // Matches what `Standing` calls over: nothing left to play, and nothing the app
+  // could not score. A week with a hole in it has no result to state yet.
+  const isOver =
+    players.length > 0 &&
+    remainingGames(players).length === 0 &&
+    unscoreableGames(players).length === 0;
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -148,6 +154,20 @@ export default function PlayerAnalysisDialog({
                 aria-label="Player"
                 className="player-analysis__input"
               />
+              {/*
+                The player named in the input is marked the way the tables mark
+                them, so the search says where they stand before the answer below
+                it has been worked out.
+              */}
+              {player != null && (
+                <span
+                  className={`player-analysis__input-status ${getClasses({
+                    "--knocked-out": player.isKnockedOut,
+                  })}`}
+                >
+                  <PlayerStatusIcon isKnockedOut={player.isKnockedOut} />
+                </span>
+              )}
               <Combobox.Icon className="player-analysis__input-icon">
                 <UnfoldMoreIcon />
               </Combobox.Icon>

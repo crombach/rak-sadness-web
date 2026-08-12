@@ -23,6 +23,10 @@ sequences. `getPlayerAnalysis` is a second entry point, reading those results ba
   a column at a time because a blank cell scores "error" rather than "incomplete",
   so one row alone would drop a game that row's player skipped. Both halves of the
   question below read it
+- `unscoreableGames`: the games nobody can be scored on, by the picks table's own
+  label. A contradicted spread or a game the results do not hold is a hole in the
+  week, so a week carrying one is not finished however many of its games are. A
+  blank cell is not one of those, and every week has some
 - `applyKnockouts`: who can still win, and why not
 - `getPlayerAnalysis`: the other half of `applyKnockouts`, for any player named. One
   already knocked out reads back the reason they carry, and a decided week is

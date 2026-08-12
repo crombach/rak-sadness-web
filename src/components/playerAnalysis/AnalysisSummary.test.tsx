@@ -180,6 +180,55 @@ describe("Standing", () => {
     ).toBeInTheDocument();
   });
 
+  /** One game nobody could be scored on, which is a hole in a week otherwise done. */
+  function withUnscoreableGame(week: RakMadnessScores): RakMadnessScores {
+    return {
+      scores: week.scores.map((it) => ({
+        ...it,
+        pro: [
+          {
+            ...it.pro[0],
+            status: "error" as const,
+            explanation: { header: "Invalid Spread", message: "" },
+          },
+          ...it.pro.slice(1),
+        ],
+      })),
+    };
+  }
+
+  it("does not call a week complete while a game cannot be scored", () => {
+    render(<Standing scores={withUnscoreableGame(finished(scores))} />);
+
+    expect(
+      screen.getByText("Rak leads with 3 points · 1 game could not be scored"),
+    ).toBeInTheDocument();
+  });
+
+  it("counts a blank cell as the player's own, not a hole in the week", () => {
+    const blank: RakMadnessScores = {
+      scores: finished(scores).scores.map((it, index) => ({
+        ...it,
+        pro:
+          index === 0
+            ? it.pro
+            : [
+                {
+                  ...it.pro[0],
+                  status: "error" as const,
+                  explanation: { header: "Missing Pick", message: "" },
+                },
+                ...it.pro.slice(1),
+              ],
+      })),
+    };
+    render(<Standing scores={blank} />);
+
+    expect(
+      screen.getByText("Rak wins with 3 points · Week complete"),
+    ).toBeInTheDocument();
+  });
+
   it("names no leader before a game has been played", () => {
     const fresh: RakMadnessScores = {
       scores: scores.scores.map((it) => ({

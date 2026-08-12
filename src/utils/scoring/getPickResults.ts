@@ -39,6 +39,13 @@ export function indexResultsByTeam(
 }
 
 /**
+ * The header a cell left blank carries. Held apart from the other two because it is
+ * the player's own doing rather than a game nobody can score: every week has blanks
+ * in it, and a week full of them is still a week that finished.
+ */
+export const MISSING_PICK = "Missing Pick";
+
+/**
  * A pick with no point in it either way. Every reason a game cannot be scored ends
  * here, and they share `isInvalid` because they share that outcome. Only the
  * explanation differs, since only the user can act on the difference.
@@ -81,7 +88,7 @@ export function getPickResults(
     }
     if (selectedTeam == null) {
       return unscoreable(
-        "Missing Pick",
+        MISSING_PICK,
         "No selection was made for this game.",
         hasSpread,
       );

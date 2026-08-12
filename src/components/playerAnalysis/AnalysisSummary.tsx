@@ -8,6 +8,7 @@ import {
 } from "../../types/PlayerAnalysis";
 import { PlayerScore, RakMadnessScores } from "../../types/RakMadnessScores";
 import remainingGames from "../../utils/scoring/remainingGames";
+import unscoreableGames from "../../utils/scoring/unscoreableGames";
 import Button from "../button/Button";
 import "./AnalysisSummary.scss";
 
@@ -94,13 +95,21 @@ export function Standing({
   const [leader] = players;
   if (leader == null) return null;
   const remaining = remainingGames(players).length;
-  const isOver = remaining === 0;
+  // A game nobody can be scored on is a hole in the week, so the week is not over
+  // however few of its games are still being played. Saying otherwise would call a
+  // leader the winner on a total the app itself could not work out.
+  const unscoreable = unscoreableGames(players).length;
+  const isOver = remaining === 0 && unscoreable === 0;
   const isClinched = result?.kind === "clinched" && result.player === player;
   return (
     <p className="analysis__standing">
       {headline(players, isOver, player, isClinched)}
       {" · "}
-      {isOver ? "Week complete" : `${plural(remaining, "game")} still to play`}
+      {remaining > 0
+        ? `${plural(remaining, "game")} still to play`
+        : unscoreable > 0
+          ? `${plural(unscoreable, "game")} could not be scored`
+          : "Week complete"}
     </p>
   );
 }
