@@ -114,6 +114,9 @@
   // than widening the popup past the input it hangs off.
   max-width: var(--anchor-width);
   max-height: min(240px, var(--available-height));
+  // Every entry here is filled, so the mixin's own top and bottom padding would
+  // read as a white band inside the border rather than as room.
+  padding-block: 0;
 }
 
 // A name here is filled and marked the way the tables fill and mark the same

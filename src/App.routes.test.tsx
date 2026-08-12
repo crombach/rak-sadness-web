@@ -41,7 +41,7 @@ describe("the app, week routes", () => {
     expect(await screen.findByText("MNF Points Pick")).toBeInTheDocument();
   });
 
-  // Read inside the table, because the navbar's path to victory button carries
+  // Read inside the table, because the navbar's player analysis button carries
   // the same trophy while a week that is still being played collapses it away.
   const crown = () =>
     within(screen.getByRole("table")).queryByTestId("EmojiEventsIcon");
@@ -94,7 +94,7 @@ describe("the app, week routes", () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
     mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
 
-    // Scoreboard, picks, refresh, and path to victory.
+    // Scoreboard, picks, refresh, and player analysis.
     const loading = scoresHeaderButtons();
     expect(loading).toHaveLength(4);
     loading.forEach((button) => expect(button).toBeDisabled());

@@ -63,7 +63,7 @@
   background-color: var(--rak-on-solid);
 }
 
-// What a week still being played gets: the refresh and path to victory buttons,
+// What a week still being played gets: the refresh and player analysis buttons,
 // and the divider before them, collapsed together once the week is decided. A grid
 // column from `1fr` to `0fr` narrows them, because they measure whatever their
 // padding and their icons come to, and `auto` cannot be interpolated.

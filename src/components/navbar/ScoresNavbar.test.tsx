@@ -23,7 +23,7 @@ describe("ScoresNavbar", () => {
     vi.useRealTimers();
   });
 
-  it("offers refresh and a path to victory for a week that is still open", () => {
+  it("offers refresh and the player analysis for a week that is still open", () => {
     render(<ScoresNavbar {...props} isWeekLive />);
 
     expect(screen.getByRole("button", { name: "Refresh" })).toBeInTheDocument();

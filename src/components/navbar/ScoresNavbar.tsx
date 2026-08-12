@@ -37,7 +37,7 @@ export default function ScoresNavbar({
   disabled?: boolean;
   /**
    * Cleared once the week is over, when rescoring cannot change anything and
-   * nobody has a path to victory left to work out.
+   * nobody has a route left to work out. A player's name still opens the analysis.
    */
   isWeekLive: boolean;
 }) {
