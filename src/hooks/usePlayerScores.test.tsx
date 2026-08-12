@@ -28,6 +28,13 @@ function week(value: number): WeekInfo {
   };
 }
 
+/**
+ * Held still, not built per render. `usePlayerScores` keys its scoring callback on
+ * this object's identity, so a fresh one every render refires the effect behind it
+ * and the test can no longer tell a stable hook from a looping one.
+ */
+const WEEK_5 = week(5);
+
 function scoresFor(week: number): RakMadnessScores {
   return {
     tiebreaker: week,
@@ -61,7 +68,7 @@ describe("usePlayerScores", () => {
     ) as unknown as typeof fetch;
     getPlayerScoresMock.mockResolvedValue(scoresFor(5));
 
-    const { result } = renderHook(() => usePlayerScores(week(5), SEASON), {
+    const { result } = renderHook(() => usePlayerScores(WEEK_5, SEASON), {
       wrapper,
     });
 
@@ -76,7 +83,7 @@ describe("usePlayerScores", () => {
       Promise.resolve(new Response(null, { status: 404 })),
     ) as unknown as typeof fetch;
 
-    const { result } = renderHook(() => usePlayerScores(week(5), SEASON), {
+    const { result } = renderHook(() => usePlayerScores(WEEK_5, SEASON), {
       wrapper,
     });
 
@@ -93,7 +100,7 @@ describe("usePlayerScores", () => {
     );
 
     const { result, rerender } = renderHook(
-      ({ season }: { season: number }) => usePlayerScores(week(5), season),
+      ({ season }: { season: number }) => usePlayerScores(WEEK_5, season),
       { initialProps: { season: SEASON }, wrapper },
     );
     await waitFor(() =>
