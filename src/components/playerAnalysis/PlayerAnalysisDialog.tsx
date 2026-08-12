@@ -5,6 +5,7 @@ import { PlayerAnalysis } from "../../types/PlayerAnalysis";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import getClasses from "../../utils/getClasses";
 import getPlayerAnalysis from "../../utils/scoring/getPlayerAnalysis";
+import remainingGames from "../../utils/scoring/remainingGames";
 import Button from "../button/Button";
 import { CloseRoundedIcon, UnfoldMoreIcon } from "../icon/Icon";
 import PlayerStatusIcon from "../table/playerName/PlayerStatusIcon";
@@ -97,6 +98,12 @@ export default function PlayerAnalysisDialog({
   // dialog emptying and filling again. Only a rescore takes it away.
   const shown = found?.scores === scores ? found : undefined;
   const isSearching = player != null && shown?.name !== player.name;
+  // Read once here, off the same scores, so the header and the "clinched" case
+  // below it never work out separately whether the week itself is done.
+  // `remainingGames` reads the first row unguarded, so an empty week is short
+  // circuited rather than handed to it.
+  const players = scores?.scores ?? [];
+  const isOver = players.length > 0 && remainingGames(players).length === 0;
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -189,10 +196,18 @@ export default function PlayerAnalysisDialog({
             <div className="player-analysis__content" aria-live="polite">
               {/* Read off the scores, so it answers for the player picked before
                   their routes have been worked out. */}
-              <Standing scores={scores} player={player?.name} />
+              <Standing
+                scores={scores}
+                player={player?.name}
+                result={shown?.paths}
+              />
               {/* Keyed on the player, so the answer to a new one plays in rather
                   than replacing the last one in place. */}
-              <AnalysisSummary key={shown?.name} result={shown?.paths} />
+              <AnalysisSummary
+                key={shown?.name}
+                result={shown?.paths}
+                isOver={isOver}
+              />
             </div>
           </div>
         </Dialog.Popup>

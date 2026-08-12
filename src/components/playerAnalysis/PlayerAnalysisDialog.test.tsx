@@ -139,10 +139,7 @@ describe("PlayerAnalysisDialog", () => {
     );
 
     expect(
-      await screen.findByText("Bobby cannot win this week."),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Knocked out on Total Score by Alice."),
+      await screen.findByText("Knocked out on Total Score by Alice."),
     ).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "Player" })).toHaveValue(
       "Bobby",

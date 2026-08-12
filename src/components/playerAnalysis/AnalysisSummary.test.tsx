@@ -120,6 +120,66 @@ describe("Standing", () => {
     ).toBeInTheDocument();
   });
 
+  it("calls a clinched player the winner even where games remain", () => {
+    render(
+      <Standing
+        scores={scores}
+        player="Rak"
+        result={{ kind: "clinched", player: "Rak" }}
+      />,
+    );
+
+    expect(
+      screen.getByText("Winner · 1 game still to play"),
+    ).toBeInTheDocument();
+  });
+
+  it("ties a clinched player for the win where the top is shared", () => {
+    const tied: RakMadnessScores = {
+      scores: [...scores.scores, player("Bill", 3, "KC -3")],
+    };
+    render(
+      <Standing
+        scores={tied}
+        player="Rak"
+        result={{ kind: "clinched", player: "Rak" }}
+      />,
+    );
+
+    expect(
+      screen.getByText("Tied for the win · 1 game still to play"),
+    ).toBeInTheDocument();
+  });
+
+  it("ignores a clinch that answers for a different player", () => {
+    render(
+      <Standing
+        scores={scores}
+        player="Rak"
+        result={{ kind: "clinched", player: "Alice" }}
+      />,
+    );
+
+    expect(
+      screen.getByText("Tied for the lead · 1 game still to play"),
+    ).toBeInTheDocument();
+  });
+
+  it("says a knocked out player is knocked out, and leaves the points to the answer", () => {
+    const out: RakMadnessScores = {
+      scores: scores.scores.map((it) =>
+        it.name === "Alice"
+          ? { ...it, status: { ...it.status, isKnockedOut: true } }
+          : it,
+      ),
+    };
+    render(<Standing scores={out} player="Alice" />);
+
+    expect(
+      screen.getByText("Knocked out · 1 game still to play"),
+    ).toBeInTheDocument();
+  });
+
   it("names no leader before a game has been played", () => {
     const fresh: RakMadnessScores = {
       scores: scores.scores.map((it) => ({
@@ -157,18 +217,41 @@ describe("AnalysisSummary", () => {
     };
     render(<AnalysisSummary result={result} />);
 
-    expect(screen.getByText("Bob cannot win this week.")).toBeInTheDocument();
+    // The reason says they cannot win, so nothing above it says so again.
     expect(
       screen.getByText("Knocked out on Total Score by Alice."),
     ).toBeInTheDocument();
+    expect(screen.queryByText("Bob cannot win this week.")).toBeNull();
   });
 
-  it("says a clinched week is already won", () => {
+  it("tells an eliminated player carrying no reason that they cannot win", () => {
+    const result: PlayerAnalysis = { kind: "eliminated", player: "Bob" };
+    render(<AnalysisSummary result={result} />);
+
+    expect(screen.getByText("Bob cannot win this week.")).toBeInTheDocument();
+  });
+
+  it("says nothing left can undo a clinch with games still to play", () => {
     render(<AnalysisSummary result={{ kind: "clinched", player: "Alice" }} />);
 
+    // The header already calls Alice the winner, so this only has to explain
+    // how that holds with games left.
     expect(
-      screen.getByText("Alice has already won the week."),
+      screen.getByText("Nothing still to be played can take it away."),
     ).toBeInTheDocument();
+    expect(screen.queryByText(/already won/)).not.toBeInTheDocument();
+  });
+
+  it("says nothing more where a clinch also ends the week", () => {
+    render(
+      <AnalysisSummary result={{ kind: "clinched", player: "Alice" }} isOver />,
+    );
+
+    // The header already covers both facts: winner, and week complete.
+    expect(screen.queryByText(/already won/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Nothing still to be played/),
+    ).not.toBeInTheDocument();
   });
 
   it("gives a floor rather than paths on a week too big to search", () => {

@@ -38,47 +38,67 @@ function hasKickedOff(players: Array<PlayerScore>): boolean {
 }
 
 /**
+ * Where the player picked stands, or where the week does before one is. Nothing
+ * here repeats the answer below it: a player who cannot win reads as knocked out
+ * and leaves the points to the explanation, and a clinched player reads as the
+ * winner outright, games left or not, leaving the body to say only why that
+ * holds where some remain.
+ */
+function headline(
+  players: Array<PlayerScore>,
+  isOver: boolean,
+  player: string | undefined,
+  isClinched: boolean,
+): string {
+  if (!hasKickedOff(players)) return "No finished games";
+  const [leader] = players;
+  const top = leader.score.total;
+  const chosen = players.find((it) => it.name === player);
+  if (chosen == null) {
+    const leaders = players.filter((it) => it.score.total === top).length;
+    const verb = isOver ? "win" : "lead";
+    const points = plural(top, "point");
+    return leaders > 1
+      ? `${leaders} players ${verb} with ${points}`
+      : `${leader.name} ${verb}s with ${points}`;
+  }
+  if (chosen.status.isKnockedOut) return "Knocked out";
+  const behind = top - chosen.score.total;
+  if (behind > 0) return `${plural(behind, "point")} behind ${leader.name}`;
+  if (!isOver && !isClinched) return "Tied for the lead";
+  return players.filter((it) => it.score.total === top).length > 1
+    ? "Tied for the win"
+    : "Winner";
+}
+
+/**
  * Where the week stands, which the scores already say. Read straight off them so
  * it is on screen before anyone is picked, and while their routes are worked out.
+ *
+ * `result` is the analysis once it lands, read only for the "clinched" word: the
+ * header and the answer below it are worked out from the same fact this way, so
+ * neither has to guess what the other already said. Trusted only where it answers
+ * for the same player named here, since the dialog keeps the last answer on
+ * screen while the next one is worked out.
  */
 export function Standing({
   scores,
   player,
+  result,
 }: {
   scores?: RakMadnessScores;
   player?: string;
+  result?: PlayerAnalysis;
 }) {
   const players = scores?.scores ?? [];
   const [leader] = players;
   if (leader == null) return null;
-  const top = leader.score.total;
-  const chosen = players.find((it) => it.name === player);
-  const leaders = players.filter((it) => it.score.total === top).length;
-  // Nothing left to play, so the standing is the result. A leader is a winner,
-  // and there is no count of what is still to come to give.
   const remaining = remainingGames(players).length;
   const isOver = remaining === 0;
-  const lead = isOver
-    ? leaders > 1
-      ? `${leaders} players win with ${plural(top, "point")}`
-      : `${leader.name} wins with ${plural(top, "point")}`
-    : leaders > 1
-      ? `${leaders} players lead with ${plural(top, "point")}`
-      : `${leader.name} leads with ${plural(top, "point")}`;
-  const behind = chosen != null ? top - chosen.score.total : null;
+  const isClinched = result?.kind === "clinched" && result.player === player;
   return (
     <p className="analysis__standing">
-      {!hasKickedOff(players)
-        ? "No finished games"
-        : behind == null
-          ? lead
-          : behind > 0
-            ? `${plural(behind, "point")} behind ${leader.name}`
-            : isOver
-              ? leaders > 1
-                ? "Tied for the win"
-                : "Winner"
-              : "Tied for the lead"}
+      {headline(players, isOver, player, isClinched)}
       {" · "}
       {isOver ? "Week complete" : `${plural(remaining, "game")} still to play`}
     </p>
@@ -298,8 +318,11 @@ function Message({ lines }: { lines: Array<string | undefined> }) {
 /** What the player has to do, or why there is nothing left to do about it. */
 export default function AnalysisSummary({
   result,
+  isOver,
 }: {
   result?: PlayerAnalysis;
+  /** Whether the week itself is done, which is what the "clinched" case needs. */
+  isOver?: boolean;
 }) {
   // Nothing under the search until a name is picked, which the placeholder in it
   // already asks for.
@@ -308,8 +331,12 @@ export default function AnalysisSummary({
   if (result.kind === "eliminated") {
     return (
       <Answer>
+        {/* The explanation names who knocked them out and by how much, so it says
+            they cannot win on its own. Only a player without one needs telling. */}
         <Message
-          lines={[`${result.player} cannot win this week.`, result.explanation]}
+          lines={[
+            result.explanation ?? `${result.player} cannot win this week.`,
+          ]}
         />
       </Answer>
     );
@@ -318,10 +345,11 @@ export default function AnalysisSummary({
   if (result.kind === "clinched") {
     return (
       <Answer>
+        {/* The header already calls a clinched player the winner, week over or
+            not, so a week still running is the only case left to explain. */}
         <Message
           lines={[
-            `${result.player} has already won the week.`,
-            "Nothing still to be played can take it away.",
+            isOver ? undefined : "Nothing still to be played can take it away.",
           ]}
         />
       </Answer>

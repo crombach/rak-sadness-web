@@ -26,7 +26,16 @@ it. The standing leads, from `Standing`, which reads the scores rather than the
 search, and names no leader until a pick is settled. With nothing left to play it
 reads as a result rather than a standing: a leader wins, the player picked is the
 winner rather than tied for the lead, and the tail says the week is complete
-instead of counting no games. Picks sit in a
+instead of counting no games. `Standing` also takes the analysis once it lands,
+read only for a clinch: a clinched player is called the winner outright even with
+games left, so the body underneath only has to say why that holds, and never why
+they won at all. Trusted only where the analysis answers for the player named,
+since the dialog keeps the last one on screen while the next is worked out.
+Nothing an `eliminated` or `headline` result says repeats the header either: a
+player already called `Knocked out` there is left to the explanation below, and
+one still trailing keeps the pick count the `headline` kind answers with, since
+that counts only the player's own remaining picks and can differ from the
+header's count of every game left. Picks sit in a
 grid rather than a wrapping row, so the same game holds the same column down every
 route, and a pick is drawn monospace and given the width of the widest team
 abbreviation and spread a sheet can hold, so a column fits as many as it can and
