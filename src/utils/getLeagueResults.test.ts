@@ -63,7 +63,6 @@ function espnEvent({
     status: {
       type: {
         id: status,
-        detail: "detail",
         shortDetail: status === GameStatus.FINAL ? "Final" : "3rd Quarter",
       },
     },

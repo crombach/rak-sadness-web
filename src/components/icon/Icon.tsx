@@ -99,18 +99,10 @@ export function EmojiEventsOutlinedIcon() {
   );
 }
 
-export function SkullIcon() {
-  return (
-    <Icon name="SkullIcon">
-      <path d="M10.5 15.75h3l-1.5-3-1.5 3Zm-2-2.75q.83 0 1.41-.59T10.5 11q0-.83-.59-1.41T8.5 9q-.83 0-1.41.59T6.5 11q0 .83.59 1.41T8.5 13Zm7 0q.83 0 1.41-.59T17.5 11q0-.83-.59-1.41T15.5 9q-.83 0-1.41.59T13.5 11q0 .83.59 1.41T15.5 13ZM6 22v-4.25q-.98-.43-1.71-1.14t-1.25-1.61q-.51-.9-.78-1.93T2 11q0-3.95 2.8-6.48t7.2-2.53q4.4 0 7.2 2.53t2.8 6.48q0 1.05-.26 2.08t-.78 1.93q-.51.9-1.25 1.61T18 17.75v4.25H15v-2h-2v2h-2v-2h-2v2H6Z" />
-    </Icon>
-  );
-}
-
 /**
- * The skull as an outline, on the same 24 grid as the filled one above. Both are
- * Material Symbols, which is where the shape comes from at all, so the two differ
- * only in the `fill` axis.
+ * A Material Symbol rather than a Material Design icon, rescaled onto the same 24
+ * grid as everything else here, drawn as an outline to sit beside the outlined
+ * trophy above.
  */
 export function SkullOutlinedIcon() {
   return (
