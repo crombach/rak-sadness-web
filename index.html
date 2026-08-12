@@ -4,13 +4,13 @@
     <meta charset="utf-8" />
     <link rel="icon" href="/favicon.ico" />
     <!-- viewport-fit=cover is what makes the safe-area insets non-zero, which
-         Table.scss uses to size the row below the scores. interactive-widget
-         hands a keyboard's height back to the layout viewport, so `dvh` measures
-         what is left rather than the whole screen. Chrome honours it; Safari does
-         not, which is what src/hooks/useViewportInsets.ts is there for. -->
+         Table.scss uses to size the row below the scores. No interactive-widget:
+         handing a keyboard's height back to the layout viewport can leave a small
+         phone wider than it is tall, which reads as landscape and raises the
+         rotate overlay. src/hooks/useViewportInsets.ts measures it instead. -->
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <!-- Matches --rak-primary-500 in src/index.scss, the navbar's own fill. -->
     <meta name="theme-color" content="#375267" />
