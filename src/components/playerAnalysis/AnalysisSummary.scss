@@ -1,5 +1,3 @@
-// Whatever the answer turns out to be, it fades in under a dialog already growing
-// to hold it.
 .analysis {
   // What a pick chip sets its text in by, which a line under one indents by to
   // stand under that text rather than under the chip.
@@ -14,24 +12,12 @@
   // The standing above reads as a title over the body, so it sits the same distance
   // from it as a section title sits from its own contents.
   gap: 8px;
-
-  @media (prefers-reduced-motion: no-preference) {
-    animation: analysis-in 220ms ease both;
-  }
 }
 
 .analysis__body {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-// The fade alone. A transform counts against the scrollable overflow of the body
-// this sits in, so any travel draws a scrollbar over the answer while it runs.
-@keyframes analysis-in {
-  from {
-    opacity: 0;
-  }
 }
 
 .analysis__note {
@@ -50,6 +36,18 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+// The two colors the tables and the search already draw a player's standing in,
+// at the step of each taken far enough down to read on a white surface.
+.analysis__headline {
+  &.--won {
+    color: var(--rak-in-contention-on-light);
+  }
+
+  &.--knocked-out {
+    color: var(--rak-knocked-out-on-light);
+  }
 }
 
 .analysis__standing,

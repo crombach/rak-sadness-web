@@ -36,6 +36,11 @@ const base = {
 };
 
 describe("Standing", () => {
+  /** Whole standing, whose headline is drawn apart from the tail it sits before. */
+  function standingText(): string {
+    return document.querySelector(".analysis__standing")?.textContent ?? "";
+  }
+
   /** One game already settled and one still open, which is a week under way. */
   function player(name: string, total: number, pick: string): PlayerScore {
     const result = (status: PlayerScore["pro"][number]["status"]) => ({
@@ -71,17 +76,13 @@ describe("Standing", () => {
   it("counts the player picked back to the leader", () => {
     render(<Standing scores={scores} player="Alice" />);
 
-    expect(
-      screen.getByText("2 points behind Rak · 1 game still to play"),
-    ).toBeInTheDocument();
+    expect(standingText()).toBe("2 points behind Rak · 1 game still to play");
   });
 
   it("ties the player picked to the lead where they hold it", () => {
     render(<Standing scores={scores} player="Rak" />);
 
-    expect(
-      screen.getByText("Tied for the lead · 1 game still to play"),
-    ).toBeInTheDocument();
+    expect(standingText()).toBe("Tied for the lead · 1 game still to play");
   });
 
   /** The same week with nothing left open, which is a week that has a winner. */
@@ -97,7 +98,7 @@ describe("Standing", () => {
   it("calls the player picked the winner rather than tied for the lead", () => {
     render(<Standing scores={finished(scores)} player="Rak" />);
 
-    expect(screen.getByText("Winner · Week complete")).toBeInTheDocument();
+    expect(standingText()).toBe("Winner · Week complete");
   });
 
   it("ties the player picked for the win where the top is shared", () => {
@@ -106,9 +107,7 @@ describe("Standing", () => {
     };
     render(<Standing scores={finished(tied)} player="Rak" />);
 
-    expect(
-      screen.getByText("Tied for the win · Week complete"),
-    ).toBeInTheDocument();
+    expect(standingText()).toBe("Tied for the win · Week complete");
   });
 
   /** Level on points, told apart by the Monday night tiebreaker. */
@@ -131,15 +130,13 @@ describe("Standing", () => {
     render(<Standing scores={separatedWeek} player="Rak" />);
 
     // Level on points with Bill, so only the tiebreaker makes this one winner.
-    expect(screen.getByText("Winner · Week complete")).toBeInTheDocument();
+    expect(standingText()).toBe("Winner · Week complete");
   });
 
   it("says the player picked lost the tiebreaker rather than tied for the win", () => {
     render(<Standing scores={separatedWeek} player="Bill" />);
 
-    expect(
-      screen.getByText("Loses the tiebreaker to Rak · Week complete"),
-    ).toBeInTheDocument();
+    expect(standingText()).toBe("Loses the tiebreaker to Rak · Week complete");
   });
 
   it("calls a clinched player the winner even where games remain", () => {
@@ -151,9 +148,7 @@ describe("Standing", () => {
       />,
     );
 
-    expect(
-      screen.getByText("Winner · 1 game still to play"),
-    ).toBeInTheDocument();
+    expect(standingText()).toBe("Winner · 1 game still to play");
   });
 
   it("ties a clinched player for the win where the top is shared", () => {
@@ -168,9 +163,7 @@ describe("Standing", () => {
       />,
     );
 
-    expect(
-      screen.getByText("Tied for the win · 1 game still to play"),
-    ).toBeInTheDocument();
+    expect(standingText()).toBe("Tied for the win · 1 game still to play");
   });
 
   it("ignores a clinch that answers for a different player", () => {
@@ -182,24 +175,45 @@ describe("Standing", () => {
       />,
     );
 
-    expect(
-      screen.getByText("Tied for the lead · 1 game still to play"),
-    ).toBeInTheDocument();
+    expect(standingText()).toBe("Tied for the lead · 1 game still to play");
   });
 
-  it("says a knocked out player is knocked out, and leaves the points to the answer", () => {
-    const out: RakMadnessScores = {
-      scores: scores.scores.map((it) =>
-        it.name === "Alice"
+  /** The same week with one player out of it. */
+  function knockedOut(week: RakMadnessScores, name: string): RakMadnessScores {
+    return {
+      scores: week.scores.map((it) =>
+        it.name === name
           ? { ...it, status: { ...it.status, isKnockedOut: true } }
           : it,
       ),
     };
-    render(<Standing scores={out} player="Alice" />);
+  }
 
-    expect(
-      screen.getByText("Knocked out · 1 game still to play"),
-    ).toBeInTheDocument();
+  it("says a knocked out player is knocked out, and leaves the points to the answer", () => {
+    render(<Standing scores={knockedOut(scores, "Alice")} player="Alice" />);
+
+    expect(standingText()).toBe("Knocked out · 1 game still to play");
+  });
+
+  it("colors a win and a knockout, and leaves an open standing plain", () => {
+    const headlineClasses = () =>
+      document.querySelector(".analysis__standing")?.firstElementChild
+        ?.className ?? "";
+
+    const { unmount: unmountWinner } = render(
+      <Standing scores={finished(scores)} player="Rak" />,
+    );
+    expect(headlineClasses()).toContain("--won");
+    unmountWinner();
+
+    const { unmount: unmountKnockedOut } = render(
+      <Standing scores={knockedOut(scores, "Alice")} player="Alice" />,
+    );
+    expect(headlineClasses()).toContain("--knocked-out");
+    unmountKnockedOut();
+
+    render(<Standing scores={scores} player="Alice" />);
+    expect(headlineClasses()).toBe("");
   });
 
   /** One game nobody could be scored on, which is a hole in a week otherwise done. */
@@ -225,9 +239,9 @@ describe("Standing", () => {
     );
 
     // Not the winner: a week with a hole in it has no result to state yet.
-    expect(
-      screen.getByText("Tied for the lead · 1 game could not be scored"),
-    ).toBeInTheDocument();
+    expect(standingText()).toBe(
+      "Tied for the lead · 1 game could not be scored",
+    );
   });
 
   it("counts a blank cell as the player's own, not a hole in the week", () => {
@@ -249,7 +263,7 @@ describe("Standing", () => {
     };
     render(<Standing scores={blank} player="Rak" />);
 
-    expect(screen.getByText("Winner · Week complete")).toBeInTheDocument();
+    expect(standingText()).toBe("Winner · Week complete");
   });
 
   it("says no game has been played rather than ranking anyone", () => {
@@ -262,9 +276,7 @@ describe("Standing", () => {
     };
     render(<Standing scores={fresh} player="Rak" />);
 
-    expect(
-      screen.getByText("No finished games · 2 games still to play"),
-    ).toBeInTheDocument();
+    expect(standingText()).toBe("No finished games · 2 games still to play");
   });
 });
 

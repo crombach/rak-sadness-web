@@ -63,17 +63,23 @@ function headline(
   isOver: boolean,
   chosen: PlayerScore,
   isClinched: boolean,
-): string {
-  if (!hasKickedOff(players)) return "No finished games";
+): { text: string; tone?: "won" | "knocked-out" } {
+  if (!hasKickedOff(players)) return { text: "No finished games" };
   const [leader] = players;
-  if (chosen.status.isKnockedOut) return "Knocked out";
+  if (chosen.status.isKnockedOut)
+    return { text: "Knocked out", tone: "knocked-out" };
   const behind = leader.score.total - chosen.score.total;
-  if (behind > 0) return `${plural(behind, "point")} behind ${leader.name}`;
-  if (!isOver && !isClinched) return "Tied for the lead";
+  if (behind > 0)
+    return { text: `${plural(behind, "point")} behind ${leader.name}` };
+  if (!isOver && !isClinched) return { text: "Tied for the lead" };
   const won = winners(players);
   // Level on points and still beaten, which only the tiebreakers can do.
-  if (!won.includes(chosen)) return `Loses the tiebreaker to ${leader.name}`;
-  return won.length > 1 ? "Tied for the win" : "Winner";
+  if (!won.includes(chosen))
+    return { text: `Loses the tiebreaker to ${leader.name}` };
+  return {
+    text: won.length > 1 ? "Tied for the win" : "Winner",
+    tone: "won",
+  };
 }
 
 /**
@@ -106,9 +112,15 @@ export function Standing({
   const unscoreable = unscoreableGames(players).length;
   const isClinched = result?.kind === "clinched" && result.player === player;
   const isOver = isWeekOver(players);
+  const { text, tone } = headline(players, isOver, chosen, isClinched);
   return (
     <p className="analysis__standing">
-      {headline(players, isOver, chosen, isClinched)}
+      {/* Held apart from the tail, which says how much of the week is behind the
+          standing rather than what the standing is, so only the standing is
+          colored by it. */}
+      <span className={tone != null ? `analysis__headline --${tone}` : ""}>
+        {text}
+      </span>
       {" · "}
       {remaining > 0
         ? `${plural(remaining, "game")} still to play`
@@ -119,7 +131,6 @@ export function Standing({
   );
 }
 
-/** Whatever the answer turns out to be, it plays in under the same wrapper. */
 function Answer({ children }: { children: ReactNode }) {
   return <div className="analysis">{children}</div>;
 }
@@ -433,8 +444,7 @@ function Body({
  * The whole answer to a player: where they stand, then what that leaves them.
  *
  * The standing is drawn here rather than beside this, because there is one headline
- * slot and one component has to own it. Held in the same wrapper as the body, so
- * both play in on the same beat rather than the headline arriving cold.
+ * slot and one component has to own it.
  */
 export default function AnalysisSummary({
   scores,

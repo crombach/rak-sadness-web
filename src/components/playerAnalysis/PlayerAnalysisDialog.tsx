@@ -229,10 +229,8 @@ export default function PlayerAnalysisDialog({
             <div className="player-analysis__content" aria-live="polite">
               {/* The standing heads the answer and is read off the scores, so it
                   says where the player picked stands before their routes have been
-                  worked out. Keyed on the player, so the answer to a new one plays
-                  in rather than replacing the last one in place. */}
+                  worked out. */}
               <AnalysisSummary
-                key={shown?.name}
                 scores={scores}
                 player={player?.name}
                 result={shown?.paths}
