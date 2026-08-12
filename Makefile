@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help setup build run test check lint typecheck format
+.PHONY: help setup build run test check lint lint-docs typecheck format
 
 # Override to run a second dev server alongside the first, e.g. make run PORT=3001
 PORT ?= 3000
@@ -22,11 +22,17 @@ run: ## Start the Vite dev server (PORT=3000 by default)
 test: ## Run the Vitest suite once (no watch mode)
 	npm test
 
-check: lint typecheck test ## Lint, typecheck, test, and format-check everything
+check: lint lint-docs typecheck test ## Lint, typecheck, test, and format-check everything
 	npm run prettier
 
 lint: ## ESLint over the repo
 	npm run lint
+
+# Length only. The structure and duplication checks want a CLAUDE.md in public/,
+# which stays out on purpose: that directory is served to the web.
+lint-docs: ## Hold every CLAUDE.md to its word ceiling
+	@command -v python3 >/dev/null || { echo "Missing python3"; exit 1; }
+	.claude/scripts/lint_claude_md.py length .
 
 typecheck: ## tsc --noEmit for src/ and functions/ separately
 	npm run typecheck

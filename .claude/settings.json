@@ -50,7 +50,8 @@
       "Bash(npm -v)",
       "Bash(npm audit)",
       "Bash(git *)",
-      "Bash(gh *)"
+      "Bash(gh *)",
+      "Bash(.claude/scripts/lint_claude_md.py *)"
     ],
     "ask": ["Bash(wrangler *)", "Bash(npx wrangler *)"],
     "deny": [

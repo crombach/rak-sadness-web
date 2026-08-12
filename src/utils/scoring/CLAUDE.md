@@ -1,49 +1,19 @@
 # scoring
 
-The picks-to-scoreboard pipeline, one concern per file. `getPlayerScores` is the only
-entry point that turns a workbook into a week's results; everything else is a step it
-sequences. Three more read those results back for the UI: `getPlayerAnalysis`,
-`isWeekOver`, and `unscoreableGames`.
+The picks-to-scoreboard pipeline, one concern per file. `getPlayerScores` sequences
+the rest. `getPlayerAnalysis`, `isWeekOver`, `unscoreableGames` read results back.
 
-- `parsePicksWorkbook`: xlsx buffer to rows, column keys, and per-game matchups.
-  Async because it imports `xlsx-js-style` on demand, which is over half the bundle.
-  Reads its column keys from the header row, not the first player's row, because
-  `sheet_to_json` drops a blank cell from the object it builds
-- `parsePick`: one cell to a team abbreviation and a spread. Anchors the spread to
-  the end of the cell, so an abbreviation with a hyphen (`M-OH`) survives
-- `validateSpreads`: the games whose rows contradict each other about the spread
-- `getPickResults`: scores picks against game results, plus `getStatus`. Exports
-  `MISSING_PICK`, the explanation header a blank cell carries, which is how
-  `unscoreableGames` tells one from a game the app could not score
-- `gameColumns`: `LEAGUES`, the order a week's games are walked in, and `gameLabels`,
-  the `C1`/`P11` column labels the picks table gives them
-- `getTiebreakerScore`: the Monday night game's real total, once it is final
+- `parsePicksWorkbook`: xlsx buffer to rows, keys, matchups
+- `parsePick`: one cell to a team and a spread
+- `validateSpreads`: rows that disagree on a spread
+- `getPickResults`: picks scored, plus `getStatus`
+- `gameColumns`: `LEAGUES` and `gameLabels`
+- `getTiebreakerScore`: the Monday night total
 - `scorePlayers`: per-player totals, sorted
-- `comparePlayerScores`: the rank order. `comparePlayerScoresOnMerit` is every
-  tiebreaker tier without the name that settles a dead heat, since two players the
-  tiers leave tied have both won the week
-- `isWeekDecided`: whether every game and the tiebreaker are settled, which is when
-  whoever the knockouts left standing has won
-- `remainingGames`: the open games a column at a time, each row's cell parsed. Read
-  a column at a time because a blank cell scores "error" rather than "incomplete",
-  so one row alone would drop a game that row's player skipped. Both halves of the
-  question below read it
-- `unscoreableGames`: the games nobody can be scored on, by the picks table's own
-  label. A contradicted spread or a game the results do not hold is a hole in the
-  week, so a week carrying one is not finished however many of its games are. A
-  blank cell is not one of those, and every week has some
-- `isWeekOver`: whether a week has a result to state, which is nothing left to play
-  and no such hole. The one place that question is answered, so the analysis header
-  and the answer under it cannot disagree about it. Not `isWeekDecided`, which asks
-  whether the knockouts have settled who won
+- `comparePlayerScores`: rank order, and on merit
+- `isWeekDecided`: whether the knockouts settled it
+- `remainingGames`: the open games
+- `unscoreableGames`: games nobody can be scored on
+- `isWeekOver`: whether the week has a result
 - `applyKnockouts`: who can still win, and why not
-- `getPlayerAnalysis`: the other half of `applyKnockouts`, for any player named. One
-  already knocked out reads back the reason they carry, and a decided week is
-  answered from `isWeekDecided` rather than searched, since the knockouts have
-  already settled it and the search reads the lower tiers in an order of its own.
-  For a player still standing in a live week, once ten or fewer games are left, it
-  walks every way the contested ones can fall, and reduces the winning ones to the
-  games that must go right, the pool the rest come from, and the Monday night totals
-  that settle a dead heat on points. Where they do not reduce to a pool it lists the
-  eight routes asking least of the player and counts the rest. Above ten games it gives
-  a floor from a closed form instead, since the search doubles per game
+- `getPlayerAnalysis`: what a named player must do
