@@ -115,10 +115,9 @@ describe("PlayerAnalysisDialog", () => {
     expect(
       screen.getByRole("progressbar", { name: "Working out the paths" }),
     ).toHaveAttribute("aria-busy", "true");
-    expect(document.querySelector(".player-analysis__content")).toHaveAttribute(
-      "aria-live",
-      "polite",
-    );
+    expect(
+      document.querySelector(".player-analysis__body [aria-live]"),
+    ).toHaveAttribute("aria-live", "polite");
 
     // The search runs a frame after the bar that says it is under way.
     const mustWin = await screen.findByRole("heading", { name: "Must win" });
@@ -143,6 +142,40 @@ describe("PlayerAnalysisDialog", () => {
     expect(
       await screen.findByText("Knocked out on Total Score by Alice."),
     ).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Player" })).toHaveValue(
+      "Bobby",
+    );
+
+    // Closing takes that name away again. Nothing here goes with it, since the
+    // answer and the search are still on screen for as long as the fade runs.
+    rerender(
+      <PlayerAnalysisDialog
+        open
+        onOpenChange={() => undefined}
+        scores={scores}
+      />,
+    );
+
+    expect(screen.getByRole("combobox", { name: "Player" })).toHaveValue(
+      "Bobby",
+    );
+    expect(
+      screen.getByText("Knocked out on Total Score by Alice."),
+    ).toBeInTheDocument();
+
+    // Opened on that same player twice running, with something half typed into the
+    // search in between. The name arriving is still a change, so it wins.
+    await user.clear(screen.getByRole("combobox", { name: "Player" }));
+    await user.type(screen.getByRole("combobox", { name: "Player" }), "Ali");
+    rerender(
+      <PlayerAnalysisDialog
+        open
+        onOpenChange={() => undefined}
+        player="Bobby"
+        scores={scores}
+      />,
+    );
+
     expect(screen.getByRole("combobox", { name: "Player" })).toHaveValue(
       "Bobby",
     );

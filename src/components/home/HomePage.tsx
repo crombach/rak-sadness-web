@@ -177,7 +177,7 @@ export default function HomePage() {
               Use Local Spreadsheet
             </Button>
             <Button
-              className="home__button --scores"
+              className="home__button"
               busy={isBusy}
               disabled={hasNoScoresYet}
               color="success"
@@ -188,7 +188,7 @@ export default function HomePage() {
               View Results
             </Button>
             <Button
-              className="home__button --export"
+              className="home__button"
               busy={isBusy || isExportLoading}
               disabled={hasNoScoresYet || isExportLoading}
               color="danger"

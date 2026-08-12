@@ -132,7 +132,6 @@
 .player-analysis__positioner {
   // Above the dialog it opens inside of, which the backdrop already sits under.
   z-index: calc(var(--rak-z-modal) + 2);
-  max-height: var(--available-height);
 }
 
 .player-analysis__list {
@@ -197,14 +196,6 @@
   // The room a scrollbar needs, held whether or not there is one, so an answer
   // long enough to scroll does not narrow the one that was on screen before it.
   scrollbar-gutter: stable;
-}
-
-// The standing reads as a title over what follows, so it sits the same distance
-// from it as a section title sits from its own contents.
-.player-analysis__content {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
 // A bar on the rule above it while the next answer is worked out, in place of

@@ -117,8 +117,8 @@ export default function PlayerAnalysisDialog({
   // dialog emptying and filling again. Only a rescore takes it away.
   const shown = found?.scores === scores ? found : undefined;
   const isSearching = player != null && shown?.name !== player.name;
-  // The same question `Standing` asks, off the same scores and the same predicate,
-  // so the header and the answer under it can never disagree about the week.
+  // Asked off the same scores and the same predicate the standing uses, so the two
+  // can never disagree about whether the week is done.
   const isOver = isWeekOver(scores?.scores ?? []);
 
   return (
@@ -226,10 +226,7 @@ export default function PlayerAnalysisDialog({
             )}
             {/* Polite, so a new answer replacing the last one is read once the
                 screen reader is free rather than cutting off what it is saying. */}
-            <div className="player-analysis__content" aria-live="polite">
-              {/* The standing heads the answer and is read off the scores, so it
-                  says where the player picked stands before their routes have been
-                  worked out. */}
+            <div aria-live="polite">
               <AnalysisSummary
                 scores={scores}
                 player={player?.name}

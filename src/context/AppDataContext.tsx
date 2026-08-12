@@ -91,9 +91,9 @@ export function AppDataContextProvider({
 
   const picksSeasons = usePicksSeasons();
   const currentSeason = useCurrentSeason();
-  // The newest season with picks, unless the URL or the picker named one. ESPN
-  // moves on to the season about to start as soon as the last one ends, and that
-  // season has nothing to show, so it is offered below rather than opened on.
+  // The newest season with picks, unless the URL or the picker named one. Never
+  // the season ESPN calls current between the Super Bowl and the opener: nothing
+  // of it has been played, so `useCurrentSeason` withholds it too.
   const requestedSeason = selectedSeason ?? picksSeasons.seasons?.[0];
   const leagueWeeks = useLeagueWeeks(
     route.week,

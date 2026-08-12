@@ -196,24 +196,19 @@ describe("Standing", () => {
   });
 
   it("colors a win and a knockout, and leaves an open standing plain", () => {
-    const headlineClasses = () =>
-      document.querySelector(".analysis__standing")?.firstElementChild
-        ?.className ?? "";
-
-    const { unmount: unmountWinner } = render(
+    const { rerender } = render(
       <Standing scores={finished(scores)} player="Rak" />,
     );
-    expect(headlineClasses()).toContain("--won");
-    unmountWinner();
+    expect(screen.getByText("Winner")).toHaveClass("--won");
 
-    const { unmount: unmountKnockedOut } = render(
-      <Standing scores={knockedOut(scores, "Alice")} player="Alice" />,
+    rerender(<Standing scores={knockedOut(scores, "Alice")} player="Alice" />);
+    expect(screen.getByText("Knocked out")).toHaveClass("--knocked-out");
+
+    rerender(<Standing scores={scores} player="Rak" />);
+    expect(screen.getByText("Tied for the lead")).not.toHaveClass(
+      "--won",
+      "--knocked-out",
     );
-    expect(headlineClasses()).toContain("--knocked-out");
-    unmountKnockedOut();
-
-    render(<Standing scores={scores} player="Alice" />);
-    expect(headlineClasses()).toBe("");
   });
 
   /** One game nobody could be scored on, which is a hole in a week otherwise done. */

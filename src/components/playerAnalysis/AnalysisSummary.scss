@@ -38,8 +38,8 @@
   gap: 8px;
 }
 
-// The two colors the tables and the search already draw a player's standing in,
-// at the step of each taken far enough down to read on a white surface.
+// A win and a knockout, in the hues the tables and the search already mark those
+// players with.
 .analysis__headline {
   &.--won {
     color: var(--rak-in-contention-on-light);

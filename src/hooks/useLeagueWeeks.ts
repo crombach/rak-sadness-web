@@ -96,11 +96,11 @@ export default function useLeagueWeeks(
   const isWeekInfoLoading =
     !enabled || isLookupPending || (season != null && season !== seasonYear);
 
-  // Newest first, and never a week the season has not reached. Held apart from
-  // the slice, which reads a missing end as the whole array.
+  // Newest first, and never a week the season has not reached. A season with no
+  // week behind it offers none, which is what the 0 stands for: `slice` would read
+  // a missing end as the whole array.
   const selectableWeeks = useMemo(
-    () =>
-      currentWeek == null ? [] : (weeks ?? []).slice(0, currentWeek).reverse(),
+    () => (weeks ?? []).slice(0, currentWeek ?? 0).reverse(),
     [weeks, currentWeek],
   );
 

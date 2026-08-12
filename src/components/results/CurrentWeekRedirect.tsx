@@ -23,17 +23,17 @@ export default function CurrentWeekRedirect({ view }: { view: ScoresView }) {
   if (!isWeekInfoLoading) {
     // The schedule lookup failed and already said so in its own toast, or the
     // season has no week to show. Home, as the week route guard does for both.
+    // `seasonYear` is set alongside the weeks, so it names the season those weeks
+    // describe by the time there are any.
     if (weeks == null || currentWeek == null) {
       return <Navigate to="/" replace />;
     }
-    if (seasonYear != null) {
-      return (
-        <Navigate
-          to={`/${seasonYear}/${currentWeek}/${view.toLowerCase()}`}
-          replace
-        />
-      );
-    }
+    return (
+      <Navigate
+        to={`/${seasonYear}/${currentWeek}/${view.toLowerCase()}`}
+        replace
+      />
+    );
   }
 
   return <ResultsFrame view={view} />;

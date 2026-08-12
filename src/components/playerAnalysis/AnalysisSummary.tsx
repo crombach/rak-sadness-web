@@ -63,11 +63,11 @@ function headline(
   isOver: boolean,
   chosen: PlayerScore,
   isClinched: boolean,
-): { text: string; tone?: "won" | "knocked-out" } {
+): { text: string; tone?: "--won" | "--knocked-out" } {
   if (!hasKickedOff(players)) return { text: "No finished games" };
   const [leader] = players;
   if (chosen.status.isKnockedOut)
-    return { text: "Knocked out", tone: "knocked-out" };
+    return { text: "Knocked out", tone: "--knocked-out" };
   const behind = leader.score.total - chosen.score.total;
   if (behind > 0)
     return { text: `${plural(behind, "point")} behind ${leader.name}` };
@@ -78,7 +78,7 @@ function headline(
     return { text: `Loses the tiebreaker to ${leader.name}` };
   return {
     text: won.length > 1 ? "Tied for the win" : "Winner",
-    tone: "won",
+    tone: "--won",
   };
 }
 
@@ -86,9 +86,9 @@ function headline(
  * Where the player picked stands, which the scores already say. Read straight off
  * them, so it is on screen while their routes are still being worked out.
  *
- * `result` is the analysis once it lands, read only for the "clinched" word: the
- * header and the answer below it are worked out from the same fact this way, so
- * neither has to guess what the other already said. Trusted only where it answers
+ * `result` is the analysis once it lands, read only for the "clinched" word: this
+ * standing and the answer below it are worked out from the same fact, so neither
+ * has to guess what the other already said. Trusted only where it answers
  * for the same player named here, since the dialog keeps the last answer on
  * screen while the next one is worked out.
  */
@@ -118,9 +118,7 @@ export function Standing({
       {/* Held apart from the tail, which says how much of the week is behind the
           standing rather than what the standing is, so only the standing is
           colored by it. */}
-      <span className={tone != null ? `analysis__headline --${tone}` : ""}>
-        {text}
-      </span>
+      <span className={`analysis__headline ${tone ?? ""}`}>{text}</span>
       {" · "}
       {remaining > 0
         ? `${plural(remaining, "game")} still to play`
@@ -129,10 +127,6 @@ export function Standing({
           : "Week complete"}
     </p>
   );
-}
-
-function Answer({ children }: { children: ReactNode }) {
-  return <div className="analysis">{children}</div>;
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -351,32 +345,26 @@ function Body({
   week?: number;
 }) {
   if (result.kind === "eliminated") {
+    // The explanation names who knocked them out and by how much, so it says they
+    // cannot win on its own. Only a player without one needs telling.
     return (
-      <>
-        {/* The explanation names who knocked them out and by how much, so it says
-            they cannot win on its own. Only a player without one needs telling. */}
-        <Message
-          lines={[
-            result.explanation ?? `${result.player} cannot win this week.`,
-          ]}
-        />
-      </>
+      <Message
+        lines={[result.explanation ?? `${result.player} cannot win this week.`]}
+      />
     );
   }
 
   if (result.kind === "clinched") {
+    // The standing calls a clinched player the winner without saying of what, so
+    // this names the week. Only a week still running needs the line under it,
+    // since a week with nothing left to play cannot be undone.
     return (
-      <>
-        {/* The standing calls a clinched player the winner without saying of what,
-            so this names the week. Only a week still running needs the line
-            under it, since a week with nothing left to play cannot be undone. */}
-        <Message
-          lines={[
-            `${result.player} has won ${week != null ? `week ${week}` : "the week"}.`,
-            isOver ? undefined : "Nothing still to be played can take it away.",
-          ]}
-        />
-      </>
+      <Message
+        lines={[
+          `${result.player} has won ${week != null ? `week ${week}` : "the week"}.`,
+          isOver ? undefined : "Nothing still to be played can take it away.",
+        ]}
+      />
     );
   }
 
@@ -443,8 +431,9 @@ function Body({
 /**
  * The whole answer to a player: where they stand, then what that leaves them.
  *
- * The standing is drawn here rather than beside this, because there is one headline
- * slot and one component has to own it.
+ * The standing belongs to this component rather than to the dialog around it,
+ * because there is one headline slot and two components rendering it can put two
+ * headlines on screen at once.
  */
 export default function AnalysisSummary({
   scores,
@@ -467,13 +456,13 @@ export default function AnalysisSummary({
   if (player == null && result == null) return null;
 
   return (
-    <Answer>
+    <div className="analysis">
       <Standing scores={scores} player={player} result={result} />
       {result != null && (
         <div className="analysis__body">
           <Body result={result} isOver={isOver} week={week} />
         </div>
       )}
-    </Answer>
+    </div>
   );
 }
