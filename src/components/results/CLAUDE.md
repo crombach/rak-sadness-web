@@ -13,7 +13,8 @@ the app has, fed the `scores` `ResultsLayout` passes down. One dialog toggled ra
 than one mounted per opening, because Base UI ties its scroll lock and focus guards
 to a dialog being open.
 
-The navbar opens it on nobody. A player's name opens it on them, through the
-`PlayerAnalysisContextProvider` wrapped around the tables, since they arrive through
-a routed `Outlet` and cannot be handed a callback on the way. The name it was opened
-on is cleared as it closes, so the same name again is a change the dialog can see.
+A player's name is the only way in, through the `PlayerAnalysisContextProvider`
+wrapped around the tables, since they arrive through a routed `Outlet` and cannot be
+handed a callback on the way. So the name held is what says the dialog is open, and
+it is cleared as the dialog closes, which makes the same name again a change the
+dialog can see.

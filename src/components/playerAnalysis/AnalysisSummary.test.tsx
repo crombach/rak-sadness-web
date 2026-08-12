@@ -267,6 +267,19 @@ describe("AnalysisSummary", () => {
     expect(screen.queryByText(/takes it outright/)).not.toBeInTheDocument();
   });
 
+  it("names the player standing where nothing takes the week outright", () => {
+    const result: PlayerAnalysis = {
+      ...base,
+      mustWin: [{ label: "P1", pick: "KC -3" }],
+      mondayNight: { kind: "range", max: 45, contenders: ["Rak"] },
+    };
+    render(<AnalysisSummary result={result} />);
+
+    expect(
+      screen.getByText("Alice is still live to win the week. What it takes:"),
+    ).toBeInTheDocument();
+  });
+
   it("names the team that has to miss in a game the player left blank", () => {
     const result: PlayerAnalysis = {
       ...base,

@@ -7,8 +7,8 @@ import "./ScoresNavbar.scss";
 export type ScoresView = "Scoreboard" | "Picks";
 
 /**
- * How long the live-week buttons take to fade and narrow away. Held here because
- * they have to stay mounted for exactly that long. The stylesheet reads it back as
+ * How long the refresh button takes to fade and narrow away. Held here because it
+ * has to stay mounted for exactly that long. The stylesheet reads it back as
  * `--collapse-duration`, so the two cannot drift apart.
  */
 export const COLLAPSE_DURATION_MS = 300;

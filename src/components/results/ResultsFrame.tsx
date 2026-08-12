@@ -1,4 +1,4 @@
-import { PropsWithChildren, useCallback, useState } from "react";
+import { PropsWithChildren, useState } from "react";
 import { useNavigate } from "react-router";
 import { useIsWeekDecided } from "../../context/AppDataContext";
 import { PlayerAnalysisContextProvider } from "../../context/PlayerAnalysisContext";
@@ -43,13 +43,8 @@ export default function ResultsFrame({
   // Once every game is final there is nothing left to fetch, so the refresh button
   // and the divider beside it go rather than sit there doing nothing.
   const isWeekDecided = useIsWeekDecided();
-  const [isAnalysisOpen, setAnalysisOpen] = useState(false);
+  // A name is the only way in, so the dialog is open exactly while one is held.
   const [analysisPlayer, setAnalysisPlayer] = useState<string>();
-
-  const showPlayerAnalysis = useCallback((playerName: string) => {
-    setAnalysisPlayer(playerName);
-    setAnalysisOpen(true);
-  }, []);
 
   return (
     <PageLayout
@@ -73,16 +68,15 @@ export default function ResultsFrame({
       }
     >
       <div className={`home__scores ${getClasses({ "--loading": !isReady })}`}>
-        <PlayerAnalysisContextProvider showPlayerAnalysis={showPlayerAnalysis}>
+        <PlayerAnalysisContextProvider showPlayerAnalysis={setAnalysisPlayer}>
           {isReady ? children : <SkeletonTable view={view} />}
         </PlayerAnalysisContextProvider>
       </div>
       <PlayerAnalysisDialog
-        open={isAnalysisOpen}
+        open={analysisPlayer != null}
         // Cleared on the way out, so naming the same player again is a change the
         // dialog can see.
         onOpenChange={(open) => {
-          setAnalysisOpen(open);
           if (!open) setAnalysisPlayer(undefined);
         }}
         player={analysisPlayer}

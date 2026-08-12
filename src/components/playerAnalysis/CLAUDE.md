@@ -1,7 +1,7 @@
 # playerAnalysis
 
 Where a player stands in a week and what they still have to do to win it, opened
-from the navbar's gold trophy button or from a player's name in either table.
+from a player's name in either table.
 
 `PlayerAnalysisDialog`: a Base UI dialog over a Base UI combobox, with
 `AnalysisSummary` under it. `playersMatching` offers every player the letters typed

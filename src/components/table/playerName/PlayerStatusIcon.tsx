@@ -19,10 +19,15 @@ export default function PlayerStatusIcon({
 }) {
   const isWeekDecided = useIsWeekDecided();
 
-  function icon() {
-    if (isKnockedOut) return <SkullIcon />;
-    return isWeekDecided ? <EmojiEventsIcon /> : <SentimentVerySatisfiedIcon />;
-  }
-
-  return <span className="player-status-icon">{icon()}</span>;
+  return (
+    <span className="player-status-icon">
+      {isKnockedOut ? (
+        <SkullIcon />
+      ) : isWeekDecided ? (
+        <EmojiEventsIcon />
+      ) : (
+        <SentimentVerySatisfiedIcon />
+      )}
+    </span>
+  );
 }

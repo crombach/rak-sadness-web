@@ -3,7 +3,7 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  // Both from `Table.scss`, so the wireframe can leave the same room for an icon
+  // From `src/index.scss`, so the wireframe can leave the same room for an icon
   // it never draws.
   gap: var(--rak-player-icon-gap);
 
