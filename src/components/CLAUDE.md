@@ -6,7 +6,9 @@ Route components live in `home/` and `results/`; the routes themselves are in
 ## Subdirectories
 
 - [`button/`](button/CLAUDE.md) — shared button, Base UI's primitive
+- [`dialog/`](dialog/CLAUDE.md) — the shared dialog shell and its search
 - [`footer/`](footer/CLAUDE.md) — bottom links bar
+- [`gameStatus/`](gameStatus/CLAUDE.md) — how one game in the week is going
 - [`home/`](home/CLAUDE.md) — home route: pickers, upload, export
 - [`icon/`](icon/CLAUDE.md) — SVG icons inlined from Material Design
 - [`navbar/`](navbar/CLAUDE.md) — top nav bar, view switch, logo button

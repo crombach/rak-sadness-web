@@ -12,6 +12,6 @@
 
 ## Subdirectories
 
-- [`picks/`](picks/CLAUDE.md) — picks table, per-pick toasts
+- [`picks/`](picks/CLAUDE.md) — picks table, a cell opening its game
 - [`playerName/`](playerName/CLAUDE.md) — name cell, shared status icon
 - [`scores/`](scores/CLAUDE.md) — ranked score table, default view

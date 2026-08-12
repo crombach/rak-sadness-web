@@ -8,6 +8,14 @@ function team(abbreviation: string) {
   return { name: abbreviation, abbreviation };
 }
 
+/** A side with nothing but its name and its score, which is all scoring reads. */
+function side(abbreviation: string, score: number) {
+  return { team: team(abbreviation), score, linescores: [] };
+}
+
+/** Every fixture game is the only one in its test, so they can share an id. */
+const EVENT_ID = "1";
+
 /**
  * A completed game. `by` is the winner's margin, which is what the spread is
  * compared against, so it is derived from the scores rather than passed in.
@@ -28,13 +36,14 @@ export function finalGame({
   const isTie = homeScore === awayScore;
   const homeWon = homeScore > awayScore;
   return {
+    id: EVENT_ID,
     name: `${away} at ${home}`,
     shortName: `${away} @ ${home}`,
     date: GAME_DATE,
     status: GameStatus.FINAL,
     detailMessage: "Final",
-    home: { team: homeTeam, score: homeScore },
-    away: { team: awayTeam, score: awayScore },
+    home: { team: homeTeam, score: homeScore, linescores: [] },
+    away: { team: awayTeam, score: awayScore, linescores: [] },
     possession: NO_POSSESSION,
     winner: {
       team: isTie ? null : homeWon ? homeTeam : awayTeam,
@@ -59,13 +68,14 @@ export function upcomingGame({
   away: string;
 }): LeagueResult {
   return {
+    id: EVENT_ID,
     name: `${away} at ${home}`,
     shortName: `${away} @ ${home}`,
     date: GAME_DATE,
     status: GameStatus.UPCOMING,
     detailMessage: "Sun, October 6th",
-    home: { team: team(home), score: 0 },
-    away: { team: team(away), score: 0 },
+    home: side(home, 0),
+    away: side(away, 0),
     possession: NO_POSSESSION,
     winner: { team: null, homeAway: null, by: 0 },
     loser: { team: null, homeAway: null, by: 0 },

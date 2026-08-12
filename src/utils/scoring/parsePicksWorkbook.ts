@@ -12,6 +12,12 @@ export type ParsedPicks = {
   tiebreakerGameKey?: string;
   collegeMatchups: Array<Set<string>>;
   proMatchups: Array<Set<string>>;
+  /**
+   * Every column's matchup, by workbook key, so a column can be paired with the
+   * game it describes. The two lists above leave out a column nobody picked,
+   * which puts them out of step with the keys.
+   */
+  matchupsByGameKey: Map<string, Set<string>>;
   /** Game key to the disagreement, for the games that cannot be scored. */
   inconsistentSpreadGames: Map<string, string>;
 };
@@ -98,6 +104,7 @@ export default async function parsePicksWorkbook(
     tiebreakerGameKey,
     collegeMatchups,
     proMatchups,
+    matchupsByGameKey: new Map(Object.entries(matchups)),
     inconsistentSpreadGames,
   };
 }

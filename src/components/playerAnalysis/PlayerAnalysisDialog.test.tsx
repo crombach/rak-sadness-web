@@ -115,9 +115,10 @@ describe("PlayerAnalysisDialog", () => {
     expect(
       screen.getByRole("progressbar", { name: "Working out the paths" }),
     ).toHaveAttribute("aria-busy", "true");
-    expect(
-      document.querySelector(".player-analysis__body [aria-live]"),
-    ).toHaveAttribute("aria-live", "polite");
+    expect(document.querySelector(".dialog__body [aria-live]")).toHaveAttribute(
+      "aria-live",
+      "polite",
+    );
 
     // The search runs a frame after the bar that says it is under way.
     const mustWin = await screen.findByRole("heading", { name: "Must win" });

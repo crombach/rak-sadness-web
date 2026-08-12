@@ -7,8 +7,9 @@ and `/picks` by redirecting to the latest week worth showing.
   selected week in step, and holds the navbar.
 - `ScoreboardRoute` and `PicksRoute`: one table each, from context.
 - `ResultsFrame`: the page and wireframe both `ResultsLayout` and
-  `CurrentWeekRedirect` render into. Holds the app's one `PlayerAnalysisDialog` and
-  the `PlayerAnalysisContextProvider` around the tables, and reads
-  `useIsWeekDecided` for `ScoresNavbar`'s `isWeekLive`.
+  `CurrentWeekRedirect` render into. Holds the app's `PlayerAnalysisDialog` and
+  `GameStatusDialog` and both providers around the tables, and reads
+  `useIsWeekDecided` for `ScoresNavbar`'s `isWeekLive`. What the tables opened is one
+  piece of state, so two dialogs cannot both be up claiming the viewport insets.
 - `ResultsFrame.scss`: colors the scores area so the gap below reads as part of the
   table.

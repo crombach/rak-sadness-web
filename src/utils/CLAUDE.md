@@ -1,6 +1,7 @@
 # src/utils
 
-- `getLeagueInfo` / `getLeagueResults`: ESPN API fetch, calendar and week mapping
+- `getLeagueInfo` / `getLeagueResults`: ESPN API fetch, calendar and week mapping,
+  plus `getGameResult`, one game by event id
 - `getRegularSeasonWeekCount`: a season's week count, cached per league and season
 - `buildSpreadsheetBuffer`: the xlsx-js-style workbook export and its content type
 - `pickStatusFill`: pick colors for the export

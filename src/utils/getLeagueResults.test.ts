@@ -1,7 +1,7 @@
 import { Mock, MockedFunction } from "vitest";
-import { EspnEvent, GameStatus, HomeAway } from "../types/ESPN";
+import { EspnCompetitor, EspnEvent, GameStatus, HomeAway } from "../types/ESPN";
 import { League, WeekInfo } from "../types/League";
-import { getLeagueResults } from "./getLeagueResults";
+import { getGameResult, getLeagueResults } from "./getLeagueResults";
 
 vi.mock("./getLeagueInfo");
 
@@ -24,10 +24,10 @@ function competitor(
   abbreviation: string,
   homeAway: HomeAway,
   score: number,
-  id = abbreviation,
+  extras: Partial<EspnCompetitor> = {},
 ) {
   return {
-    id,
+    id: abbreviation,
     homeAway,
     winner: false,
     team: {
@@ -36,6 +36,7 @@ function competitor(
       abbreviation,
     },
     score: String(score),
+    ...extras,
   };
 }
 
@@ -47,6 +48,11 @@ function espnEvent({
   status = GameStatus.FINAL,
   date = GAME_DATE,
   situation,
+  id = "1",
+  homeExtras,
+  awayExtras,
+  venue,
+  links,
 }: {
   home: string;
   away: string;
@@ -55,11 +61,18 @@ function espnEvent({
   status?: GameStatus;
   date?: string;
   situation?: { downDistanceText?: string; possession: string };
+  id?: string;
+  homeExtras?: Partial<EspnCompetitor>;
+  awayExtras?: Partial<EspnCompetitor>;
+  venue?: EspnEvent["competitions"][0]["venue"];
+  links?: EspnEvent["links"];
 }): EspnEvent {
   return {
+    id,
     name: `${away} Team at ${home} Team`,
     shortName: `${away} @ ${home}`,
     date,
+    links,
     status: {
       type: {
         id: status,
@@ -69,11 +82,12 @@ function espnEvent({
     competitions: [
       {
         competitors: [
-          competitor(home, HomeAway.HOME, homeScore),
-          competitor(away, HomeAway.AWAY, awayScore),
+          competitor(home, HomeAway.HOME, homeScore, homeExtras),
+          competitor(away, HomeAway.AWAY, awayScore, awayExtras),
         ],
         situation: situation as never,
         date,
+        venue,
       },
     ],
   };
@@ -271,6 +285,98 @@ describe("getLeagueResults, mapping", () => {
       downDistanceText: "2nd & 7",
       homeAway: HomeAway.AWAY,
     });
+  });
+
+  it("carries the event id, each side's record, and the quarter scores", async () => {
+    mockFetch([
+      espnEvent({
+        home: "BUF",
+        away: "KC",
+        id: "401",
+        homeExtras: {
+          records: [
+            { type: "home", summary: "2-0" },
+            { type: "total", summary: "4-1" },
+          ],
+          linescores: [
+            { value: 7 },
+            { value: 10 },
+            { value: 3 },
+            { value: 10 },
+          ],
+        },
+        awayExtras: { records: [{ type: "total", summary: "3-2" }] },
+      }),
+    ]);
+    const [result] = await getLeagueResults(League.PRO, WEEK, [BUF_KC]);
+    expect(result.id).toBe("401");
+    expect(result.home.record).toBe("4-1");
+    expect(result.away.record).toBe("3-2");
+    expect(result.home.linescores).toEqual([7, 10, 3, 10]);
+    // Nothing sent, so nothing to draw a row from.
+    expect(result.away.linescores).toEqual([]);
+  });
+
+  it("carries the venue and the Gamecast link", async () => {
+    mockFetch([
+      espnEvent({
+        home: "BUF",
+        away: "KC",
+        venue: {
+          fullName: "Highmark Stadium",
+          address: { city: "Orchard Park", state: "NY" },
+        },
+        links: [
+          { text: "Box Score", href: "https://espn.com/box" },
+          { text: "Gamecast", href: "https://espn.com/game" },
+        ],
+      }),
+    ]);
+    const [result] = await getLeagueResults(League.PRO, WEEK, [BUF_KC]);
+    expect(result.venue).toEqual({
+      name: "Highmark Stadium",
+      city: "Orchard Park",
+      state: "NY",
+    });
+    expect(result.gamecastUrl).toBe("https://espn.com/game");
+  });
+
+  it("leaves the venue and the link out where ESPN sent neither", async () => {
+    mockFetch([bufVsKc]);
+    const [result] = await getLeagueResults(League.PRO, WEEK, [BUF_KC]);
+    expect(result.venue).toBeUndefined();
+    expect(result.gamecastUrl).toBeUndefined();
+  });
+});
+
+describe("getGameResult", () => {
+  it("finds the game with that id, whoever picked it", async () => {
+    mockFetch([
+      espnEvent({ home: "BUF", away: "KC", id: "1" }),
+      espnEvent({ home: "DAL", away: "PHI", id: "2" }),
+    ]);
+    const result = await getGameResult(League.PRO, WEEK, "2");
+    expect(result?.shortName).toBe("PHI @ DAL");
+  });
+
+  it("comes back with nothing where the week no longer holds the game", async () => {
+    mockFetch([espnEvent({ home: "BUF", away: "KC", id: "1" })]);
+    expect(await getGameResult(League.PRO, WEEK, "9")).toBeNull();
+  });
+
+  it("finds a college game played before the week began", async () => {
+    // The list a week is scored from drops these, because ESPN hands back the whole
+    // bowl season at once. One being looked up by id was already chosen.
+    mockFetch([
+      espnEvent({
+        home: "OSU",
+        away: "MICH",
+        id: "7",
+        date: "2024-09-01T17:00Z",
+      }),
+    ]);
+    const result = await getGameResult(League.COLLEGE, WEEK, "7");
+    expect(result?.shortName).toBe("MICH @ OSU");
   });
 });
 

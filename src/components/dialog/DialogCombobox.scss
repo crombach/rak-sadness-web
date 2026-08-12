@@ -1,0 +1,73 @@
+@use "../../styles/focus" as *;
+@use "../../styles/listbox" as *;
+
+// Base UI ships the combobox unstyled, so these rules carry its whole look. It
+// sits inside a popup and is shorter than a page-level control, so it keeps its own
+// box rather than taking `field-shell`, and borrows only the focus ring.
+.dialog__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 12px;
+  border: 1px solid var(--rak-border);
+  border-radius: var(--rak-radius-sm);
+  background-color: var(--rak-on-solid);
+
+  // On the shell rather than on the input inside it, so the ring goes round the
+  // whole search including its icons.
+  @include focus-ring(":focus-within");
+}
+
+.dialog__input {
+  flex: 1;
+  min-width: 0;
+  padding: 3px 0;
+  border: 0 solid var(--rak-border);
+  background-color: transparent;
+  color: var(--rak-text-secondary);
+  font-family: inherit;
+  font-size: var(--rak-text-md);
+  line-height: 1.5;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.dialog__input-icon {
+  display: flex;
+  align-items: center;
+  color: var(--rak-text-tertiary);
+}
+
+.dialog__positioner {
+  // Above the dialog it opens inside of, which the backdrop already sits under.
+  z-index: calc(var(--rak-z-modal) + 2);
+}
+
+.dialog__list {
+  @include listbox-popup;
+
+  // Held to the width of the search above it, so a long entry is cut short rather
+  // than widening the popup past the input it hangs off.
+  max-width: var(--anchor-width);
+}
+
+.dialog__option {
+  @include listbox-item;
+
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.dialog__empty {
+  padding: 8px 12px;
+  color: var(--rak-text-tertiary);
+  font-size: var(--rak-text-sm);
+
+  // Base UI keeps this mounted as a live region and empties it while the list has
+  // matches. Left padded, it stands over the first entry as a blank band.
+  &:empty {
+    padding: 0;
+  }
+}

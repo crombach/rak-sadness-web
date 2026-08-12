@@ -1,4 +1,5 @@
-import { memo, useCallback } from "react";
+import { memo } from "react";
+import { useShowGameStatus } from "../../../context/GameStatusContext";
 import {
   PickResult,
   PlayerScore,
@@ -9,7 +10,6 @@ import rangeWithPrefix from "../../../utils/rangeWithPrefix";
 import PlayerName from "../playerName/PlayerName";
 import TableShell, { RankCell } from "../TableShell";
 import "./PicksTable.scss";
-import { useToastActions, Toast } from "../../../context/ToastContext";
 
 /** Rank, player, college score, pro score, and total score. */
 const FIXED_COLUMN_COUNT = 5;
@@ -25,8 +25,8 @@ const PICK_STATUS_LABEL: Partial<Record<Status, string>> = {
   unscoreable: "Unscoreable",
 };
 
-function leagueHeaders(count: number, prefix: string) {
-  return rangeWithPrefix(count, prefix).map((header) => (
+function leagueHeaders(labels: Array<string>) {
+  return labels.map((header) => (
     <th key={header} scope="col">
       <span className="table__pick-header">{header}</span>
     </th>
@@ -35,17 +35,20 @@ function leagueHeaders(count: number, prefix: string) {
 
 function PickCell({
   result,
+  gameLabel,
   onClick,
 }: {
   result: PickResult;
-  onClick: (result: PickResult) => void;
+  /** The column this cell is in, which is what names the game behind it. */
+  gameLabel: string;
+  onClick: (gameLabel: string) => void;
 }) {
   const statusLabel = PICK_STATUS_LABEL[result.status];
   return (
     <button
       type="button"
       className="table__cell-button"
-      onClick={() => onClick(result)}
+      onClick={() => onClick(gameLabel)}
     >
       <span>{result.pick || "N/A"}</span>
       {statusLabel && <span className="table__sr-only">{statusLabel}</span>}
@@ -54,25 +57,7 @@ function PickCell({
 }
 
 function PicksTable({ scores }: { scores?: RakMadnessScores | null }) {
-  const { showToast, clearToasts } = useToastActions();
-
-  const handlePickResultClick = useCallback(
-    (result: PickResult) => {
-      clearToasts();
-      showToast(
-        new Toast(
-          "neutral",
-          result.explanation.header,
-          <>
-            {result.explanation.message}
-            {result.explanation.downDistanceText && <br />}
-            {result.explanation.downDistanceText}
-          </>,
-        ),
-      );
-    },
-    [clearToasts, showToast],
-  );
+  const showGameStatus = useShowGameStatus();
 
   if (scores == null) {
     return null;
@@ -82,6 +67,10 @@ function PicksTable({ scores }: { scores?: RakMadnessScores | null }) {
   const collegeCount = firstPlayer.college.length;
   const proCount = firstPlayer.pro.length;
   const columnCount = FIXED_COLUMN_COUNT + collegeCount + proCount;
+  // Built once for the headers and every row's cells, so a cell and the column it
+  // sits under cannot disagree about which game they mean.
+  const collegeLabels = rangeWithPrefix(collegeCount, "C");
+  const proLabels = rangeWithPrefix(proCount, "P");
 
   return (
     <TableShell
@@ -93,9 +82,9 @@ function PicksTable({ scores }: { scores?: RakMadnessScores | null }) {
           <th className="table__player-col" scope="col">
             Player
           </th>
-          {leagueHeaders(collegeCount, "C")}
+          {leagueHeaders(collegeLabels)}
           <th scope="col">College Score</th>
-          {leagueHeaders(proCount, "P")}
+          {leagueHeaders(proLabels)}
           <th scope="col">Pro Score</th>
           <th scope="col">Total Score</th>
         </>
@@ -108,19 +97,27 @@ function PicksTable({ scores }: { scores?: RakMadnessScores | null }) {
             <PlayerName player={player} />
             {player.college.map((result, index) => (
               <td
-                key={`${player.name}-C${index + 1}`}
+                key={`${player.name}-${collegeLabels[index]}`}
                 className={`table__center table__pick --${result.status}`}
               >
-                <PickCell result={result} onClick={handlePickResultClick} />
+                <PickCell
+                  result={result}
+                  gameLabel={collegeLabels[index]}
+                  onClick={showGameStatus}
+                />
               </td>
             ))}
             <td className="table__center">{player.score.college}</td>
             {player.pro.map((result, index) => (
               <td
-                key={`${player.name}-P${index + 1}`}
+                key={`${player.name}-${proLabels[index]}`}
                 className={`table__center table__pick --${result.status}`}
               >
-                <PickCell result={result} onClick={handlePickResultClick} />
+                <PickCell
+                  result={result}
+                  gameLabel={proLabels[index]}
+                  onClick={showGameStatus}
+                />
               </td>
             ))}
             <td className="table__center">{player.score.pro}</td>

@@ -1,0 +1,18 @@
+// An entry reads as its column then its game, the column held to one width so the
+// game names below it line up.
+.dialog__option .game-status__option-label {
+  flex: 0 0 auto;
+  min-width: 2.5ch;
+  color: var(--rak-text-tertiary);
+  font-family: var(--rak-font-mono);
+  font-size: var(--rak-text-sm);
+}
+
+.dialog__option .game-status__option-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
