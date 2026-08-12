@@ -50,6 +50,20 @@ $breakpoint-wide: 601px;
 }
 
 /**
+ * A phone turned on its side. The height is what tells it apart from a tablet or
+ * a window: every phone in landscape is under 500px tall, and the shortest tablet
+ * is well over it.
+ *
+ * The app is portrait only. A week of picks is a wide table under a bar of
+ * controls, and a phone on its side has no room for either.
+ */
+@mixin phone-landscape {
+  @media (orientation: landscape) and (max-height: 500px) {
+    @content;
+  }
+}
+
+/**
  * A pointer that can hover. Touch reports `:hover` on the last thing tapped and
  * holds it there, so a hover fill left unguarded reads as a selection the app
  * does not have.

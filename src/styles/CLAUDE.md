@@ -11,8 +11,10 @@ default rather than the exception. `roomy-screen` loosens the tables and the nav
 `labelled-navbar` is room enough to label the navbar's buttons, `wide-screen` is room
 enough to center a dialog rather than stand it on the bottom edge as a sheet, and
 `can-hover` guards a hover fill, which touch would otherwise leave stuck on the last
-thing tapped. These have to be Sass, because custom properties do not work inside a
-media query.
+thing tapped. `phone-landscape` is the one that is not about width: a phone on its
+side, told apart from a tablet by being under 500px tall, which `PageLayout` covers
+with a note asking for the phone back upright. These have to be Sass, because custom
+properties do not work inside a media query.
 
 `_focus.scss`: `focus-ring`, the one focus ring in the app.
 `_a11y.scss`: `visually-hidden`, for text only a screen reader reads.

@@ -3,7 +3,10 @@
 `PageLayout`: chrome every page shares, the background, the navbar, and `<main>`.
 Its required `title` is the page's one `<h1>`, first inside `<main>` and drawn
 nowhere. No route here shows a heading, so this is the only thing telling a screen
-reader which page it landed on. Route components live in `home/` and `results/`;
+reader which page it landed on. It also holds the note that covers a phone turned
+on its side: the app is portrait only, so rather than lay a week's table out across
+400px of height it asks for the phone back the way round it was built for.
+Route components live in `home/` and `results/`;
 the routes themselves are in `src/App.tsx`.
 
 ## Subdirectories

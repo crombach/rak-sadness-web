@@ -95,6 +95,17 @@ export default function PageLayout({
         <h1 className="home__title">{title}</h1>
         {children}
       </main>
+      {/*
+        Drawn only on a phone turned on its side, where the stylesheet covers the
+        page with it. `display: none` the rest of the time, so it is out of the
+        accessibility tree rather than merely off screen.
+      */}
+      <div className="home__rotate">
+        <p className="home__rotate-message">Turn your phone upright</p>
+        <p className="home__rotate-detail">
+          The Rakulator does not support landscape on a phone.
+        </p>
+      </div>
     </div>
   );
 }
