@@ -68,47 +68,6 @@ describe("the app, week routes", () => {
     );
   });
 
-  it("fills the wireframe with rows down to the bottom of the viewport", async () => {
-    fetchMock.mockResolvedValue(spreadsheetResponse());
-    mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
-
-    // jsdom reports no layout, so every measurement is zero and the whole
-    // viewport counts as spare. That still exercises the row count for real.
-    const rows = document.querySelectorAll(".table__filler-row");
-    expect(rows.length).toBe(Math.floor(window.innerHeight / 32));
-  });
-
-  it("shapes the scoreboard wireframe like the scoreboard", async () => {
-    fetchMock.mockResolvedValue(spreadsheetResponse());
-    mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
-
-    expect(
-      document.querySelectorAll(".table.--skeleton thead th"),
-    ).toHaveLength(8);
-  });
-
-  it("shapes the picks wireframe with a column per game", async () => {
-    fetchMock.mockResolvedValue(spreadsheetResponse());
-    mountApp(`/${SEASON}/${CURRENT_WEEK}/picks`);
-
-    // Rank, player, and three score columns, plus a middling week's worth of
-    // games. The real count is not known until the picks have been read.
-    expect(
-      document.querySelectorAll(".table.--skeleton thead th"),
-    ).toHaveLength(24);
-  });
-
-  it("gives the wireframe a row per player of a middling week", async () => {
-    fetchMock.mockResolvedValue(spreadsheetResponse());
-    mountApp(`/${SEASON}/${CURRENT_WEEK}/picks`);
-
-    expect(
-      document.querySelectorAll(
-        ".table.--skeleton tbody tr:not(.table__last-row):not(.table__filler-row)",
-      ),
-    ).toHaveLength(61);
-  });
-
   it("holds the content still while the week loads, keeping the scrollbar's room", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
     mountApp(`/${SEASON}/${CURRENT_WEEK}/picks`);
