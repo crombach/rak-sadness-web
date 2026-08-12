@@ -194,12 +194,14 @@ function NeedsHelp({ games }: { games: Array<UncontrolledGame> }) {
 function Routes({
   title,
   routes,
+  hiddenCount,
   // Off where every route asks the same of the tiebreaker, which the section
   // below then states once rather than on each of them.
   showMondayNight,
 }: {
   title: string;
   routes: Array<VictoryRoute>;
+  hiddenCount: number;
   showMondayNight: boolean;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -222,6 +224,13 @@ function Routes({
           </li>
         ))}
       </ol>
+      {/* Worked out, then left off, so the count is what the reader is missing.
+          Held back until they have asked for the rest and reached the end of them. */}
+      {isExpanded && hiddenCount > 0 && (
+        <p className="analysis__note">
+          {plural(hiddenCount, "other path")} found but not shown.
+        </p>
+      )}
       {folded > 0 && (
         <Button
           className="analysis__more"
@@ -326,6 +335,7 @@ export default function AnalysisSummary({
         <Routes
           title={result.mustWin.length > 0 ? "Then one of" : "One of"}
           routes={result.routes}
+          hiddenCount={result.hiddenRouteCount}
           showMondayNight={result.mondayNight == null}
         />
       )}
@@ -340,13 +350,6 @@ export default function AnalysisSummary({
 
       <NeedsHelp games={result.needsHelp} />
       <MondayNight outlook={result.mondayNight} />
-
-      {/* Worked out, then left off, so the count is what the reader is missing. */}
-      {result.hiddenRouteCount > 0 && (
-        <p className="analysis__note">
-          {plural(result.hiddenRouteCount, "other path")} found but not shown.
-        </p>
-      )}
     </Answer>
   );
 }

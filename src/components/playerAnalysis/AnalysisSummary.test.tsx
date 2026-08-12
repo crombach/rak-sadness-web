@@ -310,7 +310,6 @@ describe("AnalysisSummary", () => {
           mondayNight: { kind: "range", max: 32, contenders: ["Rak"] },
         },
       ],
-      hiddenRouteCount: 2,
     };
     render(<AnalysisSummary result={result} />);
 
@@ -321,8 +320,24 @@ describe("AnalysisSummary", () => {
       "P1KC -3",
       "P2BUF -1P3SF -6MNF points ≤ 32 to beat Rak.",
     ]);
-    const note = screen.getByText("2 other paths found but not shown.");
-    expect(note).toBe(document.querySelector(".analysis")?.lastElementChild);
+  });
+
+  it("counts the routes left off under the last one, once they are all open", async () => {
+    const result: PlayerAnalysis = {
+      ...base,
+      routes: routesOf(8),
+      hiddenRouteCount: 2,
+    };
+    render(<AnalysisSummary result={result} />);
+
+    const note = "2 other paths found but not shown.";
+    expect(screen.queryByText(note)).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button"));
+
+    const routes = [...document.querySelectorAll(".analysis__route")];
+    expect(screen.getByText(note).previousElementSibling).toBe(
+      routes[routes.length - 1]?.parentElement,
+    );
   });
 
   it("states a total every route shares once, not on each of them", () => {

@@ -23,9 +23,12 @@ takes its shape from `styles/_listbox.scss`, which the home page selects share.
 it. The standing leads, from `Standing`, which reads the scores rather than the
 search, and names no leader until a pick is settled. Picks sit in a
 grid rather than a wrapping row, so the same game holds the same column down every
-route. A must-win game carries a red line where a route carries gold. Routes stand
-four deep and unfold on a click, and the dialog's own key on the player is what
-starts a new one folded. A closing note counts the routes found past the eight kept.
+route, and a pick is drawn monospace and given the width of the widest team
+abbreviation and spread a sheet can hold, so a column fits as many as it can and
+never cuts one short. A must-win game carries a red line where a route carries gold.
+Routes stand four deep and unfold on a click, and the dialog's own key on the player
+is what starts a new one folded. Under the last one opened, a note counts the routes
+found past the eight kept, held back until the rest have been asked for.
 A player picked always reads a sentence, down to the week resting on the
 tiebreaker alone.
 
