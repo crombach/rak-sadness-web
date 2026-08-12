@@ -1,4 +1,9 @@
-import { render, screen, within } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitForElementToBeRemoved,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MockedFunction } from "vitest";
 import { GameStatus, HomeAway } from "../../types/ESPN";
@@ -231,10 +236,12 @@ describe("GameStatusDialog", () => {
     // In words as well as in a dot, a red dot alone reading as a decoration.
     expect(screen.getByRole("img", { name: "Live" })).toHaveTextContent("LIVE");
 
-    // The score the fetch came back with, not the one the week was scored at.
-    expect(await screen.findByText("8:42 - 3rd Quarter")).toBeInTheDocument();
+    // The score the fetch came back with, not the one the week was scored at. Waited
+    // on by the bar, since the wireframe carries the week's own copy of the game and
+    // so already reads the same in places.
+    await waitForElementToBeRemoved(() => screen.queryByRole("progressbar"));
+    expect(screen.getByText("8:42 - 3rd Quarter")).toBeInTheDocument();
     expect(screen.getByText("BUF Team")).toBeInTheDocument();
-    expect(screen.queryByRole("progressbar")).toBeNull();
 
     // Ten seconds on, the same game is asked about again, and the answer replaces
     // what was on screen.
@@ -318,8 +325,8 @@ describe("GameStatusDialog", () => {
     expect(screen.getByRole("img", { name: "Final" })).toBeInTheDocument();
 
     pending.settle(collegeGame);
-    expect(await screen.findByText("OSU Team")).toBeInTheDocument();
-    expect(screen.queryByRole("progressbar")).toBeNull();
+    await waitForElementToBeRemoved(() => screen.queryByRole("progressbar"));
+    expect(screen.getByText("OSU Team")).toBeInTheDocument();
     // Over, so the search says so rather than that there is something to watch.
     expect(screen.queryByRole("img", { name: /Live/ })).toBeNull();
     expect(screen.getByRole("img", { name: "Final" })).toBeInTheDocument();

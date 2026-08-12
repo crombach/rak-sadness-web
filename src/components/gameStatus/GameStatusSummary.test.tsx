@@ -92,8 +92,43 @@ describe("GameStatusSummary, before there is anything to show", () => {
     render(
       <GameStatusSummary game={game(result())} result={result()} isLoading />,
     );
-    expect(screen.queryByText("Buffalo Bills")).toBeNull();
+    // The bars carry the week's own copy of the game, hidden, so they come out the
+    // size the answer will be. What is on screen is still only the wireframe.
+    expect(document.querySelector(".game-status:not(.--skeleton)")).toBeNull();
     expect(bars()).toBeGreaterThan(0);
+  });
+
+  it("sizes the wireframe from the week's own copy of the game", () => {
+    render(<GameStatusSummary game={game(result())} />);
+    // The kickoff is left out, since what it reads is the zone the suite runs in.
+    expect(
+      [
+        ...document.querySelectorAll(
+          ".game-status__scoreline .game-status__bar.--text",
+        ),
+      ].map((bar) => bar.textContent),
+    ).toEqual([
+      "Home",
+      "Buffalo BillsBUF",
+      "4-1",
+      "FT",
+      "Away",
+      "Kansas City ChiefsKC",
+      "3-2",
+    ]);
+  });
+
+  it("holds room for the tracker's link where the week had the game live", () => {
+    const live = result({ status: GameStatus.LIVE });
+    render(<GameStatusSummary game={game(live)} />);
+    expect(document.querySelector(".game-status__gamecast")).not.toBeNull();
+  });
+
+  it("holds no room for it where the week had the game over", () => {
+    // A finished game is never linked out to, so a bar for one would only shift the
+    // scoreline when the answer landed.
+    render(<GameStatusSummary game={game(result())} />);
+    expect(document.querySelector(".game-status__gamecast")).toBeNull();
   });
 
   it("says so where ESPN listed no game for the column", () => {
@@ -161,17 +196,10 @@ describe("GameStatusSummary, a game that is over", () => {
     short.forEach((it) => expect(it).toHaveAttribute("aria-hidden", "true"));
   });
 
-  it("links out to ESPN's own tracker, in a tab of its own", () => {
+  it("offers no tracker for a game that is over, link or no link", () => {
     const tracked = result({ gamecastUrl: "https://espn.com/game/401" });
     render(<GameStatusSummary game={game(tracked)} result={tracked} />);
-    const link = screen.getByRole("link", { name: "ESPN Gamecast" });
-    expect(link).toHaveAttribute("href", "https://espn.com/game/401");
-    expect(link).toHaveAttribute("target", "_blank");
-    expect(link).toHaveAttribute("rel", "noreferrer");
-  });
-
-  it("offers no tracker where ESPN listed no link to one", () => {
-    renderFinal();
+    // Everything a finished game has to say is on screen already.
     expect(screen.queryByRole("link")).toBeNull();
   });
 
@@ -285,6 +313,22 @@ describe("GameStatusSummary, a game still being played", () => {
       "game-status__scores",
       "game-status__down",
     ]);
+  });
+
+  it("links out to ESPN's own tracker, in a tab of its own", () => {
+    const tracked = { ...live, gamecastUrl: "https://espn.com/game/401" };
+    render(<GameStatusSummary game={game(tracked)} result={tracked} />);
+    const link = screen.getByRole("link", { name: "ESPN Gamecast" });
+    expect(link).toHaveAttribute("href", "https://espn.com/game/401");
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noreferrer");
+  });
+
+  it("holds the down's line with a word where there is no down to say", () => {
+    const dead = { ...live, possession: { homeAway: HomeAway.AWAY } };
+    render(<GameStatusSummary game={game(dead)} result={dead} />);
+    // A line either way, so the poll that finds no down cannot move the scoreline.
+    expect(screen.getByText("Between plays")).toBeInTheDocument();
   });
 
   it("says who has the ball with the marker alone", () => {
