@@ -96,6 +96,14 @@ const collegeGame = result({
   awayScore: 30,
   status: GameStatus.FINAL,
 });
+const upcomingGame = result({
+  id: "403",
+  home: "PHI",
+  away: "DAL",
+  homeScore: 0,
+  awayScore: 0,
+  status: GameStatus.UPCOMING,
+});
 
 const games: Array<WeekGame> = [
   {
@@ -117,6 +125,12 @@ const games: Array<WeekGame> = [
     name: proGame.shortName,
     result: proGame,
   },
+  {
+    label: "P2",
+    league: League.PRO,
+    name: upcomingGame.shortName,
+    result: upcomingGame,
+  },
 ];
 
 const scores: RakMadnessScores = { scores: [], games };
@@ -136,6 +150,7 @@ describe("gamesMatching", () => {
       "C1",
       "C2",
       "P1",
+      "P2",
     ]);
   });
 
@@ -203,6 +218,8 @@ describe("GameStatusDialog", () => {
       "https://espn.com/MICH.png",
       "https://espn.com/BUF.png",
       "https://espn.com/KC.png",
+      "https://espn.com/PHI.png",
+      "https://espn.com/DAL.png",
     ]);
 
     // The game, not the column the cell that opened it was in, and a wireframe
@@ -243,8 +260,9 @@ describe("GameStatusDialog", () => {
     getGameResultMock.mockReturnValue(pending.promise);
     await user.click(screen.getByRole("combobox", { name: "Game" }));
 
-    // Every entry says where its game stands: the live game a dot, the one that is
-    // over a tick, and the column ESPN has no game for a warning.
+    // Every entry says where its game stands: the live game LIVE, the one that is
+    // over a tick, the one yet to start a calendar, and the column ESPN has no game
+    // for a warning.
     await screen.findByRole("option", { name: /KC @ BUF/ });
     expect(
       screen.getAllByRole("option").map((option) =>
@@ -252,7 +270,17 @@ describe("GameStatusDialog", () => {
           .getAllByRole("img")
           .map((mark) => mark.getAttribute("aria-label")),
       ),
-    ).toEqual([["Final"], ["Not listed by ESPN"], ["Live"]]);
+    ).toEqual([
+      ["Final"],
+      ["Not listed by ESPN"],
+      ["Live"],
+      ["Yet to kick off"],
+    ]);
+    expect(
+      within(screen.getByRole("option", { name: /DAL @ PHI/ })).getByTestId(
+        "EventIcon",
+      ),
+    ).toBeInTheDocument();
 
     await user.click(screen.getByRole("option", { name: /MICH @ OSU/ }));
 

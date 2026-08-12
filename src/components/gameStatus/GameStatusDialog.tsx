@@ -9,7 +9,7 @@ import { WeekGame } from "../../types/WeekGame";
 import getClasses from "../../utils/getClasses";
 import DialogCombobox from "../dialog/DialogCombobox";
 import DialogShell from "../dialog/DialogShell";
-import { CheckCircleIcon, WarningIcon } from "../icon/Icon";
+import { CheckCircleIcon, EventIcon, WarningIcon } from "../icon/Icon";
 import GameStatusSummary from "./GameStatusSummary";
 import "./GameStatusDialog.scss";
 
@@ -39,7 +39,7 @@ export function gamesMatching(
  * Where a game stands, in one mark, on every game the search offers.
  *
  * A game being played says LIVE beside a red dot, since a red dot on its own reads as
- * a decoration next to a game's name. A grey dot for a game yet to kick off, a tick for
+ * a decoration next to a game's name. A calendar for a game yet to kick off, a tick for
  * one that is over, and a warning for a column ESPN lists no game for, which is the one
  * game the dialog can say nothing else about. The dot on the game being watched pulses,
  * since that game is asked about again every ten seconds.
@@ -90,10 +90,12 @@ function GameMark({
   }
   return (
     <span
-      className="game-status__mark --dot"
+      className="game-status__mark --upcoming"
       role="img"
       aria-label="Yet to kick off"
-    />
+    >
+      <EventIcon />
+    </span>
   );
 }
 

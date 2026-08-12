@@ -25,8 +25,8 @@
 // What there is to watch about a game, on the end of the search and on the end of
 // its entry, which is where the player analysis puts a player's status icon.
 //
-// Under the box it is centered in, since a filled circle reads heavier than an icon
-// drawn to the same width.
+// The dot in the live pill is under the icons beside it, a filled circle reading
+// heavier than an icon drawn to the same width.
 $dot-size: 12px;
 
 // One box whatever is in it, so the marks line up down the list and the search does
@@ -40,15 +40,6 @@ $dot-size: 12px;
   justify-content: center;
   width: var(--rak-icon-sm);
   height: var(--rak-icon-sm);
-
-  &.--dot::after {
-    content: "";
-    width: $dot-size;
-    height: $dot-size;
-    border-radius: 50%;
-    // A game yet to kick off, which is a clock that is not running.
-    background-color: var(--rak-text-tertiary);
-  }
 
   &.--live {
     width: auto;
@@ -88,6 +79,11 @@ $dot-size: 12px;
 
   &.--invalid > svg {
     fill: var(--rak-warning-500);
+  }
+
+  // Quiet, a game yet to kick off being nothing to act on.
+  &.--upcoming > svg {
+    fill: var(--rak-text-tertiary);
   }
 }
 
