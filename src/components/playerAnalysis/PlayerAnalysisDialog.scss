@@ -161,6 +161,12 @@
   padding: 8px 12px;
   color: var(--rak-text-tertiary);
   font-size: var(--rak-text-sm);
+
+  // Base UI keeps this mounted as a live region and empties it while the list has
+  // matches. Left padded, it stands over the first name as a blank band.
+  &:empty {
+    padding: 0;
+  }
 }
 
 // Sized to the answer, and capped by the popup above it. A tall floor would
@@ -176,8 +182,11 @@
   min-height: 0;
   padding-top: var(--rak-analysis-inset);
   // Everything under here scrolls. Only the search above it holds still.
-  border-top: 1px solid var(--rak-border);
+  border-top: var(--rak-border-width-hairline) solid var(--rak-divider);
   overflow-y: auto;
+  // The room a scrollbar needs, held whether or not there is one, so an answer
+  // long enough to scroll does not narrow the one that was on screen before it.
+  scrollbar-gutter: stable;
 }
 
 // The standing reads as a title over what follows, so it sits the same distance

@@ -13,7 +13,7 @@
     "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
     "Segoe UI Symbol";
-  // Picks are laid out in character widths: `20ch` for a name, `3ch` for a pick
+  // Picks are laid out in character widths: `18ch` for a name, `3ch` for a pick
   // label. A bare `monospace` resolves to Courier on some Android builds, whose
   // advance width is narrow enough to change how many columns fit.
   --rak-font-mono:
@@ -141,7 +141,9 @@
 
   // How far an even row is taken from the fill its cells already carry. One value
   // for every column, so a striped name cell, a striped pick, and a striped score
-  // are all the same step apart from their odd-row neighbours.
+  // are all the same step apart from their odd-row neighbours. The hover and
+  // active steps in `Table.scss` are set past this one, so a cell darkened by the
+  // pointer is never read as a striped row.
   --rak-stripe-strength: 86%;
   --rak-stripe-with: var(--rak-primary-800);
 
@@ -202,6 +204,16 @@ body {
 html,
 body {
   overscroll-behavior-y: none;
+}
+
+// The page itself never scrolls: every route is a full-height shell with its own
+// scrolling areas inside it. Saying so here is also what keeps a dialog from
+// shifting the page as it opens. Base UI locks the document's scroll behind a
+// modal, and its lock reserves a scrollbar gutter on <html> that was not there
+// before, which moves everything under it 15px. It stands down where the author
+// has already hidden that overflow.
+html {
+  overflow: hidden;
 }
 
 // Anything the app animates is either decoration or a state it also says in
