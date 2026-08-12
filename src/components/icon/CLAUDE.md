@@ -12,6 +12,10 @@ toaster suite finds them.
 carry. Same licence, its path data rescaled from Symbols' `0 -960 960 960` box onto
 the standard 24px one so it sits on the same grid as every other icon here.
 
+`ScreenRotationIcon` is drawn nowhere but the note covering a phone held sideways,
+at 40px rather than the shared 24px, since it leads that screen rather than sitting
+beside a word.
+
 The app is drawn in filled icons, except the three a player's status wears:
 `SkullOutlinedIcon`, `EmojiEventsOutlinedIcon`, and `SentimentVerySatisfiedIcon`,
 which is only drawn as an outline. Those sit at the end of a line of text at 16px,

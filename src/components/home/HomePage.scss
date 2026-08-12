@@ -1,4 +1,3 @@
-@use "../../styles/breakpoints" as *;
 @use "../../styles/field" as *;
 @use "../../styles/listbox" as *;
 
@@ -84,40 +83,4 @@
   padding: 0;
   opacity: 0;
   visibility: hidden;
-}
-
-// Each is a column of its own on a phone held sideways, and nothing at all
-// anywhere else, so the stack everywhere else is untouched.
-.home__pickers,
-.home__actions {
-  display: contents;
-}
-
-// A phone on its side, where the stack is taller than the screen. Two columns of
-// it instead: the selects beside the buttons, and the footer's links dropped,
-// since neither of them is what the page is for.
-@include phone-landscape {
-  .home__controls {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-    column-gap: var(--rak-space-4);
-    width: min(680px, 100%);
-    padding-block: var(--rak-space-2);
-  }
-
-  .home__pickers,
-  .home__actions {
-    display: flex;
-    flex-direction: column;
-  }
-
-  // The first button in the column has nothing above it to stand off.
-  .home .home__button:first-child {
-    margin-top: 0;
-  }
-
-  .footer {
-    display: none;
-  }
 }

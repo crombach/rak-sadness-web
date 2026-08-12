@@ -4,9 +4,9 @@
 Its required `title` is the page's one `<h1>`, first inside `<main>` and drawn
 nowhere. No route here shows a heading, so this is the only thing telling a screen
 reader which page it landed on. It also holds the note that covers a phone turned
-on its side, for every page but the home one: a week's table cannot be read across
-400px of height, so it asks for the phone back the way round instead. A page with a
-landscape layout of its own says so with `allowLandscape`.
+on its side, on every page: a week's table cannot be read across 400px of height,
+so the app asks for the phone back the way round instead, under a `ScreenRotation`
+icon saying the same thing in a shape.
 Route components live in `home/` and `results/`;
 the routes themselves are in `src/App.tsx`.
 

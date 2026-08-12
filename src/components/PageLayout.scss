@@ -121,6 +121,18 @@
     text-align: center;
   }
 
+  // The shape says which way to turn before the words do, so it leads, at the
+  // size a heading would have been.
+  .home__rotate-icon {
+    display: flex;
+
+    > svg {
+      width: 40px;
+      height: 40px;
+      fill: var(--rak-primary-700);
+    }
+  }
+
   .home__rotate-message {
     margin: 0;
     font-size: var(--rak-text-lg);
