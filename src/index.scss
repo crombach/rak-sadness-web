@@ -75,13 +75,16 @@
   --rak-pick-no-dark: #de7c7c;
   --rak-pick-error: #edfaa0;
   --rak-pick-error-dark: #cfde7c;
-  // A player, wherever they are named: the tables' name cells and the player
-  // analysis search both fill from these. The -dark value stripes the even rows
-  // of the tables, and marks the entry the search is pointing at.
+  // A player, by whether they can still win. The tables fill a name cell with
+  // these, and the -dark value stripes their even rows. The -text value is the
+  // same hue taken far enough down to read on white, which the fill itself
+  // cannot: it is what the player analysis search draws a status icon in.
   --rak-knocked-out: #fac99e;
   --rak-knocked-out-dark: #deaa7c;
+  --rak-knocked-out-text: #8a4a12;
   --rak-in-contention: #9edbfa;
   --rak-in-contention-dark: #7cbede;
+  --rak-in-contention-text: #126287;
   // The status icon beside a player's name, drawn the same size wherever the
   // name is. The wireframe leaves this much room without drawing one.
   --rak-player-icon-size: 16px;

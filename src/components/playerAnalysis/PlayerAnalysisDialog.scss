@@ -114,35 +114,20 @@
   // than widening the popup past the input it hangs off.
   max-width: var(--anchor-width);
   max-height: min(240px, var(--available-height));
-  // Every entry here is filled, so the mixin's own top and bottom padding would
-  // read as a white band inside the border rather than as room.
-  padding-block: 0;
 }
 
-// A name here is filled and marked the way the tables fill and mark the same
-// player's cell, so the search reads as the standings do.
+// An entry carries the status icon the tables give the same player, in the hue
+// they fill that player's cell with. The icon rather than the entry, so the
+// highlight the list draws as it is walked is still the only fill in the popup.
 .player-analysis__option {
   @include listbox-item;
 
   justify-content: space-between;
   gap: var(--rak-player-icon-gap);
-  color: black;
-  background-color: var(--rak-in-contention);
+  --rak-player-icon-fill: var(--rak-in-contention-text);
 
   &.--knocked-out {
-    background-color: var(--rak-knocked-out);
-  }
-
-  // The darker half of the same pair, which is what the tables stripe their even
-  // rows with. Named after the mixin's own states, which color by neither.
-  &[data-highlighted],
-  &[data-selected] {
-    background-color: var(--rak-in-contention-dark);
-  }
-
-  &.--knocked-out[data-highlighted],
-  &.--knocked-out[data-selected] {
-    background-color: var(--rak-knocked-out-dark);
+    --rak-player-icon-fill: var(--rak-knocked-out-text);
   }
 
   // One line however long the name is. The popup is not monospace, so it is cut

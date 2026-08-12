@@ -6,18 +6,18 @@ from the navbar's gold trophy button or from a player's name in either table.
 `PlayerAnalysisDialog`: a Base UI dialog over a Base UI combobox, with
 `AnalysisSummary` under it. `playersMatching` offers every player the letters typed
 reach, knocked out or not, since a knocked out one has an answer too. An entry
-carries the fill and the status icon the tables give the same player, from
-`--rak-in-contention` or `--rak-knocked-out` and `PlayerStatusIcon`, and the darker
-half of its pair marks the entry being pointed at. A name too long for the popup is
-cut short rather than wrapped, so an entry stays one line. The search is thousands
+carries the status icon the tables give the same player, through
+`PlayerStatusIcon`, drawn in `--rak-in-contention-text` or `--rak-knocked-out-text`.
+The icon says the status rather than a fill behind it, so the only fill in the popup
+is still the highlight the list draws as it is walked. A name too long for the popup
+is cut short rather than wrapped, so an entry stays one line. The search is thousands
 of scenarios, so it runs on the player chosen rather than on every render. Only the
 search holds still: everything under the rule below it scrolls. A `player` prop
 stands in for a choice made in the search, and remounts the combobox so the name
 reaches its input. `PlayerAnalysisDialog.scss` centers the one dialog as a modal and
 stands it on the bottom edge as a sheet below `compact-screen`, replacing both ends
 of the transition, since a sheet cannot inherit a centered transform. Its popup list
-takes its shape from `styles/_listbox.scss`, which the home page selects share, and
-overrides the two states that mixin colors by neither status.
+takes its shape from `styles/_listbox.scss`, which the home page selects share.
 
 `AnalysisSummary`: renders `PlayerAnalysis`, working out only what it takes to say
 it. The standing leads, from `Standing`, which reads the scores rather than the
