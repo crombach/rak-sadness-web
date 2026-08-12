@@ -6,7 +6,6 @@ import { PlayerAnalysis } from "../../types/PlayerAnalysis";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import getClasses from "../../utils/getClasses";
 import getPlayerAnalysis from "../../utils/scoring/getPlayerAnalysis";
-import isWeekOver from "../../utils/scoring/isWeekOver";
 import Button from "../button/Button";
 import { CloseRoundedIcon, UnfoldMoreIcon } from "../icon/Icon";
 import PlayerStatusIcon from "../table/playerName/PlayerStatusIcon";
@@ -117,9 +116,6 @@ export default function PlayerAnalysisDialog({
   // dialog emptying and filling again. Only a rescore takes it away.
   const shown = found?.scores === scores ? found : undefined;
   const isSearching = player != null && shown?.name !== player.name;
-  // Asked off the same scores and the same predicate the standing uses, so the two
-  // can never disagree about whether the week is done.
-  const isOver = isWeekOver(scores?.scores ?? []);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -231,7 +227,6 @@ export default function PlayerAnalysisDialog({
                 scores={scores}
                 player={player?.name}
                 result={shown?.paths}
-                isOver={isOver}
                 week={week}
               />
             </div>
