@@ -110,28 +110,45 @@
 .player-analysis__list {
   @include listbox-popup;
 
+  // Held to the width of the search above it, so a long name is cut short rather
+  // than widening the popup past the input it hangs off.
+  max-width: var(--anchor-width);
   max-height: min(240px, var(--available-height));
 }
 
+// A name here is filled and marked the way the tables fill and mark the same
+// player's cell, so the search reads as the standings do.
 .player-analysis__option {
   @include listbox-item;
 
-  gap: 8px;
+  justify-content: space-between;
+  gap: var(--rak-player-icon-gap);
+  color: black;
+  background-color: var(--rak-in-contention);
 
-  // Only ever offered where nobody still standing shares the letters typed. Named
-  // in the color the tables fill the same player's cell with, so it reads as the
-  // answer rather than as a choice.
-  &.--knocked-out,
-  &.--knocked-out[data-highlighted] {
-    background-color: transparent;
-    color: var(--rak-knocked-out-text);
-    cursor: default;
+  &.--knocked-out {
+    background-color: var(--rak-knocked-out);
   }
 
-  // As tall as the name beside it, which is the proportion the tables draw the
-  // same skull at.
-  > svg {
-    font-size: 1em;
+  // The darker half of the same pair, which is what the tables stripe their even
+  // rows with. Named after the mixin's own states, which color by neither.
+  &[data-highlighted],
+  &[data-selected] {
+    background-color: var(--rak-in-contention-dark);
+  }
+
+  &.--knocked-out[data-highlighted],
+  &.--knocked-out[data-selected] {
+    background-color: var(--rak-knocked-out-dark);
+  }
+
+  // One line however long the name is. The popup is not monospace, so it is cut
+  // to the room left beside the icon rather than to a count of characters.
+  .player-analysis__option-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 

@@ -1,26 +1,12 @@
 import { memo } from "react";
 import { PlayerScore } from "../../../types/RakMadnessScores";
 import getClasses from "../../../utils/getClasses";
-import {
-  EmojiEventsIcon,
-  SentimentVerySatisfiedIcon,
-  SkullIcon,
-} from "../../icon/Icon";
-import { useIsWeekDecided } from "../../../context/AppDataContext";
-import { useToastActions, Toast } from "../../../context/ToastContext";
+import { useShowPlayerAnalysis } from "../../../context/PlayerAnalysisContext";
+import PlayerStatusIcon from "./PlayerStatusIcon";
 import "./PlayerName.scss";
 
-/** Still standing at the end of the week, which is what winning the week is. */
-function statusIcon(player: PlayerScore, isWeekDecided: boolean) {
-  if (player.status.isKnockedOut) {
-    return <SkullIcon />;
-  }
-  return isWeekDecided ? <EmojiEventsIcon /> : <SentimentVerySatisfiedIcon />;
-}
-
 function PlayerName({ player }: { player: PlayerScore }) {
-  const { showToast, clearToasts } = useToastActions();
-  const isWeekDecided = useIsWeekDecided();
+  const showPlayerAnalysis = useShowPlayerAnalysis();
 
   return (
     <td
@@ -28,18 +14,11 @@ function PlayerName({ player }: { player: PlayerScore }) {
         "--knocked-out": player.status.isKnockedOut,
       })}`}
       role="button"
-      onClick={() => {
-        clearToasts();
-        showToast(
-          new Toast("neutral", player.name, player.status.explanation ?? ""),
-        );
-      }}
+      onClick={() => showPlayerAnalysis(player.name)}
     >
       <div className="player-name">
         <span className="player-name__name">{player.name}</span>
-        <span className="player-name__status-icon">
-          {statusIcon(player, isWeekDecided)}
-        </span>
+        <PlayerStatusIcon isKnockedOut={player.status.isKnockedOut} />
       </div>
     </td>
   );

@@ -6,7 +6,8 @@ import { RakMadnessScores } from "../../types/RakMadnessScores";
 import getClasses from "../../utils/getClasses";
 import getPlayerAnalysis from "../../utils/scoring/getPlayerAnalysis";
 import Button from "../button/Button";
-import { CloseRoundedIcon, SkullIcon, UnfoldMoreIcon } from "../icon/Icon";
+import { CloseRoundedIcon, UnfoldMoreIcon } from "../icon/Icon";
+import PlayerStatusIcon from "../table/playerName/PlayerStatusIcon";
 import AnalysisSummary, { Standing } from "./AnalysisSummary";
 import "./PlayerAnalysisDialog.scss";
 
@@ -21,25 +22,18 @@ export function playerOptions(scores?: RakMadnessScores): Array<PlayerOption> {
   );
 }
 
-/**
- * The players a query offers. A knocked out one is named only where the letters
- * typed reach nobody still standing, since their only answer is "no".
- */
+/** The players a query offers, in the order the tables rank them. */
 export function playersMatching(
   options: Array<PlayerOption>,
   query: string,
 ): Array<PlayerOption> {
   const needle = query.trim().toLowerCase();
-  const matches = options.filter((option) =>
-    option.name.toLowerCase().includes(needle),
-  );
-  const standing = matches.filter((option) => !option.isKnockedOut);
-  if (needle.length === 0 || standing.length > 0) return standing;
-  return matches;
+  return options.filter((option) => option.name.toLowerCase().includes(needle));
 }
 
 /**
- * What a player still has to do to win the week on screen.
+ * Where a player stands in the week on screen, and what they still have to do to
+ * win it.
  *
  * A centered modal by default and a sheet up from the bottom edge on a phone. Both
  * are the one Base UI dialog, told apart in the stylesheet, because that is where
@@ -48,10 +42,13 @@ export function playersMatching(
 export default function PlayerAnalysisDialog({
   open,
   onOpenChange,
+  player: named,
   scores,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Set where the dialog was opened on one player, by clicking their name. */
+  player?: string;
   scores?: RakMadnessScores;
 }) {
   const [player, setPlayer] = useState<PlayerOption>();
@@ -65,7 +62,15 @@ export default function PlayerAnalysisDialog({
   // Held still between renders, since the combobox reads the chosen player back
   // off this list by identity.
   const options = useMemo(() => playerOptions(scores), [scores]);
-  const standing = useMemo(() => playersMatching(options, ""), [options]);
+
+  // A name arriving from outside stands in for a choice made in the search. Taken
+  // during the render that brings it, so the answer is worked out in the same pass
+  // rather than a beat behind it.
+  const [lastNamed, setLastNamed] = useState(named);
+  if (named !== lastNamed) {
+    setLastNamed(named);
+    setPlayer(options.find((option) => option.name === named));
+  }
 
   // The search is thousands of scenarios and holds the thread while it runs, so
   // it waits for the spinner beside it to paint first.
@@ -124,15 +129,15 @@ export default function PlayerAnalysisDialog({
           </header>
 
           <Combobox.Root
-            // Only the players still standing, since the combobox falls back to
-            // this list whole once a name has been chosen, rather than to the
-            // filtered one below.
-            items={standing}
+            // Remounted on a name arriving from outside, which is what puts that
+            // name in the input. The combobox keeps the choice itself, and handing
+            // it a value it started without reads as a controlled input arriving
+            // late, so a fresh one starts on the right player instead.
+            key={named ?? ""}
+            defaultValue={player}
+            items={options}
             filteredItems={playersMatching(options, query)}
             itemToStringLabel={(option: PlayerOption) => option.name}
-            // The combobox keeps the choice itself. Naming it here as well would
-            // hand it a value it started without, which it reads as a controlled
-            // input arriving late.
             onValueChange={(chosen: PlayerOption | null) =>
               setPlayer(chosen ?? undefined)
             }
@@ -165,13 +170,14 @@ export default function PlayerAnalysisDialog({
                       <Combobox.Item
                         key={option.name}
                         value={option}
-                        disabled={option.isKnockedOut}
                         className={`player-analysis__option ${getClasses({
                           "--knocked-out": option.isKnockedOut,
                         })}`}
                       >
-                        {option.name}
-                        {option.isKnockedOut && <SkullIcon />}
+                        <span className="player-analysis__option-name">
+                          {option.name}
+                        </span>
+                        <PlayerStatusIcon isKnockedOut={option.isKnockedOut} />
                       </Combobox.Item>
                     )}
                   </Combobox.List>

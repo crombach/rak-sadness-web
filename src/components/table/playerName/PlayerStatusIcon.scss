@@ -1,0 +1,13 @@
+.player-status-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  > svg {
+    // Black rather than the text color, because every fill it is drawn on is a
+    // light one and the icon carries the same weight as the name beside it.
+    fill: black;
+    width: var(--rak-player-icon-size);
+    height: var(--rak-player-icon-size);
+  }
+}

@@ -1,6 +1,7 @@
-import { PropsWithChildren, useState } from "react";
+import { PropsWithChildren, useCallback, useState } from "react";
 import { useNavigate } from "react-router";
 import { useIsWeekDecided } from "../../context/AppDataContext";
+import { PlayerAnalysisContextProvider } from "../../context/PlayerAnalysisContext";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import getClasses from "../../utils/getClasses";
 import LogoButton from "../navbar/LogoButton/LogoButton";
@@ -35,15 +36,22 @@ export default function ResultsFrame({
   onViewChange?: (view: ScoresView) => void;
   onRefresh?: () => void;
   isRefreshing?: boolean;
-  /** What the path to victory is worked out from. Absent while a week loads. */
+  /** What the player analysis is worked out from. Absent while a week loads. */
   scores?: RakMadnessScores;
 }>) {
   const navigate = useNavigate();
-  // Once every game is final there is nothing left to fetch and nobody has a path
-  // to victory left, so the refresh and path buttons and the divider beside them
-  // go rather than sit there doing nothing.
+  // Once every game is final there is nothing left to fetch, and the analysis of
+  // every player is settled, so the refresh and analysis buttons and the divider
+  // beside them go rather than sit there doing nothing. A player's name still
+  // opens the analysis, which then reads as the week's result.
   const isWeekDecided = useIsWeekDecided();
   const [isAnalysisOpen, setAnalysisOpen] = useState(false);
+  const [analysisPlayer, setAnalysisPlayer] = useState<string>();
+
+  const showPlayerAnalysis = useCallback((playerName: string) => {
+    setAnalysisPlayer(playerName);
+    setAnalysisOpen(true);
+  }, []);
 
   return (
     <PageLayout
@@ -62,17 +70,28 @@ export default function ResultsFrame({
           isWeekLive={!isWeekDecided}
           onViewChange={onViewChange}
           onRefresh={onRefresh}
-          onShowAnalysis={() => setAnalysisOpen(true)}
+          onShowAnalysis={() => {
+            setAnalysisPlayer(undefined);
+            setAnalysisOpen(true);
+          }}
           isRefreshing={isRefreshing}
         />
       }
     >
       <div className={`home__scores ${getClasses({ "--loading": !isReady })}`}>
-        {isReady ? children : <SkeletonTable view={view} />}
+        <PlayerAnalysisContextProvider showPlayerAnalysis={showPlayerAnalysis}>
+          {isReady ? children : <SkeletonTable view={view} />}
+        </PlayerAnalysisContextProvider>
       </div>
       <PlayerAnalysisDialog
         open={isAnalysisOpen}
-        onOpenChange={setAnalysisOpen}
+        // Cleared on the way out, so naming the same player again is a change the
+        // dialog can see.
+        onOpenChange={(open) => {
+          setAnalysisOpen(open);
+          if (!open) setAnalysisPlayer(undefined);
+        }}
+        player={analysisPlayer}
         scores={scores}
       />
     </PageLayout>

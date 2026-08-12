@@ -1,9 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { PlayerScore, RakMadnessScores } from "../../../types/RakMadnessScores";
-import { ToastContextProvider } from "../../../context/ToastContext";
-import Toaster from "../../toaster/Toaster";
+import { PlayerAnalysisContextProvider } from "../../../context/PlayerAnalysisContext";
 import ScoresTable from "./ScoresTable";
+
+const showPlayerAnalysis = vi.fn();
 
 function player(overrides: Partial<PlayerScore> = {}): PlayerScore {
   return {
@@ -30,10 +31,9 @@ const knockedOutBob = player({
 
 function mountTable(scores?: RakMadnessScores) {
   return render(
-    <ToastContextProvider>
+    <PlayerAnalysisContextProvider showPlayerAnalysis={showPlayerAnalysis}>
       <ScoresTable scores={scores} />
-      <Toaster />
-    </ToastContextProvider>,
+    </PlayerAnalysisContextProvider>,
   );
 }
 
@@ -110,11 +110,9 @@ describe("ScoresTable", () => {
     expect(bob.className).toContain("--knocked-out");
   });
 
-  it("explains a player's status when their name is clicked", async () => {
+  it("opens the player analysis when a name is clicked", async () => {
     mountTable(bothPlayers);
     await userEvent.click(screen.getByRole("button", { name: /Bob/ }));
-    expect(
-      screen.getByText("Knocked out on Total Score by Alice."),
-    ).toBeInTheDocument();
+    expect(showPlayerAnalysis).toHaveBeenCalledWith("Bob");
   });
 });

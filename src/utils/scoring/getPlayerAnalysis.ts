@@ -7,6 +7,7 @@ import {
 } from "../../types/PlayerAnalysis";
 import { PlayerScore, RakMadnessScores } from "../../types/RakMadnessScores";
 import { comparePlayerScoresOnMerit } from "./comparePlayerScores";
+import isWeekDecided from "./isWeekDecided";
 import remainingGames, {
   pickDifference,
   RemainingGame,
@@ -503,10 +504,11 @@ function reduceRoutes(
 }
 
 /**
- * What a player still has to do to win a week that is being played.
+ * Where a player stands in a week, and what they still have to do to win it.
  *
- * Undefined where the sheet holds nobody by that name, which is the only way the
- * question has no answer at all.
+ * Answers for every player, knocked out or not, and for a week already decided as
+ * well as one being played. Undefined where the sheet holds nobody by that name,
+ * which is the only way the question has no answer at all.
  */
 export default function getPlayerAnalysis(
   scores: RakMadnessScores,
@@ -519,6 +521,14 @@ export default function getPlayerAnalysis(
   const player = players[playerIndex];
   if (player.status.isKnockedOut) {
     return eliminated(player);
+  }
+
+  // Nothing is left to play, so the knockouts have already settled the week and
+  // whoever they left standing has won it. Said here rather than searched for,
+  // because the search reads the lower tiers in an order of its own, and on a
+  // week nobody can change it would sometimes disagree with the standings.
+  if (isWeekDecided(scores)) {
+    return { kind: "clinched", player: player.name };
   }
 
   // A knocked out player cannot take the week off anyone, so they are not measured

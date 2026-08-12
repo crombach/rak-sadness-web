@@ -123,6 +123,49 @@ describe("getPlayerAnalysis, whether there is anything to work out", () => {
       player: "Alice",
     });
   });
+
+  it("calls both winners of a decided week clinched", () => {
+    // Level on every tier, which the knockouts leave standing together.
+    const scores = week(
+      [
+        player({ name: "Alice", total: 5, pro: [pick("KC -3", "yes")] }),
+        player({ name: "Bob", total: 5, pro: [pick("KC -3", "yes")] }),
+      ],
+      41,
+    );
+
+    expect(getPlayerAnalysis(scores, "Alice")).toEqual({
+      kind: "clinched",
+      player: "Alice",
+    });
+    expect(getPlayerAnalysis(scores, "Bob")).toEqual({
+      kind: "clinched",
+      player: "Bob",
+    });
+  });
+
+  it("still gives a knocked out player their reason once a week is decided", () => {
+    const scores = week(
+      [
+        player({ name: "Alice", total: 5, pro: [pick("KC -3", "yes")] }),
+        player({
+          name: "Bob",
+          total: 3,
+          pro: [pick("DEN +3", "no")],
+          isKnockedOut: true,
+        }),
+      ],
+      41,
+    );
+    scores.scores[1].status.explanation =
+      "Knocked out on Total Score by Alice.";
+
+    expect(getPlayerAnalysis(scores, "Bob")).toEqual({
+      kind: "eliminated",
+      player: "Bob",
+      explanation: "Knocked out on Total Score by Alice.",
+    });
+  });
 });
 
 describe("getPlayerAnalysis, the routes", () => {
