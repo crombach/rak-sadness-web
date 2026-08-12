@@ -16,9 +16,9 @@ already on screen stays there while the next one is worked out, under a bar on t
 rule that says so, rather than being taken away and put back. Only the
 search holds still: everything under the rule below it scrolls. A `player` prop
 stands in for a choice made in the search, and remounts the combobox so the name
-reaches its input. `PlayerAnalysisDialog.scss` centers the one dialog as a modal and
-stands it on the bottom edge as a sheet below `compact-screen`, replacing both ends
-of the transition, since a sheet cannot inherit a centered transform. Its popup list
+reaches its input. `PlayerAnalysisDialog.scss` stands the one dialog on the bottom
+edge as a sheet, and stands it up as a centered modal at `wide-screen`, replacing
+both ends of the transition, since a window cannot inherit a sheet's slide. Its popup list
 takes its shape from `styles/_listbox.scss`, which the home page selects share.
 
 `AnalysisSummary`: renders `PlayerAnalysis`, working out only what it takes to say

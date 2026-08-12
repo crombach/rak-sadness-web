@@ -1,27 +1,80 @@
 // Design tokens. Base UI ships no styles, so every visual in the app resolves
 // back to these.
 :root {
-  // Colors extracted from the site logo
-  --color-brand-light: #6eaad9;
-  --color-brand: #375267;
-  --color-brand-dark: #2f4557;
+  // The app draws one light palette. Saying so is what stops the browser from
+  // rendering form controls and scrollbars in dark chrome against it when the
+  // system is set to dark.
+  color-scheme: light;
 
+  // Type. `Inter Variable` is the family `@fontsource-variable/inter` registers,
+  // which `src/index.tsx` loads. Naming it anything else downloads the font and
+  // renders in the fallback.
   --rak-font-body:
-    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-    Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol";
+  // Picks are laid out in character widths: `20ch` for a name, `3ch` for a pick
+  // label. A bare `monospace` resolves to Courier on some Android builds, whose
+  // advance width is narrow enough to change how many columns fit.
+  --rak-font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 
+  --rak-text-xs: 0.75rem;
+  --rak-text-sm: 0.875rem;
+  --rak-text-md: 1rem;
+  --rak-text-lg: 1.25rem;
+
+  --rak-weight-medium: 500;
+  --rak-weight-semibold: 600;
+  --rak-weight-bold: 700;
+
+  --rak-line-height: 1.5;
+
+  // Space, on a 4px grid.
+  --rak-space-1: 4px;
+  --rak-space-2: 8px;
+  --rak-space-3: 12px;
+  --rak-space-4: 16px;
+  --rak-space-5: 20px;
+  --rak-space-6: 24px;
+
+  --rak-radius-xs: 3px;
   --rak-radius-sm: 6px;
-  --rak-radius-md: 8px;
   --rak-radius-lg: 12px;
 
-  // Every line the app draws around or between things: the table's dividers and a
-  // toast's frame. Named so those two cannot drift apart. `--rak-border` below is a
-  // color, not a width.
+  // Every line the app draws around or between things. A control's boundary has
+  // to be told from the surface behind it, so it is darker than a rule drawn
+  // between two things that are already apart.
   --rak-border-width: 2px;
+  --rak-border-width-hairline: 1px;
 
-  --rak-shadow-xs: 0 1px 2px 0 rgb(21 21 21 / 8%);
-  --rak-shadow-md:
-    0 2px 8px -2px rgb(21 21 21 / 8%), 0 6px 12px -2px rgb(21 21 21 / 8%);
+  // The floor for anything a finger has to hit.
+  --rak-touch-target: 44px;
+
+  --rak-icon-sm: 16px;
+  --rak-icon-md: 24px;
+
+  // Motion. Four durations cover every transition and the one loop.
+  --rak-duration-fast: 120ms;
+  --rak-duration-base: 220ms;
+  --rak-duration-slow: 300ms;
+  --rak-duration-loop: 2000ms;
+  --rak-ease-standard: ease;
+  --rak-ease-emphasized: ease-in-out;
+
+  // Stacking, one step per named layer. Nothing sets a z-index that is not here,
+  // so what sits above what is decided in one place.
+  --rak-z-below: -1;
+  --rak-z-sticky-cell: 10;
+  --rak-z-sticky-header: 20;
+  --rak-z-skeleton: 30;
+  --rak-z-navbar: 100;
+  --rak-z-overlay: 200;
+  --rak-z-modal: 300;
+  --rak-z-toast: 400;
+
+  // The page behind the tiled logo, and the largest surface on a phone.
+  --rak-brand-light: #6eaad9;
 
   // Primary scale, from the logo's mid blue.
   --rak-primary-100: #acc2d2;
@@ -30,87 +83,136 @@
   --rak-primary-700: #243542;
   --rak-primary-800: #1b2832;
 
+  // Semantic ramps. One ramp per meaning, whatever draws it: 100 is a soft fill
+  // behind text, 300 fills a table cell, 500 and up are solid fills and text.
+  // The table's fills are steps on these rather than a palette of their own, so
+  // a wrong pick and a failure are the same red.
+  --rak-success-100: #e3fbe3;
+  --rak-success-300: #a3faa0;
   --rak-success-500: #1f7a1f;
   --rak-success-600: #136c13;
   --rak-success-700: #0a470a;
+
+  --rak-danger-100: #fce4e4;
+  --rak-danger-300: #faa0a0;
   --rak-danger-500: #c41c1c;
   --rak-danger-600: #a51818;
   --rak-danger-700: #7d1212;
+
+  --rak-warning-100: #fdf0e1;
+  --rak-warning-300: #edfaa0;
   --rak-warning-500: #9a5b13;
-  // The player analysis routes' accent, on the line each one carries and on the
-  // button that unfolds the rest. Its own hue rather than a step on any scale
-  // above, so a way to win the week reads as neither a warning nor a result.
+  --rak-warning-700: #492b08;
+
+  --rak-neutral-100: #f0f4f8;
+  --rak-neutral-500: #555e68;
+  --rak-neutral-700: #32383e;
+
+  // The player analysis accent, on the line each route carries and on the button
+  // that unfolds the rest. Its own hue rather than a step on any ramp above, so a
+  // way to win the week reads as neither a warning nor a result.
   --rak-gold-500: #d9a02b;
-  --rak-gold-700: #9a7018;
+  --rak-gold-700: #8a6415;
 
-  // Soft fills, used by the toasts.
-  --rak-soft-primary-bg: #acc2d2;
-  --rak-soft-primary-text: #243542;
-  --rak-soft-neutral-bg: #f0f4f8;
-  --rak-soft-neutral-text: #32383e;
-  --rak-soft-success-bg: #e3fbe3;
-  --rak-soft-success-text: #0a470a;
-  --rak-soft-warning-bg: #fdf0e1;
-  --rak-soft-warning-text: #492b08;
-  --rak-soft-danger-bg: #fce4e4;
-  --rak-soft-danger-text: #7d1212;
+  // A player, by whether they can still win. 300 fills their name cell; -on-light
+  // is the same hue taken far enough down to read on a white surface, which the
+  // fill cannot, and is what the player analysis search draws its status icon in.
+  --rak-knocked-out-300: #fac99e;
+  --rak-knocked-out-on-light: #8a4a12;
+  --rak-in-contention-300: #9edbfa;
+  --rak-in-contention-on-light: #126287;
 
-  --rak-surface: #fbfcfe;
-  --rak-level1: #f0f4f8;
-  --rak-border: #cdd7e1;
-  --rak-neutral-200: #dde7ee;
+  --rak-surface: #fff;
+  --rak-fill-subtle: #f0f4f8;
+  --rak-fill-muted: #dde7ee;
+  // A control's own boundary, which has to be told from the surface behind it.
+  --rak-border: #838e9a;
+  // A rule between two things that are already apart, which does not.
+  --rak-divider: #cdd7e1;
+
   --rak-text: #171a1c;
   --rak-text-secondary: #32383e;
   --rak-text-tertiary: #555e68;
+  // Foreground on a solid fill. Not a background: `--rak-surface` is the page.
   --rak-on-solid: #fff;
-  // Pick fills, by whether the pick scored. Keep in sync with
-  // PICK_STATUS_FILL in src/utils/pickStatusFill.ts, which colors the same
-  // statuses in the exported spreadsheet. The -dark values stripe the even rows
-  // and have no counterpart there, since the export is not striped.
-  --rak-pick-yes: #a3faa0;
-  --rak-pick-yes-dark: #7ede7c;
-  --rak-pick-no: #faa0a0;
-  --rak-pick-no-dark: #de7c7c;
-  --rak-pick-error: #edfaa0;
-  --rak-pick-error-dark: #cfde7c;
-  // A player, by whether they can still win. The tables fill a name cell with
-  // these, and the -dark value stripes their even rows. The -text value is the
-  // same hue taken far enough down to read on white, which the fill itself
-  // cannot: it is what the player analysis search draws a status icon in.
-  --rak-knocked-out: #fac99e;
-  --rak-knocked-out-dark: #deaa7c;
-  --rak-knocked-out-text: #8a4a12;
-  --rak-in-contention: #9edbfa;
-  --rak-in-contention-dark: #7cbede;
-  --rak-in-contention-text: #126287;
-  // The status icon beside a player's name, drawn the same size wherever the
-  // name is. The wireframe leaves this much room without drawing one.
-  --rak-player-icon-size: 16px;
-  --rak-player-icon-gap: 8px;
 
   --rak-disabled-bg: #f0f4f8;
-  --rak-disabled-text: #9fa6ad;
+  --rak-disabled-text: #6b7480;
+
+  // How far an even row is taken from the fill its cells already carry. One value
+  // for every column, so a striped name cell, a striped pick, and a striped score
+  // are all the same step apart from their odd-row neighbours.
+  --rak-stripe-strength: 86%;
+  --rak-stripe-with: var(--rak-primary-800);
+
+  // The status icon beside a player's name, drawn the same size wherever the
+  // name is. The wireframe leaves this much room without drawing one.
+  --rak-player-icon-size: var(--rak-icon-sm);
+  --rak-player-icon-gap: var(--rak-space-2);
+
+  // Alpha. Every translucent value in the app is one of these.
+  --rak-shadow-color: 21 21 21;
+  --rak-scrim: rgb(var(--rak-shadow-color) / 45%);
+  --rak-state-hover: rgb(0 0 0 / 8%);
+  --rak-state-press: rgb(0 0 0 / 16%);
+
+  // Elevation, one tier per stacking layer above.
+  --rak-shadow-raised: 0 1px 2px 0 rgb(var(--rak-shadow-color) / 8%);
+  --rak-shadow-overlay:
+    0 2px 8px -2px rgb(var(--rak-shadow-color) / 10%),
+    0 6px 12px -2px rgb(var(--rak-shadow-color) / 8%);
+  --rak-shadow-modal:
+    0 8px 24px -4px rgb(var(--rak-shadow-color) / 18%),
+    0 16px 40px -8px rgb(var(--rak-shadow-color) / 12%);
+
+  // Loading. One fill for a placeholder bar and one sheen that crosses it, shared
+  // by every wireframe in the app.
+  --rak-loading-fill: var(--rak-text-tertiary);
+  --rak-loading-fill-on-solid: var(--rak-on-solid);
+  --rak-loading-fill-opacity: 0.3;
+  --rak-loading-sheen: rgb(255 255 255 / 30%);
 }
 
 body {
   margin: 0;
-  background-color: var(--rak-on-solid);
+  background-color: var(--rak-surface);
   color: var(--rak-text-secondary);
   font-family: var(--rak-font-body);
-  font-size: 1rem;
-  line-height: 1.5;
+  font-size: var(--rak-text-md);
+  line-height: var(--rak-line-height);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
-  min-width: 100vw;
-  min-height: 100vh;
+  min-width: 100%;
+  min-height: 100dvh;
 }
 
 * {
   box-sizing: border-box;
-  // Attempt to disable pull-to-refresh behavior on mobile devices.
-  // See https://stackoverflow.com/questions/29008194/disabling-androids-chrome-pull-down-to-refresh-feature
-  overscroll-behavior: contain;
+  // Every fill in the app is chosen, so nothing wants a translucent grey laid
+  // over it on tap. Both cells and buttons draw their own `:active` state.
+  -webkit-tap-highlight-color: transparent;
+}
+
+// Disables pull-to-refresh. On the document rather than on every element, which
+// also traps scroll chaining inside anything that scrolls.
+// See https://developer.mozilla.org/en-US/docs/Web/CSS/overscroll-behavior
+html,
+body {
+  overscroll-behavior-y: none;
+}
+
+// Anything the app animates is either decoration or a state it also says in
+// words, so all of it can stop. The two placeholders that do something smarter
+// than stopping override this themselves.
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

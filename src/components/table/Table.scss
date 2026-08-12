@@ -5,9 +5,11 @@
   // Tapping a cell opens a toast about it, and a drag across one selected the text
   // instead of reading as a tap.
   user-select: none;
+  // A phone's size, which a roomier screen puts back up at the foot of this file.
+  font-size: 0.8rem;
   // Read back by useFillerRows, which needs a row height to work out how many
   // rows fit below the real ones.
-  --rak-table-row-height: 32px;
+  --rak-table-row-height: 28px;
   // The rest are the measurements the wireframe has to reproduce. It draws a
   // table nobody has the numbers for yet, so it reaches them here, either through
   // the selectors below that it shares or by name in `SkeletonTable.scss`. Either
@@ -99,29 +101,20 @@
 
     .table__player-col {
       border-left: var(--rak-table-border);
+      --rak-cell-fill: var(--rak-in-contention-300);
 
       &.--knocked-out {
-        background-color: var(--rak-knocked-out);
-      }
-
-      &:not(.--knocked-out) {
-        background-color: var(--rak-in-contention);
-      }
-    }
-
-    tr:nth-child(even) .table__player-col {
-      &.--knocked-out {
-        background-color: var(--rak-knocked-out-dark);
-      }
-
-      &:not(.--knocked-out) {
-        background-color: var(--rak-in-contention-dark);
+        --rak-cell-fill: var(--rak-knocked-out-300);
       }
     }
 
     td {
       color: black;
-      background-color: var(--rak-on-solid);
+      // Every cell names the fill it carries and reads it back here, so an even row
+      // is one rule rather than one per column. A column with a fill of its own
+      // says so by setting this, and its stripe follows.
+      --rak-cell-fill: var(--rak-surface);
+      background-color: var(--rak-cell-fill);
       font-family: monospace;
       min-width: max-content;
       height: var(--rak-table-row-height);
@@ -136,7 +129,11 @@
     }
 
     tr:nth-child(even) td {
-      background-color: var(--rak-neutral-200);
+      background-color: color-mix(
+        in srgb,
+        var(--rak-cell-fill) var(--rak-stripe-strength),
+        var(--rak-stripe-with)
+      );
     }
 
     // Keeps the last real row clear of a phone's rounded corners and home
@@ -155,9 +152,11 @@
   }
 }
 
-@include narrow-screen {
+// A phone reads the tighter table, set on `.table` itself above. Room enough, and
+// both go back up.
+@include roomy-screen {
   .table {
-    font-size: 0.8rem;
-    --rak-table-row-height: 28px;
+    font-size: 1rem;
+    --rak-table-row-height: 32px;
   }
 }

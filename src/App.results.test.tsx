@@ -69,12 +69,12 @@ describe("the app, results views", () => {
     await user.click(screen.getByText("View Results"));
 
     const [scoreboard, picks] = scoresHeaderButtons();
-    expect(scoreboard).toHaveClass("--active");
-    expect(picks).not.toHaveClass("--active");
+    expect(scoreboard).toHaveAttribute("aria-pressed", "true");
+    expect(picks).toHaveAttribute("aria-pressed", "false");
 
     await user.click(picks);
-    expect(picks).toHaveClass("--active");
-    expect(scoreboard).not.toHaveClass("--active");
+    expect(picks).toHaveAttribute("aria-pressed", "true");
+    expect(scoreboard).toHaveAttribute("aria-pressed", "false");
   });
 
   it("returns home from the logo button", async () => {

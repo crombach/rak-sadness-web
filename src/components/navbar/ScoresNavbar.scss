@@ -1,52 +1,29 @@
 @use "../../styles/breakpoints" as *;
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+// One flex child of the navbar's right side, so it carries the gap between its
+// own buttons rather than leaving it to a container that now holds only this.
+.home__scores-nav {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--navbar-gap);
 }
 
-.home__scores-header-button {
-  &.--spinning svg {
-    animation: spin 0.5s infinite linear;
-  }
-}
+// Below this the icon carries the button on its own, so the app name beside it
+// keeps to two lines. Labelled buttons squeeze it to three. The label is only
+// drawn, never removed: the button is named for a screen reader either way.
+.home__scores-header-label {
+  display: none;
 
-@include crowded-navbar {
-  // The icon carries the button on its own here, so the app name beside it keeps
-  // to two lines. Labelled buttons squeeze it to three.
-  .home__scores-header-label {
-    display: none;
-  }
-}
-
-// `Button` paints its own fill from four nested classes, and its hover and press
-// colors from five, so this has to out-specify all of them or the view you are on
-// looks exactly like the one you are not. Held by the route rather than the
-// pointer, which is why it also has to beat `:hover`.
-.button.--solid:not(:disabled).--primary.home__scores-header-button.--active {
-  background-color: var(--rak-primary-700);
-}
-
-// Disabled only while a week loads, and it should not look it. The buttons sit
-// where they will sit, showing the view the URL already names, and do nothing
-// until there is something to switch between.
-.button.--solid.home__scores-header-button:disabled {
-  background-color: var(--rak-primary-500);
-  color: var(--rak-on-solid);
-
-  &.--active {
-    background-color: var(--rak-primary-700);
+  @include labelled-navbar {
+    display: inline;
   }
 }
 
 .home__scores-header-divider {
-  width: 2px;
-  height: 1.5rem;
-  margin: 0 6px;
+  width: var(--rak-border-width);
+  height: var(--rak-icon-md);
+  margin: 0 var(--rak-space-2);
   background-color: var(--rak-on-solid);
 }
 
@@ -60,7 +37,7 @@
   grid-template-columns: 1fr;
   transition-property: grid-template-columns, margin-inline-start, opacity;
   transition-duration: var(--collapse-duration);
-  transition-timing-function: ease;
+  transition-timing-function: var(--rak-ease-standard);
 
   &.--collapsed {
     grid-template-columns: 0fr;

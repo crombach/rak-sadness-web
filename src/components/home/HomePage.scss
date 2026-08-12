@@ -1,37 +1,13 @@
+@use "../../styles/field" as *;
 @use "../../styles/listbox" as *;
 
-@keyframes slide {
-  from {
-    background-position: right, center;
-  }
-}
-
-// Base UI ships the select unstyled, so these rules carry its whole look.
-.select__trigger,
-.select__popup {
-  color: var(--rak-text-secondary);
-  font-size: 1rem;
-}
-
+// Base UI ships the select unstyled, so these rules carry its whole look. Both
+// the season and the week select share them.
 .select__trigger {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 3px 12px;
-  border: 1px solid var(--rak-border);
-  border-radius: var(--rak-radius-sm);
-  background-color: var(--rak-surface);
-  box-shadow: var(--rak-shadow-xs);
-  font-family: inherit;
-  line-height: 1.5;
-  text-align: left;
-  cursor: pointer;
+  @include field-shell;
 
-  &:focus-visible {
-    outline: 2px solid var(--rak-primary-500);
-    outline-offset: 2px;
-  }
+  justify-content: space-between;
+  cursor: pointer;
 
   &[data-disabled] {
     cursor: default;
@@ -39,14 +15,16 @@
   }
 }
 
+.select__popup {
+  color: var(--rak-text-secondary);
+}
+
 .select__icon {
-  display: flex;
-  align-items: center;
-  color: var(--rak-text-tertiary);
+  @include field-icon;
 }
 
 .select__positioner {
-  z-index: 1000;
+  z-index: var(--rak-z-overlay);
   // Keeps a long week list from running past the viewport.
   max-height: var(--available-height);
 }
@@ -67,16 +45,16 @@
   align-items: center;
   justify-content: center;
   width: min(340px, 100%);
-  padding: 16px;
+  padding: var(--rak-space-4);
   // What sits between every control. Carried as margins rather than a flex
   // `gap`, because a button that hides itself collapses its own margin as part
   // of that transition, which a gap on the container cannot do.
-  --rak-control-gap: 12px;
+  --rak-control-gap: var(--rak-space-3);
 }
 
 .home__week-input {
   width: 100%;
-  height: 56px;
+  height: 3.5rem;
 }
 
 .home__season-input {
@@ -91,12 +69,9 @@
   width: 100%;
   min-width: min-content;
   transition-property: height, min-height, opacity, color, background-color;
-  transition-duration: 300ms;
-  transition-timing-function: ease;
-  height: 56px;
-  min-height: 56px;
+  transition-duration: var(--rak-duration-slow);
+  transition-timing-function: var(--rak-ease-standard);
   margin-top: var(--rak-control-gap);
-  padding: 0.375rem;
   opacity: 1;
   visibility: visible;
 }
@@ -108,35 +83,4 @@
   padding: 0;
   opacity: 0;
   visibility: hidden;
-}
-
-.--loading-btn::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    to right,
-    transparent 30%,
-    rgba(255, 255, 255, 0.3),
-    transparent 70%
-  );
-  background-size:
-    300% 100%,
-    cover;
-  animation: slide 1s linear infinite;
-}
-
-.--loading-btn:disabled::after {
-  background: linear-gradient(
-    to right,
-    transparent 30%,
-    rgba(128, 128, 128, 0.15),
-    transparent 70%
-  );
-  background-size:
-    300% 100%,
-    cover;
 }

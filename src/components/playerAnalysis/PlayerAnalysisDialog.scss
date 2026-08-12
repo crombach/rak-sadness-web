@@ -17,21 +17,25 @@
   }
 }
 
+// A sheet on the bottom edge, which is what a screen too narrow to leave a margin
+// either side of a centered window gets. Told apart here rather than in the
+// component, because every other screen split in the app is drawn this way.
 .player-analysis__popup {
   position: fixed;
   z-index: 1001;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  top: 50%;
-  left: 50%;
-  width: min(640px, calc(100vw - 32px));
-  max-height: min(680px, calc(100dvh - 64px));
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-height: 85dvh;
   padding: 20px;
-  border-radius: var(--rak-radius-lg);
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  border-radius: var(--rak-radius-lg) var(--rak-radius-lg) 0 0;
   background-color: var(--rak-surface);
-  box-shadow: var(--rak-shadow-md);
-  transform: translate(-50%, -50%);
+  box-shadow: var(--rak-shadow-modal);
   transition:
     opacity 200ms ease,
     transform 200ms ease;
@@ -40,12 +44,14 @@
     outline: none;
   }
 
-  // Held apart from the resting rule above, so the sheet below can replace both
-  // ends of the transition without inheriting a centered transform.
+  // Held apart from the resting rule above, so the window below can replace both
+  // ends of the transition rather than inherit a slide.
   &[data-starting-style],
   &[data-ending-style] {
-    opacity: 0;
-    transform: translate(-50%, -46%);
+    // Only the slide, so a sheet on its way in is not also faded. The travel reads
+    // as the whole animation at this size.
+    opacity: 1;
+    transform: translateY(100%);
   }
 }
 
@@ -71,7 +77,6 @@
   border: 1px solid var(--rak-border);
   border-radius: var(--rak-radius-sm);
   background-color: var(--rak-on-solid);
-  box-shadow: var(--rak-shadow-xs);
 
   &:focus-within {
     outline: 2px solid var(--rak-primary-500);
@@ -124,10 +129,10 @@
 
   justify-content: space-between;
   gap: var(--rak-player-icon-gap);
-  --rak-player-icon-fill: var(--rak-in-contention-text);
+  --rak-player-icon-fill: var(--rak-in-contention-on-light);
 
   &.--knocked-out {
-    --rak-player-icon-fill: var(--rak-knocked-out-text);
+    --rak-player-icon-fill: var(--rak-knocked-out-on-light);
   }
 
   // One line however long the name is. The popup is not monospace, so it is cut
@@ -194,7 +199,7 @@ $bar-height: 2px;
   margin-top: calc(-1 * var(--rak-analysis-inset));
   margin-bottom: calc(var(--rak-analysis-inset) - #{$bar-height});
   overflow: hidden;
-  background-color: var(--rak-neutral-200);
+  background-color: var(--rak-fill-subtle);
 
   &::after {
     content: "";
@@ -224,27 +229,24 @@ $bar-height: 2px;
   }
 }
 
-@include compact-screen {
-  // A sheet on the bottom edge, where a centered window would leave no margin
-  // either side of it. The same dialog, told apart here rather than in the
-  // component, because every other screen split in the app is drawn this way.
+// Room enough either side of it to read as a window, so the sheet above stands up
+// and centers itself.
+@include wide-screen {
   .player-analysis__popup {
-    top: auto;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    max-height: 85dvh;
-    padding-bottom: calc(20px + env(safe-area-inset-bottom));
-    border-radius: var(--rak-radius-lg) var(--rak-radius-lg) 0 0;
-    transform: none;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    width: min(640px, calc(100vw - 32px));
+    max-height: min(680px, calc(100dvh - 64px));
+    padding-bottom: 20px;
+    border-radius: var(--rak-radius-lg);
+    transform: translate(-50%, -50%);
 
     &[data-starting-style],
     &[data-ending-style] {
-      // Only the slide, so a sheet on its way in is not also faded. The travel
-      // reads as the whole animation at this size.
-      opacity: 1;
-      transform: translateY(100%);
+      opacity: 0;
+      transform: translate(-50%, -46%);
     }
   }
 }

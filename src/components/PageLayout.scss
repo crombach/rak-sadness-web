@@ -1,8 +1,12 @@
 .home {
   position: relative;
   box-sizing: border-box;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  // The dynamic viewport, so the page is the height the browser is actually
+  // showing. `100vh` is the tall viewport, which would put the table's last rows
+  // and the safe-area row below it out of reach until the URL bar collapsed.
+  height: 100dvh;
+  background-color: var(--rak-brand-light);
   // index.html asks for viewport-fit=cover so the table below the scores can
   // size itself from the bottom inset. That lets the whole app draw into the
   // unsafe areas, so the other three sides are held back here.
@@ -24,20 +28,14 @@
     content: "";
     position: absolute;
     inset: 0;
-    z-index: -1;
+    z-index: var(--rak-z-below);
     background-image: var(--rak-background-tile);
     opacity: 0;
-    transition: opacity 400ms ease-in;
+    transition: opacity var(--rak-duration-slow) ease-in;
   }
 
   &.--tiles-loaded::before {
     opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .home::before {
-    transition: none;
   }
 }
 
@@ -48,7 +46,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--rak-shadow-md);
+  box-shadow: var(--rak-shadow-overlay);
   overflow: auto;
   background-color: var(--rak-surface);
   color: var(--rak-text-secondary);
@@ -64,5 +62,26 @@
   // its band out of the page. Refusing the pointer is what keeps this unscrollable.
   &.--frozen {
     pointer-events: none;
+  }
+}
+
+/** Straight to the results, past a navbar that is the same on every page. */
+.home__skip-link {
+  position: absolute;
+  left: var(--rak-space-2);
+  top: var(--rak-space-2);
+  z-index: var(--rak-z-navbar);
+  padding: var(--rak-space-2) var(--rak-space-3);
+  border-radius: var(--rak-radius-sm);
+  background-color: var(--rak-surface);
+  color: var(--rak-text);
+  box-shadow: var(--rak-shadow-overlay);
+  font-weight: var(--rak-weight-semibold);
+  // Off screen until it is tabbed to, and never taken out of the accessibility
+  // tree, which is the only way it can be reached at all.
+  transform: translateY(-200%);
+
+  &:focus-visible {
+    transform: none;
   }
 }

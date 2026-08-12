@@ -85,7 +85,7 @@
   gap: var(--rak-pick-gap);
   padding: 4px var(--rak-pick-inset);
   border-radius: var(--rak-radius-sm);
-  background-color: var(--rak-level1);
+  background-color: var(--rak-fill-subtle);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -121,7 +121,7 @@
   // Drawn on the left alone, so a stack of routes reads as a list of alternatives
   // rather than as a stack of boxes.
   border-inline-start: var(--rak-border-width) solid var(--rak-gold-500);
-  background-color: var(--rak-level1);
+  background-color: var(--rak-fill-subtle);
 }
 
 .analysis__route {

@@ -1,0 +1,48 @@
+// The shell every control the user types into or opens shares: the season and
+// week selects on the home page, and the player search in the player analysis
+// dialog. Mixins only, so this emits no CSS of its own however many files pull it
+// in.
+
+@use "breakpoints" as *;
+@use "focus" as *;
+
+/**
+ * A hairline box on the page's own surface. No shadow: the buttons beside these
+ * carry none either, and one lifted control among flat ones reads as a mistake
+ * rather than as depth.
+ */
+@mixin field-shell {
+  display: flex;
+  align-items: center;
+  gap: var(--rak-space-2);
+  min-height: var(--rak-touch-target);
+  padding: var(--rak-space-1) var(--rak-space-3);
+  border: var(--rak-border-width-hairline) solid var(--rak-border);
+  border-radius: var(--rak-radius-sm);
+  background-color: var(--rak-surface);
+  color: var(--rak-text-secondary);
+  font-family: inherit;
+  font-size: var(--rak-text-md);
+  line-height: var(--rak-line-height);
+  text-align: left;
+  transition: border-color var(--rak-duration-fast) var(--rak-ease-standard);
+
+  @include can-hover {
+    &:hover {
+      border-color: var(--rak-text-tertiary);
+    }
+  }
+
+  &:active {
+    background-color: var(--rak-fill-subtle);
+  }
+
+  @include focus-ring;
+}
+
+/** The chevron a field carries on its trailing edge. */
+@mixin field-icon {
+  display: flex;
+  align-items: center;
+  color: var(--rak-text-tertiary);
+}

@@ -1,57 +1,61 @@
 $toasterWidth: min(calc(100% - 48px), 400px);
 
 .toaster {
-  z-index: 100;
+  // Above everything. A toast can be raised while the dialog is open, and it is
+  // the newest thing on screen wherever it lands.
+  z-index: var(--rak-z-toast);
   display: flex;
   flex-direction: column-reverse;
-  gap: 12px;
+  gap: var(--rak-space-3);
   position: fixed;
   bottom: 0;
-  right: calc(50% - $toasterWidth / 2 - 24px);
-  margin: 24px;
+  left: 50%;
+  transform: translateX(-50%);
   width: $toasterWidth;
-  border-radius: var(--rak-radius-lg);
+  margin: var(--rak-space-6);
+  // `Toaster` is mounted beside the app rather than inside it, so it is outside
+  // the wrapper that holds the page back from the unsafe areas and has to keep
+  // itself off the home indicator on its own.
+  margin-bottom: calc(var(--rak-space-6) + env(safe-area-inset-bottom, 0px));
 }
 
 .toast {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: var(--rak-space-3);
   width: 100%;
-  padding: 12px;
+  padding: var(--rak-space-3);
   border-radius: var(--rak-radius-sm);
   // A toast lands over the table, which is busy behind it. The same width as the
-  // table's own dividers, and the same shadow the navbar sits on. The color is the
-  // strong shade of the fill each type carries, primary here and repainted below.
+  // table's own dividers. The color is the strong shade of the fill each type
+  // carries, primary here and repainted below.
   border: var(--rak-border-width) solid var(--rak-primary-500);
-  box-shadow: var(--rak-shadow-xs);
-  font-size: 1rem;
-  font-weight: 500;
-  line-height: 1.5;
+  box-shadow: var(--rak-shadow-overlay);
+  font-weight: var(--rak-weight-medium);
 
   &.--primary {
-    background-color: var(--rak-soft-primary-bg);
-    color: var(--rak-soft-primary-text);
+    background-color: var(--rak-primary-100);
+    color: var(--rak-primary-700);
   }
   &.--neutral {
-    border-color: var(--rak-text-secondary);
-    background-color: var(--rak-soft-neutral-bg);
-    color: var(--rak-soft-neutral-text);
+    border-color: var(--rak-neutral-500);
+    background-color: var(--rak-neutral-100);
+    color: var(--rak-neutral-700);
   }
   &.--success {
     border-color: var(--rak-success-500);
-    background-color: var(--rak-soft-success-bg);
-    color: var(--rak-soft-success-text);
+    background-color: var(--rak-success-100);
+    color: var(--rak-success-700);
   }
   &.--warning {
     border-color: var(--rak-warning-500);
-    background-color: var(--rak-soft-warning-bg);
-    color: var(--rak-soft-warning-text);
+    background-color: var(--rak-warning-100);
+    color: var(--rak-warning-700);
   }
   &.--danger {
     border-color: var(--rak-danger-500);
-    background-color: var(--rak-soft-danger-bg);
-    color: var(--rak-soft-danger-text);
+    background-color: var(--rak-danger-100);
+    color: var(--rak-danger-700);
   }
 
   // Both icons sit on the heading's line rather than the middle of the toast, which
@@ -66,12 +70,12 @@ $toasterWidth: min(calc(100% - 48px), 400px);
 
   // The message's own color, and the weight the message does not carry.
   .toast__header {
-    font-weight: 700;
+    font-weight: var(--rak-weight-bold);
   }
 
   .toast__close {
-    // Its box is 32px against the heading's 24px line, so lift it by half the
+    // Its box is 36px against the heading's 24px line, so lift it by half the
     // difference to put the icon on that line. Keeps the whole touch target.
-    margin-top: -4px;
+    margin-top: -6px;
   }
 }

@@ -11,10 +11,10 @@ import "./PageLayout.scss";
 
 const BACKGROUND_TILE = "/logo512.png";
 
+// Read by `PageLayout.scss`, so the file that loads the tile is also the one that
+// names it. The color behind the tiles is a token there, not here: it is the
+// largest surface in the app and does not belong in a style object.
 const BACKGROUND_STYLE = {
-  backgroundColor: "#6eaad9",
-  // Read by `PageLayout.scss`, so the file that loads the tile is also the one
-  // that names it.
   "--rak-background-tile": `url(${BACKGROUND_TILE})`,
 } as CSSProperties;
 
@@ -74,8 +74,12 @@ export default function PageLayout({
       className={`home ${getClasses({ "--tiles-loaded": areTilesLoaded })}`}
       style={BACKGROUND_STYLE}
     >
+      <a className="home__skip-link" href="#main">
+        Skip to results
+      </a>
       <Navbar left={navbarLeft} right={navbarRight} />
       <main
+        id="main"
         className={`home__content ${getClasses({
           "--scores": showingScores,
           "--frozen": !scrollable,
