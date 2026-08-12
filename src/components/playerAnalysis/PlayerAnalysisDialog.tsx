@@ -161,8 +161,8 @@ export default function PlayerAnalysisDialog({
             // name already in it goes rather than being deleted by hand. Only a
             // press: opening by typing reports `input-change`, and wiping that
             // would take the letters that opened the list.
-            onOpenChange={(open, details) => {
-              if (open && details.reason === "trigger-press") setQuery("");
+            onOpenChange={(listOpen, details) => {
+              if (listOpen && details.reason === "trigger-press") setQuery("");
             }}
             // The list is short and already on screen, so the first match being
             // highlighted saves an arrow key before Enter.

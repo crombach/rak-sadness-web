@@ -197,5 +197,21 @@ describe("PlayerAnalysisDialog", () => {
     expect(
       screen.getByText("Knocked out on Total Score by Alice."),
     ).toBeInTheDocument();
+
+    // Dismissing puts the chosen name back, since the answer below is still that
+    // player's.
+    await user.keyboard("{Escape}");
+    expect(screen.getByRole("combobox", { name: "Player" })).toHaveValue(
+      "Bobby",
+    );
+
+    // Only a press empties the search. A letter typed into it opens the list too,
+    // and wiping on that would take the letter that opened it. Typed straight at
+    // the focused input, since `user.type` clicks first and would open by press.
+    await user.keyboard("x");
+
+    expect(screen.getByRole("combobox", { name: "Player" })).toHaveValue(
+      "Bobbyx",
+    );
   });
 });

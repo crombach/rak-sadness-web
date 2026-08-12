@@ -47,7 +47,10 @@ export function viewportInsets({
   };
 }
 
-/** Whether two measurements are the same, which is how the loop below stops. */
+/**
+ * Whether two measurements are the same, which is how the loop below stops and
+ * what keeps it from writing the same numbers back every frame.
+ */
 export function sameInsets(
   a: ViewportInsets | undefined,
   b: ViewportInsets,
@@ -91,17 +94,24 @@ export default function useViewportInsets(enabled: boolean): void {
     let last: ViewportInsets | undefined;
     let frame = 0;
 
-    const measure = (): ViewportInsets => {
+    // Answers whether the viewport held still, which is what the loop counts. The
+    // root is written only when it moved, so the frames either side of a keyboard
+    // cost a read and nothing else.
+    const measure = (): boolean => {
       const insets = viewportInsets({
         layoutHeight: window.innerHeight,
         viewportHeight: viewport.height,
         offsetTop: viewport.offsetTop,
         scale: viewport.scale,
       });
-      root.style.setProperty(VIEWPORT_HEIGHT_VAR, `${insets.height}px`);
-      root.style.setProperty(VIEWPORT_OFFSET_VAR, `${insets.offset}px`);
-      root.style.setProperty(KEYBOARD_INSET_VAR, `${insets.keyboardInset}px`);
-      return insets;
+      const held = sameInsets(last, insets);
+      last = insets;
+      if (!held) {
+        root.style.setProperty(VIEWPORT_HEIGHT_VAR, `${insets.height}px`);
+        root.style.setProperty(VIEWPORT_OFFSET_VAR, `${insets.offset}px`);
+        root.style.setProperty(KEYBOARD_INSET_VAR, `${insets.keyboardInset}px`);
+      }
+      return held;
     };
 
     // Restarted rather than stacked, so a second event partway through a keyboard
@@ -111,9 +121,7 @@ export default function useViewportInsets(enabled: boolean): void {
       let held = 0;
       const until = performance.now() + TRACKING_MS;
       const step = () => {
-        const insets = measure();
-        held = sameInsets(last, insets) ? held + 1 : 0;
-        last = insets;
+        held = measure() ? held + 1 : 0;
         if (held < SETTLED_FRAMES && performance.now() < until) {
           frame = requestAnimationFrame(step);
         }
