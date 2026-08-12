@@ -5,11 +5,9 @@
   // stand under that text rather than under the chip.
   --rak-pick-inset: 8px;
   --rak-pick-gap: 6px;
-  // A game label is a league letter and at most two digits. A pick is a team
-  // abbreviation of at most five characters, a space, and a spread of at most three
-  // counting its sign. Monospace, so those are widths rather than guesses.
+  // A game label is a league letter and at most two digits. Monospace, so that is a
+  // width rather than a guess.
   --rak-pick-label-width: 3ch;
-  --rak-pick-value-width: 9ch;
 
   display: flex;
   flex-direction: column;
@@ -59,13 +57,15 @@
 // every route. Each list is the same width, so each divides the same way.
 .analysis__picks {
   display: grid;
-  // A column is only ever as wide as the widest thing it can hold.
+  // A column is only ever as wide as the widest chip it can hold: a label, a team
+  // abbreviation of at most five characters, a space, a spread of at most three
+  // counting its sign, and the gap and padding around them.
   grid-template-columns: repeat(
     auto-fit,
     minmax(
       calc(
-        var(--rak-pick-label-width) + var(--rak-pick-value-width) +
-          var(--rak-pick-gap) + var(--rak-pick-inset) * 2
+        var(--rak-pick-label-width) + 9ch + var(--rak-pick-gap) +
+          var(--rak-pick-inset) * 2
       ),
       1fr
     )
@@ -159,11 +159,9 @@
   font-size: 0.875rem;
 }
 
-// Reads as part of the route it closes, so it is set like the picks above it, in
-// under their text and labelled the way they are.
-// Each half stays whole, so a screen too narrow for the line breaks between the
-// total and the players it beats, and the half carried down starts where the label
-// above it does rather than under the total.
+// Set like the picks above it, in under their text. A screen too narrow for the
+// line breaks after the total rather than inside it, and what is carried down
+// starts where the label above it does.
 .analysis__route-mnf {
   display: flex;
   flex-wrap: wrap;

@@ -180,21 +180,19 @@
 // anything that would move the answer still on screen. Stuck to the rule so
 // scrolling cannot carry it off, and pulled back out of the flow by its own height,
 // so what the body measures is the answer alone.
-.player-analysis__progress {
-  --rak-analysis-bar-height: 2px;
+$bar-height: 2px;
 
+.player-analysis__progress {
   position: sticky;
   // Measured from where the answer starts, which is the inset below the rule.
   top: calc(-1 * var(--rak-analysis-inset));
   z-index: 1;
   display: block;
-  height: var(--rak-analysis-bar-height);
+  height: $bar-height;
   // Pulled up onto the rule, and the room it took given back underneath, so the
   // answer sits where it would with no bar there at all.
   margin-top: calc(-1 * var(--rak-analysis-inset));
-  margin-bottom: calc(
-    var(--rak-analysis-inset) - var(--rak-analysis-bar-height)
-  );
+  margin-bottom: calc(var(--rak-analysis-inset) - #{$bar-height});
   overflow: hidden;
   background-color: var(--rak-neutral-200);
 

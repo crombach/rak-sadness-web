@@ -109,7 +109,7 @@ function Picks({
   );
 }
 
-/** The MNF points that win, named the way the scoreboard column is. */
+/** The MNF Points that win, named the way the scoreboard column is. */
 function mondayNightPoints({ min, max }: MondayNightRange): string {
   if (min != null && max != null) {
     return min === max ? `MNF Points = ${min}` : `${min} ≤ MNF Points ≤ ${max}`;
@@ -126,9 +126,7 @@ function mondayNightSentence(outlook: DecidingOutlook): string {
 
 /**
  * The total a route of its own asks for, set out the way its picks are: what to do
- * in the ink they use, and the words holding it together in the ink their labels
- * use. The total and the players it beats wrap as wholes, so a screen too narrow
- * for the line breaks between them rather than inside either.
+ * in the ink they use, and the words holding it together in their labels' ink.
  */
 function RouteMondayNight({ outlook }: { outlook: MondayNightRange }) {
   return (
@@ -136,8 +134,7 @@ function RouteMondayNight({ outlook }: { outlook: MondayNightRange }) {
       <span className="analysis__pick-label">AND</span>
       <span>{mondayNightPoints(outlook)}</span>
       <span>
-        {/* A list rather than a sentence, since the line around it is one too,
-              and what holds it together is grey the way the rest of it is. */}
+        {/* A list rather than a sentence, since the line around it is one too. */}
         <span className="analysis__term">TO BEAT</span>{" "}
         {outlook.contenders.map((name, index) => (
           <Fragment key={name}>
@@ -175,7 +172,7 @@ function fewestWins(result: PathsResult): number {
 function Lead({ result }: { result: PathsResult }) {
   const outright =
     result.mondayNight?.kind === "notNeeded"
-      ? "Takes the week outright, whatever the MNF points come to."
+      ? "Takes the week outright, whatever the MNF Points come to."
       : // Only worth saying where it asks more than the routes below already do.
         result.outrightAt != null && result.outrightAt > fewestWins(result)
         ? `Winning ${plural(result.outrightAt, "game")} takes it outright.`
@@ -195,7 +192,7 @@ function Lead({ result }: { result: PathsResult }) {
 function MondayNight({ outlook }: { outlook?: MondayNightOutlook }) {
   if (outlook == null || outlook.kind === "notNeeded") return null;
   return (
-    <Section title="MNF points">
+    <Section title="MNF Points">
       <p className="analysis__line">{mondayNightSentence(outlook)}</p>
     </Section>
   );
@@ -250,8 +247,9 @@ function Routes({
         ))}
       </ol>
       {/* Worked out, then left off, so the count is what the reader is missing.
-          Held back until they have asked for the rest and reached the end of them. */}
-      {isExpanded && hiddenCount > 0 && (
+          Held back while there are routes folded away, which are the ones to read
+          before hearing what came after them. */}
+      {(isExpanded || folded <= 0) && hiddenCount > 0 && (
         <p className="analysis__note --upright">
           {plural(hiddenCount, "other path")} found but not shown.
         </p>
@@ -326,7 +324,7 @@ export default function AnalysisSummary({
           lines={[
             `${result.player} needs at least ${result.minimumWins} of their ${result.remainingPickCount} remaining picks.`,
             result.needsMondayNight
-              ? "That is only enough to draw level, so the MNF points tiebreaker would still decide it."
+              ? "That is only enough to draw level, so the MNF Points tiebreaker would still decide it."
               : undefined,
           ]}
         />
@@ -369,7 +367,7 @@ export default function AnalysisSummary({
           games ask nothing and the line above said nothing either. */}
       {!hasGames(result) && result.mondayNight?.kind !== "notNeeded" && (
         <p className="analysis__line">
-          No clean path to victory. The MNF points tiebreaker decides it.
+          No clean path to victory. The MNF Points tiebreaker decides it.
         </p>
       )}
 

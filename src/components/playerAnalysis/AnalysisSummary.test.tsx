@@ -149,7 +149,7 @@ describe("AnalysisSummary", () => {
     expect(
       screen.getByText("Alice needs at least 6 of their 13 remaining picks."),
     ).toBeInTheDocument();
-    expect(screen.getByText(/MNF points tiebreaker/)).toBeInTheDocument();
+    expect(screen.getByText(/MNF Points tiebreaker/)).toBeInTheDocument();
     const why = screen.getByText(
       "Detailed paths are worked out once ten games are left.",
     );
@@ -189,7 +189,7 @@ describe("AnalysisSummary", () => {
 
     expect(
       screen.getByText(
-        "No clean path to victory. The MNF points tiebreaker decides it.",
+        "No clean path to victory. The MNF Points tiebreaker decides it.",
       ),
     ).toBeInTheDocument();
   });
@@ -337,6 +337,37 @@ describe("AnalysisSummary", () => {
     const routes = [...document.querySelectorAll(".analysis__route")];
     expect(screen.getByText(note).previousElementSibling).toBe(
       routes[routes.length - 1]?.parentElement,
+    );
+  });
+
+  it("counts them straight away where no route was folded away", () => {
+    const result: PlayerAnalysis = {
+      ...base,
+      routes: routesOf(2),
+      hiddenRouteCount: 2,
+    };
+    render(<AnalysisSummary result={result} />);
+
+    expect(
+      screen.getByText("2 other paths found but not shown."),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("names every player a route's total has to beat", () => {
+    const result: PlayerAnalysis = {
+      ...base,
+      routes: [
+        {
+          games: [{ label: "P1", pick: "KC -3" }],
+          mondayNight: { kind: "range", min: 30, contenders: ["Rak", "Bill"] },
+        },
+      ],
+    };
+    render(<AnalysisSummary result={result} />);
+
+    expect(document.querySelector(".analysis__route")?.textContent).toBe(
+      "P1KC -3ANDMNF Points ≥ 30TO BEAT Rak, Bill",
     );
   });
 

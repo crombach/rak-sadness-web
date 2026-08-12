@@ -34,7 +34,7 @@ found past the eight kept, held back until the rest have been asked for.
 A player picked always reads a sentence, down to the week resting on the
 tiebreaker alone.
 
-A tiebreaker every route shares is stated once under `MNF points`, as a sentence,
+A tiebreaker every route shares is stated once under `MNF Points`, as a sentence,
 and left off the routes themselves. Where they disagree each route carries its own
 and that section does not render. A route says it the way it says its picks: set
 monospace under them, with `AND`, `TO BEAT`, and the commas between the players in

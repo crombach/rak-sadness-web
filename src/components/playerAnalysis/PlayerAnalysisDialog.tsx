@@ -73,7 +73,7 @@ export default function PlayerAnalysisDialog({
   }
 
   // The search is thousands of scenarios and holds the thread while it runs, so
-  // it waits for the spinner beside it to paint first.
+  // it waits for the bar that says so to paint first.
   useEffect(() => {
     if (scores == null || player == null) return;
     let timer = 0;
@@ -197,7 +197,9 @@ export default function PlayerAnalysisDialog({
               />
             )}
             <div className="player-analysis__content" ref={measure}>
-              <Standing scores={scores} player={shown?.name} />
+              {/* Read off the scores, so it answers for the player picked before
+                  their routes have been worked out. */}
+              <Standing scores={scores} player={player?.name} />
               {/* Keyed on the player, so the answer to a new one plays in rather
                   than replacing the last one in place. */}
               <AnalysisSummary key={shown?.name} result={shown?.paths} />
