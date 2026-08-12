@@ -28,7 +28,7 @@
 .analysis__note {
   margin: 0;
   color: var(--rak-text-tertiary);
-  font-size: 0.875rem;
+  font-size: var(--rak-text-sm);
   font-style: italic;
 
   // Reads as the end of the routes above it rather than as an aside about them.
@@ -47,7 +47,7 @@
 .analysis__section-title {
   margin: 0;
   color: var(--rak-text-tertiary);
-  font-size: 0.75rem;
+  font-size: var(--rak-text-xs);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -75,7 +75,7 @@
   padding: 0;
   list-style: none;
   font-family: var(--rak-font-mono);
-  font-size: 0.875rem;
+  font-size: var(--rak-text-sm);
 }
 
 // One pick reads as a chip of two halves: which game, then what to back in it.
@@ -156,7 +156,7 @@
 .analysis__line {
   margin: 0;
   color: var(--rak-text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--rak-text-sm);
 }
 
 // Set like the picks above it, in under their text. A screen too narrow for the

@@ -84,7 +84,9 @@
     width: 100%;
     height: 100%;
     padding: var(--rak-table-cell-padding-y) var(--rak-table-cell-padding-x);
-    border: none;
+    // Not `none`, for the same reason the cells around it say so: Dark Reader
+    // forces a zero-width border visible, and `none` would take `currentColor`.
+    border: var(--rak-table-no-border);
     background: none;
     color: inherit;
     font: inherit;
@@ -189,7 +191,7 @@
 // both go back up.
 @include roomy-screen {
   .table {
-    font-size: 1rem;
+    font-size: var(--rak-text-md);
     --rak-table-row-height: 32px;
   }
 }
