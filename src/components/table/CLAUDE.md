@@ -25,8 +25,7 @@ text is selectable again. Status conveyed by fill color alone also gets a
 inside the button, read by a screen reader and drawn nowhere.
 
 An edge that carries no border is `0 solid var(--rak-primary-800)`, never `none`.
-The shorthand resets the color to `currentColor`, and Dark Reader forces a
-zero-width border visible, so `none` shows up as a white line.
+The shorthand resets the color to `currentColor`, which is white here.
 
 `SkeletonTable`: the wireframe shown while a week's results are being worked out,
 shaped like the view it stands in for. One sheen sweeps across the screen rather

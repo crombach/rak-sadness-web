@@ -19,8 +19,7 @@
   --rak-table-header-border: var(--rak-border-width) solid
     var(--rak-primary-600);
   // For an edge that draws nothing. Never `none`, which resets the color to
-  // `currentColor`: Dark Reader forces a zero-width border visible, and white is
-  // what it would then draw between the rank and the player.
+  // `currentColor`.
   --rak-table-no-border: 0 solid var(--rak-primary-800);
 
   // The table's own accessible name. Not shown: a caption here would add a line
@@ -47,8 +46,7 @@
       height: calc(2lh + 2 * var(--rak-table-cell-padding-y));
       padding: var(--rak-table-cell-padding-y) var(--rak-table-header-padding-x);
       // Named even on the edges that carry no border, because a zero-width border
-      // takes `currentColor`, which is white here. Dark Reader forces borders
-      // visible and draws that white against the dividers below.
+      // takes `currentColor`, which is white here.
       border-color: var(--rak-primary-600);
 
       &:not(:last-child) {
@@ -84,8 +82,8 @@
     width: 100%;
     height: 100%;
     padding: var(--rak-table-cell-padding-y) var(--rak-table-cell-padding-x);
-    // Not `none`, for the same reason the cells around it say so: Dark Reader
-    // forces a zero-width border visible, and `none` would take `currentColor`.
+    // Not `none`, for the same reason the cells around it say so: it would take
+    // `currentColor`.
     border: var(--rak-table-no-border);
     background: none;
     color: inherit;
@@ -123,14 +121,18 @@
       cursor: pointer;
       transition: filter 150ms;
 
+      // A step of its own, well past the one between an odd row and an even one,
+      // so a hovered odd row is never mistaken for the striped row below it.
       @include can-hover {
         &:hover {
-          filter: brightness(0.85);
+          filter: brightness(0.75);
         }
       }
 
+      // As dark as a cell goes. Black text on a striped knocked-out cell still
+      // clears 5:1 here.
       &:active {
-        filter: brightness(0.7);
+        filter: brightness(0.68);
       }
     }
 

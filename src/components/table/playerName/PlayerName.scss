@@ -7,12 +7,12 @@
   // it never draws.
   gap: var(--rak-player-icon-gap);
 
-  // The cell's font is monospace, so 20ch is exactly 20 characters. A longer name
+  // The cell's font is monospace, so 18ch is exactly 18 characters. A longer name
   // is cut short rather than wrapped, because a wrapped name would make its row
   // taller than every other row in the table. The whole name is in the player
   // analysis the cell opens.
   .player-name__name {
-    max-width: 20ch;
+    max-width: 18ch;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
