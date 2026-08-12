@@ -179,12 +179,16 @@ export default function GameStatusDialog({
           itemToStringLabel={(option) => option.name}
           itemKey={(option) => option.label}
           // The chosen game's own mark, on the freshest status rather than the one
-          // the week was scored at, so a game going final stops pulsing.
+          // the week was scored at, so a game going final stops pulsing. While a
+          // fetch is out, `shown` is still the game before it, whose status is not
+          // this game's, so the week's own is what stands until the answer lands.
           adornment={
             game != null && (
               <GameMark
                 game={game}
-                status={shown?.status ?? game.result?.status}
+                status={
+                  (isLoading ? undefined : shown?.status) ?? game.result?.status
+                }
                 polling
               />
             )

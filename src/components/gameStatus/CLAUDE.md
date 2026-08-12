@@ -9,4 +9,4 @@ How a game in the week is going, opened from a pick cell in the picks table.
   one grid, so their labels, names and records line up across the middle. A wireframe
   stands in until the game has been fetched.
 - `GameStatusSummary.scss`: the middle between the scores at `roomy-screen`, and under
-  it below them, joined by a dash. Marks are `roomy-screen` up.
+  it below them, joined by a dash. A phone gets each team's abbreviation, not its name.

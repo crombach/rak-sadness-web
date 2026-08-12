@@ -155,6 +155,14 @@ describe("GameStatusSummary, a game that is over", () => {
     ).toEqual(["BUF", "KC"]);
   });
 
+  it("carries each side's abbreviation, which is what a phone shows", () => {
+    renderFinal();
+    const short = [...document.querySelectorAll(".game-status__name-short")];
+    expect(short.map((it) => it.textContent)).toEqual(["BUF", "KC"]);
+    // The name is the one read out, so the abbreviation beside it is not heard twice.
+    short.forEach((it) => expect(it).toHaveAttribute("aria-hidden", "true"));
+  });
+
   it("wears both teams' marks, home first", () => {
     renderFinal();
     expect(logos()).toEqual([

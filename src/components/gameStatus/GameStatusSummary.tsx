@@ -259,7 +259,15 @@ function Side({
         <span className="game-status__side-label">
           {homeAway === HomeAway.HOME ? "Home" : "Away"}
         </span>
-        <span className="game-status__team-name">{side.team.name}</span>
+        <span className="game-status__team-name">
+          {/* The abbreviation on a phone and the name once there is width for it.
+              Both are in the page, so neither costs a measurement to choose
+              between, and the one read out is the name however narrow the screen. */}
+          <span className="game-status__name-full">{side.team.name}</span>
+          <span aria-hidden="true" className="game-status__name-short">
+            {side.team.abbreviation}
+          </span>
+        </span>
         {side.record != null && (
           <span className="game-status__record">{side.record}</span>
         )}

@@ -34,9 +34,14 @@
     height: 0.6rem;
   }
 
+  // An abbreviation's worth on a phone, a name's worth once one is shown.
   &.--name {
-    width: 6.5rem;
+    width: 2.5rem;
     margin-top: var(--rak-space-1);
+
+    @include roomy-screen {
+      width: 6.5rem;
+    }
   }
 
   &.--record {
@@ -118,16 +123,15 @@
 }
 
 // Held to a square whatever shape the mark is, so a wide logo and a tall one take
-// the same room out of the name beside them.
+// the same room out of the name beside them. Smaller on a phone, where it stands
+// beside an abbreviation rather than a name.
 .game-status__logo {
-  // Off on a phone, where the row has no width to spare beside two names and two
-  // scores, and a mark small enough to fit reads as a smudge anyway.
-  display: none;
   align-self: center;
   object-fit: contain;
+  width: 24px;
+  height: 24px;
 
   @include roomy-screen {
-    display: block;
     width: 32px;
     height: 32px;
   }
@@ -246,6 +250,22 @@
   font-size: var(--rak-text-md);
   font-weight: var(--rak-weight-semibold);
   line-height: var(--rak-line-height);
+}
+
+// A phone gets the abbreviation, a name of three words wrapping to three lines in
+// the room left beside a mark and a score.
+.game-status__name-full {
+  display: none;
+}
+
+@include roomy-screen {
+  .game-status__name-full {
+    display: inline;
+  }
+
+  .game-status__name-short {
+    display: none;
+  }
 }
 
 .game-status__record {

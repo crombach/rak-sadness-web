@@ -266,6 +266,9 @@ describe("GameStatusDialog", () => {
       screen.getByRole("progressbar", { name: "Fetching the game" }),
     ).toBeInTheDocument();
     expect(screen.queryByText("BUF Team")).toBeNull();
+    // The game being switched to, which is over, rather than the live one whose
+    // result is still the last one fetched.
+    expect(screen.getByRole("img", { name: "Final" })).toBeInTheDocument();
 
     pending.settle(collegeGame);
     expect(await screen.findByText("OSU Team")).toBeInTheDocument();
