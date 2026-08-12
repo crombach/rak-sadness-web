@@ -124,6 +124,7 @@ describe("ScoresTable", () => {
     expect(showPlayerAnalysis).toHaveBeenCalledWith("Bob");
   });
 
+  // `PlayerName` draws this for both tables, so only one of them checks it.
   it("announces a player's status for a screen reader", () => {
     mountTable(bothPlayers);
     const [alice, bob] = screen.getAllByRole("button");

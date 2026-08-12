@@ -262,14 +262,4 @@ describe("PlayerName, rendered through the table", () => {
     expect(showPlayerAnalysis).toHaveBeenCalledWith("Bob");
     expect(showToast).not.toHaveBeenCalled();
   });
-
-  it("announces a knocked-out player for a screen reader", () => {
-    render(<PicksTable scores={scores} />);
-    expect(screen.getByText("Bob").closest("button")).toHaveTextContent(
-      "Knocked out",
-    );
-    expect(screen.getByText("Alice").closest("button")).toHaveTextContent(
-      "Still in contention",
-    );
-  });
 });

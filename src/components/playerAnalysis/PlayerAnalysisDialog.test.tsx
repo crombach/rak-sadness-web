@@ -122,6 +122,8 @@ describe("PlayerAnalysisDialog", () => {
 
     // The search runs a frame after the bar that says it is under way.
     const mustWin = await screen.findByRole("heading", { name: "Must win" });
+    // The bar goes with the answer arriving, rather than sitting over it.
+    expect(screen.queryByRole("progressbar")).toBeNull();
     const pick = within(mustWin.parentElement as HTMLElement).getByRole(
       "listitem",
     );

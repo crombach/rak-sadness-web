@@ -20,6 +20,13 @@ function under(title: string): Array<string> {
     .map((item) => item.textContent ?? "");
 }
 
+/** The one tiebreaker range the cases below need: beat Rak on 45 points. */
+const RAK_BY_45 = {
+  kind: "range" as const,
+  max: 45,
+  contenders: ["Rak"],
+};
+
 const base = {
   kind: "paths" as const,
   player: "Alice",
@@ -51,9 +58,14 @@ describe("Standing", () => {
   };
 
   it("says nothing until the scores hold the player picked", () => {
-    const { container } = render(<Standing scores={scores} player="Nobody" />);
+    // A name the week does not hold, then a name with no week behind it yet.
+    const { container: withoutPlayer } = render(
+      <Standing scores={scores} player="Nobody" />,
+    );
+    expect(withoutPlayer).toBeEmptyDOMElement();
 
-    expect(container).toBeEmptyDOMElement();
+    const { container: withoutScores } = render(<Standing player="Rak" />);
+    expect(withoutScores).toBeEmptyDOMElement();
   });
 
   it("counts the player picked back to the leader", () => {
@@ -254,12 +266,6 @@ describe("Standing", () => {
       screen.getByText("No finished games · 2 games still to play"),
     ).toBeInTheDocument();
   });
-
-  it("has nothing to say before a week is scored", () => {
-    const { container } = render(<Standing />);
-
-    expect(container).toBeEmptyDOMElement();
-  });
 });
 
 describe("AnalysisSummary", () => {
@@ -369,7 +375,7 @@ describe("AnalysisSummary", () => {
   it("says something for a player the games can no longer separate", () => {
     const result: PlayerAnalysis = {
       ...base,
-      mondayNight: { kind: "range", max: 45, contenders: ["Rak"] },
+      mondayNight: RAK_BY_45,
     };
     render(<AnalysisSummary result={result} />);
 
@@ -402,7 +408,7 @@ describe("AnalysisSummary", () => {
     const result: PlayerAnalysis = {
       ...base,
       mustWin: [{ label: "P1", pick: "KC -3" }],
-      mondayNight: { kind: "range", max: 45, contenders: ["Rak"] },
+      mondayNight: RAK_BY_45,
     };
     render(<AnalysisSummary result={result} />);
 
@@ -416,7 +422,7 @@ describe("AnalysisSummary", () => {
       ...base,
       pool: { choose: 2, games: [{ label: "P1", pick: "KC -3" }] },
       outrightAt: 3,
-      mondayNight: { kind: "range", max: 45, contenders: ["Rak"] },
+      mondayNight: RAK_BY_45,
     };
     render(<AnalysisSummary result={result} />);
 
@@ -457,7 +463,7 @@ describe("AnalysisSummary", () => {
     const result: PlayerAnalysis = {
       ...base,
       mustWin: [{ label: "P1", pick: "KC -3" }],
-      mondayNight: { kind: "range", max: 45, contenders: ["Rak"] },
+      mondayNight: RAK_BY_45,
     };
     render(<AnalysisSummary result={result} />);
 

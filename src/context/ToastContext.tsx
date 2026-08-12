@@ -88,7 +88,8 @@ export function useToasts(): Array<Toast> {
 /** A toast's countdown, kept so it can be stopped and picked back up. */
 type Countdown = {
   toast: Toast;
-  handle: number;
+  /** Null while paused, when what is left is held rather than running down. */
+  handle: number | null;
   /** What was left when it last started running. */
   remaining: number;
   startedAt: number;
@@ -100,10 +101,8 @@ export function ToastContextProvider({ children }: PropsWithChildren<object>) {
 
   const stopCountdown = useCallback((id: string) => {
     const countdown = countdowns.current.get(id);
-    if (countdown == null) return undefined;
-    window.clearTimeout(countdown.handle);
+    if (countdown?.handle != null) window.clearTimeout(countdown.handle);
     countdowns.current.delete(id);
-    return countdown;
   }, []);
 
   // Declared before showToast, which schedules it.
@@ -151,21 +150,22 @@ export function ToastContextProvider({ children }: PropsWithChildren<object>) {
   }, [stopCountdown]);
 
   const pauseToasts = useCallback(() => {
-    for (const countdown of Array.from(countdowns.current.values())) {
-      const left = countdown.remaining - (Date.now() - countdown.startedAt);
-      stopCountdown(countdown.toast.id);
-      countdowns.current.set(countdown.toast.id, {
-        ...countdown,
-        handle: 0,
-        remaining: Math.max(left, 0),
-      });
+    for (const countdown of countdowns.current.values()) {
+      if (countdown.handle == null) continue;
+      window.clearTimeout(countdown.handle);
+      countdown.handle = null;
+      countdown.remaining = Math.max(
+        countdown.remaining - (Date.now() - countdown.startedAt),
+        0,
+      );
     }
-  }, [stopCountdown]);
+  }, []);
 
   const resumeToasts = useCallback(() => {
+    // Held apart from the map while it is written to, since starting a countdown
+    // replaces the entry being read.
     for (const countdown of Array.from(countdowns.current.values())) {
-      if (countdown.handle !== 0) continue;
-      countdowns.current.delete(countdown.toast.id);
+      if (countdown.handle != null) continue;
       startCountdown(countdown.toast, countdown.remaining);
     }
   }, [startCountdown]);
