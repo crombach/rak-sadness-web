@@ -298,6 +298,8 @@ describe("getPlayerScores, tiebreaker", () => {
 });
 
 describe("getPlayerScores, ranking", () => {
+  // The tiebreaker cascade itself is `comparePlayerScores.test.ts`. These two
+  // only prove the pipeline sorts at all, and works out `hasNoPicks` to sort by.
   it("ranks by total score, highest first", async () => {
     const result = await getPlayerScores(
       WEEK,
@@ -307,55 +309,6 @@ describe("getPlayerScores, ranking", () => {
       ]),
     );
     expect(namesOf(result.scores)).toEqual(["Alice", "Bob"]);
-  });
-
-  it("breaks a tie on total score by tiebreaker distance", async () => {
-    const result = await getPlayerScores(
-      WEEK,
-      picksBuffer([
-        { Name: "Cara", C1: "OSU -3", P1: "BUF -7", P2: "DAL -3", Pts: 45 },
-        { Name: "Alice", C1: "OSU -3", P1: "BUF -7", P2: "DAL -3", Pts: 41 },
-      ]),
-    );
-    expect(namesOf(result.scores)).toEqual(["Alice", "Cara"]);
-  });
-
-  it("breaks a tie on distance by college score", async () => {
-    withEverythingFinal();
-    const result = await getPlayerScores(
-      WEEK,
-      picksBuffer([
-        // College 0, pro 2.
-        { Name: "Dan", C1: "MICH +3", P1: "BUF -7", P2: "DAL -3", Pts: 41 },
-        // College 1, pro 1.
-        { Name: "Alice", C1: "OSU -3", P1: "KC +7", P2: "DAL -3", Pts: 41 },
-      ]),
-    );
-    expect(namesOf(result.scores)).toEqual(["Alice", "Dan"]);
-  });
-
-  it("breaks a tie on college score by pro score against the spread", async () => {
-    withEverythingFinal();
-    const result = await getPlayerScores(
-      WEEK,
-      picksBuffer([
-        // Correct pro pick carries no spread, so it earns no ATS point.
-        { Name: "Frank", C1: "OSU -3", P1: "BUF", P2: "PHI +3", Pts: 41 },
-        { Name: "Erin", C1: "OSU -3", P1: "BUF -7", P2: "PHI +3", Pts: 41 },
-      ]),
-    );
-    expect(namesOf(result.scores)).toEqual(["Erin", "Frank"]);
-  });
-
-  it("falls back to alphabetical order", async () => {
-    const result = await getPlayerScores(
-      WEEK,
-      picksBuffer([
-        { Name: "Zoe", C1: "OSU -3", P1: "BUF -7", P2: "DAL -3", Pts: 41 },
-        { Name: "amy", C1: "OSU -3", P1: "BUF -7", P2: "DAL -3", Pts: 41 },
-      ]),
-    );
-    expect(namesOf(result.scores)).toEqual(["amy", "Zoe"]);
   });
 
   it("ranks players who submitted no picks last", async () => {
