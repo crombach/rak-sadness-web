@@ -11,7 +11,8 @@ import {
 /** Exposes the whole context as buttons plus a rendered list of toast headers. */
 function Harness() {
   const toasts = useToasts();
-  const { showToast, removeToast, clearToasts } = useToastActions();
+  const { showToast, removeToast, clearToasts, pauseToasts, resumeToasts } =
+    useToastActions();
   return (
     <div>
       <ul data-testid="toasts">
@@ -31,10 +32,15 @@ function Harness() {
       <button onClick={() => showToast(new Toast("neutral", "D", "d"))}>
         show D
       </button>
+      <button onClick={() => showToast(new Toast("danger", "E", "e"))}>
+        show E
+      </button>
       <button onClick={() => removeToast(toasts[0])} disabled={!toasts.length}>
         remove first
       </button>
       <button onClick={clearToasts}>clear</button>
+      <button onClick={pauseToasts}>pause</button>
+      <button onClick={resumeToasts}>resume</button>
     </div>
   );
 }
@@ -167,6 +173,46 @@ describe("ToastContextProvider", () => {
     act(() => {
       vi.advanceTimersByTime(TOAST_LIFETIME_MS);
     });
+    expect(headers()).toEqual([]);
+  });
+
+  it("holds a paused toast, then gives it back the time it had left", async () => {
+    const user = mountHarness();
+    await user.click(screen.getByText("show A"));
+
+    act(() => {
+      vi.advanceTimersByTime(TOAST_LIFETIME_MS - 1000);
+    });
+    await user.click(screen.getByText("pause"));
+
+    // Long past its lifetime, and still on screen, because nothing is counting.
+    act(() => {
+      vi.advanceTimersByTime(TOAST_LIFETIME_MS * 2);
+    });
+    expect(headers()).toEqual(["A"]);
+
+    await user.click(screen.getByText("resume"));
+    act(() => {
+      vi.advanceTimersByTime(999);
+    });
+    expect(headers()).toEqual(["A"]);
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(headers()).toEqual([]);
+  });
+
+  it("leaves a failure on screen until it is dismissed", async () => {
+    const user = mountHarness();
+    await user.click(screen.getByText("show E"));
+
+    act(() => {
+      vi.advanceTimersByTime(TOAST_LIFETIME_MS * 10);
+    });
+    expect(headers()).toEqual(["E"]);
+
+    await user.click(screen.getByText("remove first"));
     expect(headers()).toEqual([]);
   });
 

@@ -6,15 +6,16 @@ import {
   useState,
 } from "react";
 import getClasses from "../utils/getClasses";
+import { ScreenRotationIcon } from "./icon/Icon";
 import Navbar from "./navbar/Navbar";
 import "./PageLayout.scss";
 
 const BACKGROUND_TILE = "/logo512.png";
 
+// Read by `PageLayout.scss`, so the file that loads the tile is also the one that
+// names it. The color behind the tiles is a token there, not here: it is the
+// largest surface in the app and does not belong in a style object.
 const BACKGROUND_STYLE = {
-  backgroundColor: "#6eaad9",
-  // Read by `PageLayout.scss`, so the file that loads the tile is also the one
-  // that names it.
   "--rak-background-tile": `url(${BACKGROUND_TILE})`,
 } as CSSProperties;
 
@@ -52,12 +53,19 @@ function useImageLoaded(source: string): boolean {
 
 /** The chrome every page shares: the background, the navbar, and the main area. */
 export default function PageLayout({
+  title,
   navbarLeft,
   navbarRight,
   showingScores = false,
   scrollable = true,
   children,
 }: PropsWithChildren<{
+  /**
+   * The page's one `<h1>`, drawn nowhere. Every route here is a logo, a bar of
+   * controls, and a table, so there is no heading to show, and a page with no
+   * `<h1>` gives a screen reader nothing to say about where it has landed.
+   */
+  title: string;
   navbarLeft: ReactNode;
   navbarRight?: ReactNode;
   showingScores?: boolean;
@@ -74,15 +82,34 @@ export default function PageLayout({
       className={`home ${getClasses({ "--tiles-loaded": areTilesLoaded })}`}
       style={BACKGROUND_STYLE}
     >
+      <a className="home__skip-link" href="#main">
+        Skip to results
+      </a>
       <Navbar left={navbarLeft} right={navbarRight} />
       <main
+        id="main"
         className={`home__content ${getClasses({
           "--scores": showingScores,
           "--frozen": !scrollable,
         })}`}
       >
+        <h1 className="home__title">{title}</h1>
         {children}
       </main>
+      {/*
+        Drawn only on a phone turned on its side, where the stylesheet covers the
+        page with it. `display: none` the rest of the time, so it is out of the
+        accessibility tree rather than merely off screen.
+      */}
+      <div className="home__rotate">
+        <span className="home__rotate-icon">
+          <ScreenRotationIcon />
+        </span>
+        <p className="home__rotate-message">Turn your phone upright</p>
+        <p className="home__rotate-detail">
+          The Rakulator does not support landscape on a phone.
+        </p>
+      </div>
     </div>
   );
 }

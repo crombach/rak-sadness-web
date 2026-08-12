@@ -8,15 +8,27 @@
   bottom: 0;
   display: flex;
   flex-direction: row;
-  gap: 6px;
-  padding: 16px;
+  align-items: center;
+  gap: var(--rak-space-2);
+  padding: var(--rak-space-4);
   // The results table has its own trailing row for this. The home page does not,
   // so the links keep clear of the home indicator here.
-  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(var(--rak-space-4) + env(safe-area-inset-bottom, 0px));
   text-align: center;
 
   > * {
     text-decoration: none;
+  }
+}
+
+.footer__link {
+  display: flex;
+  align-items: center;
+  gap: var(--rak-space-2);
+
+  > svg {
+    width: var(--rak-icon-sm);
+    height: var(--rak-icon-sm);
   }
 }
 

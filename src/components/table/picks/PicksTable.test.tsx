@@ -126,6 +126,22 @@ describe("PicksTable, headers", () => {
     expect(headers).toContain("C1");
     expect(headers).not.toContain("C2");
   });
+
+  it("marks every header cell with its column scope", () => {
+    render(<PicksTable scores={scores} />);
+    screen
+      .getAllByRole("columnheader")
+      .forEach((header) => expect(header).toHaveAttribute("scope", "col"));
+  });
+});
+
+describe("PicksTable, accessible name", () => {
+  it("names the table for a screen reader", () => {
+    render(<PicksTable scores={scores} />);
+    expect(screen.getByRole("table")).toHaveAccessibleName(
+      "Player picks for the week, college and pro games",
+    );
+  });
 });
 
 describe("PicksTable, rows", () => {
@@ -155,10 +171,30 @@ describe("PicksTable, rows", () => {
 
   it("tags each pick cell with its status", () => {
     render(<PicksTable scores={scores} />);
-    expect(screen.getByText("MICH")).toHaveClass("--yes");
-    expect(screen.getByText("OSU")).toHaveClass("--no");
-    expect(screen.getByText("KC")).toHaveClass("--incomplete");
-    expect(screen.getByText("MIA")).toHaveClass("--error");
+    expect(screen.getByText("MICH").closest("td")).toHaveClass("--yes");
+    expect(screen.getByText("OSU").closest("td")).toHaveClass("--no");
+    expect(screen.getByText("KC").closest("td")).toHaveClass("--incomplete");
+    expect(screen.getByText("MIA").closest("td")).toHaveClass("--error");
+  });
+
+  it("announces a pick's status for a screen reader, fill colors aside", () => {
+    render(<PicksTable scores={scores} />);
+    expect(screen.getByText("MICH").closest("button")).toHaveTextContent(
+      "Right",
+    );
+    expect(screen.getByText("OSU").closest("button")).toHaveTextContent(
+      "Wrong",
+    );
+    expect(screen.getByText("MIA").closest("button")).toHaveTextContent(
+      "Unscoreable",
+    );
+  });
+
+  it("adds nothing for an incomplete pick, which draws no color either", () => {
+    render(<PicksTable scores={scores} />);
+    expect(screen.getByText("KC").closest("button")?.textContent?.trim()).toBe(
+      "KC",
+    );
   });
 
   it("shows the college, pro, and total score per player", () => {

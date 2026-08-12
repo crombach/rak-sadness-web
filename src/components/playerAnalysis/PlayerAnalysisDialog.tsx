@@ -1,10 +1,11 @@
 import { Combobox } from "@base-ui-components/react/combobox";
 import { Dialog } from "@base-ui-components/react/dialog";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PlayerAnalysis } from "../../types/PlayerAnalysis";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import getClasses from "../../utils/getClasses";
 import getPlayerAnalysis from "../../utils/scoring/getPlayerAnalysis";
+import isWeekOver from "../../utils/scoring/isWeekOver";
 import Button from "../button/Button";
 import { CloseRoundedIcon, UnfoldMoreIcon } from "../icon/Icon";
 import PlayerStatusIcon from "../table/playerName/PlayerStatusIcon";
@@ -44,12 +45,15 @@ export default function PlayerAnalysisDialog({
   onOpenChange,
   player: named,
   scores,
+  week,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** Set where the dialog was opened on one player, by clicking their name. */
   player?: string;
   scores?: RakMadnessScores;
+  /** Which week the scores are for, which a won week is named by. */
+  week?: number;
 }) {
   const [player, setPlayer] = useState<PlayerOption>();
   const [query, setQuery] = useState("");
@@ -97,19 +101,9 @@ export default function PlayerAnalysisDialog({
   // dialog emptying and filling again. Only a rescore takes it away.
   const shown = found?.scores === scores ? found : undefined;
   const isSearching = player != null && shown?.name !== player.name;
-
-  const body = useRef<HTMLDivElement>(null);
-  // The dialog grows to what the answer measures rather than jumping to it. Only
-  // the wrapper carries a height, so the summary inside is laid out as usual.
-  // Hung off the node itself, since the portal holding it mounts after this.
-  const measure = useCallback((content: HTMLDivElement) => {
-    const observer = new ResizeObserver(([entry]) => {
-      if (body.current == null) return;
-      body.current.style.height = `${entry.contentRect.height}px`;
-    });
-    observer.observe(content);
-    return () => observer.disconnect();
-  }, []);
+  // The same question `Standing` asks, off the same scores and the same predicate,
+  // so the header and the answer under it can never disagree about the week.
+  const isOver = isWeekOver(scores?.scores ?? []);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -140,9 +134,12 @@ export default function PlayerAnalysisDialog({
             items={options}
             filteredItems={playersMatching(options, query)}
             itemToStringLabel={(option: PlayerOption) => option.name}
-            onValueChange={(chosen: PlayerOption | null) =>
-              setPlayer(chosen ?? undefined)
-            }
+            // Null arrives when the input is cleared to type another name. The
+            // dialog is opened on a player and answers for one from then on, so
+            // that clears the search rather than the answer under it.
+            onValueChange={(chosen: PlayerOption | null) => {
+              if (chosen != null) setPlayer(chosen);
+            }}
             onInputValueChange={setQuery}
             // The list is short and already on screen, so the first match being
             // highlighted saves an arrow key before Enter.
@@ -154,6 +151,20 @@ export default function PlayerAnalysisDialog({
                 aria-label="Player"
                 className="player-analysis__input"
               />
+              {/*
+                The player named in the input is marked the way the tables mark
+                them, so the search says where they stand before the answer below
+                it has been worked out.
+              */}
+              {player != null && (
+                <span
+                  className={`player-analysis__input-status ${getClasses({
+                    "--knocked-out": player.isKnockedOut,
+                  })}`}
+                >
+                  <PlayerStatusIcon isKnockedOut={player.isKnockedOut} />
+                </span>
+              )}
               <Combobox.Icon className="player-analysis__input-icon">
                 <UnfoldMoreIcon />
               </Combobox.Icon>
@@ -188,21 +199,33 @@ export default function PlayerAnalysisDialog({
             </Combobox.Portal>
           </Combobox.Root>
 
-          <div className="player-analysis__body" ref={body}>
+          <div className="player-analysis__body">
             {isSearching && (
               <span
                 className="player-analysis__progress"
-                role="status"
+                role="progressbar"
+                aria-busy="true"
                 aria-label="Working out the paths"
               />
             )}
-            <div className="player-analysis__content" ref={measure}>
+            {/* Polite, so a new answer replacing the last one is read once the
+                screen reader is free rather than cutting off what it is saying. */}
+            <div className="player-analysis__content" aria-live="polite">
               {/* Read off the scores, so it answers for the player picked before
                   their routes have been worked out. */}
-              <Standing scores={scores} player={player?.name} />
+              <Standing
+                scores={scores}
+                player={player?.name}
+                result={shown?.paths}
+              />
               {/* Keyed on the player, so the answer to a new one plays in rather
                   than replacing the last one in place. */}
-              <AnalysisSummary key={shown?.name} result={shown?.paths} />
+              <AnalysisSummary
+                key={shown?.name}
+                result={shown?.paths}
+                isOver={isOver}
+                week={week}
+              />
             </div>
           </div>
         </Dialog.Popup>

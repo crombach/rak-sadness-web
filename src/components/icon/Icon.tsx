@@ -11,24 +11,15 @@ import "./Icon.scss";
  * fill rules that `SvgIcon` applied, so nothing downstream had to be resized.
  *
  * One shape comes from Material Symbols instead, which that package does not
- * carry. Same icons, same licence, drawn on a taller box, which is what `viewBox`
- * is for.
+ * carry. Same icon, same licence, filled style to match the rest, with its path
+ * data rescaled from Symbols' `0 -960 960 960` box onto the standard one here so
+ * it drops onto the same grid as everything else.
  */
-const SYMBOLS_VIEW_BOX = "0 -960 960 960";
-
-function Icon({
-  name,
-  viewBox = "0 0 24 24",
-  children,
-}: {
-  name: string;
-  viewBox?: string;
-  children: ReactNode;
-}) {
+function Icon({ name, children }: { name: string; children: ReactNode }) {
   return (
     <svg
       className="icon"
-      viewBox={viewBox}
+      viewBox="0 0 24 24"
       aria-hidden="true"
       focusable="false"
       // The name `@mui/icons-material` put here, which the toaster suite looks an
@@ -80,6 +71,14 @@ export function RefreshIcon() {
   );
 }
 
+export function ScreenRotationIcon() {
+  return (
+    <Icon name="ScreenRotationIcon">
+      <path d="M16.48 2.52c3.27 1.55 5.61 4.72 5.97 8.48h1.5C23.44 4.84 18.29 0 12 0l-.66.03 3.81 3.81zm-6.25-.77c-.59-.59-1.54-.59-2.12 0L1.75 8.11c-.59.59-.59 1.54 0 2.12l12.02 12.02c.59.59 1.54.59 2.12 0l6.36-6.36c.59-.59.59-1.54 0-2.12zm4.6 19.44L2.81 9.17l6.36-6.36 12.02 12.02zm-7.31.29C4.25 19.94 1.91 16.76 1.55 13H.05C.56 19.16 5.71 24 12 24l.66-.03-3.81-3.81z" />
+    </Icon>
+  );
+}
+
 export function EmojiEventsIcon() {
   return (
     <Icon name="EmojiEventsIcon">
@@ -88,10 +87,35 @@ export function EmojiEventsIcon() {
   );
 }
 
+/**
+ * The trophy drawn as an outline, which is what a player's status wears. Held
+ * apart from the filled one above, which the footer's link keeps.
+ */
+export function EmojiEventsOutlinedIcon() {
+  return (
+    <Icon name="EmojiEventsOutlinedIcon">
+      <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2M5 8V7h2v3.82C5.84 10.4 5 9.3 5 8m7 6c-1.65 0-3-1.35-3-3V5h6v6c0 1.65-1.35 3-3 3m7-6c0 1.3-.84 2.4-2 2.82V7h2z" />
+    </Icon>
+  );
+}
+
 export function SkullIcon() {
   return (
-    <Icon name="SkullIcon" viewBox={SYMBOLS_VIEW_BOX}>
-      <path d="M240-80v-170q-39-17-68.5-45.5t-50-64.5q-20.5-36-31-77T80-520q0-158 112-259t288-101q176 0 288 101t112 259q0 42-10.5 83t-31 77q-20.5 36-50 64.5T720-250v170H240Zm80-80h40v-80h80v80h80v-80h80v80h40v-142q38-9 67.5-30t50-50q20.5-29 31.5-64t11-74q0-125-88.5-202.5T480-800q-143 0-231.5 77.5T160-520q0 39 11 74t31.5 64q20.5 29 50.5 50t67 30v142Zm100-200h120l-60-120-60 120Zm-80-80q33 0 56.5-23.5T420-520q0-33-23.5-56.5T340-600q-33 0-56.5 23.5T260-520q0 33 23.5 56.5T340-440Zm280 0q33 0 56.5-23.5T700-520q0-33-23.5-56.5T620-600q-33 0-56.5 23.5T540-520q0 33 23.5 56.5T620-440ZM480-160Z" />
+    <Icon name="SkullIcon">
+      <path d="M10.5 15.75h3l-1.5-3-1.5 3Zm-2-2.75q.83 0 1.41-.59T10.5 11q0-.83-.59-1.41T8.5 9q-.83 0-1.41.59T6.5 11q0 .83.59 1.41T8.5 13Zm7 0q.83 0 1.41-.59T17.5 11q0-.83-.59-1.41T15.5 9q-.83 0-1.41.59T13.5 11q0 .83.59 1.41T15.5 13ZM6 22v-4.25q-.98-.43-1.71-1.14t-1.25-1.61q-.51-.9-.78-1.93T2 11q0-3.95 2.8-6.48t7.2-2.53q4.4 0 7.2 2.53t2.8 6.48q0 1.05-.26 2.08t-.78 1.93q-.51.9-1.25 1.61T18 17.75v4.25H15v-2h-2v2h-2v-2h-2v2H6Z" />
+    </Icon>
+  );
+}
+
+/**
+ * The skull as an outline, on the same 24 grid as the filled one above. Both are
+ * Material Symbols, which is where the shape comes from at all, so the two differ
+ * only in the `fill` axis.
+ */
+export function SkullOutlinedIcon() {
+  return (
+    <Icon name="SkullOutlinedIcon">
+      <path d="M6 22v-4.25q-.98-.43-1.71-1.14t-1.25-1.61q-.51-.9-.78-1.93T2 11q0-3.95 2.8-6.48t7.2-2.53q4.4 0 7.2 2.53t2.8 6.48q0 1.05-.26 2.08t-.78 1.93q-.51.9-1.25 1.61T18 17.75v4.25H15v-2h-2v2h-2v-2h-2v2H6Zm2-2h1v-2h2v2h2v-2h2v2h1v-3.55q.95-.22 1.69-.75t1.25-1.25q.51-.72.79-1.6T20.5 11q0-3.13-2.21-5.31Q16.07 3.5 12 3.5T5.71 5.69Q3.5 7.87 3.5 11q0 .97.28 1.85t.79 1.6q.51.72 1.25 1.25T7.5 16.45V20H8Zm2.5-4.25h3l-1.5-3-1.5 3ZM8.5 13q.83 0 1.41-.59T10.5 11q0-.83-.59-1.41T8.5 9q-.83 0-1.41.59T6.5 11q0 .83.59 1.41T8.5 13Zm7 0q.83 0 1.41-.59T17.5 11q0-.83-.59-1.41T15.5 9q-.83 0-1.41.59T13.5 11q0 .83.59 1.41T15.5 13ZM12 12Z" />
     </Icon>
   );
 }
@@ -134,6 +158,14 @@ export function WarningIcon() {
   return (
     <Icon name="WarningIcon">
       <path d="M1 21h22L12 2zm12-3h-2v-2h2zm0-4h-2v-4h2z" />
+    </Icon>
+  );
+}
+
+export function GitHubIcon() {
+  return (
+    <Icon name="GitHubIcon">
+      <path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27" />
     </Icon>
   );
 }

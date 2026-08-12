@@ -28,7 +28,7 @@
 .analysis__note {
   margin: 0;
   color: var(--rak-text-tertiary);
-  font-size: 0.875rem;
+  font-size: var(--rak-text-sm);
   font-style: italic;
 
   // Reads as the end of the routes above it rather than as an aside about them.
@@ -47,7 +47,7 @@
 .analysis__section-title {
   margin: 0;
   color: var(--rak-text-tertiary);
-  font-size: 0.75rem;
+  font-size: var(--rak-text-xs);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -74,8 +74,8 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  font-family: monospace;
-  font-size: 0.875rem;
+  font-family: var(--rak-font-mono);
+  font-size: var(--rak-text-sm);
 }
 
 // One pick reads as a chip of two halves: which game, then what to back in it.
@@ -85,7 +85,7 @@
   gap: var(--rak-pick-gap);
   padding: 4px var(--rak-pick-inset);
   border-radius: var(--rak-radius-sm);
-  background-color: var(--rak-level1);
+  background-color: var(--rak-fill-subtle);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -121,7 +121,7 @@
   // Drawn on the left alone, so a stack of routes reads as a list of alternatives
   // rather than as a stack of boxes.
   border-inline-start: var(--rak-border-width) solid var(--rak-gold-500);
-  background-color: var(--rak-level1);
+  background-color: var(--rak-fill-subtle);
 }
 
 .analysis__route {
@@ -156,7 +156,7 @@
 .analysis__line {
   margin: 0;
   color: var(--rak-text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--rak-text-sm);
 }
 
 // Set like the picks above it, in under their text. A screen too narrow for the
@@ -169,7 +169,7 @@
   gap: 0 var(--rak-pick-gap);
   padding-inline-start: var(--rak-pick-inset);
   color: var(--rak-text);
-  font-family: monospace;
+  font-family: var(--rak-font-mono);
   font-weight: 600;
 }
 

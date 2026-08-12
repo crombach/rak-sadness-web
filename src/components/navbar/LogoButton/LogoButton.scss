@@ -8,7 +8,8 @@
   &__logo {
     width: 20px;
     height: 20px;
-    filter: url(#logo-button-outline);
+    // The matching `<filter>` id is unique per instance, set inline in
+    // `LogoButton.tsx` rather than here, where it would have to be static.
   }
 
   // Reads as the navbar's own heading rather than as button text, which is what

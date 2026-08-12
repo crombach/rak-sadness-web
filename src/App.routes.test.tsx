@@ -42,7 +42,7 @@ describe("the app, week routes", () => {
   });
 
   const crown = () =>
-    within(screen.getByRole("table")).queryByTestId("EmojiEventsIcon");
+    within(screen.getByRole("table")).queryByTestId("EmojiEventsOutlinedIcon");
 
   it("crowns a player still standing at the end of the week", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
@@ -88,17 +88,22 @@ describe("the app, week routes", () => {
     expect(document.querySelector(".table.--skeleton")).not.toBeInTheDocument();
   });
 
-  it("shows every navbar button disabled while the week loads", async () => {
+  it("shows every navbar button unavailable while the week loads", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
     mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
 
-    // Scoreboard, picks, and refresh.
+    // Scoreboard, picks, and refresh. `aria-disabled`, not `disabled`: they keep
+    // their place in the tab order while there is nothing to switch between.
     const loading = scoresHeaderButtons();
     expect(loading).toHaveLength(3);
-    loading.forEach((button) => expect(button).toBeDisabled());
+    loading.forEach((button) =>
+      expect(button).toHaveAttribute("aria-disabled", "true"),
+    );
 
     await screen.findByText("MNF Points Pick");
-    scoresHeaderButtons().forEach((button) => expect(button).toBeEnabled());
+    scoresHeaderButtons().forEach((button) =>
+      expect(button).not.toHaveAttribute("aria-disabled"),
+    );
   });
 
   it("fills the wireframe with rows down to the bottom of the viewport", async () => {

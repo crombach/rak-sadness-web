@@ -1,0 +1,21 @@
+// Mixins only, so this emits no CSS of its own however many files pull it in.
+
+/**
+ * Read by a screen reader, drawn nowhere. For the word behind a fill or an icon
+ * that carries meaning on its own, and for a heading a page needs but does not
+ * show.
+ *
+ * Clipped to a single pixel rather than hidden, because `display: none` and
+ * `visibility: hidden` both take the text out of the accessibility tree too.
+ */
+@mixin visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

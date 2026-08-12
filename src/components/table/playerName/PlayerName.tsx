@@ -13,13 +13,20 @@ function PlayerName({ player }: { player: PlayerScore }) {
       className={`table__player-col ${getClasses({
         "--knocked-out": player.status.isKnockedOut,
       })}`}
-      role="button"
-      onClick={() => showPlayerAnalysis(player.name)}
     >
-      <div className="player-name">
-        <span className="player-name__name">{player.name}</span>
-        <PlayerStatusIcon isKnockedOut={player.status.isKnockedOut} />
-      </div>
+      <button
+        type="button"
+        className="table__cell-button"
+        onClick={() => showPlayerAnalysis(player.name)}
+      >
+        <span className="player-name">
+          <span className="player-name__name">{player.name}</span>
+          <PlayerStatusIcon isKnockedOut={player.status.isKnockedOut} />
+        </span>
+        <span className="table__sr-only">
+          {player.status.isKnockedOut ? "Knocked out" : "Still in contention"}
+        </span>
+      </button>
     </td>
   );
 }

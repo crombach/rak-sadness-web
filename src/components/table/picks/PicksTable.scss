@@ -1,13 +1,19 @@
+// A pick's fill is the ramp its status already has elsewhere in the app: a right
+// pick is the success green, a wrong one the danger red, one that cannot be scored
+// the warning yellow. Naming the fill is all a cell does. `Table.scss` paints it,
+// and derives the even-row stripe from it.
 .table {
   tbody {
-    @each $status in yes, no, error {
-      .table__pick.--#{$status} {
-        background-color: var(--rak-pick-#{$status});
-      }
+    .table__pick.--yes {
+      --rak-cell-fill: var(--rak-success-300);
+    }
 
-      tr:nth-child(even) .table__pick.--#{$status} {
-        background-color: var(--rak-pick-#{$status}-dark);
-      }
+    .table__pick.--no {
+      --rak-cell-fill: var(--rak-danger-300);
+    }
+
+    .table__pick.--error {
+      --rak-cell-fill: var(--rak-warning-300);
     }
   }
 }

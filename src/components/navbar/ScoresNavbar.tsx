@@ -1,6 +1,5 @@
 import { CSSProperties, useEffect, useState } from "react";
 import { FactCheckIcon, LeaderboardIcon, RefreshIcon } from "../icon/Icon";
-import getClasses from "../../utils/getClasses";
 import Button from "../button/Button";
 import "./ScoresNavbar.scss";
 
@@ -43,34 +42,40 @@ export default function ScoresNavbar({
   }, [isWeekLive, isLiveMounted]);
 
   return (
-    <>
+    // The two views are the only way through the results, so they are navigation
+    // rather than a pair of loose buttons.
+    <nav className="home__scores-nav" aria-label="Results view">
+      {/*
+        `aria-disabled` rather than `disabled` while a week loads. The buttons sit
+        where they will sit, showing the view the URL already names, and keep both
+        their place in the tab order and their own look until there is something
+        to switch between.
+      */}
       <Button
-        disabled={disabled}
+        ariaDisabled={disabled}
+        compact
+        selected={view === "Scoreboard"}
         onClick={() => onViewChange("Scoreboard")}
-        className={`home__scores-header-button ${getClasses({
-          "--active": view === "Scoreboard",
-        })}`}
+        className="home__scores-header-button"
       >
         <LeaderboardIcon />
-        {/* Hidden by the stylesheet on a narrow screen, where the icon has to
-            carry the button on its own. */}
+        {/* Drawn only where the navbar has room, and read by a screen reader
+            everywhere, so the button is never nameless. */}
         <span className="home__scores-header-label">Scoreboard</span>
       </Button>
       <Button
-        disabled={disabled}
+        ariaDisabled={disabled}
+        compact
+        selected={view === "Picks"}
         onClick={() => onViewChange("Picks")}
-        className={`home__scores-header-button ${getClasses({
-          "--active": view === "Picks",
-        })}`}
+        className="home__scores-header-button"
       >
         <FactCheckIcon />
         <span className="home__scores-header-label">Picks</span>
       </Button>
       {isLiveMounted && (
         <div
-          className={`home__scores-header-live ${getClasses({
-            "--collapsed": !isWeekLive,
-          })}`}
+          className={`home__scores-header-live ${isWeekLive ? "" : "--collapsed"}`}
           style={
             {
               "--collapse-duration": `${COLLAPSE_DURATION_MS}ms`,
@@ -84,17 +89,17 @@ export default function ScoresNavbar({
             <div className="home__scores-header-divider" />
             <Button
               ariaLabel="Refresh"
-              disabled={disabled}
+              ariaDisabled={disabled}
+              busy={isRefreshing}
+              compact
               onClick={onRefresh}
-              className={`home__scores-header-button ${getClasses({
-                "--spinning": isRefreshing,
-              })}`}
+              className="home__scores-header-button"
             >
               <RefreshIcon />
             </Button>
           </div>
         </div>
       )}
-    </>
+    </nav>
   );
 }

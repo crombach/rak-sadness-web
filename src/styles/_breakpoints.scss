@@ -1,41 +1,75 @@
 // Sass rather than a custom property, because custom properties do not work
 // inside a media query. Variables and mixins only, so this emits no CSS of its
 // own however many files pull it in.
-
-$breakpoint-narrow: 400px;
+//
+// Every mixin here is `min-width`. A phone gets the base rules, and wider screens
+// opt into what the extra room allows. Written the other way round, the floor a
+// finger needs would be the exception rather than the default.
 
 /**
- * Below this the navbar cannot hold the app name and three labelled buttons at
+ * Above the widest phone held in portrait. Below it the tables and the navbar
+ * tighten up and every target is a full `--rak-touch-target`. Measured against
+ * the flagships, whose logical widths run to 440px.
+ */
+$breakpoint-roomy: 481px;
+
+/**
+ * Above this the navbar can hold the app name and three labelled buttons at
  * once. Measured: with the labels showing, the name wraps to three lines at 540px
  * and to two at 560px.
  */
-$breakpoint-crowded-navbar: 560px;
+$breakpoint-labelled-navbar: 561px;
 
 /**
- * Below this a dialog centered in the viewport leaves too little either side of it
- * to read as a window, and belongs on the bottom edge as a sheet instead. Wider
+ * Above this a dialog centered in the viewport leaves enough either side of it to
+ * read as a window. Below it belongs on the bottom edge as a sheet instead. Wider
  * than the navbar breakpoints, because this is about the width of a paragraph
  * rather than about what fits in one bar.
  */
-$breakpoint-compact: 600px;
+$breakpoint-wide: 601px;
 
-/** Phone-width screens, where the tables and navbar tighten up. */
-@mixin narrow-screen {
-  @media (max-width: $breakpoint-narrow) {
+/** Room enough for the tables and the navbar to loosen up. */
+@mixin roomy-screen {
+  @media (min-width: $breakpoint-roomy) {
     @content;
   }
 }
 
-/** Too little room for the navbar to label its buttons. */
-@mixin crowded-navbar {
-  @media (max-width: $breakpoint-crowded-navbar) {
+/** Room enough for the navbar to label its buttons. */
+@mixin labelled-navbar {
+  @media (min-width: $breakpoint-labelled-navbar) {
     @content;
   }
 }
 
-/** Too little room to center a dialog, so it rises from the bottom edge. */
-@mixin compact-screen {
-  @media (max-width: $breakpoint-compact) {
+/** Room enough to center a dialog, rather than stand it on the bottom edge. */
+@mixin wide-screen {
+  @media (min-width: $breakpoint-wide) {
+    @content;
+  }
+}
+
+/**
+ * A phone turned on its side. The height is what tells it apart from a tablet or
+ * a window: every phone in landscape is under 500px tall, and the shortest tablet
+ * is well over it.
+ *
+ * The app is portrait only. A week of picks is a wide table under a bar of
+ * controls, and a phone on its side has no room for either.
+ */
+@mixin phone-landscape {
+  @media (orientation: landscape) and (max-height: 500px) {
+    @content;
+  }
+}
+
+/**
+ * A pointer that can hover. Touch reports `:hover` on the last thing tapped and
+ * holds it there, so a hover fill left unguarded reads as a selection the app
+ * does not have.
+ */
+@mixin can-hover {
+  @media (hover: hover) and (pointer: fine) {
     @content;
   }
 }

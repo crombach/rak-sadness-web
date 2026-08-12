@@ -1,30 +1,35 @@
+@use "../../styles/breakpoints" as *;
+@use "../../styles/focus" as *;
+@use "../../styles/skeleton" as *;
+
 .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  // The `--loading-btn` shimmer is an absolutely positioned ::after, so it
-  // needs this element as its containing block.
+  gap: var(--rak-space-2);
+  // Containing block for the loading sheen, which is taken out of flow.
   position: relative;
   overflow: hidden;
-  min-height: 36px;
-  padding: 6px 16px;
+  // A finger's worth of button by default, everywhere. The exceptions below are
+  // smaller on purpose and stay above the 24px floor.
+  min-height: var(--rak-touch-target);
+  padding: var(--rak-space-2) var(--rak-space-4);
   border: none;
   border-radius: var(--rak-radius-sm);
   font-family: inherit;
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1.5;
+  font-size: var(--rak-text-sm);
+  font-weight: var(--rak-weight-semibold);
+  line-height: var(--rak-line-height);
   cursor: pointer;
   transition:
-    background-color 120ms ease,
-    color 120ms ease;
+    background-color var(--rak-duration-fast) var(--rak-ease-standard),
+    color var(--rak-duration-fast) var(--rak-ease-standard);
 
-  &:focus-visible {
-    outline: 2px solid var(--rak-primary-500);
-    outline-offset: 2px;
-  }
+  @include focus-ring;
 
+  // Only a real `disabled` greys out. `aria-disabled` says the button is waiting
+  // on something rather than unavailable, and a control that is about to work
+  // should not look like one that never will.
   &:disabled {
     cursor: default;
     background-color: var(--rak-disabled-bg);
@@ -32,9 +37,14 @@
   }
 
   &.--sm {
-    min-height: 32px;
-    padding: 2px 6px;
-    border-radius: 3px;
+    min-height: 2.25rem;
+    padding: var(--rak-space-1) var(--rak-space-2);
+    border-radius: var(--rak-radius-xs);
+  }
+
+  // Held tighter than the default, for a bar with more buttons than room.
+  &.--compact {
+    padding-inline: var(--rak-space-3);
   }
 
   // Icon-only buttons should stay square rather than stretch to the text width.
@@ -47,23 +57,34 @@
   // more specific than `&:disabled`, so without that the disabled fill loses.
   &.--solid:not(:disabled) {
     color: var(--rak-on-solid);
+    // A ring in the app's own primary cannot be seen on a fill in the app's own
+    // primary, and the offset gap shows that fill too.
+    --rak-focus-ring: var(--rak-on-solid);
 
     &.--primary {
       background-color: var(--rak-primary-500);
 
-      &:hover {
-        background-color: var(--rak-primary-600);
+      @include can-hover {
+        &:hover {
+          background-color: var(--rak-primary-600);
+        }
       }
       &:active {
         background-color: var(--rak-primary-700);
+      }
+      // Held by the route rather than the pointer, so it has to come after both.
+      &.--selected {
+        background-color: var(--rak-primary-800);
       }
     }
 
     &.--success {
       background-color: var(--rak-success-500);
 
-      &:hover {
-        background-color: var(--rak-success-600);
+      @include can-hover {
+        &:hover {
+          background-color: var(--rak-success-600);
+        }
       }
       &:active {
         background-color: var(--rak-success-700);
@@ -73,13 +94,28 @@
     &.--danger {
       background-color: var(--rak-danger-500);
 
-      &:hover {
-        background-color: var(--rak-danger-600);
+      @include can-hover {
+        &:hover {
+          background-color: var(--rak-danger-600);
+        }
       }
       &:active {
         background-color: var(--rak-danger-700);
       }
     }
+  }
+
+  // Which one is chosen, said in something other than a fill one step from its
+  // neighbours': a rule under the button, on the edge it shares with the page.
+  &.--selected::before {
+    content: "";
+    position: absolute;
+    left: var(--rak-space-2);
+    right: var(--rak-space-2);
+    bottom: 0;
+    height: var(--rak-border-width);
+    border-radius: var(--rak-border-width) var(--rak-border-width) 0 0;
+    background-color: var(--rak-on-solid);
   }
 
   // Soft buttons inherit the surrounding tint, which is how the toast close
@@ -88,11 +124,20 @@
     background-color: transparent;
     color: inherit;
 
-    &:hover {
-      background-color: rgb(0 0 0 / 8%);
+    @include can-hover {
+      &:hover {
+        background-color: var(--rak-state-hover);
+      }
     }
     &:active {
-      background-color: rgb(0 0 0 / 16%);
+      background-color: var(--rak-state-press);
     }
+  }
+
+  // The button's own work is running. The label stays, because the user pressed
+  // this and nothing else on screen has changed yet, so a wireframe here would
+  // take away the only thing that says what they pressed.
+  &.--busy {
+    @include skeleton-sheen;
   }
 }

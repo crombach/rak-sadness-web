@@ -20,8 +20,8 @@ const PLAYER_COUNT = 61;
  * stays out of the DOM's text so nothing reads or matches a placeholder.
  */
 const RANK = "10";
-/** Twenty characters, the longest a real name gets before it is cut short. */
-const PLAYER = "Why is the Runn Gone";
+/** Eighteen characters, the longest a real name gets before it is cut short. */
+const PLAYER = "Why is the Runn Go";
 const PICK = "TCU -13.5";
 const SCORE = "10";
 
@@ -79,37 +79,49 @@ function SkeletonTable({ view }: { view: ScoresView }) {
   const columns = view === "Picks" ? PICKS_COLUMNS : SCOREBOARD_COLUMNS;
 
   return (
-    <TableShell
-      className="--skeleton"
-      columnCount={columns.length}
-      header={columns.map((column, index) => (
-        // A game's header is sized by `table__pick-header`'s own minimum, the way
-        // the real one is, so it needs no stand-in text.
-        <th
-          key={index}
-          data-skeleton-text={column.isPick ? undefined : column.header}
-        >
-          {column.isPick && <span className="table__pick-header" />}
-          <span className="skeleton__bar" />
-        </th>
-      ))}
-    >
-      {Array.from({ length: PLAYER_COUNT }, (_, row) => (
-        <tr key={row}>
-          {columns.map((column, index) => (
-            <td
-              key={index}
-              className={
-                column.isPick ? "table__center table__pick" : undefined
-              }
-              data-skeleton-text={column.cell}
-            >
-              <span className="skeleton__bar" />
-            </td>
-          ))}
-        </tr>
-      ))}
-    </TableShell>
+    <>
+      {/*
+        A screen reader has nothing to read out of the wireframe below, hidden
+        entirely, so this says what it stands in for instead.
+      */}
+      <span className="skeleton__status" role="status">
+        Loading {view.toLowerCase()} results
+      </span>
+      <TableShell
+        className="--skeleton"
+        columnCount={columns.length}
+        ariaBusy
+        ariaHidden
+        header={columns.map((column, index) => (
+          // A game's header is sized by `table__pick-header`'s own minimum, the way
+          // the real one is, so it needs no stand-in text.
+          <th
+            key={index}
+            scope="col"
+            data-skeleton-text={column.isPick ? undefined : column.header}
+          >
+            {column.isPick && <span className="table__pick-header" />}
+            <span className="skeleton__bar" />
+          </th>
+        ))}
+      >
+        {Array.from({ length: PLAYER_COUNT }, (_, row) => (
+          <tr key={row}>
+            {columns.map((column, index) => (
+              <td
+                key={index}
+                className={
+                  column.isPick ? "table__center table__pick" : undefined
+                }
+                data-skeleton-text={column.cell}
+              >
+                <span className="skeleton__bar" />
+              </td>
+            ))}
+          </tr>
+        ))}
+      </TableShell>
+    </>
   );
 }
 

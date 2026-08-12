@@ -110,8 +110,20 @@ describe("PlayerAnalysisDialog", () => {
     await user.type(search, "Ali");
     await user.click(await screen.findByRole("option", { name: "Alice" }));
 
+    // Announced as busy while the search runs, on the region a screen reader
+    // reads politely once the answer replaces it.
+    expect(
+      screen.getByRole("progressbar", { name: "Working out the paths" }),
+    ).toHaveAttribute("aria-busy", "true");
+    expect(document.querySelector(".player-analysis__content")).toHaveAttribute(
+      "aria-live",
+      "polite",
+    );
+
     // The search runs a frame after the bar that says it is under way.
     const mustWin = await screen.findByRole("heading", { name: "Must win" });
+    // The bar goes with the answer arriving, rather than sitting over it.
+    expect(screen.queryByRole("progressbar")).toBeNull();
     const pick = within(mustWin.parentElement as HTMLElement).getByRole(
       "listitem",
     );
@@ -129,10 +141,7 @@ describe("PlayerAnalysisDialog", () => {
     );
 
     expect(
-      await screen.findByText("Bobby cannot win this week."),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Knocked out on Total Score by Alice."),
+      await screen.findByText("Knocked out on Total Score by Alice."),
     ).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "Player" })).toHaveValue(
       "Bobby",

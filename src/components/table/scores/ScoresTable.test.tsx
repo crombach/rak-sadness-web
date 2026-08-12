@@ -65,27 +65,35 @@ describe("ScoresTable", () => {
     ]);
   });
 
+  it("marks every header cell with its column scope", () => {
+    mountTable(bothPlayers);
+    screen
+      .getAllByRole("columnheader")
+      .forEach((header) => expect(header).toHaveAttribute("scope", "col"));
+  });
+
+  it("names the table for a screen reader", () => {
+    mountTable(bothPlayers);
+    expect(screen.getByRole("table")).toHaveAccessibleName(
+      "Player rankings for the week, by total score",
+    );
+  });
+
   it("renders one row per player, in the order given", () => {
     mountTable(bothPlayers);
     const names = screen
       .getAllByRole("button")
-      .map((cell) => cell.textContent?.trim());
+      .map((cell) => cell.querySelector(".player-name__name")?.textContent);
     expect(names).toEqual(["Alice", "Bob"]);
   });
 
   it("renders each player's rank and scores", () => {
     mountTable(bothPlayers);
     const cells = screen.getAllByRole("row")[1].querySelectorAll("td, th");
-    expect(Array.from(cells).map((cell) => cell.textContent?.trim())).toEqual([
-      "1",
-      "Alice",
-      "41",
-      "0",
-      "1",
-      "2",
-      "1",
-      "3",
-    ]);
+    const texts = Array.from(cells).map((cell) =>
+      (cell.querySelector(".player-name__name") ?? cell).textContent?.trim(),
+    );
+    expect(texts).toEqual(["1", "Alice", "41", "0", "1", "2", "1", "3"]);
   });
 
   it("shows N/A when a player has no tiebreaker pick", () => {
@@ -106,13 +114,21 @@ describe("ScoresTable", () => {
   it("marks a knocked-out player's name cell", () => {
     mountTable(bothPlayers);
     const [alice, bob] = screen.getAllByRole("button");
-    expect(alice.className).not.toContain("--knocked-out");
-    expect(bob.className).toContain("--knocked-out");
+    expect(alice.closest("td")?.className).not.toContain("--knocked-out");
+    expect(bob.closest("td")?.className).toContain("--knocked-out");
   });
 
   it("opens the player analysis when a name is clicked", async () => {
     mountTable(bothPlayers);
     await userEvent.click(screen.getByRole("button", { name: /Bob/ }));
     expect(showPlayerAnalysis).toHaveBeenCalledWith("Bob");
+  });
+
+  // `PlayerName` draws this for both tables, so only one of them checks it.
+  it("announces a player's status for a screen reader", () => {
+    mountTable(bothPlayers);
+    const [alice, bob] = screen.getAllByRole("button");
+    expect(alice).toHaveTextContent("Still in contention");
+    expect(bob).toHaveTextContent("Knocked out");
   });
 });

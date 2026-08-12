@@ -20,4 +20,10 @@ describe("Footer", () => {
       expect(link).toHaveAttribute("rel", "noreferrer");
     });
   });
+
+  it("names each link by its text, not the decorative icon beside it", () => {
+    render(<Footer />);
+    expect(screen.getByRole("link", { name: "Standings" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "GitHub" })).toBeInTheDocument();
+  });
 });

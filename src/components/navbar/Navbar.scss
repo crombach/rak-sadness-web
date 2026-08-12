@@ -6,27 +6,30 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  z-index: 999;
-  box-shadow: var(--rak-shadow-xs);
+  z-index: var(--rak-z-navbar);
+  box-shadow: var(--rak-shadow-raised);
   background-color: var(--rak-primary-500);
   color: var(--rak-on-solid);
+  // Every button in here sits on the app's own primary, which a ring in that same
+  // primary cannot be seen against.
+  --rak-focus-ring: var(--rak-on-solid);
 }
 
 .navbar__content {
-  height: 60px;
+  min-height: 3.75rem;
   width: min(1024px, 100%);
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   display: flex;
-  gap: 12px;
-  padding: 12px;
+  // Tighter than a desktop's, because on a phone the room is better spent on the
+  // buttons than around them.
+  gap: var(--rak-space-1);
+  padding: var(--rak-space-2);
 
-  @include narrow-screen {
-    gap: 4px;
-    // Tighter than a desktop's, because on a phone the room is better spent on
-    // the buttons than around them.
-    padding: 6px;
+  @include roomy-screen {
+    gap: var(--rak-space-3);
+    padding: var(--rak-space-3);
   }
 }
 
@@ -34,38 +37,25 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 12px;
-  font-weight: bold;
+  gap: var(--rak-space-3);
+  font-weight: var(--rak-weight-bold);
+  // The app name does not wrap, so without this the name pushes the buttons off
+  // a 320px screen rather than giving up its own room.
+  min-width: 0;
+  overflow: hidden;
 }
 
 .navbar__content-right {
   display: flex;
   flex-direction: row;
   align-items: center;
+  flex: 0 0 auto;
   // Named because `ScoresNavbar` cancels it with a negative margin while the
   // refresh button collapses, and a gap around nothing would otherwise remain.
-  --navbar-gap: 12px;
+  --navbar-gap: var(--rak-space-1);
   gap: var(--navbar-gap);
 
-  @include narrow-screen {
-    --navbar-gap: 4px;
-  }
-}
-
-// Narrower than a desktop's, from the width the buttons lose their labels, so the
-// app name beside them keeps its one line.
-@include crowded-navbar {
-  .navbar__content .button {
-    // !important because this ties on specificity with `.button.--sm` and
-    // `.button.--icon`, and which one wins would come down to the order the two
-    // stylesheets happen to be imported in.
-    padding-inline: 12px !important;
-  }
-}
-
-@include narrow-screen {
-  .navbar__content .button {
-    // A finger's worth of button on a phone, where these are the only controls.
-    min-height: 44px;
+  @include roomy-screen {
+    --navbar-gap: var(--rak-space-3);
   }
 }

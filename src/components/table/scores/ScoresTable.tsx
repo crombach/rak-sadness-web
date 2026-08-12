@@ -12,17 +12,20 @@ function ScoresTable({ scores }: { scores?: RakMadnessScores | null }) {
 
   return (
     <TableShell
+      caption="Player rankings for the week, by total score"
       columnCount={COLUMN_COUNT}
       header={
         <>
-          <th>Rank</th>
-          <th className="table__player-col">Player</th>
-          <th>MNF Points Pick</th>
-          <th>MNF Points Distance</th>
-          <th>College Score</th>
-          <th>Pro Score</th>
-          <th>Pro Score ATS</th>
-          <th>Total Score</th>
+          <th scope="col">Rank</th>
+          <th className="table__player-col" scope="col">
+            Player
+          </th>
+          <th scope="col">MNF Points Pick</th>
+          <th scope="col">MNF Points Distance</th>
+          <th scope="col">College Score</th>
+          <th scope="col">Pro Score</th>
+          <th scope="col">Pro Score ATS</th>
+          <th scope="col">Total Score</th>
         </>
       }
     >

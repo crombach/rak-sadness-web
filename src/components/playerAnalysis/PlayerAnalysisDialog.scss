@@ -1,4 +1,5 @@
 @use "../../styles/breakpoints" as *;
+@use "../../styles/focus" as *;
 @use "../../styles/listbox" as *;
 
 // Base UI ships the dialog and the combobox unstyled, so these rules carry the
@@ -7,8 +8,8 @@
 .player-analysis__backdrop {
   position: fixed;
   inset: 0;
-  z-index: 1000;
-  background-color: rgb(21 21 21 / 45%);
+  z-index: var(--rak-z-modal);
+  background-color: var(--rak-scrim);
   transition: opacity 200ms ease;
 
   &[data-starting-style],
@@ -17,21 +18,25 @@
   }
 }
 
+// A sheet on the bottom edge, which is what a screen too narrow to leave a margin
+// either side of a centered window gets. Told apart here rather than in the
+// component, because every other screen split in the app is drawn this way.
 .player-analysis__popup {
   position: fixed;
-  z-index: 1001;
+  z-index: calc(var(--rak-z-modal) + 1);
   display: flex;
   flex-direction: column;
   gap: 16px;
-  top: 50%;
-  left: 50%;
-  width: min(640px, calc(100vw - 32px));
-  max-height: min(680px, calc(100dvh - 64px));
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-height: 85dvh;
   padding: 20px;
-  border-radius: var(--rak-radius-lg);
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  border-radius: var(--rak-radius-lg) var(--rak-radius-lg) 0 0;
   background-color: var(--rak-surface);
-  box-shadow: var(--rak-shadow-md);
-  transform: translate(-50%, -50%);
+  box-shadow: var(--rak-shadow-modal);
   transition:
     opacity 200ms ease,
     transform 200ms ease;
@@ -40,12 +45,14 @@
     outline: none;
   }
 
-  // Held apart from the resting rule above, so the sheet below can replace both
-  // ends of the transition without inheriting a centered transform.
+  // Held apart from the resting rule above, so the window below can replace both
+  // ends of the transition rather than inherit a slide.
   &[data-starting-style],
   &[data-ending-style] {
-    opacity: 0;
-    transform: translate(-50%, -46%);
+    // Only the slide, so a sheet on its way in is not also faded. The travel reads
+    // as the whole animation at this size.
+    opacity: 1;
+    transform: translateY(100%);
   }
 }
 
@@ -59,7 +66,7 @@
 .player-analysis__title {
   margin: 0;
   color: var(--rak-primary-700);
-  font-size: 1.25rem;
+  font-size: var(--rak-text-lg);
   font-weight: 700;
 }
 
@@ -71,12 +78,10 @@
   border: 1px solid var(--rak-border);
   border-radius: var(--rak-radius-sm);
   background-color: var(--rak-on-solid);
-  box-shadow: var(--rak-shadow-xs);
 
-  &:focus-within {
-    outline: 2px solid var(--rak-primary-500);
-    outline-offset: 2px;
-  }
+  // On the shell rather than on the input inside it, so the ring goes round the
+  // whole search including its icons.
+  @include focus-ring(":focus-within");
 }
 
 .player-analysis__input {
@@ -87,7 +92,7 @@
   background-color: transparent;
   color: var(--rak-text-secondary);
   font-family: inherit;
-  font-size: 1rem;
+  font-size: var(--rak-text-md);
   line-height: 1.5;
 
   &:focus {
@@ -101,9 +106,21 @@
   color: var(--rak-text-tertiary);
 }
 
+// The status of the player named in the input, in the hue the list marks them
+// with, so the search reads the same way whether it is open or closed.
+.player-analysis__input-status {
+  display: flex;
+  align-items: center;
+  --rak-player-icon-fill: var(--rak-in-contention-on-light);
+
+  &.--knocked-out {
+    --rak-player-icon-fill: var(--rak-knocked-out-on-light);
+  }
+}
+
 .player-analysis__positioner {
   // Above the dialog it opens inside of, which the backdrop already sits under.
-  z-index: 1002;
+  z-index: calc(var(--rak-z-modal) + 2);
   max-height: var(--available-height);
 }
 
@@ -124,10 +141,10 @@
 
   justify-content: space-between;
   gap: var(--rak-player-icon-gap);
-  --rak-player-icon-fill: var(--rak-in-contention-text);
+  --rak-player-icon-fill: var(--rak-in-contention-on-light);
 
   &.--knocked-out {
-    --rak-player-icon-fill: var(--rak-knocked-out-text);
+    --rak-player-icon-fill: var(--rak-knocked-out-on-light);
   }
 
   // One line however long the name is. The popup is not monospace, so it is cut
@@ -143,29 +160,33 @@
 .player-analysis__empty {
   padding: 8px 12px;
   color: var(--rak-text-tertiary);
-  font-size: 0.875rem;
+  font-size: var(--rak-text-sm);
+
+  // Base UI keeps this mounted as a live region and empties it while the list has
+  // matches. Left padded, it stands over the first name as a blank band.
+  &:empty {
+    padding: 0;
+  }
 }
 
-// Its height is set from what the content inside measures, so the dialog grows
-// and shrinks with the answer. Shrinking is what makes it scroll, once the popup
-// has no more room to give. Measured without the padding and the rule, which
-// `content-box` keeps outside the height set on it.
+// Sized to the answer, and capped by the popup above it. A tall floor would
+// leave a two-line answer sitting over an empty half-screen, and the answers
+// that need the room scroll instead.
 .player-analysis__body {
   // How far the answer stands off the rule above it, which the progress bar reads
   // back to sit on that rule without moving the answer.
   --rak-analysis-inset: 16px;
 
-  box-sizing: content-box;
+  box-sizing: border-box;
   flex: 0 1 auto;
   min-height: 0;
   padding-top: var(--rak-analysis-inset);
   // Everything under here scrolls. Only the search above it holds still.
-  border-top: 1px solid var(--rak-border);
+  border-top: var(--rak-border-width-hairline) solid var(--rak-divider);
   overflow-y: auto;
-
-  @media (prefers-reduced-motion: no-preference) {
-    transition: height 220ms ease;
-  }
+  // The room a scrollbar needs, held whether or not there is one, so an answer
+  // long enough to scroll does not narrow the one that was on screen before it.
+  scrollbar-gutter: stable;
 }
 
 // The standing reads as a title over what follows, so it sits the same distance
@@ -178,8 +199,8 @@
 
 // A bar on the rule above it while the next answer is worked out, in place of
 // anything that would move the answer still on screen. Stuck to the rule so
-// scrolling cannot carry it off, and pulled back out of the flow by its own height,
-// so what the body measures is the answer alone.
+// scrolling cannot carry it off, and pulled back out of the flow by its own
+// height, so it does not push the answer below it down the page.
 $bar-height: 2px;
 
 .player-analysis__progress {
@@ -194,7 +215,7 @@ $bar-height: 2px;
   margin-top: calc(-1 * var(--rak-analysis-inset));
   margin-bottom: calc(var(--rak-analysis-inset) - #{$bar-height});
   overflow: hidden;
-  background-color: var(--rak-neutral-200);
+  background-color: var(--rak-fill-subtle);
 
   &::after {
     content: "";
@@ -224,27 +245,24 @@ $bar-height: 2px;
   }
 }
 
-@include compact-screen {
-  // A sheet on the bottom edge, where a centered window would leave no margin
-  // either side of it. The same dialog, told apart here rather than in the
-  // component, because every other screen split in the app is drawn this way.
+// Room enough either side of it to read as a window, so the sheet above stands up
+// and centers itself.
+@include wide-screen {
   .player-analysis__popup {
-    top: auto;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    max-height: 85dvh;
-    padding-bottom: calc(20px + env(safe-area-inset-bottom));
-    border-radius: var(--rak-radius-lg) var(--rak-radius-lg) 0 0;
-    transform: none;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    width: min(640px, calc(100vw - 32px));
+    max-height: min(680px, calc(100dvh - 64px));
+    padding-bottom: 20px;
+    border-radius: var(--rak-radius-lg);
+    transform: translate(-50%, -50%);
 
     &[data-starting-style],
     &[data-ending-style] {
-      // Only the slide, so a sheet on its way in is not also faded. The travel
-      // reads as the whole animation at this size.
-      opacity: 1;
-      transform: translateY(100%);
+      opacity: 0;
+      transform: translate(-50%, -46%);
     }
   }
 }

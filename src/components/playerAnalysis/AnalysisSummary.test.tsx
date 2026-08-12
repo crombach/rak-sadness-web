@@ -20,6 +20,13 @@ function under(title: string): Array<string> {
     .map((item) => item.textContent ?? "");
 }
 
+/** The one tiebreaker range the cases below need: beat Rak on 45 points. */
+const RAK_BY_45 = {
+  kind: "range" as const,
+  max: 45,
+  contenders: ["Rak"],
+};
+
 const base = {
   kind: "paths" as const,
   player: "Alice",
@@ -50,23 +57,15 @@ describe("Standing", () => {
     scores: [player("Rak", 3, "KC -3"), player("Alice", 1, "DEN +3")],
   };
 
-  it("names the leader and their score before anyone is picked", () => {
-    render(<Standing scores={scores} />);
+  it("says nothing until the scores hold the player picked", () => {
+    // A name the week does not hold, then a name with no week behind it yet.
+    const { container: withoutPlayer } = render(
+      <Standing scores={scores} player="Nobody" />,
+    );
+    expect(withoutPlayer).toBeEmptyDOMElement();
 
-    expect(
-      screen.getByText("Rak leads with 3 points · 1 game still to play"),
-    ).toBeInTheDocument();
-  });
-
-  it("counts the leaders where the top is shared", () => {
-    const tied: RakMadnessScores = {
-      scores: [...scores.scores, player("Bill", 3, "KC -3")],
-    };
-    render(<Standing scores={tied} />);
-
-    expect(
-      screen.getByText("2 players lead with 3 points · 1 game still to play"),
-    ).toBeInTheDocument();
+    const { container: withoutScores } = render(<Standing player="Rak" />);
+    expect(withoutScores).toBeEmptyDOMElement();
   });
 
   it("counts the player picked back to the leader", () => {
@@ -85,7 +84,175 @@ describe("Standing", () => {
     ).toBeInTheDocument();
   });
 
-  it("names no leader before a game has been played", () => {
+  /** The same week with nothing left open, which is a week that has a winner. */
+  function finished(week: RakMadnessScores): RakMadnessScores {
+    return {
+      scores: week.scores.map((it) => ({
+        ...it,
+        pro: it.pro.map((pick) => ({ ...pick, status: "yes" as const })),
+      })),
+    };
+  }
+
+  it("calls the player picked the winner rather than tied for the lead", () => {
+    render(<Standing scores={finished(scores)} player="Rak" />);
+
+    expect(screen.getByText("Winner · Week complete")).toBeInTheDocument();
+  });
+
+  it("ties the player picked for the win where the top is shared", () => {
+    const tied: RakMadnessScores = {
+      scores: [...scores.scores, player("Bill", 3, "KC -3")],
+    };
+    render(<Standing scores={finished(tied)} player="Rak" />);
+
+    expect(
+      screen.getByText("Tied for the win · Week complete"),
+    ).toBeInTheDocument();
+  });
+
+  /** Level on points, told apart by the Monday night tiebreaker. */
+  function separated(week: RakMadnessScores): RakMadnessScores {
+    return {
+      scores: week.scores.map((it, index) => ({
+        ...it,
+        tiebreaker: { pick: 40, distance: index },
+      })),
+    };
+  }
+
+  const separatedWeek = separated(
+    finished({
+      scores: [player("Rak", 3, "KC -3"), player("Bill", 3, "KC -3")],
+    }),
+  );
+
+  it("calls the player picked the winner where they took the tiebreaker", () => {
+    render(<Standing scores={separatedWeek} player="Rak" />);
+
+    // Level on points with Bill, so only the tiebreaker makes this one winner.
+    expect(screen.getByText("Winner · Week complete")).toBeInTheDocument();
+  });
+
+  it("says the player picked lost the tiebreaker rather than tied for the win", () => {
+    render(<Standing scores={separatedWeek} player="Bill" />);
+
+    expect(
+      screen.getByText("Loses the tiebreaker to Rak · Week complete"),
+    ).toBeInTheDocument();
+  });
+
+  it("calls a clinched player the winner even where games remain", () => {
+    render(
+      <Standing
+        scores={scores}
+        player="Rak"
+        result={{ kind: "clinched", player: "Rak" }}
+      />,
+    );
+
+    expect(
+      screen.getByText("Winner · 1 game still to play"),
+    ).toBeInTheDocument();
+  });
+
+  it("ties a clinched player for the win where the top is shared", () => {
+    const tied: RakMadnessScores = {
+      scores: [...scores.scores, player("Bill", 3, "KC -3")],
+    };
+    render(
+      <Standing
+        scores={tied}
+        player="Rak"
+        result={{ kind: "clinched", player: "Rak" }}
+      />,
+    );
+
+    expect(
+      screen.getByText("Tied for the win · 1 game still to play"),
+    ).toBeInTheDocument();
+  });
+
+  it("ignores a clinch that answers for a different player", () => {
+    render(
+      <Standing
+        scores={scores}
+        player="Rak"
+        result={{ kind: "clinched", player: "Alice" }}
+      />,
+    );
+
+    expect(
+      screen.getByText("Tied for the lead · 1 game still to play"),
+    ).toBeInTheDocument();
+  });
+
+  it("says a knocked out player is knocked out, and leaves the points to the answer", () => {
+    const out: RakMadnessScores = {
+      scores: scores.scores.map((it) =>
+        it.name === "Alice"
+          ? { ...it, status: { ...it.status, isKnockedOut: true } }
+          : it,
+      ),
+    };
+    render(<Standing scores={out} player="Alice" />);
+
+    expect(
+      screen.getByText("Knocked out · 1 game still to play"),
+    ).toBeInTheDocument();
+  });
+
+  /** One game nobody could be scored on, which is a hole in a week otherwise done. */
+  function withUnscoreableGame(week: RakMadnessScores): RakMadnessScores {
+    return {
+      scores: week.scores.map((it) => ({
+        ...it,
+        pro: [
+          {
+            ...it.pro[0],
+            status: "error" as const,
+            explanation: { header: "Invalid Spread", message: "" },
+          },
+          ...it.pro.slice(1),
+        ],
+      })),
+    };
+  }
+
+  it("does not call a week complete while a game cannot be scored", () => {
+    render(
+      <Standing scores={withUnscoreableGame(finished(scores))} player="Rak" />,
+    );
+
+    // Not the winner: a week with a hole in it has no result to state yet.
+    expect(
+      screen.getByText("Tied for the lead · 1 game could not be scored"),
+    ).toBeInTheDocument();
+  });
+
+  it("counts a blank cell as the player's own, not a hole in the week", () => {
+    const blank: RakMadnessScores = {
+      scores: finished(scores).scores.map((it, index) => ({
+        ...it,
+        pro:
+          index === 0
+            ? it.pro
+            : [
+                {
+                  ...it.pro[0],
+                  status: "error" as const,
+                  explanation: { header: "Missing Pick", message: "" },
+                },
+                ...it.pro.slice(1),
+              ],
+      })),
+    };
+    render(<Standing scores={blank} player="Rak" />);
+
+    expect(screen.getByText("Winner · Week complete")).toBeInTheDocument();
+  });
+
+  it("says no game has been played rather than ranking anyone", () => {
     const fresh: RakMadnessScores = {
       scores: scores.scores.map((it) => ({
         ...it,
@@ -93,17 +260,11 @@ describe("Standing", () => {
         pro: it.pro.map((pick) => ({ ...pick, status: "incomplete" as const })),
       })),
     };
-    render(<Standing scores={fresh} />);
+    render(<Standing scores={fresh} player="Rak" />);
 
     expect(
       screen.getByText("No finished games · 2 games still to play"),
     ).toBeInTheDocument();
-  });
-
-  it("has nothing to say before a week is scored", () => {
-    const { container } = render(<Standing />);
-
-    expect(container).toBeEmptyDOMElement();
   });
 });
 
@@ -122,18 +283,49 @@ describe("AnalysisSummary", () => {
     };
     render(<AnalysisSummary result={result} />);
 
-    expect(screen.getByText("Bob cannot win this week.")).toBeInTheDocument();
+    // The reason says they cannot win, so nothing above it says so again.
     expect(
       screen.getByText("Knocked out on Total Score by Alice."),
     ).toBeInTheDocument();
+    expect(screen.queryByText("Bob cannot win this week.")).toBeNull();
   });
 
-  it("says a clinched week is already won", () => {
-    render(<AnalysisSummary result={{ kind: "clinched", player: "Alice" }} />);
+  it("tells an eliminated player carrying no reason that they cannot win", () => {
+    const result: PlayerAnalysis = { kind: "eliminated", player: "Bob" };
+    render(<AnalysisSummary result={result} />);
 
+    expect(screen.getByText("Bob cannot win this week.")).toBeInTheDocument();
+  });
+
+  it("says nothing left can undo a clinch with games still to play", () => {
+    render(
+      <AnalysisSummary
+        result={{ kind: "clinched", player: "Alice" }}
+        week={12}
+      />,
+    );
+
+    // The header calls Alice the winner without naming the week, so this does.
+    expect(screen.getByText("Alice has won week 12.")).toBeInTheDocument();
     expect(
-      screen.getByText("Alice has already won the week."),
+      screen.getByText("Nothing still to be played can take it away."),
     ).toBeInTheDocument();
+  });
+
+  it("leaves a clinch that also ends the week to its one line", () => {
+    render(
+      <AnalysisSummary
+        result={{ kind: "clinched", player: "Alice" }}
+        week={12}
+        isOver
+      />,
+    );
+
+    expect(screen.getByText("Alice has won week 12.")).toBeInTheDocument();
+    // Nothing is still to be played, so saying it cannot be undone adds nothing.
+    expect(
+      screen.queryByText(/Nothing still to be played/),
+    ).not.toBeInTheDocument();
   });
 
   it("gives a floor rather than paths on a week too big to search", () => {
@@ -183,7 +375,7 @@ describe("AnalysisSummary", () => {
   it("says something for a player the games can no longer separate", () => {
     const result: PlayerAnalysis = {
       ...base,
-      mondayNight: { kind: "range", max: 45, contenders: ["Rak"] },
+      mondayNight: RAK_BY_45,
     };
     render(<AnalysisSummary result={result} />);
 
@@ -216,7 +408,7 @@ describe("AnalysisSummary", () => {
     const result: PlayerAnalysis = {
       ...base,
       mustWin: [{ label: "P1", pick: "KC -3" }],
-      mondayNight: { kind: "range", max: 45, contenders: ["Rak"] },
+      mondayNight: RAK_BY_45,
     };
     render(<AnalysisSummary result={result} />);
 
@@ -230,7 +422,7 @@ describe("AnalysisSummary", () => {
       ...base,
       pool: { choose: 2, games: [{ label: "P1", pick: "KC -3" }] },
       outrightAt: 3,
-      mondayNight: { kind: "range", max: 45, contenders: ["Rak"] },
+      mondayNight: RAK_BY_45,
     };
     render(<AnalysisSummary result={result} />);
 
@@ -271,7 +463,7 @@ describe("AnalysisSummary", () => {
     const result: PlayerAnalysis = {
       ...base,
       mustWin: [{ label: "P1", pick: "KC -3" }],
-      mondayNight: { kind: "range", max: 45, contenders: ["Rak"] },
+      mondayNight: RAK_BY_45,
     };
     render(<AnalysisSummary result={result} />);
 

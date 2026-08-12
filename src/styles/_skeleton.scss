@@ -1,0 +1,95 @@
+@use "sass:math";
+
+// The one way the app says it is still working. A wireframe stands in for content
+// that is not there yet; a sheen crosses content that is there but stale. Nothing
+// spins, and no button shimmers, so a wait always looks like a wait wherever it
+// happens.
+//
+// Unlike the other partials here this one emits CSS, the keyframes below. A Sass
+// module is evaluated once however many files `@use` it, so they are written out
+// once.
+
+// The fraction of the swept box's width the sheen covers. A transform percentage
+// is of the sheen's own width, so crossing the whole box takes 100% divided by
+// that fraction. The sheen starts with its right edge on the box's left, and ends
+// with its left edge on the box's right.
+$sheen-fraction: 0.6;
+
+@keyframes rak-skeleton-sweep {
+  from {
+    transform: translate3d(-100%, 0, 0);
+  }
+  to {
+    transform: translate3d(math.div(100%, $sheen-fraction), 0, 0);
+  }
+}
+
+/** The fill of a placeholder bar or block. */
+@mixin skeleton-surface {
+  background-color: var(--rak-loading-fill);
+  opacity: var(--rak-loading-fill-opacity);
+  border-radius: var(--rak-radius-xs);
+}
+
+/**
+ * One sheen crossing the whole element, rather than a pulse in each of the
+ * fifteen hundred bars a wireframe table holds. Animating them all cost three
+ * quarters of the frame budget on a throttled phone, over the same seconds the
+ * week is being scored. This is one transform on the compositor, so it costs the
+ * same whatever the element's size.
+ *
+ * Applies to the element it is included in, which becomes the containing block
+ * and clips the sheen: the sheen is as wide as most of the box, so both ends of
+ * its run hang outside.
+ */
+@mixin skeleton-sheen($z: var(--rak-z-skeleton)) {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: $sheen-fraction * 100%;
+    z-index: $z;
+    pointer-events: none;
+    background: linear-gradient(
+      100deg,
+      transparent 30%,
+      var(--rak-loading-sheen) 50%,
+      transparent 70%
+    );
+    transform: translate3d(-100%, 0, 0);
+    will-change: transform;
+    animation: rak-skeleton-sweep var(--rak-duration-loop) linear infinite;
+  }
+
+  // Taken away rather than held still, because a sheen parked across the screen
+  // reads as part of the page rather than as something that was moving. Written
+  // out rather than left to the global guard in `index.scss`, which only makes
+  // the loop instant.
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      display: none;
+    }
+  }
+}
+
+/**
+ * Sizes a placeholder from the text it stands in for, drawn from a
+ * `data-skeleton-text` attribute rather than written into the element. The
+ * stand-in never lands in the page's text, so no screen reader or query finds it,
+ * and the element still measures as though the real value were there.
+ */
+@mixin skeleton-reserve {
+  // Containing block for the bar, which is taken out of flow so the invisible
+  // text is what sizes the box.
+  position: relative;
+
+  &::before {
+    content: attr(data-skeleton-text);
+    visibility: hidden;
+  }
+}

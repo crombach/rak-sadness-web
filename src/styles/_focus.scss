@@ -1,0 +1,18 @@
+// The one focus ring. Mixins only, so this emits no CSS of its own however many
+// files pull it in.
+
+/**
+ * Drawn in `--rak-focus-ring`, which every surface that is not the page sets for
+ * itself. On the navbar that is white, because a ring in the app's own primary is
+ * the navbar's own color and cannot be seen at all.
+ *
+ * `$on` is the state that draws it. A wrapper around a control takes
+ * `:focus-within` instead, so the ring lands on the whole shell rather than on the
+ * bare input inside it.
+ */
+@mixin focus-ring($on: ":focus-visible") {
+  &#{$on} {
+    outline: 2px solid var(--rak-focus-ring, var(--rak-primary-500));
+    outline-offset: 2px;
+  }
+}

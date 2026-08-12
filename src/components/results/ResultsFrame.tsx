@@ -1,5 +1,5 @@
 import { PropsWithChildren, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useIsWeekDecided } from "../../context/AppDataContext";
 import { PlayerAnalysisContextProvider } from "../../context/PlayerAnalysisContext";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
@@ -40,6 +40,9 @@ export default function ResultsFrame({
   scores?: RakMadnessScores;
 }>) {
   const navigate = useNavigate();
+  // Absent on the redirect routes, which render this frame before they know which
+  // week they are headed for.
+  const { season, week } = useParams();
   // Once every game is final there is nothing left to fetch, so the refresh button
   // and the divider beside it go rather than sit there doing nothing.
   const isWeekDecided = useIsWeekDecided();
@@ -48,6 +51,11 @@ export default function ResultsFrame({
 
   return (
     <PageLayout
+      title={
+        season && week
+          ? `${season} Week ${week} ${view}`
+          : `Rak Madness ${view}`
+      }
       // True while loading too: the wireframe is shaped like the table it stands
       // in for, so it wants the same content area.
       showingScores
@@ -81,6 +89,7 @@ export default function ResultsFrame({
         }}
         player={analysisPlayer}
         scores={scores}
+        week={week != null ? Number(week) : undefined}
       />
     </PageLayout>
   );
