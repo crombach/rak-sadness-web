@@ -345,7 +345,9 @@ describe("AnalysisSummary", () => {
     const why = screen.getByText(
       "Detailed paths are worked out once ten games are left.",
     );
-    expect(why).toBe(document.querySelector(".analysis")?.lastElementChild);
+    expect(why).toBe(
+      document.querySelector(".analysis__body")?.lastElementChild,
+    );
   });
 
   it("lists the must-win games and the pool behind them", () => {

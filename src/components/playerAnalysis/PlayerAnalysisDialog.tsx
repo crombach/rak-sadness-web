@@ -10,7 +10,7 @@ import isWeekOver from "../../utils/scoring/isWeekOver";
 import Button from "../button/Button";
 import { CloseRoundedIcon, UnfoldMoreIcon } from "../icon/Icon";
 import PlayerStatusIcon from "../table/playerName/PlayerStatusIcon";
-import AnalysisSummary, { Standing } from "./AnalysisSummary";
+import AnalysisSummary from "./AnalysisSummary";
 import "./PlayerAnalysisDialog.scss";
 
 export type PlayerOption = { name: string; isKnockedOut: boolean };
@@ -76,10 +76,20 @@ export default function PlayerAnalysisDialog({
   // A name arriving from outside stands in for a choice made in the search. Taken
   // during the render that brings it, so the answer is worked out in the same pass
   // rather than a beat behind it.
-  const [lastNamed, setLastNamed] = useState(named);
-  if (named !== lastNamed) {
-    setLastNamed(named);
-    setPlayer(options.find((option) => option.name === named));
+  //
+  // Only an arrival is acted on. The name is cleared as the dialog closes, and
+  // taking that would empty the dialog while it is still fading out. `arrivals`
+  // counts them rather than naming the latest, so opening on the same player twice
+  // running is still a change the combobox below can see.
+  const [arrival, setArrival] = useState({ named, arrivals: 0 });
+  if (named !== arrival.named) {
+    setArrival({
+      named,
+      arrivals: named != null ? arrival.arrivals + 1 : arrival.arrivals,
+    });
+    if (named != null) {
+      setPlayer(options.find((option) => option.name === named));
+    }
   }
 
   // The search is thousands of scenarios and holds the thread while it runs, so
@@ -135,7 +145,7 @@ export default function PlayerAnalysisDialog({
             // name in the input. The combobox keeps the choice itself, and handing
             // it a value it started without reads as a controlled input arriving
             // late, so a fresh one starts on the right player instead.
-            key={named ?? ""}
+            key={arrival.arrivals}
             defaultValue={player}
             items={options}
             filteredItems={playersMatching(options, query)}
@@ -217,17 +227,14 @@ export default function PlayerAnalysisDialog({
             {/* Polite, so a new answer replacing the last one is read once the
                 screen reader is free rather than cutting off what it is saying. */}
             <div className="player-analysis__content" aria-live="polite">
-              {/* Read off the scores, so it answers for the player picked before
-                  their routes have been worked out. */}
-              <Standing
-                scores={scores}
-                player={player?.name}
-                result={shown?.paths}
-              />
-              {/* Keyed on the player, so the answer to a new one plays in rather
-                  than replacing the last one in place. */}
+              {/* The standing heads the answer and is read off the scores, so it
+                  says where the player picked stands before their routes have been
+                  worked out. Keyed on the player, so the answer to a new one plays
+                  in rather than replacing the last one in place. */}
               <AnalysisSummary
                 key={shown?.name}
+                scores={scores}
+                player={player?.name}
                 result={shown?.paths}
                 isOver={isOver}
                 week={week}
