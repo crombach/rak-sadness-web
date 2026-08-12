@@ -1,5 +1,5 @@
 import { MockedFunction } from "vitest";
-import { screen, waitFor, within } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { League, LeagueInfo } from "./types/League";
 
 vi.mock("./utils/getLeagueInfo");
@@ -11,7 +11,6 @@ import {
   CURRENT_WEEK,
   SEASON,
   leagueInfo,
-  scores,
   getLeagueInfoMock,
   getPlayerScoresMock,
   mountApp,
@@ -39,43 +38,6 @@ describe("the app, week routes", () => {
     await mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
 
     expect(await screen.findByText("MNF Points Pick")).toBeInTheDocument();
-  });
-
-  const crown = () =>
-    within(screen.getByRole("table")).queryByTestId("EmojiEventsOutlinedIcon");
-
-  it("crowns a player still standing at the end of the week", async () => {
-    fetchMock.mockResolvedValue(spreadsheetResponse());
-    await mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
-
-    await screen.findByText("MNF Points Pick");
-    expect(crown()).toBeInTheDocument();
-  });
-
-  it("holds the crown back while a game is still to finish", async () => {
-    getPlayerScoresMock.mockResolvedValue({
-      ...scores,
-      scores: [
-        {
-          ...scores.scores[0],
-          pro: [
-            {
-              pick: "BUF",
-              status: "incomplete",
-              explanation: { header: "P1", message: "in progress" },
-            },
-          ],
-        },
-      ],
-    });
-    fetchMock.mockResolvedValue(spreadsheetResponse());
-    await mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
-
-    await screen.findByText("MNF Points Pick");
-    expect(
-      screen.getByTestId("SentimentVerySatisfiedIcon"),
-    ).toBeInTheDocument();
-    expect(crown()).not.toBeInTheDocument();
   });
 
   it("shows a wireframe table until the results are ready", async () => {

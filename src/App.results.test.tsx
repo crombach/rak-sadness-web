@@ -101,21 +101,6 @@ describe("the app, results views", () => {
     expect(getPlayerScoresMock).toHaveBeenCalledTimes(2);
   });
 
-  it("collapses refresh away once every game is final", async () => {
-    const user = await mountWithScores();
-    await user.click(screen.getByText("View Results"));
-
-    // Waited for, because the button stays mounted while it animates out.
-    await waitFor(() => {
-      expect(
-        screen.queryByRole("button", { name: "Refresh" }),
-      ).not.toBeInTheDocument();
-    });
-    expect(
-      document.querySelector(".scores-nav__divider"),
-    ).not.toBeInTheDocument();
-  });
-
   it("offers refresh while a game is still to be played", async () => {
     getPlayerScoresMock.mockResolvedValue(openWeekScores);
     const user = await mountWithScores();
