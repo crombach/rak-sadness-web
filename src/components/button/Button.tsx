@@ -20,13 +20,12 @@ export default function Button({
   className = "",
   ariaLabel,
   ariaExpanded,
-  ariaControls,
 }: {
   children: ReactNode;
   onClick: () => void;
   color?: ButtonColor;
   variant?: "solid" | "soft";
-  size?: "lg" | "md" | "sm";
+  size?: "md" | "sm";
   iconOnly?: boolean;
   /** Tighter side padding, for a bar that has more buttons than room. */
   compact?: boolean;
@@ -46,14 +45,11 @@ export default function Button({
   ariaLabel?: string;
   /** Set where the button opens and closes something below it. */
   ariaExpanded?: boolean;
-  /** The id of what `ariaExpanded` opens. */
-  ariaControls?: string;
 }) {
   const modifiers = getClasses({
     [`--${variant}`]: true,
     [`--${color}`]: true,
     "--sm": size === "sm",
-    "--lg": size === "lg",
     "--icon": iconOnly,
     "--compact": compact,
     "--selected": !!selected,
@@ -64,7 +60,6 @@ export default function Button({
       type="button"
       aria-label={ariaLabel}
       aria-expanded={ariaExpanded}
-      aria-controls={ariaControls}
       aria-pressed={selected}
       aria-disabled={ariaDisabled || undefined}
       aria-busy={busy || undefined}

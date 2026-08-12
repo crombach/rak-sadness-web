@@ -42,10 +42,6 @@
     border-radius: var(--rak-radius-xs);
   }
 
-  &.--lg {
-    min-height: 3.5rem;
-  }
-
   // Held tighter than the default, for a bar with more buttons than room.
   &.--compact {
     padding-inline: var(--rak-space-3);
