@@ -181,9 +181,16 @@ describe("the app, first load", () => {
     });
   });
 
-  it("shows the app title in the navbar", async () => {
+  it("names the app on the logo and again as the page's own heading", async () => {
     await mountLoadedApp();
-    expect(screen.getByText("The Rakulator")).toBeInTheDocument();
+    // The heading is visually hidden, so this is what a screen reader is told
+    // the page is, not a second copy of the wordmark on screen.
+    expect(
+      screen.getByRole("button", { name: /The Rakulator/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 1, name: "The Rakulator" }),
+    ).toBeInTheDocument();
   });
 
   it("opens a newly picked season on that season's current week", async () => {

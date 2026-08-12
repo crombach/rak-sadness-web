@@ -31,7 +31,7 @@ export default function useExportScores(
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `rak-madness_season-${season}_week-${week.value}_scores.xlsx`;
+        link.download = `rak-madness_season-${season}_week-${week.value}_results.xlsx`;
         link.click();
         link.remove();
         // The blob is held until its URL is released, and every export mints

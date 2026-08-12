@@ -4,7 +4,7 @@ import { useIsWeekDecided } from "../../context/AppDataContext";
 import { PlayerAnalysisContextProvider } from "../../context/PlayerAnalysisContext";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import getClasses from "../../utils/getClasses";
-import LogoButton from "../navbar/LogoButton";
+import LogoButton, { APP_NAME } from "../navbar/LogoButton";
 import ScoresNavbar, { ScoresView } from "../navbar/ScoresNavbar";
 import PageLayout from "../pageLayout/PageLayout";
 import PlayerAnalysisDialog from "../playerAnalysis/PlayerAnalysisDialog";
@@ -54,7 +54,7 @@ export default function ResultsFrame({
       title={
         season && week
           ? `${season} Week ${week} ${view}`
-          : `Rak Madness ${view}`
+          : `${APP_NAME} ${view}`
       }
       // True while loading too: the wireframe is shaped like the table it stands
       // in for, so it wants the same content area.

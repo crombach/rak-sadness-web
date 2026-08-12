@@ -66,7 +66,7 @@ export default function useLeagueWeeks(
         setSelectedWeek(undefined);
         setLoading(false);
         showToast(
-          new Toast("danger", "Error", "Failed to load the NFL schedule."),
+          new Toast("danger", "Error", "Failed to load the pro schedule."),
         );
         return;
       }

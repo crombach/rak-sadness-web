@@ -89,7 +89,7 @@ export function getPickResults(
     if (selectedTeam == null) {
       return unscoreable(
         MISSING_PICK,
-        "No selection was made for this game.",
+        "No pick was made for this game.",
         hasSpread,
       );
     }

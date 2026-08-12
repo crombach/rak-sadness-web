@@ -8,7 +8,7 @@ import { WeekInfo } from "../../types/League";
 import getClasses from "../../utils/getClasses";
 import Button from "../button/Button";
 import Footer from "../footer/Footer";
-import LogoButton from "../navbar/LogoButton";
+import LogoButton, { APP_NAME } from "../navbar/LogoButton";
 import PageLayout from "../pageLayout/PageLayout";
 import "./HomePage.scss";
 
@@ -57,7 +57,7 @@ export default function HomePage() {
 
   return (
     <PageLayout
-      title="Rak Madness"
+      title={APP_NAME}
       navbarLeft={<LogoButton onClick={() => navigate("/")} />}
     >
       {/*
