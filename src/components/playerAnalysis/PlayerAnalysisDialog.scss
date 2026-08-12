@@ -27,6 +27,12 @@
 // without shrinking `dvh`, so the sheet stands on top of the keyboard rather than
 // running on behind it, and is capped by what is left rather than by the screen.
 // Every one falls back to the whole screen, which is where they started.
+
+// How far the lowest thing in the sheet stands off the keyboard. The answer gives
+// up its room before the search does, so with a long answer squeezed out this is
+// what keeps the rule under the search off the keyboard's top edge.
+$keyboard-gap: 12px;
+
 .player-analysis__popup {
   position: fixed;
   z-index: calc(var(--rak-z-modal) + 1);
@@ -40,10 +46,12 @@
   max-height: min(85dvh, var(--rak-viewport-height, 85dvh));
   padding: 20px;
   // Room for the home indicator, given back once the sheet is standing on a
-  // keyboard rather than on the bottom edge the indicator is drawn over.
+  // keyboard rather than on the bottom edge the indicator is drawn over, which
+  // takes the gap above the keyboard in its place.
   padding-bottom: calc(
     20px +
-      max(0px, env(safe-area-inset-bottom) - var(--rak-keyboard-inset, 0px))
+      max(0px, env(safe-area-inset-bottom) - var(--rak-keyboard-inset, 0px)) +
+      min(var(--rak-keyboard-inset, 0px), #{$keyboard-gap})
   );
   border-radius: var(--rak-radius-lg) var(--rak-radius-lg) 0 0;
   background-color: var(--rak-surface);

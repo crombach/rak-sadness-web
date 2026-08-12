@@ -179,5 +179,39 @@ describe("PlayerAnalysisDialog", () => {
     expect(screen.getByRole("combobox", { name: "Player" })).toHaveValue(
       "Bobby",
     );
+
+    // Typing above left the list open, which in the app it never is when a name
+    // arrives: the dialog is modal, so the table that names one is out of reach
+    // until it closes and takes the search with it.
+    await user.keyboard("{Escape}");
+
+    // Tapping the search is the start of looking someone else up, so the name in
+    // it goes and everyone is offered again. The answer stays on the player it was
+    // opened on until another one is picked.
+    await user.click(screen.getByRole("combobox", { name: "Player" }));
+
+    expect(screen.getByRole("combobox", { name: "Player" })).toHaveValue("");
+    expect(
+      (await screen.findAllByRole("option")).map((it) => it.textContent),
+    ).toEqual(["Alice", "Bob", "Bobby"]);
+    expect(
+      screen.getByText("Knocked out on Total Score by Alice."),
+    ).toBeInTheDocument();
+
+    // Dismissing puts the chosen name back, since the answer below is still that
+    // player's.
+    await user.keyboard("{Escape}");
+    expect(screen.getByRole("combobox", { name: "Player" })).toHaveValue(
+      "Bobby",
+    );
+
+    // Only a press empties the search. A letter typed into it opens the list too,
+    // and wiping on that would take the letter that opened it. Typed straight at
+    // the focused input, since `user.type` clicks first and would open by press.
+    await user.keyboard("x");
+
+    expect(screen.getByRole("combobox", { name: "Player" })).toHaveValue(
+      "Bobbyx",
+    );
   });
 });

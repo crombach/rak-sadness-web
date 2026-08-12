@@ -9,6 +9,12 @@ export const VIEWPORT_OFFSET_VAR = "--rak-viewport-offset";
 /** How much of the bottom edge something like a keyboard covers. */
 export const KEYBOARD_INSET_VAR = "--rak-keyboard-inset";
 
+export type ViewportInsets = {
+  height: number;
+  offset: number;
+  keyboardInset: number;
+};
+
 /**
  * What is on screen, out of what the layout is sized against.
  *
@@ -30,7 +36,7 @@ export function viewportInsets({
   viewportHeight: number;
   offsetTop: number;
   scale: number;
-}): { height: number; offset: number; keyboardInset: number } {
+}): ViewportInsets {
   if (scale > 1) {
     return { height: layoutHeight, offset: 0, keyboardInset: 0 };
   }
@@ -42,12 +48,42 @@ export function viewportInsets({
 }
 
 /**
+ * Whether two measurements are the same, which is how the loop below stops and
+ * what keeps it from writing the same numbers back every frame.
+ */
+export function sameInsets(
+  a: ViewportInsets | undefined,
+  b: ViewportInsets,
+): boolean {
+  return (
+    a != null &&
+    a.height === b.height &&
+    a.offset === b.offset &&
+    a.keyboardInset === b.keyboardInset
+  );
+}
+
+/** How long the same measurement has to hold for the keyboard to be done moving. */
+const SETTLED_FRAMES = 5;
+
+/** The longest the loop runs, in case something keeps the viewport moving. */
+const TRACKING_MS = 1000;
+
+/**
  * Publishes the visible viewport to the document root, so a stylesheet can size
  * against what the reader can actually see rather than the whole screen.
  *
  * Held to while `enabled`, since the only thing that asks is a dialog with a
  * search in it, and the properties are dropped on the way out so everything
  * falls back to its `dvh` default.
+ *
+ * A keyboard opens over a few hundred milliseconds, and Safari reports that with
+ * far fewer events than there are frames in it, so listening alone leaves the
+ * sheet sitting behind the keyboard and then jumping clear. Anything that could
+ * be the start of one instead kicks off a frame by frame read of the viewport,
+ * which stops once the numbers hold still. The properties are written straight
+ * to the root rather than through React, so a frame's measurement paints in that
+ * frame.
  */
 export default function useViewportInsets(enabled: boolean): void {
   useEffect(() => {
@@ -55,25 +91,54 @@ export default function useViewportInsets(enabled: boolean): void {
     if (!enabled || viewport == null) return;
 
     const root = document.documentElement;
+    let last: ViewportInsets | undefined;
+    let frame = 0;
 
-    const measure = () => {
-      const { height, offset, keyboardInset } = viewportInsets({
+    // Answers whether the viewport held still, which is what the loop counts. The
+    // root is written only when it moved, so the frames either side of a keyboard
+    // cost a read and nothing else.
+    const measure = (): boolean => {
+      const insets = viewportInsets({
         layoutHeight: window.innerHeight,
         viewportHeight: viewport.height,
         offsetTop: viewport.offsetTop,
         scale: viewport.scale,
       });
-      root.style.setProperty(VIEWPORT_HEIGHT_VAR, `${height}px`);
-      root.style.setProperty(VIEWPORT_OFFSET_VAR, `${offset}px`);
-      root.style.setProperty(KEYBOARD_INSET_VAR, `${keyboardInset}px`);
+      const held = sameInsets(last, insets);
+      last = insets;
+      if (!held) {
+        root.style.setProperty(VIEWPORT_HEIGHT_VAR, `${insets.height}px`);
+        root.style.setProperty(VIEWPORT_OFFSET_VAR, `${insets.offset}px`);
+        root.style.setProperty(KEYBOARD_INSET_VAR, `${insets.keyboardInset}px`);
+      }
+      return held;
     };
 
-    measure();
-    viewport.addEventListener("resize", measure);
-    viewport.addEventListener("scroll", measure);
+    // Restarted rather than stacked, so a second event partway through a keyboard
+    // opening extends the read instead of running a loop of its own.
+    const track = () => {
+      cancelAnimationFrame(frame);
+      let held = 0;
+      const until = performance.now() + TRACKING_MS;
+      const step = () => {
+        held = measure() ? held + 1 : 0;
+        if (held < SETTLED_FRAMES && performance.now() < until) {
+          frame = requestAnimationFrame(step);
+        }
+      };
+      step();
+    };
+
+    track();
+    viewport.addEventListener("resize", track);
+    viewport.addEventListener("scroll", track);
+    // The first sign a keyboard is on its way, and earlier than any of the above.
+    window.addEventListener("focusin", track);
     return () => {
-      viewport.removeEventListener("resize", measure);
-      viewport.removeEventListener("scroll", measure);
+      cancelAnimationFrame(frame);
+      viewport.removeEventListener("resize", track);
+      viewport.removeEventListener("scroll", track);
+      window.removeEventListener("focusin", track);
       root.style.removeProperty(VIEWPORT_HEIGHT_VAR);
       root.style.removeProperty(VIEWPORT_OFFSET_VAR);
       root.style.removeProperty(KEYBOARD_INSET_VAR);
