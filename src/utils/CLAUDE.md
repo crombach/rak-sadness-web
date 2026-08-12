@@ -12,7 +12,6 @@
 - `plural`: a count and its noun, pluralized
 - `rangeWithPrefix`: labeled index arrays (C1, C2…)
 - `readFileToBuffer`: an uploaded spreadsheet's bytes
-- `leagueResultFixtures`: game builders for the tests here
 
 ## Subdirectories
 

@@ -3,7 +3,7 @@ import { League, WeekInfo } from "../../types/League";
 import { LeagueResult } from "../../types/LeagueResult";
 import { getLeagueResults } from "../getLeagueResults";
 import { getPlayerScores } from "./getPlayerScores";
-import { finalGame, upcomingGame } from "../leagueResultFixtures";
+import { finalGame, upcomingGame } from "./leagueResultFixtures";
 
 vi.mock("../getLeagueResults");
 

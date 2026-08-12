@@ -1,6 +1,6 @@
 import { GameStatus, HomeAway } from "../../types/ESPN";
 import { LeagueResult } from "../../types/LeagueResult";
-import { finalGame } from "../leagueResultFixtures";
+import { finalGame } from "./leagueResultFixtures";
 import {
   getPickResults,
   getStatus,

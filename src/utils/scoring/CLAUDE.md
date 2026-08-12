@@ -1,7 +1,7 @@
 # scoring
 
 The picks-to-scoreboard pipeline, one concern per file. `getPlayerScores` sequences
-the rest. `getPlayerAnalysis`, `isWeekOver`, `unscoreableGames` read results back.
+the rest.
 
 - `parsePicksWorkbook`: xlsx buffer to rows, keys, matchups
 - `parsePick`: one cell to a team and a spread
@@ -17,3 +17,4 @@ the rest. `getPlayerAnalysis`, `isWeekOver`, `unscoreableGames` read results bac
 - `isWeekOver`: whether the week has a result
 - `applyKnockouts`: who can still win, and why not
 - `getPlayerAnalysis`: what a named player must do
+- `leagueResultFixtures`: game builders for these tests
