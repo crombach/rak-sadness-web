@@ -151,10 +151,14 @@
 // has no more room to give. Measured without the padding and the rule, which
 // `content-box` keeps outside the height set on it.
 .player-analysis__body {
+  // How far the answer stands off the rule above it, which the progress bar reads
+  // back to sit on that rule without moving the answer.
+  --rak-analysis-inset: 16px;
+
   box-sizing: content-box;
   flex: 0 1 auto;
   min-height: 0;
-  padding-top: 16px;
+  padding-top: var(--rak-analysis-inset);
   // Everything under here scrolls. Only the search above it holds still.
   border-top: 1px solid var(--rak-border);
   overflow-y: auto;
@@ -172,24 +176,53 @@
   gap: 8px;
 }
 
-.player-analysis__searching {
-  display: flex;
-  justify-content: center;
-  padding: 24px 0;
+// A bar on the rule above it while the next answer is worked out, in place of
+// anything that would move the answer still on screen. Stuck to the rule so
+// scrolling cannot carry it off, and pulled back out of the flow by its own height,
+// so what the body measures is the answer alone.
+.player-analysis__progress {
+  --rak-analysis-bar-height: 2px;
+
+  position: sticky;
+  // Measured from where the answer starts, which is the inset below the rule.
+  top: calc(-1 * var(--rak-analysis-inset));
+  z-index: 1;
+  display: block;
+  height: var(--rak-analysis-bar-height);
+  // Pulled up onto the rule, and the room it took given back underneath, so the
+  // answer sits where it would with no bar there at all.
+  margin-top: calc(-1 * var(--rak-analysis-inset));
+  margin-bottom: calc(
+    var(--rak-analysis-inset) - var(--rak-analysis-bar-height)
+  );
+  overflow: hidden;
+  background-color: var(--rak-neutral-200);
+
+  &::after {
+    content: "";
+    display: block;
+    width: 40%;
+    height: 100%;
+    background-color: var(--rak-primary-500);
+    animation: player-analysis-sweep 900ms ease-in-out infinite;
+  }
+
+  // Still says work is under way, without a thing crossing the screen to say it.
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      width: 100%;
+      animation: none;
+    }
+  }
 }
 
-.player-analysis__spinner {
-  width: 24px;
-  height: 24px;
-  border: 3px solid var(--rak-neutral-200);
-  border-top-color: var(--rak-primary-500);
-  border-radius: 50%;
-  animation: player-analysis-spin 700ms linear infinite;
-}
+@keyframes player-analysis-sweep {
+  from {
+    transform: translateX(-100%);
+  }
 
-@keyframes player-analysis-spin {
   to {
-    transform: rotate(1turn);
+    transform: translateX(250%);
   }
 }
 

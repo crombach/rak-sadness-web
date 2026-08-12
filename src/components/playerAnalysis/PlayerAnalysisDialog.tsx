@@ -92,9 +92,11 @@ export default function PlayerAnalysisDialog({
     };
   }, [scores, player]);
 
-  const isCurrent = found?.scores === scores && found?.name === player?.name;
-  const isSearching = player != null && !isCurrent;
-  const result = isCurrent ? found?.paths : undefined;
+  // The answer already on screen stays there while the next one is worked out, so
+  // moving between players reads as one answer replacing another rather than as the
+  // dialog emptying and filling again. Only a rescore takes it away.
+  const shown = found?.scores === scores ? found : undefined;
+  const isSearching = player != null && shown?.name !== player.name;
 
   const body = useRef<HTMLDivElement>(null);
   // The dialog grows to what the answer measures rather than jumping to it. Only
@@ -187,21 +189,18 @@ export default function PlayerAnalysisDialog({
           </Combobox.Root>
 
           <div className="player-analysis__body" ref={body}>
+            {isSearching && (
+              <span
+                className="player-analysis__progress"
+                role="status"
+                aria-label="Working out the paths"
+              />
+            )}
             <div className="player-analysis__content" ref={measure}>
-              <Standing scores={scores} player={player?.name} />
-              {isSearching ? (
-                <div
-                  className="player-analysis__searching"
-                  role="status"
-                  aria-label="Working out the paths"
-                >
-                  <span className="player-analysis__spinner" />
-                </div>
-              ) : (
-                // Keyed on the player, so the answer to a new one plays in rather
-                // than replacing the last one in place.
-                <AnalysisSummary key={player?.name} result={result} />
-              )}
+              <Standing scores={scores} player={shown?.name} />
+              {/* Keyed on the player, so the answer to a new one plays in rather
+                  than replacing the last one in place. */}
+              <AnalysisSummary key={shown?.name} result={shown?.paths} />
             </div>
           </div>
         </Dialog.Popup>

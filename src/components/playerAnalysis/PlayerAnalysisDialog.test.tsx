@@ -110,7 +110,7 @@ describe("PlayerAnalysisDialog", () => {
     await user.type(search, "Ali");
     await user.click(await screen.findByRole("option", { name: "Alice" }));
 
-    // The search runs a frame after the spinner it replaces.
+    // The search runs a frame after the bar that says it is under way.
     const mustWin = await screen.findByRole("heading", { name: "Must win" });
     const pick = within(mustWin.parentElement as HTMLElement).getByRole(
       "listitem",

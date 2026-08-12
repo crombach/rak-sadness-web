@@ -11,7 +11,9 @@ carries the status icon the tables give the same player, through
 The icon says the status rather than a fill behind it, so the only fill in the popup
 is still the highlight the list draws as it is walked. A name too long for the popup
 is cut short rather than wrapped, so an entry stays one line. The search is thousands
-of scenarios, so it runs on the player chosen rather than on every render. Only the
+of scenarios, so it runs on the player chosen rather than on every render. The answer
+already on screen stays there while the next one is worked out, under a bar on the
+rule that says so, rather than being taken away and put back. Only the
 search holds still: everything under the rule below it scrolls. A `player` prop
 stands in for a choice made in the search, and remounts the combobox so the name
 reaches its input. `PlayerAnalysisDialog.scss` centers the one dialog as a modal and
