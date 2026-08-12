@@ -3,8 +3,7 @@ import {
   RakMadnessScores,
   Status,
 } from "../../types/RakMadnessScores";
-
-const LEAGUES = ["college", "pro"] as const;
+import { LEAGUES } from "./gameColumns";
 
 function isSettled(status: Status): boolean {
   return status === "yes" || status === "no";

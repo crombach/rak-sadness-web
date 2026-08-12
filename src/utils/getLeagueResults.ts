@@ -1,6 +1,7 @@
 import { EspnCompetitor, EspnEvent, GameStatus, HomeAway } from "../types/ESPN";
 import { League, SeasonType, WeekInfo } from "../types/League";
 import { LeagueResult, Possession } from "../types/LeagueResult";
+import debugLog from "./debugLog";
 import { getRegularSeasonWeekCount } from "./getLeagueInfo";
 
 /**
@@ -115,7 +116,7 @@ export async function getLeagueResults(
   season?: number,
 ): Promise<Array<LeagueResult>> {
   const events = await getLeagueEvents(league, week, season);
-  console.log(`${league} events`, events);
+  debugLog(`${league} events`, events);
 
   return events
     .map((event: EspnEvent) => {

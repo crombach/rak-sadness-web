@@ -35,6 +35,9 @@ export default tseslint.config(
       "@typescript-eslint/no-explicit-any": "off",
       // "smart" keeps the `!= null` checks the scoring code relies on.
       eqeqeq: ["error", "smart"],
+      // Traces go through `debugLog`, which is silent outside a dev server. A
+      // raw `console.log` ships them to every reader's console instead.
+      "no-console": ["error", { allow: ["debug", "warn", "error"] }],
     },
   },
   {

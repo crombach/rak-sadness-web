@@ -55,22 +55,13 @@ type ToastActions = {
 // The actions sit in their own context because their identity never changes. That
 // keeps the parts of the app that only send toasts (every player cell, for one)
 // still while toasts appear and time out.
+const noop = () => undefined;
 const ToastActionsContext = createContext<ToastActions>({
-  showToast: () => {
-    /* Placeholder */
-  },
-  removeToast: () => {
-    /* Placeholder */
-  },
-  clearToasts: () => {
-    /* Placeholder */
-  },
-  pauseToasts: () => {
-    /* Placeholder */
-  },
-  resumeToasts: () => {
-    /* Placeholder */
-  },
+  showToast: noop,
+  removeToast: noop,
+  clearToasts: noop,
+  pauseToasts: noop,
+  resumeToasts: noop,
 });
 
 const ToastListContext = createContext<Array<Toast>>([]);
