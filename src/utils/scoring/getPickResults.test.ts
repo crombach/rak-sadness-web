@@ -1,6 +1,6 @@
 import { GameStatus, HomeAway } from "../../types/ESPN";
 import { LeagueResult } from "../../types/LeagueResult";
-import { finalGame } from "../leagueResultFixtures";
+import { finalGame } from "./leagueResultFixtures";
 import {
   getPickResults,
   getStatus,
@@ -232,7 +232,7 @@ describe("getPickResults, unscoreable games", () => {
     expect(unscoreable.pointValue).toBe(0);
     expect(unscoreable.isInvalid).toBe(true);
     expect(unscoreable.isCompleted).toBe(false);
-    expect(getStatus(unscoreable)).toBe("error");
+    expect(getStatus(unscoreable)).toBe("unscoreable");
   });
 
   it("explains itself with the disagreement", () => {

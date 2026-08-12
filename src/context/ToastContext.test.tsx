@@ -1,5 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
-import { userEvent } from "@testing-library/user-event";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import {
   TOAST_LIFETIME_MS,
   Toast,
@@ -46,17 +45,11 @@ function Harness() {
 }
 
 function mountHarness() {
-  // Advancing fake timers is what dismisses toasts, so user-event must not
-  // wait on the real clock.
-  const user = userEvent.setup({
-    advanceTimers: (ms: number) => vi.advanceTimersByTime(ms),
-  });
   render(
     <ToastContextProvider>
       <Harness />
     </ToastContextProvider>,
   );
-  return user;
 }
 
 function headers(): Array<string> {
@@ -70,7 +63,12 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  vi.runOnlyPendingTimers();
+  // Every toast a test leaves standing still has a dismissal timer behind it,
+  // and running it removes the toast. Inside `act`, so that last render is one
+  // React knows about rather than a warning per surviving toast.
+  act(() => {
+    vi.runOnlyPendingTimers();
+  });
   vi.useRealTimers();
 });
 
@@ -95,41 +93,41 @@ describe("ToastContextProvider", () => {
     expect(headers()).toEqual([]);
   });
 
-  it("shows toasts in the order they arrive", async () => {
-    const user = mountHarness();
-    await user.click(screen.getByText("show A"));
-    await user.click(screen.getByText("show B"));
+  it("shows toasts in the order they arrive", () => {
+    mountHarness();
+    fireEvent.click(screen.getByText("show A"));
+    fireEvent.click(screen.getByText("show B"));
     expect(headers()).toEqual(["A", "B"]);
   });
 
-  it("keeps only the newest three, dropping the oldest", async () => {
-    const user = mountHarness();
-    await user.click(screen.getByText("show A"));
-    await user.click(screen.getByText("show B"));
-    await user.click(screen.getByText("show C"));
-    await user.click(screen.getByText("show D"));
+  it("keeps only the newest three, dropping the oldest", () => {
+    mountHarness();
+    fireEvent.click(screen.getByText("show A"));
+    fireEvent.click(screen.getByText("show B"));
+    fireEvent.click(screen.getByText("show C"));
+    fireEvent.click(screen.getByText("show D"));
     expect(headers()).toEqual(["B", "C", "D"]);
   });
 
-  it("removes a toast by identity, not by position", async () => {
-    const user = mountHarness();
-    await user.click(screen.getByText("show A"));
-    await user.click(screen.getByText("show B"));
-    await user.click(screen.getByText("remove first"));
+  it("removes a toast by identity, not by position", () => {
+    mountHarness();
+    fireEvent.click(screen.getByText("show A"));
+    fireEvent.click(screen.getByText("show B"));
+    fireEvent.click(screen.getByText("remove first"));
     expect(headers()).toEqual(["B"]);
   });
 
-  it("clears every toast at once", async () => {
-    const user = mountHarness();
-    await user.click(screen.getByText("show A"));
-    await user.click(screen.getByText("show B"));
-    await user.click(screen.getByText("clear"));
+  it("clears every toast at once", () => {
+    mountHarness();
+    fireEvent.click(screen.getByText("show A"));
+    fireEvent.click(screen.getByText("show B"));
+    fireEvent.click(screen.getByText("clear"));
     expect(headers()).toEqual([]);
   });
 
-  it("auto-dismisses a toast after its lifetime", async () => {
-    const user = mountHarness();
-    await user.click(screen.getByText("show A"));
+  it("auto-dismisses a toast after its lifetime", () => {
+    mountHarness();
+    fireEvent.click(screen.getByText("show A"));
     expect(headers()).toEqual(["A"]);
 
     act(() => {
@@ -143,14 +141,14 @@ describe("ToastContextProvider", () => {
     expect(headers()).toEqual([]);
   });
 
-  it("auto-dismisses each toast on its own schedule", async () => {
-    const user = mountHarness();
-    await user.click(screen.getByText("show A"));
+  it("auto-dismisses each toast on its own schedule", () => {
+    mountHarness();
+    fireEvent.click(screen.getByText("show A"));
 
     act(() => {
       vi.advanceTimersByTime(TOAST_LIFETIME_MS / 2);
     });
-    await user.click(screen.getByText("show B"));
+    fireEvent.click(screen.getByText("show B"));
     expect(headers()).toEqual(["A", "B"]);
 
     // A's lifetime is up, B's is not.
@@ -165,10 +163,10 @@ describe("ToastContextProvider", () => {
     expect(headers()).toEqual([]);
   });
 
-  it("does not resurrect a cleared toast when its timer fires", async () => {
-    const user = mountHarness();
-    await user.click(screen.getByText("show A"));
-    await user.click(screen.getByText("clear"));
+  it("does not resurrect a cleared toast when its timer fires", () => {
+    mountHarness();
+    fireEvent.click(screen.getByText("show A"));
+    fireEvent.click(screen.getByText("clear"));
 
     act(() => {
       vi.advanceTimersByTime(TOAST_LIFETIME_MS);
@@ -176,14 +174,14 @@ describe("ToastContextProvider", () => {
     expect(headers()).toEqual([]);
   });
 
-  it("holds a paused toast, then gives it back the time it had left", async () => {
-    const user = mountHarness();
-    await user.click(screen.getByText("show A"));
+  it("holds a paused toast, then gives it back the time it had left", () => {
+    mountHarness();
+    fireEvent.click(screen.getByText("show A"));
 
     act(() => {
       vi.advanceTimersByTime(TOAST_LIFETIME_MS - 1000);
     });
-    await user.click(screen.getByText("pause"));
+    fireEvent.click(screen.getByText("pause"));
 
     // Long past its lifetime, and still on screen, because nothing is counting.
     act(() => {
@@ -191,7 +189,7 @@ describe("ToastContextProvider", () => {
     });
     expect(headers()).toEqual(["A"]);
 
-    await user.click(screen.getByText("resume"));
+    fireEvent.click(screen.getByText("resume"));
     act(() => {
       vi.advanceTimersByTime(999);
     });
@@ -203,25 +201,25 @@ describe("ToastContextProvider", () => {
     expect(headers()).toEqual([]);
   });
 
-  it("leaves a failure on screen until it is dismissed", async () => {
-    const user = mountHarness();
-    await user.click(screen.getByText("show E"));
+  it("leaves a failure on screen until it is dismissed", () => {
+    mountHarness();
+    fireEvent.click(screen.getByText("show E"));
 
     act(() => {
       vi.advanceTimersByTime(TOAST_LIFETIME_MS * 10);
     });
     expect(headers()).toEqual(["E"]);
 
-    await user.click(screen.getByText("remove first"));
+    fireEvent.click(screen.getByText("remove first"));
     expect(headers()).toEqual([]);
   });
 
-  it("dismisses the oldest toast even after it was pushed out by the cap", async () => {
-    const user = mountHarness();
-    await user.click(screen.getByText("show A"));
-    await user.click(screen.getByText("show B"));
-    await user.click(screen.getByText("show C"));
-    await user.click(screen.getByText("show D"));
+  it("dismisses the oldest toast even after it was pushed out by the cap", () => {
+    mountHarness();
+    fireEvent.click(screen.getByText("show A"));
+    fireEvent.click(screen.getByText("show B"));
+    fireEvent.click(screen.getByText("show C"));
+    fireEvent.click(screen.getByText("show D"));
 
     act(() => {
       vi.advanceTimersByTime(TOAST_LIFETIME_MS);
@@ -231,12 +229,9 @@ describe("ToastContextProvider", () => {
 });
 
 describe("the toast hooks outside a provider", () => {
-  it("falls back to no-ops rather than throwing", async () => {
-    const user = userEvent.setup({
-      advanceTimers: (ms: number) => vi.advanceTimersByTime(ms),
-    });
+  it("falls back to no-ops rather than throwing", () => {
     render(<Harness />);
-    await user.click(screen.getByText("show A"));
+    fireEvent.click(screen.getByText("show A"));
     expect(headers()).toEqual([]);
   });
 });
@@ -265,9 +260,6 @@ function ToastListProbe() {
 
 describe("toast actions", () => {
   function mountProbes() {
-    const user = userEvent.setup({
-      advanceTimers: (ms: number) => vi.advanceTimersByTime(ms),
-    });
     renders.actionsOnly = 0;
     renders.toastList = 0;
     // No StrictMode here on purpose: its double-invoked renders would double
@@ -279,13 +271,12 @@ describe("toast actions", () => {
         <Harness />
       </ToastContextProvider>,
     );
-    return user;
   }
 
-  it("does not re-render an actions-only consumer when a toast appears", async () => {
-    const user = mountProbes();
+  it("does not re-render an actions-only consumer when a toast appears", () => {
+    mountProbes();
 
-    await user.click(screen.getByText("show A"));
+    fireEvent.click(screen.getByText("show A"));
 
     expect(headers()).toEqual(["A"]);
     expect(renders.actionsOnly).toBe(1);
@@ -293,9 +284,9 @@ describe("toast actions", () => {
     expect(renders.toastList).toBe(2);
   });
 
-  it("does not re-render an actions-only consumer when a toast times out", async () => {
-    const user = mountProbes();
-    await user.click(screen.getByText("show A"));
+  it("does not re-render an actions-only consumer when a toast times out", () => {
+    mountProbes();
+    fireEvent.click(screen.getByText("show A"));
 
     act(() => {
       vi.advanceTimersByTime(TOAST_LIFETIME_MS);

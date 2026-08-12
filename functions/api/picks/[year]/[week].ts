@@ -33,7 +33,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
   // Get the spreadsheet from R2.
   const filePath = `picks/${year}/${week}.xlsx`;
-  console.log(`Fetching picks for ${year} week ${week} from ${filePath}`);
   let spreadsheet;
   try {
     spreadsheet = await context.env.RAK_MADNESS_BUCKET.get(filePath, {

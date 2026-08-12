@@ -57,7 +57,10 @@ describe("isWeekDecided", () => {
     expect(
       isWeekDecided(
         week(
-          [player("Alice", ["yes", "error"]), player("Bob", ["no", "error"])],
+          [
+            player("Alice", ["yes", "unscoreable"]),
+            player("Bob", ["no", "unscoreable"]),
+          ],
           41,
         ),
       ),
@@ -68,7 +71,10 @@ describe("isWeekDecided", () => {
     expect(
       isWeekDecided(
         week(
-          [player("Alice", ["yes", "no"]), player("Bob", ["yes", "error"])],
+          [
+            player("Alice", ["yes", "no"]),
+            player("Bob", ["yes", "unscoreable"]),
+          ],
           41,
         ),
       ),

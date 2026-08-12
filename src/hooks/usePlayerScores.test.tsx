@@ -28,6 +28,13 @@ function week(value: number): WeekInfo {
   };
 }
 
+/**
+ * Held still, not built per render. `usePlayerScores` keys its scoring callback on
+ * this object's identity, so a fresh one every render refires the effect behind it
+ * and the test can no longer tell a stable hook from a looping one.
+ */
+const WEEK_5 = week(5);
+
 function scoresFor(week: number): RakMadnessScores {
   return {
     tiebreaker: week,
@@ -61,12 +68,12 @@ describe("usePlayerScores", () => {
     ) as unknown as typeof fetch;
     getPlayerScoresMock.mockResolvedValue(scoresFor(5));
 
-    const { result } = renderHook(() => usePlayerScores(week(5), SEASON), {
+    const { result } = renderHook(() => usePlayerScores(WEEK_5, SEASON), {
       wrapper,
     });
 
     await waitFor(() =>
-      expect(result.current.settled).toEqual({ season: SEASON, week: 5 }),
+      expect(result.current.attemptedFor).toEqual({ season: SEASON, week: 5 }),
     );
     expect(result.current.scores).toEqual(scoresFor(5));
   });
@@ -76,37 +83,40 @@ describe("usePlayerScores", () => {
       Promise.resolve(new Response(null, { status: 404 })),
     ) as unknown as typeof fetch;
 
-    const { result } = renderHook(() => usePlayerScores(week(5), SEASON), {
+    const { result } = renderHook(() => usePlayerScores(WEEK_5, SEASON), {
       wrapper,
     });
 
     await waitFor(() =>
-      expect(result.current.settled).toEqual({ season: SEASON, week: 5 }),
+      expect(result.current.attemptedFor).toEqual({ season: SEASON, week: 5 }),
     );
     expect(result.current.scores).toBeUndefined();
     expect(getPlayerScoresMock).not.toHaveBeenCalled();
   });
 
-  it("names the season it settled, so the same week of another one waits", async () => {
+  it("names the season it attemptedFor, so the same week of another one waits", async () => {
     getPlayerScoresMock.mockImplementation(async (selectedWeek) =>
       scoresFor(selectedWeek.value),
     );
 
     const { result, rerender } = renderHook(
-      ({ season }: { season: number }) => usePlayerScores(week(5), season),
+      ({ season }: { season: number }) => usePlayerScores(WEEK_5, season),
       { initialProps: { season: SEASON }, wrapper },
     );
     await waitFor(() =>
-      expect(result.current.settled).toEqual({ season: SEASON, week: 5 }),
+      expect(result.current.attemptedFor).toEqual({ season: SEASON, week: 5 }),
     );
 
     // Week 5 of the season before. Same week number, different season, so the
     // scores on hand describe neither until this attempt finishes.
     rerender({ season: SEASON - 1 });
-    expect(result.current.settled).toEqual({ season: SEASON, week: 5 });
+    expect(result.current.attemptedFor).toEqual({ season: SEASON, week: 5 });
 
     await waitFor(() =>
-      expect(result.current.settled).toEqual({ season: SEASON - 1, week: 5 }),
+      expect(result.current.attemptedFor).toEqual({
+        season: SEASON - 1,
+        week: 5,
+      }),
     );
   });
 
@@ -131,7 +141,7 @@ describe("usePlayerScores", () => {
 
     // Week 2 supersedes week 1 while week 1 is still being scored.
     rerender({ selectedWeek: week(2) });
-    await waitFor(() => expect(result.current.settled?.week).toBe(2));
+    await waitFor(() => expect(result.current.attemptedFor?.week).toBe(2));
 
     // Let week 1 finish and everything it queued run to the end.
     await act(async () => {
@@ -139,7 +149,7 @@ describe("usePlayerScores", () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    expect(result.current.settled).toEqual({ season: SEASON, week: 2 });
+    expect(result.current.attemptedFor).toEqual({ season: SEASON, week: 2 });
     expect(result.current.scores?.tiebreaker).toBe(2);
   });
 });

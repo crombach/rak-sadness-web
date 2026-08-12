@@ -51,7 +51,7 @@ type Verdict =
   | { kind: "loss" }
   | { kind: "win" }
   /** Level on points, so the Monday night total between `lo` and `hi` decides it. */
-  | { kind: "onTotal"; lo: number; hi: number; contenders: Array<string> };
+  | { kind: "onTotal"; lo: number; hi: number; rivals: Array<string> };
 
 const LOSS: Verdict = { kind: "loss" };
 const WIN: Verdict = { kind: "win" };
@@ -125,7 +125,7 @@ function projected(
   };
 }
 
-type Contender = { player: PlayerScore; gains: Gains };
+type Rival = { player: PlayerScore; gains: Gains };
 
 /**
  * Whether one outcome takes the week, and on what.
@@ -142,7 +142,7 @@ type Contender = { player: PlayerScore; gains: Gains };
 function evaluate(
   player: PlayerScore,
   gains: Gains,
-  contenders: Array<Contender>,
+  rivals: Array<Rival>,
   outcome: number,
   isMondayNightSettled: boolean,
 ): Verdict {
@@ -151,8 +151,8 @@ function evaluate(
   let hi = Number.POSITIVE_INFINITY;
   const level: Array<string> = [];
 
-  for (const contender of contenders) {
-    const them = projected(contender.player, contender.gains, outcome);
+  for (const rival of rivals) {
+    const them = projected(rival.player, rival.gains, outcome);
     if (them.score.total > me.score.total) return LOSS;
     if (them.score.total < me.score.total) continue;
 
@@ -182,9 +182,7 @@ function evaluate(
   }
 
   if (lo > hi) return LOSS;
-  return level.length === 0
-    ? WIN
-    : { kind: "onTotal", lo, hi, contenders: level };
+  return level.length === 0 ? WIN : { kind: "onTotal", lo, hi, rivals: level };
 }
 
 /** Whether `a` takes the week on more totals than `b`: a win, or a wider range. */
@@ -221,14 +219,14 @@ function guaranteedVerdict(
     if (verdict.kind === "onTotal") {
       lo = Math.max(lo, verdict.lo);
       hi = Math.min(hi, verdict.hi);
-      verdict.contenders.forEach((name) => level.add(name));
+      verdict.rivals.forEach((name) => level.add(name));
     }
   }
 
   if (lo > hi) return LOSS;
   return level.size === 0
     ? WIN
-    : { kind: "onTotal", lo, hi, contenders: [...level] };
+    : { kind: "onTotal", lo, hi, rivals: [...level] };
 }
 
 /**
@@ -261,7 +259,7 @@ function outlookOf(verdict: Verdict, isSettled: boolean): MondayNightOutlook {
     kind: "range",
     min: verdict.lo > 0 ? verdict.lo : undefined,
     max: Number.isFinite(verdict.hi) ? verdict.hi : undefined,
-    contenders: verdict.contenders,
+    rivals: verdict.rivals,
   };
 }
 
@@ -269,9 +267,7 @@ function sameOutlook(a: MondayNightOutlook, b: MondayNightOutlook): boolean {
   if (a.kind !== b.kind) return false;
   if (a.kind !== "range" || b.kind !== "range") return true;
   return (
-    a.min === b.min &&
-    a.max === b.max &&
-    a.contenders.join() === b.contenders.join()
+    a.min === b.min && a.max === b.max && a.rivals.join() === b.rivals.join()
   );
 }
 
@@ -298,9 +294,9 @@ function picksIn(
 }
 
 /** Carries the reason `applyKnockouts` already wrote, rather than writing another. */
-function eliminated(player: PlayerScore): PlayerAnalysis {
+function knockedOut(player: PlayerScore): PlayerAnalysis {
   return {
-    kind: "eliminated",
+    kind: "knockedOut",
     player: player.name,
     explanation: player.status.explanation,
   };
@@ -520,7 +516,7 @@ export default function getPlayerAnalysis(
 
   const player = players[playerIndex];
   if (player.status.isKnockedOut) {
-    return eliminated(player);
+    return knockedOut(player);
   }
 
   // Nothing is left to play, so the knockouts have already settled the week and
@@ -561,13 +557,13 @@ export default function getPlayerAnalysis(
   );
 
   const gains = gainsFor(playerIndex, contested, coverers);
-  const contenders: Array<Contender> = rivals.map((rival) => ({
+  const scoredRivals: Array<Rival> = rivals.map((rival) => ({
     player: rival.player,
     gains: gainsFor(rival.index, contested, coverers),
   }));
   const isMondayNightSettled = scores.tiebreaker != null;
   const read = (outcome: number) =>
-    evaluate(player, gains, contenders, outcome, isMondayNightSettled);
+    evaluate(player, gains, scoredRivals, outcome, isMondayNightSettled);
 
   let mineMask = 0;
   let luckMask = 0;
@@ -614,7 +610,7 @@ export default function getPlayerAnalysis(
   }
 
   if (minimal.length === 0) {
-    return eliminated(player);
+    return knockedOut(player);
   }
   // Nothing left to win, and nothing the games they left blank can do about it.
   // A route that only survives because those fell right is not a clinch.

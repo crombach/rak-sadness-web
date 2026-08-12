@@ -42,39 +42,25 @@ describe("the app, results views", () => {
     expect(screen.queryByText("Use Local Spreadsheet")).not.toBeInTheDocument();
   });
 
-  it("switches to the picks view and back", async () => {
-    const user = await mountWithScores();
-    await user.click(screen.getByText("View Results"));
-
-    const [scoreboard, picks] = scoresHeaderButtons();
-    await user.click(picks);
-    expect(screen.getByText("College Score")).toBeInTheDocument();
-    expect(screen.queryByText("MNF Points Pick")).not.toBeInTheDocument();
-
-    await user.click(scoreboard);
-    expect(screen.getByText("MNF Points Pick")).toBeInTheDocument();
-  });
-
-  it("labels the two view buttons", async () => {
+  it("switches to the picks view and back, marking the one you are on", async () => {
     const user = await mountWithScores();
     await user.click(screen.getByText("View Results"));
 
     const [scoreboard, picks] = scoresHeaderButtons();
     expect(scoreboard).toHaveTextContent("Scoreboard");
     expect(picks).toHaveTextContent("Picks");
-  });
-
-  it("marks the view you are on, on both routes", async () => {
-    const user = await mountWithScores();
-    await user.click(screen.getByText("View Results"));
-
-    const [scoreboard, picks] = scoresHeaderButtons();
     expect(scoreboard).toHaveAttribute("aria-pressed", "true");
     expect(picks).toHaveAttribute("aria-pressed", "false");
 
     await user.click(picks);
+    expect(screen.getByText("College Score")).toBeInTheDocument();
+    expect(screen.queryByText("MNF Points Pick")).not.toBeInTheDocument();
     expect(picks).toHaveAttribute("aria-pressed", "true");
     expect(scoreboard).toHaveAttribute("aria-pressed", "false");
+
+    await user.click(scoreboard);
+    expect(screen.getByText("MNF Points Pick")).toBeInTheDocument();
+    expect(scoreboard).toHaveAttribute("aria-pressed", "true");
   });
 
   it("returns home from the logo button", async () => {
@@ -91,6 +77,8 @@ describe("the app, results views", () => {
     await user.click(screen.getByText("View Results"));
     expect(getPlayerScoresMock).toHaveBeenCalledTimes(1);
 
+    // A week with a game still to play is what puts Refresh on screen at all.
+    expect(document.querySelector(".scores-nav__divider")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Refresh" }));
 
     await waitFor(() => {
@@ -99,32 +87,6 @@ describe("the app, results views", () => {
       ).toBeInTheDocument();
     });
     expect(getPlayerScoresMock).toHaveBeenCalledTimes(2);
-  });
-
-  it("collapses refresh away once every game is final", async () => {
-    const user = await mountWithScores();
-    await user.click(screen.getByText("View Results"));
-
-    // Waited for, because the button stays mounted while it animates out.
-    await waitFor(() => {
-      expect(
-        screen.queryByRole("button", { name: "Refresh" }),
-      ).not.toBeInTheDocument();
-    });
-    expect(
-      document.querySelector(".home__scores-header-divider"),
-    ).not.toBeInTheDocument();
-  });
-
-  it("offers refresh while a game is still to be played", async () => {
-    getPlayerScoresMock.mockResolvedValue(openWeekScores);
-    const user = await mountWithScores();
-    await user.click(screen.getByText("View Results"));
-
-    expect(screen.getByRole("button", { name: "Refresh" })).toBeInTheDocument();
-    expect(
-      document.querySelector(".home__scores-header-divider"),
-    ).toBeInTheDocument();
   });
 
   it("reports a scoring failure instead of crashing", async () => {

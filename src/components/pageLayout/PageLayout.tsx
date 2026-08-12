@@ -5,9 +5,9 @@ import {
   useEffect,
   useState,
 } from "react";
-import getClasses from "../utils/getClasses";
-import { ScreenRotationIcon } from "./icon/Icon";
-import Navbar from "./navbar/Navbar";
+import getClasses from "../../utils/getClasses";
+import { ScreenRotationIcon } from "../icon/Icon";
+import Navbar from "../navbar/Navbar";
 import "./PageLayout.scss";
 
 const BACKGROUND_TILE = "/logo512.png";
@@ -79,21 +79,21 @@ export default function PageLayout({
 
   return (
     <div
-      className={`home ${getClasses({ "--tiles-loaded": areTilesLoaded })}`}
+      className={`page ${getClasses({ "--tiles-loaded": areTilesLoaded })}`}
       style={BACKGROUND_STYLE}
     >
-      <a className="home__skip-link" href="#main">
+      <a className="page__skip-link" href="#main">
         Skip to results
       </a>
       <Navbar left={navbarLeft} right={navbarRight} />
       <main
         id="main"
-        className={`home__content ${getClasses({
+        className={`page__content ${getClasses({
           "--scores": showingScores,
           "--frozen": !scrollable,
         })}`}
       >
-        <h1 className="home__title">{title}</h1>
+        <h1 className="page__title">{title}</h1>
         {children}
       </main>
       {/*
@@ -101,12 +101,12 @@ export default function PageLayout({
         page with it. `display: none` the rest of the time, so it is out of the
         accessibility tree rather than merely off screen.
       */}
-      <div className="home__rotate">
-        <span className="home__rotate-icon">
+      <div className="page__rotate">
+        <span className="page__rotate-icon">
           <ScreenRotationIcon />
         </span>
-        <p className="home__rotate-message">Turn your phone upright</p>
-        <p className="home__rotate-detail">
+        <p className="page__rotate-message">Turn your phone upright</p>
+        <p className="page__rotate-detail">
           The Rakulator does not support landscape on a phone.
         </p>
       </div>

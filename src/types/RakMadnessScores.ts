@@ -37,4 +37,4 @@ export type PickResult = {
   };
 };
 
-export type Status = "yes" | "no" | "incomplete" | "error";
+export type Status = "yes" | "no" | "incomplete" | "unscoreable";

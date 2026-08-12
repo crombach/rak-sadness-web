@@ -144,7 +144,7 @@ export async function uploadSpreadsheet(
 /** Scoreboard, Picks, Refresh, in the order ScoresNavbar renders them. */
 export function scoresHeaderButtons(): Array<HTMLElement> {
   return Array.from(
-    document.querySelectorAll<HTMLElement>(".home__scores-header-button"),
+    document.querySelectorAll<HTMLElement>(".scores-nav__button"),
   );
 }
 

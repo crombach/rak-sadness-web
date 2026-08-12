@@ -2,7 +2,7 @@
 
 // One flex child of the navbar's right side, so it carries the gap between its
 // own buttons rather than leaving it to a container that now holds only this.
-.home__scores-nav {
+.scores-nav {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -12,7 +12,7 @@
 // Below this the icon carries the button on its own, so the app name beside it
 // keeps to two lines. Labelled buttons squeeze it to three. The label is only
 // drawn, never removed: the button is named for a screen reader either way.
-.home__scores-header-label {
+.scores-nav__label {
   display: none;
 
   @include labelled-navbar {
@@ -20,7 +20,7 @@
   }
 }
 
-.home__scores-header-divider {
+.scores-nav__divider {
   width: var(--rak-border-width);
   height: var(--rak-icon-md);
   margin: 0 var(--rak-space-2);
@@ -32,7 +32,7 @@
 // `0fr` narrows them, because they measure whatever their padding and their icon
 // come to, and `auto` cannot be interpolated.
 // `--collapse-duration` comes from `ScoresNavbar`, which unmounts this after it.
-.home__scores-header-live {
+.scores-nav__live {
   display: grid;
   grid-template-columns: 1fr;
   transition-property: grid-template-columns, margin-inline-start, opacity;
@@ -47,13 +47,13 @@
     margin-inline-start: calc(-1 * var(--navbar-gap));
 
     // Only while collapsing. Expanded, this would clip the button's focus outline.
-    .home__scores-header-live-content {
+    .scores-nav__live-content {
       overflow: hidden;
     }
   }
 }
 
-.home__scores-header-live-content {
+.scores-nav__live-content {
   display: flex;
   align-items: center;
   // So the column can narrow past what the divider and button measure.

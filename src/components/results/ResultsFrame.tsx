@@ -4,9 +4,9 @@ import { useIsWeekDecided } from "../../context/AppDataContext";
 import { PlayerAnalysisContextProvider } from "../../context/PlayerAnalysisContext";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import getClasses from "../../utils/getClasses";
-import LogoButton from "../navbar/LogoButton/LogoButton";
+import LogoButton, { APP_NAME } from "../navbar/LogoButton";
 import ScoresNavbar, { ScoresView } from "../navbar/ScoresNavbar";
-import PageLayout from "../PageLayout";
+import PageLayout from "../pageLayout/PageLayout";
 import PlayerAnalysisDialog from "../playerAnalysis/PlayerAnalysisDialog";
 import SkeletonTable from "../table/SkeletonTable";
 import "./ResultsFrame.scss";
@@ -54,7 +54,7 @@ export default function ResultsFrame({
       title={
         season && week
           ? `${season} Week ${week} ${view}`
-          : `Rak Madness ${view}`
+          : `${APP_NAME} ${view}`
       }
       // True while loading too: the wireframe is shaped like the table it stands
       // in for, so it wants the same content area.
@@ -75,7 +75,9 @@ export default function ResultsFrame({
         />
       }
     >
-      <div className={`home__scores ${getClasses({ "--loading": !isReady })}`}>
+      <div
+        className={`results-scores ${getClasses({ "--loading": !isReady })}`}
+      >
         <PlayerAnalysisContextProvider showPlayerAnalysis={setAnalysisPlayer}>
           {isReady ? children : <SkeletonTable view={view} />}
         </PlayerAnalysisContextProvider>

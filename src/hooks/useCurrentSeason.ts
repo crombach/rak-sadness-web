@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { League } from "../types/League";
 import getLeagueInfo from "../utils/getLeagueInfo";
+import latestOnly from "../utils/latestOnly";
 
 /**
  * The season running now, by the year it started in, once it has begun.
@@ -18,24 +19,21 @@ import getLeagueInfo from "../utils/getLeagueInfo";
 export default function useCurrentSeason() {
   const [currentSeason, setCurrentSeason] = useState<number>();
 
-  useEffect(() => {
-    let isCurrent = true;
-    const loadCurrentSeason = async () => {
-      try {
-        // No season named, so ESPN answers with the one running now.
-        const proLeagueInfo = await getLeagueInfo(League.PRO);
-        if (isCurrent && proLeagueInfo?.activeWeek != null) {
-          setCurrentSeason(proLeagueInfo.season);
+  useEffect(
+    () =>
+      latestOnly(async (isCurrent) => {
+        try {
+          // No season named, so ESPN answers with the one running now.
+          const proLeagueInfo = await getLeagueInfo(League.PRO);
+          if (isCurrent() && proLeagueInfo?.activeWeek != null) {
+            setCurrentSeason(proLeagueInfo.season);
+          }
+        } catch (error) {
+          console.warn("Could not work out the season running now", error);
         }
-      } catch (error) {
-        console.warn("Could not work out the season running now", error);
-      }
-    };
-    loadCurrentSeason();
-    return () => {
-      isCurrent = false;
-    };
-  }, []);
+      }),
+    [],
+  );
 
   return currentSeason;
 }

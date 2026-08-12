@@ -59,7 +59,7 @@ const scores: RakMadnessScores = {
     player({
       name: "Alice",
       college: [pick("MICH"), pick("OSU", "no")],
-      pro: [pick("BUF"), pick("KC", "incomplete"), pick("MIA", "error")],
+      pro: [pick("BUF"), pick("KC", "incomplete"), pick("MIA", "unscoreable")],
     }),
     player({ name: "Bob", isKnockedOut: true }),
   ],
@@ -174,7 +174,7 @@ describe("PicksTable, rows", () => {
     expect(screen.getByText("MICH").closest("td")).toHaveClass("--yes");
     expect(screen.getByText("OSU").closest("td")).toHaveClass("--no");
     expect(screen.getByText("KC").closest("td")).toHaveClass("--incomplete");
-    expect(screen.getByText("MIA").closest("td")).toHaveClass("--error");
+    expect(screen.getByText("MIA").closest("td")).toHaveClass("--unscoreable");
   });
 
   it("announces a pick's status for a screen reader, fill colors aside", () => {

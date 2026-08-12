@@ -44,7 +44,7 @@ export default function ScoresNavbar({
   return (
     // The two views are the only way through the results, so they are navigation
     // rather than a pair of loose buttons.
-    <nav className="home__scores-nav" aria-label="Results view">
+    <nav className="scores-nav" aria-label="Results view">
       {/*
         `aria-disabled` rather than `disabled` while a week loads. The buttons sit
         where they will sit, showing the view the URL already names, and keep both
@@ -56,26 +56,26 @@ export default function ScoresNavbar({
         compact
         selected={view === "Scoreboard"}
         onClick={() => onViewChange("Scoreboard")}
-        className="home__scores-header-button"
+        className="scores-nav__button"
       >
         <LeaderboardIcon />
         {/* Drawn only where the navbar has room, and read by a screen reader
             everywhere, so the button is never nameless. */}
-        <span className="home__scores-header-label">Scoreboard</span>
+        <span className="scores-nav__label">Scoreboard</span>
       </Button>
       <Button
         ariaDisabled={disabled}
         compact
         selected={view === "Picks"}
         onClick={() => onViewChange("Picks")}
-        className="home__scores-header-button"
+        className="scores-nav__button"
       >
         <FactCheckIcon />
-        <span className="home__scores-header-label">Picks</span>
+        <span className="scores-nav__label">Picks</span>
       </Button>
       {isLiveMounted && (
         <div
-          className={`home__scores-header-live ${isWeekLive ? "" : "--collapsed"}`}
+          className={`scores-nav__live ${isWeekLive ? "" : "--collapsed"}`}
           style={
             {
               "--collapse-duration": `${COLLAPSE_DURATION_MS}ms`,
@@ -85,15 +85,15 @@ export default function ScoresNavbar({
           // by pointer, keyboard, and screen reader on its own.
           inert={!isWeekLive}
         >
-          <div className="home__scores-header-live-content">
-            <div className="home__scores-header-divider" />
+          <div className="scores-nav__live-content">
+            <div className="scores-nav__divider" />
             <Button
               ariaLabel="Refresh"
               ariaDisabled={disabled}
               busy={isRefreshing}
               compact
               onClick={onRefresh}
-              className="home__scores-header-button"
+              className="scores-nav__button"
             >
               <RefreshIcon />
             </Button>

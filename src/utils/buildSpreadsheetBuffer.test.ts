@@ -47,7 +47,7 @@ const scores: RakMadnessScores = {
       name: "Bob",
       score: { total: 1, college: 0, pro: 1, proAgainstTheSpread: 0 },
       tiebreaker: { pick: 45, distance: 4 },
-      college: [pick("MICH +3", "no"), pick("PSU -7", "error")],
+      college: [pick("MICH +3", "no"), pick("PSU -7", "unscoreable")],
       pro: [pick("KC +7", "no"), pick("PHI +3", "incomplete")],
       status: { hasNoPicks: false, isKnockedOut: true },
     }),
@@ -181,7 +181,7 @@ describe("buildSpreadsheetBuffer, picks sheet", () => {
       scores: [
         player({
           college: [
-            pick(undefined as unknown as string, "error"),
+            pick(undefined as unknown as string, "unscoreable"),
             pick("MICH +7", "no"),
           ],
         }),

@@ -1,5 +1,5 @@
-import { GameStatus, HomeAway } from "../types/ESPN";
-import { LeagueResult } from "../types/LeagueResult";
+import { GameStatus, HomeAway } from "../../types/ESPN";
+import { LeagueResult } from "../../types/LeagueResult";
 
 const NO_POSSESSION = {};
 const GAME_DATE = new Date("2024-10-06T17:00:00Z");

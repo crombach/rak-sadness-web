@@ -7,7 +7,7 @@ import parsePick from "./parsePick";
 
 export function getStatus(score: GameScore): Status {
   if (score.isInvalid) {
-    return "error";
+    return "unscoreable";
   } else if (!score.isCompleted) {
     return "incomplete";
   } else if (score.pointValue === 1) {
@@ -89,7 +89,7 @@ export function getPickResults(
     if (selectedTeam == null) {
       return unscoreable(
         MISSING_PICK,
-        "No selection was made for this game.",
+        "No pick was made for this game.",
         hasSpread,
       );
     }

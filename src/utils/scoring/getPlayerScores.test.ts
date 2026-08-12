@@ -3,7 +3,7 @@ import { League, WeekInfo } from "../../types/League";
 import { LeagueResult } from "../../types/LeagueResult";
 import { getLeagueResults } from "../getLeagueResults";
 import { getPlayerScores } from "./getPlayerScores";
-import { finalGame, upcomingGame } from "../leagueResultFixtures";
+import { finalGame, upcomingGame } from "./leagueResultFixtures";
 
 vi.mock("../getLeagueResults");
 
@@ -251,7 +251,7 @@ describe("getPlayerScores, scoring", () => {
         { Name: "Alice", C1: "OSU -3", P1: "BUF -7", P2: "MIA -3", Pts: 41 },
       ]),
     );
-    expect(result.scores[0].pro[1].status).toBe("error");
+    expect(result.scores[0].pro[1].status).toBe("unscoreable");
   });
 });
 
@@ -298,6 +298,8 @@ describe("getPlayerScores, tiebreaker", () => {
 });
 
 describe("getPlayerScores, ranking", () => {
+  // The tiebreaker cascade itself is `comparePlayerScores.test.ts`. These two
+  // only prove the pipeline sorts at all, and works out `hasNoPicks` to sort by.
   it("ranks by total score, highest first", async () => {
     const result = await getPlayerScores(
       WEEK,
@@ -307,55 +309,6 @@ describe("getPlayerScores, ranking", () => {
       ]),
     );
     expect(namesOf(result.scores)).toEqual(["Alice", "Bob"]);
-  });
-
-  it("breaks a tie on total score by tiebreaker distance", async () => {
-    const result = await getPlayerScores(
-      WEEK,
-      picksBuffer([
-        { Name: "Cara", C1: "OSU -3", P1: "BUF -7", P2: "DAL -3", Pts: 45 },
-        { Name: "Alice", C1: "OSU -3", P1: "BUF -7", P2: "DAL -3", Pts: 41 },
-      ]),
-    );
-    expect(namesOf(result.scores)).toEqual(["Alice", "Cara"]);
-  });
-
-  it("breaks a tie on distance by college score", async () => {
-    withEverythingFinal();
-    const result = await getPlayerScores(
-      WEEK,
-      picksBuffer([
-        // College 0, pro 2.
-        { Name: "Dan", C1: "MICH +3", P1: "BUF -7", P2: "DAL -3", Pts: 41 },
-        // College 1, pro 1.
-        { Name: "Alice", C1: "OSU -3", P1: "KC +7", P2: "DAL -3", Pts: 41 },
-      ]),
-    );
-    expect(namesOf(result.scores)).toEqual(["Alice", "Dan"]);
-  });
-
-  it("breaks a tie on college score by pro score against the spread", async () => {
-    withEverythingFinal();
-    const result = await getPlayerScores(
-      WEEK,
-      picksBuffer([
-        // Correct pro pick carries no spread, so it earns no ATS point.
-        { Name: "Frank", C1: "OSU -3", P1: "BUF", P2: "PHI +3", Pts: 41 },
-        { Name: "Erin", C1: "OSU -3", P1: "BUF -7", P2: "PHI +3", Pts: 41 },
-      ]),
-    );
-    expect(namesOf(result.scores)).toEqual(["Erin", "Frank"]);
-  });
-
-  it("falls back to alphabetical order", async () => {
-    const result = await getPlayerScores(
-      WEEK,
-      picksBuffer([
-        { Name: "Zoe", C1: "OSU -3", P1: "BUF -7", P2: "DAL -3", Pts: 41 },
-        { Name: "amy", C1: "OSU -3", P1: "BUF -7", P2: "DAL -3", Pts: 41 },
-      ]),
-    );
-    expect(namesOf(result.scores)).toEqual(["amy", "Zoe"]);
   });
 
   it("ranks players who submitted no picks last", async () => {
@@ -372,7 +325,9 @@ describe("getPlayerScores, ranking", () => {
 });
 
 describe("getPlayerScores, knockouts", () => {
-  it("does not knock out the leader", async () => {
+  // The rules themselves are `applyKnockouts.test.ts`. This only proves the
+  // pipeline carries what it decided out to the caller.
+  it("carries each player's knockout status through the pipeline", async () => {
     const result = await getPlayerScores(
       WEEK,
       picksBuffer([
@@ -382,65 +337,6 @@ describe("getPlayerScores, knockouts", () => {
     );
     expect(result.scores[0].status.isKnockedOut).toBe(false);
     expect(result.scores[0].status.explanation).toBe("Winner!");
-  });
-
-  it("knocks out a player whose remaining picks cannot close the gap", async () => {
-    const result = await getPlayerScores(
-      WEEK,
-      picksBuffer([
-        { Name: "Alice", C1: "OSU -3", P1: "BUF -7", P2: "DAL -3", Pts: 41 },
-        // Two points behind with only one outstanding game, and that pick
-        // matches Alice's, so there is no way to gain ground on her.
-        { Name: "Bob", C1: "MICH +3", P1: "BUF -7", P2: "PHI +3", Pts: 45 },
-      ]),
-    );
-    expect(result.scores[1].status.isKnockedOut).toBe(true);
-    expect(result.scores[1].status.explanation).toBe(
-      "Knocked out on Total Score by Alice. Behind by 2 with 0 different picks remaining.",
-    );
-  });
-
-  it("keeps a player alive when a different remaining pick can still tie", async () => {
-    const result = await getPlayerScores(
-      WEEK,
-      picksBuffer([
-        { Name: "Alice", C1: "OSU -3", P1: "BUF -7", P2: "DAL -3", Pts: 45 },
-        // One point behind, one outstanding game picked the other way, and a
-        // closer tiebreaker guess than Alice's.
-        { Name: "Gina", C1: "MICH +3", P1: "KC +7", P2: "DAL -3", Pts: 41 },
-      ]),
-    );
-    expect(result.scores[1].name).toBe("Gina");
-    expect(result.scores[1].status.isKnockedOut).toBe(false);
-  });
-
-  it("knocks out a player who can only tie and has the worse tiebreaker", async () => {
-    const result = await getPlayerScores(
-      WEEK,
-      picksBuffer([
-        { Name: "Alice", C1: "OSU -3", P1: "BUF -7", P2: "DAL -3", Pts: 41 },
-        { Name: "Hank", C1: "MICH +3", P1: "KC +7", P2: "DAL -3", Pts: 45 },
-      ]),
-    );
-    expect(result.scores[1].name).toBe("Hank");
-    expect(result.scores[1].status.isKnockedOut).toBe(true);
-    expect(result.scores[1].status.explanation).toContain(
-      "Knocked out on MNF Points tiebreaker by Alice",
-    );
-  });
-
-  it("knocks out a player who submitted no picks", async () => {
-    const result = await getPlayerScores(
-      WEEK,
-      picksBuffer([
-        { Name: "Alice", C1: "OSU -3", P1: "BUF -7", P2: "DAL -3", Pts: 41 },
-        { Name: "Bob", Pts: 41 },
-      ]),
-    );
-    expect(result.scores[1].status.isKnockedOut).toBe(true);
-    expect(result.scores[1].status.explanation).toBe(
-      "Knocked out due to having no picks.",
-    );
   });
 });
 
@@ -480,7 +376,7 @@ describe("getPlayerScores, spreads the workbook contradicts", () => {
     const result = await getPlayerScores(WEEK, picksBuffer(contradictoryP1));
 
     result.scores.forEach((score) => {
-      expect(score.pro[0].status).toBe("error");
+      expect(score.pro[0].status).toBe("unscoreable");
       expect(score.pro[0].explanation.header).toBe("Invalid Spread");
       expect(score.pro[0].explanation.message).toBe(
         'Picks disagree about the spread: "BUF -7" and "KC -8".',

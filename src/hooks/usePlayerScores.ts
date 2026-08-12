@@ -3,8 +3,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Toast, useToastActions } from "../context/ToastContext";
 import { WeekInfo } from "../types/League";
 import { RakMadnessScores } from "../types/RakMadnessScores";
-import { XLSX_CONTENT_TYPE } from "../utils/buildSpreadsheetBuffer";
-import { readCachedPicks, writeCachedPicks } from "../utils/picksCache";
+import loadStoredPicks from "../utils/loadStoredPicks";
+import { writeCachedPicks } from "../utils/picksCache";
 import { readFileToBuffer } from "../utils/readFileToBuffer";
 import { getPlayerScores } from "../utils/scoring/getPlayerScores";
 
@@ -12,7 +12,16 @@ import { getPlayerScores } from "../utils/scoring/getPlayerScores";
 const REFRESH_THROTTLE_MS = 500;
 
 /** The season and week a scoring attempt has finished, however it turned out. */
-type SettledAttempt = { season: number; week: number };
+type LastAttempt = { season: number; week: number };
+
+/** Scoring threw on picks the app already had, which every path can hit. */
+function scoringFailed(week: number): Toast {
+  return new Toast(
+    "danger",
+    "Error",
+    `Failed to calculate scores for week ${week}.`,
+  );
+}
 
 type ScoringRequest = {
   loadPicks: () => Promise<ArrayBuffer>;
@@ -32,11 +41,11 @@ type ScoringRequest = {
  * played in January still scores against the season it belongs to. Nothing is
  * attempted until it is known.
  *
- * `settled` names the season and week this hook has finished trying, which is not
- * always the pair asked for: switching either leaves the old scores in place until
- * the new ones arrive. Anything reacting to a missing score has to wait for
- * `settled` to catch up, or it will act on the previous week's outcome. The season
- * belongs there as much as the week, since week 5 exists in every season.
+ * `attemptedFor` names the season and week this hook has finished trying, which
+ * is not always the pair asked for: switching either leaves the old scores in
+ * place until the new ones arrive. Anything reacting to a missing score has to
+ * wait for it to catch up, or it will act on the previous week's outcome. The
+ * season belongs there as much as the week, since week 5 exists in every season.
  */
 export default function usePlayerScores(
   selectedWeek?: WeekInfo,
@@ -46,7 +55,7 @@ export default function usePlayerScores(
 
   const [picksBuffer, setPicksBuffer] = useState<ArrayBuffer>();
   const [scores, setScores] = useState<RakMadnessScores>();
-  const [settled, setSettled] = useState<SettledAttempt>();
+  const [attemptedFor, setAttemptedFor] = useState<LastAttempt>();
   const [isScoresLoading, setScoresLoading] = useState(true);
   const [isRefreshing, setRefreshing] = useState(false);
   // Counts scoring attempts, so a superseded one cannot write its week's scores
@@ -82,7 +91,7 @@ export default function usePlayerScores(
           error,
         );
         setScores(undefined);
-        setSettled(attempted);
+        setAttemptedFor(attempted);
         setScoresLoading(false);
         showToast(onLoadFailure);
         return;
@@ -103,48 +112,11 @@ export default function usePlayerScores(
       } finally {
         if (isLatest()) {
           setScoresLoading(false);
-          setSettled(attempted);
+          setAttemptedFor(attempted);
         }
       }
     },
     [selectedWeek, season, showToast],
-  );
-
-  // Fetch the week's picks from the API, falling back to whatever this browser
-  // cached from an earlier upload. Without the fallback, reopening a results URL
-  // for a week that was only ever uploaded locally would find nothing.
-  const loadStoredPicks = useCallback(
-    async (seasonYear: number, week: WeekInfo) => {
-      try {
-        const response = await fetch(`/api/picks/${seasonYear}/${week.value}`);
-        if (response.status === 404) {
-          throw new Error("Picks spreadsheet is missing from database");
-        }
-        // `make run` is a bare dev server with no Pages Function behind it, so
-        // it answers this path with the app's own HTML at 200. Checking the type
-        // keeps that page out of the workbook parser, and lets the real fetch
-        // work against `npm run pages:dev`.
-        const contentType = response.headers.get("content-type") ?? "";
-        if (!contentType.startsWith(XLSX_CONTENT_TYPE)) {
-          throw new Error(
-            `Picks response was ${contentType}, not a spreadsheet`,
-          );
-        }
-        const arrayBuffer = await response.arrayBuffer();
-        if (!arrayBuffer?.byteLength) {
-          throw new Error("Empty picks buffer");
-        }
-        writeCachedPicks(seasonYear, week.value, arrayBuffer);
-        return arrayBuffer;
-      } catch (error) {
-        const cached = readCachedPicks(seasonYear, week.value);
-        if (cached != null) {
-          return cached;
-        }
-        throw error;
-      }
-    },
-    [],
   );
 
   useEffect(() => {
@@ -157,14 +129,10 @@ export default function usePlayerScores(
           "Missing Picks",
           `The picks spreadsheet for week ${selectedWeek.value} is not yet in the database, but you can use a local spreadsheet if you have one.`,
         ),
-        onScoreFailure: new Toast(
-          "danger",
-          "Error",
-          `Failed to calculate scores for week ${selectedWeek.value}.`,
-        ),
+        onScoreFailure: scoringFailed(selectedWeek.value),
       });
     scoreStoredPicks();
-  }, [selectedWeek, season, attemptScoring, loadStoredPicks]);
+  }, [selectedWeek, season, attemptScoring]);
 
   const scoreLocalFile = useCallback(
     async (file?: File) => {
@@ -212,11 +180,7 @@ export default function usePlayerScores(
         clearToasts();
         // Refreshing rescores the workbook already in memory, so there is no
         // separate way for loading it to fail.
-        const failure = new Toast(
-          "danger",
-          "Error",
-          `Failed to calculate scores for week ${selectedWeek.value}.`,
-        );
+        const failure = scoringFailed(selectedWeek.value);
         try {
           await attemptScoring({
             loadPicks: async () => picksBuffer,
@@ -244,12 +208,19 @@ export default function usePlayerScores(
   return useMemo(
     () => ({
       scores,
-      settled,
+      attemptedFor,
       isScoresLoading,
       isRefreshing,
       scoreLocalFile,
       refresh,
     }),
-    [scores, settled, isScoresLoading, isRefreshing, scoreLocalFile, refresh],
+    [
+      scores,
+      attemptedFor,
+      isScoresLoading,
+      isRefreshing,
+      scoreLocalFile,
+      refresh,
+    ],
   );
 }

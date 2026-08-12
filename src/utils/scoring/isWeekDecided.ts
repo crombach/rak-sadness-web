@@ -3,10 +3,10 @@ import {
   RakMadnessScores,
   Status,
 } from "../../types/RakMadnessScores";
+import { LEAGUES } from "./gameColumns";
 
-const LEAGUES = ["college", "pro"] as const;
-
-function isSettled(status: Status): boolean {
+/** Whether the pick can be scored either way, which is what ends a game for it. */
+function hasOutcome(status: Status): boolean {
   return status === "yes" || status === "no";
 }
 
@@ -36,7 +36,7 @@ export default function isWeekDecided(scores: RakMadnessScores): boolean {
   return LEAGUES.every((league) =>
     firstPlayer[league].every((_, game) =>
       scores.scores.some((player: PlayerScore) =>
-        isSettled(player[league][game].status),
+        hasOutcome(player[league][game].status),
       ),
     ),
   );

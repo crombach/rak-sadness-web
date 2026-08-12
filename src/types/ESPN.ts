@@ -20,7 +20,6 @@ export type EspnEvent = {
 export type EspnStatus = {
   type: {
     id: GameStatus;
-    detail: string;
     shortDetail: string;
   };
 };
@@ -34,7 +33,6 @@ export type EspnCompetition = {
 export type EspnCompetitor = {
   id: string;
   homeAway: HomeAway;
-  winner: boolean;
   team: EspnTeam;
   score: string;
 };

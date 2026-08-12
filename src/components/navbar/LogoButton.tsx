@@ -1,5 +1,5 @@
 import { useId } from "react";
-import Button from "../../button/Button";
+import Button from "../button/Button";
 import "./LogoButton.scss";
 
 const OUTLINE_RADIUS_PX = 1;

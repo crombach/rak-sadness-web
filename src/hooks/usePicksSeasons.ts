@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import latestOnly from "../utils/latestOnly";
 
 type SeasonsResponse = {
   years: Array<number>;
@@ -19,32 +20,29 @@ export default function usePicksSeasons() {
   const [seasons, setSeasons] = useState<Array<number>>();
   const [isSeasonsLoading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let isCurrent = true;
-    const loadSeasons = async () => {
-      try {
-        const response = await fetch("/api/picks");
-        const contentType = response.headers.get("content-type") ?? "";
-        if (!response.ok || !contentType.includes("application/json")) {
-          throw new Error(`Seasons response was ${contentType}`);
+  useEffect(
+    () =>
+      latestOnly(async (isCurrent) => {
+        try {
+          const response = await fetch("/api/picks");
+          const contentType = response.headers.get("content-type") ?? "";
+          if (!response.ok || !contentType.includes("application/json")) {
+            throw new Error(`Seasons response was ${contentType}`);
+          }
+          const body: SeasonsResponse = await response.json();
+          if (isCurrent()) {
+            setSeasons(body.years);
+          }
+        } catch (error) {
+          console.warn("Could not list the seasons that have picks", error);
+        } finally {
+          if (isCurrent()) {
+            setLoading(false);
+          }
         }
-        const body: SeasonsResponse = await response.json();
-        if (isCurrent) {
-          setSeasons(body.years);
-        }
-      } catch (error) {
-        console.warn("Could not list the seasons that have picks", error);
-      } finally {
-        if (isCurrent) {
-          setLoading(false);
-        }
-      }
-    };
-    loadSeasons();
-    return () => {
-      isCurrent = false;
-    };
-  }, []);
+      }),
+    [],
+  );
 
   return useMemo(
     () => ({ seasons, isSeasonsLoading }),

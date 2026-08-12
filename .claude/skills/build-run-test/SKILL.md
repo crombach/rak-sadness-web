@@ -24,11 +24,19 @@ From a clean checkout: `make setup`, `make build`, `make run`, `make test`, `mak
 
 ## Tests
 
-Every suite sits beside the module it covers, and they all run offline. `npm test` is `vitest run`; `npm run test:watch` watches. `src/App.test.tsx` is the widest one: it mounts the routed app and covers the week lookup, the picks fetch, upload, both results views, refresh, export, and the week route guard.
+Every suite sits beside the module it covers, and they all run offline. `npm test` is `vitest run`; `npm run test:watch` watches.
+
+Three suites at `src/` mount the routed app, each on its own axis, and each mocks `getPlayerScores` wholesale so none of them re-exercise scoring:
+
+- `src/App.picks.test.tsx` — first load, the season and week pickers, the picks fetch, and upload.
+- `src/App.routes.test.tsx` — which week a `/:season/:week` URL fetches, and what shows while it does.
+- `src/App.results.test.tsx` — the scoreboard and picks views, refresh, and export.
+
+Prefer the layer below them. A branch of `useWeekRouteGuard`, the wireframe's shape, or the bare-URL redirect each has its own suite (`hooks/useWeekRouteGuard.test.tsx`, `table/SkeletonTable.test.tsx`, `results/CurrentWeekRedirect.test.tsx`) that reaches it without mounting the app.
 
 Writing a test here:
 
-- Fixture games come from `src/utils/leagueResultFixtures.ts` (`finalGame`, `upcomingGame`). Use them instead of hand-rolling a `LeagueResult`.
+- Fixture games come from `src/utils/scoring/leagueResultFixtures.ts` (`finalGame`, `upcomingGame`). Use them instead of hand-rolling a `LeagueResult`.
 - Reading an exported workbook back flattens the fill onto `cell.s`, so assert `cell.s.fgColor.rgb`, not `cell.s.fill.fgColor.rgb`.
 - jsdom reports no layout: every rect is zero and `window.innerHeight` is 768. Anything that measures the page has its arithmetic tested apart from the hook that feeds it.
 - Mount `App` the way `index.tsx` does: inside `MemoryRouter`, `ToastContextProvider`, and `AppDataContextProvider`, with `Toaster` beside it. Toasts render in `Toaster`, so without it no toast assertion can pass.

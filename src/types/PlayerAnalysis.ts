@@ -31,7 +31,7 @@ export type MondayNightOutlook =
       min?: number;
       max?: number;
       /** Who the player is level with on points, and so measured against. */
-      contenders: Array<string>;
+      rivals: Array<string>;
     };
 
 /** One way past the must-win games, and how it ends. */
@@ -49,7 +49,7 @@ export type VictoryRoute = {
  */
 export type PlayerAnalysis =
   /** `explanation` is the reason `applyKnockouts` already wrote. */
-  | { kind: "eliminated"; player: string; explanation?: string }
+  | { kind: "knockedOut"; player: string; explanation?: string }
   /** No result left can take the week off them. */
   | { kind: "clinched"; player: string }
   /**

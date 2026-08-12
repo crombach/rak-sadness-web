@@ -6,7 +6,7 @@ import { PICK_STATUS_FILL } from "./pickStatusFill";
 const TOKEN_FOR_STATUS: Record<Status, string> = {
   yes: "--rak-success-300",
   no: "--rak-danger-300",
-  error: "--rak-warning-300",
+  unscoreable: "--rak-warning-300",
   incomplete: "--rak-surface",
 };
 

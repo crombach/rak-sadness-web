@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Toast, useToastActions } from "../context/ToastContext";
 import { League, WeekInfo } from "../types/League";
 import getLeagueInfo from "../utils/getLeagueInfo";
+import latestOnly from "../utils/latestOnly";
 
 /**
  * The season's weeks, from the ESPN calendar, plus which one is selected.
@@ -51,10 +52,9 @@ export default function useLeagueWeeks(
     // A season switched away from while its lookup was still out must not land.
     // It would leave `seasonYear` naming a season nobody asked for, which reads as
     // loading forever, with no further lookup queued to end it.
-    let isCurrent = true;
-    const getLeagueInfoAsync = async () => {
+    return latestOnly(async (isCurrent) => {
       const proLeagueInfo = await getLeagueInfo(League.PRO, season);
-      if (!isCurrent) return;
+      if (!isCurrent()) return;
       if (proLeagueInfo == null) {
         // The season that was asked for, even though nothing came back for it.
         // Everything the season we came from told us goes, or its weeks would
@@ -66,7 +66,7 @@ export default function useLeagueWeeks(
         setSelectedWeek(undefined);
         setLoading(false);
         showToast(
-          new Toast("danger", "Error", "Failed to load the NFL schedule."),
+          new Toast("danger", "Error", "Failed to load the pro schedule."),
         );
         return;
       }
@@ -82,11 +82,7 @@ export default function useLeagueWeeks(
           proLeagueInfo.activeWeek,
       );
       setLoading(false);
-    };
-    getLeagueInfoAsync();
-    return () => {
-      isCurrent = false;
-    };
+    });
   }, [showToast, season, enabled]);
 
   // Derived rather than a flag set when the season changes, so the switch counts
