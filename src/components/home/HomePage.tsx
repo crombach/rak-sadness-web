@@ -44,6 +44,8 @@ export default function HomePage() {
   const handleFileUpload: ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
       scoreLocalFile(Array.from(event.target.files ?? [])[0]);
+      // Cleared so picking the same file again still fires a change event.
+      event.target.value = "";
     },
     [scoreLocalFile],
   );

@@ -39,7 +39,10 @@ describe("PICK_STATUS_FILL", () => {
 
     Object.entries(TOKEN_FOR_STATUS).forEach(([status, token]) => {
       const declared = tokens.get(token);
-      expect(declared, `${token} is not declared in src/index.scss`).toBeDefined();
+      expect(
+        declared,
+        `${token} is not declared in src/index.scss`,
+      ).toBeDefined();
       expect(
         PICK_STATUS_FILL[status as Status].rgb.toLowerCase(),
         `${status} should match ${token}`,

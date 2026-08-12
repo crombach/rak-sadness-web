@@ -1,6 +1,6 @@
 import { Combobox } from "@base-ui-components/react/combobox";
 import { Dialog } from "@base-ui-components/react/dialog";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PlayerAnalysis } from "../../types/PlayerAnalysis";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import getClasses from "../../utils/getClasses";
@@ -98,19 +98,6 @@ export default function PlayerAnalysisDialog({
   const shown = found?.scores === scores ? found : undefined;
   const isSearching = player != null && shown?.name !== player.name;
 
-  const body = useRef<HTMLDivElement>(null);
-  // The dialog grows to what the answer measures rather than jumping to it. Only
-  // the wrapper carries a height, so the summary inside is laid out as usual.
-  // Hung off the node itself, since the portal holding it mounts after this.
-  const measure = useCallback((content: HTMLDivElement) => {
-    const observer = new ResizeObserver(([entry]) => {
-      if (body.current == null) return;
-      body.current.style.height = `${entry.contentRect.height}px`;
-    });
-    observer.observe(content);
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -188,15 +175,18 @@ export default function PlayerAnalysisDialog({
             </Combobox.Portal>
           </Combobox.Root>
 
-          <div className="player-analysis__body" ref={body}>
+          <div className="player-analysis__body">
             {isSearching && (
               <span
                 className="player-analysis__progress"
-                role="status"
+                role="progressbar"
+                aria-busy="true"
                 aria-label="Working out the paths"
               />
             )}
-            <div className="player-analysis__content" ref={measure}>
+            {/* Polite, so a new answer replacing the last one is read once the
+                screen reader is free rather than cutting off what it is saying. */}
+            <div className="player-analysis__content" aria-live="polite">
               {/* Read off the scores, so it answers for the player picked before
                   their routes have been worked out. */}
               <Standing scores={scores} player={player?.name} />
