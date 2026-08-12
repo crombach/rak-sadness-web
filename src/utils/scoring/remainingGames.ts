@@ -1,12 +1,6 @@
 import { PlayerScore } from "../../types/RakMadnessScores";
-import rangeWithPrefix from "../rangeWithPrefix";
+import gameLabels, { LEAGUES, LeagueKey } from "./gameColumns";
 import parsePick from "./parsePick";
-
-type LeagueKey = "college" | "pro";
-
-const LEAGUES: Array<LeagueKey> = ["college", "pro"];
-
-const LEAGUE_PREFIX: Record<LeagueKey, string> = { college: "C", pro: "P" };
 
 type Cell = {
   /** Absent where the player left the game blank, which scores them nothing. */
@@ -77,7 +71,7 @@ export default function remainingGames(
 ): Array<RemainingGame> {
   const [first] = players;
   return LEAGUES.flatMap((league) => {
-    const labels = rangeWithPrefix(first[league].length, LEAGUE_PREFIX[league]);
+    const labels = gameLabels(first, league);
     return remainingGameIndices(players, league).map((index) => ({
       label: labels[index],
       league,

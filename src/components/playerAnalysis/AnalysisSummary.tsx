@@ -8,6 +8,7 @@ import {
 } from "../../types/PlayerAnalysis";
 import { PlayerScore, RakMadnessScores } from "../../types/RakMadnessScores";
 import { comparePlayerScoresOnMerit } from "../../utils/scoring/comparePlayerScores";
+import isWeekOver from "../../utils/scoring/isWeekOver";
 import remainingGames from "../../utils/scoring/remainingGames";
 import unscoreableGames from "../../utils/scoring/unscoreableGames";
 import Button from "../button/Button";
@@ -99,13 +100,12 @@ export function Standing({
   // standing to give until the scores holding them arrive.
   const chosen = players.find((it) => it.name === player);
   if (chosen == null) return null;
+  // Counted here as well as asked about, since the tail says which of the two is
+  // holding the week open.
   const remaining = remainingGames(players).length;
-  // A game nobody can be scored on is a hole in the week, so the week is not over
-  // however few of its games are still being played. Saying otherwise would call a
-  // leader the winner on a total the app itself could not work out.
   const unscoreable = unscoreableGames(players).length;
-  const isOver = remaining === 0 && unscoreable === 0;
   const isClinched = result?.kind === "clinched" && result.player === player;
+  const isOver = isWeekOver(players);
   return (
     <p className="analysis__standing">
       {headline(players, isOver, chosen, isClinched)}

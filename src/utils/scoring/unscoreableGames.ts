@@ -1,13 +1,6 @@
 import { PlayerScore } from "../../types/RakMadnessScores";
-import rangeWithPrefix from "../rangeWithPrefix";
+import gameLabels, { LEAGUES } from "./gameColumns";
 import { MISSING_PICK } from "./getPickResults";
-
-const LEAGUES = ["college", "pro"] as const;
-
-const LEAGUE_PREFIX: Record<(typeof LEAGUES)[number], string> = {
-  college: "C",
-  pro: "P",
-};
 
 /**
  * The games nobody can be scored on, by the label the picks table gives them.
@@ -23,7 +16,7 @@ export default function unscoreableGames(
   const [first] = players;
   if (first == null) return [];
   return LEAGUES.flatMap((league) => {
-    const labels = rangeWithPrefix(first[league].length, LEAGUE_PREFIX[league]);
+    const labels = gameLabels(first, league);
     return first[league]
       .map((_, index) =>
         players.some(

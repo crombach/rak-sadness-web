@@ -5,8 +5,7 @@ import { PlayerAnalysis } from "../../types/PlayerAnalysis";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import getClasses from "../../utils/getClasses";
 import getPlayerAnalysis from "../../utils/scoring/getPlayerAnalysis";
-import remainingGames from "../../utils/scoring/remainingGames";
-import unscoreableGames from "../../utils/scoring/unscoreableGames";
+import isWeekOver from "../../utils/scoring/isWeekOver";
 import Button from "../button/Button";
 import { CloseRoundedIcon, UnfoldMoreIcon } from "../icon/Icon";
 import PlayerStatusIcon from "../table/playerName/PlayerStatusIcon";
@@ -102,17 +101,9 @@ export default function PlayerAnalysisDialog({
   // dialog emptying and filling again. Only a rescore takes it away.
   const shown = found?.scores === scores ? found : undefined;
   const isSearching = player != null && shown?.name !== player.name;
-  // Read once here, off the same scores, so the header and the "clinched" case
-  // below it never work out separately whether the week itself is done.
-  // `remainingGames` reads the first row unguarded, so an empty week is short
-  // circuited rather than handed to it.
-  const players = scores?.scores ?? [];
-  // Matches what `Standing` calls over: nothing left to play, and nothing the app
-  // could not score. A week with a hole in it has no result to state yet.
-  const isOver =
-    players.length > 0 &&
-    remainingGames(players).length === 0 &&
-    unscoreableGames(players).length === 0;
+  // The same question `Standing` asks, off the same scores and the same predicate,
+  // so the header and the answer under it can never disagree about the week.
+  const isOver = isWeekOver(scores?.scores ?? []);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
