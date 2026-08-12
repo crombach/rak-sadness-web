@@ -1,7 +1,8 @@
-// The shell every control the user types into or opens shares: the season and
-// week selects on the home page, and the player search in the player analysis
-// dialog. Mixins only, so this emits no CSS of its own however many files pull it
-// in.
+// The shell the season and week selects on the home page share. The player search
+// in the analysis dialog is not one of these: it sits inside a popup and is shorter
+// than a page-level control, so it keeps its own box and takes only the focus ring
+// from here. Mixins only, so this emits no CSS of its own however many files pull
+// it in.
 
 @use "breakpoints" as *;
 @use "focus" as *;

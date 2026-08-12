@@ -30,7 +30,7 @@
   }
 
   .table__header {
-    z-index: 20;
+    z-index: var(--rak-z-sticky-header);
     position: sticky;
     top: 0;
     background-color: var(--rak-primary-800);
@@ -104,7 +104,7 @@
 
   // Stick the player column to the left side of the screen.
   .table__player-col {
-    z-index: 10;
+    z-index: var(--rak-z-sticky-cell);
     position: sticky;
     left: 0;
   }

@@ -127,8 +127,8 @@
     display: flex;
 
     > svg {
-      width: 40px;
-      height: 40px;
+      width: var(--rak-icon-lg);
+      height: var(--rak-icon-lg);
       fill: var(--rak-primary-700);
     }
   }

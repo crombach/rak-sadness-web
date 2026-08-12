@@ -1,4 +1,5 @@
 @use "../../styles/breakpoints" as *;
+@use "../../styles/focus" as *;
 @use "../../styles/listbox" as *;
 
 // Base UI ships the dialog and the combobox unstyled, so these rules carry the
@@ -7,8 +8,8 @@
 .player-analysis__backdrop {
   position: fixed;
   inset: 0;
-  z-index: 1000;
-  background-color: rgb(21 21 21 / 45%);
+  z-index: var(--rak-z-modal);
+  background-color: var(--rak-scrim);
   transition: opacity 200ms ease;
 
   &[data-starting-style],
@@ -22,7 +23,7 @@
 // component, because every other screen split in the app is drawn this way.
 .player-analysis__popup {
   position: fixed;
-  z-index: 1001;
+  z-index: calc(var(--rak-z-modal) + 1);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -78,10 +79,9 @@
   border-radius: var(--rak-radius-sm);
   background-color: var(--rak-on-solid);
 
-  &:focus-within {
-    outline: 2px solid var(--rak-primary-500);
-    outline-offset: 2px;
-  }
+  // On the shell rather than on the input inside it, so the ring goes round the
+  // whole search including its icons.
+  @include focus-ring(":focus-within");
 }
 
 .player-analysis__input {
@@ -120,7 +120,7 @@
 
 .player-analysis__positioner {
   // Above the dialog it opens inside of, which the backdrop already sits under.
-  z-index: 1002;
+  z-index: calc(var(--rak-z-modal) + 2);
   max-height: var(--available-height);
 }
 

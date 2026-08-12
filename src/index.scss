@@ -35,7 +35,6 @@
   --rak-space-2: 8px;
   --rak-space-3: 12px;
   --rak-space-4: 16px;
-  --rak-space-5: 20px;
   --rak-space-6: 24px;
 
   --rak-radius-xs: 3px;
@@ -53,25 +52,29 @@
 
   --rak-icon-sm: 16px;
   --rak-icon-md: 24px;
+  // Only the note covering a phone held sideways, where the icon leads the screen
+  // rather than sitting beside a word.
+  --rak-icon-lg: 40px;
 
-  // Motion. Four durations cover every transition and the one loop.
+  // Motion. Three durations cover every transition and the one loop.
   --rak-duration-fast: 120ms;
-  --rak-duration-base: 220ms;
   --rak-duration-slow: 300ms;
   --rak-duration-loop: 2000ms;
   --rak-ease-standard: ease;
-  --rak-ease-emphasized: ease-in-out;
 
-  // Stacking, one step per named layer. Nothing sets a z-index that is not here,
-  // so what sits above what is decided in one place.
+  // Stacking, one step per layer the page stacks, so what sits above what is
+  // decided in one place. A z-index outside this list orders an element against
+  // its own siblings and nothing else.
   --rak-z-below: -1;
   --rak-z-sticky-cell: 10;
   --rak-z-sticky-header: 20;
   --rak-z-skeleton: 30;
   --rak-z-navbar: 100;
   --rak-z-overlay: 200;
-  --rak-z-modal: 300;
   --rak-z-toast: 400;
+  // Above the toasts, since the dialog's scrim covers them anyway. The two layers
+  // over it are the popup and the list it opens, taken from this with `calc`.
+  --rak-z-modal: 1000;
 
   // The page behind the tiled logo, and the largest surface on a phone.
   --rak-brand-light: #6eaad9;

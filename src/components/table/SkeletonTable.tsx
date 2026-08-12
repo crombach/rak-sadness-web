@@ -20,8 +20,8 @@ const PLAYER_COUNT = 61;
  * stays out of the DOM's text so nothing reads or matches a placeholder.
  */
 const RANK = "10";
-/** Twenty characters, the longest a real name gets before it is cut short. */
-const PLAYER = "Why is the Runn Gone";
+/** Eighteen characters, the longest a real name gets before it is cut short. */
+const PLAYER = "Why is the Runn Go";
 const PICK = "TCU -13.5";
 const SCORE = "10";
 

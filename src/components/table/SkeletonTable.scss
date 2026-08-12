@@ -1,76 +1,24 @@
-@use "sass:math";
 @use "../../styles/a11y" as *;
+@use "../../styles/skeleton" as *;
 
 .skeleton__status {
   @include visually-hidden;
 }
 
-// The fraction of the table's width the sheen covers. A transform percentage is of
-// the sheen's own width, so crossing the whole table takes 100% divided by that
-// fraction. The sheen starts with its right edge on the table's left, and ends with
-// its left edge on the table's right.
-$sheen-fraction: 0.6;
-
-@keyframes skeleton-sweep {
-  from {
-    transform: translate3d(-100%, 0, 0);
-  }
-  to {
-    transform: translate3d(math.div(100%, $sheen-fraction), 0, 0);
-  }
-}
-
 .table.--skeleton {
-  // Containing block for the sheen, which travels the table's width and no further.
-  // Clipped as well as contained: the sheen is as wide as most of the table, so both
-  // ends of its run hang outside. Nothing here sticks, because the page holds still
-  // until the week arrives, so there is no sticky header to lose to the clip.
-  position: relative;
-  overflow: hidden;
+  // The sheen is held to the table's own box, so it crosses the wireframe and not
+  // the page around it. Nothing here sticks, because the page holds still until the
+  // week arrives, so there is no sticky header to lose to the mixin's clip.
+  @include skeleton-sheen;
+
   // `.table` centers itself vertically, which would split the leftover space into
   // a band above and below. Flush to the top instead, so the whole remainder is at
   // the bottom and the row count can claim it.
   margin-block: 0;
 
-  // One sheen crossing the screen, rather than a pulse in each of the fifteen
-  // hundred bars. Animating them all cost three quarters of the frame budget on a
-  // throttled phone, over the same seconds the week is being scored. This is one
-  // transform on the compositor, so it costs the same whatever the table's size.
-  //
-  // Held to the table's own box, so it crosses the wireframe and not the page
-  // around it. Above the sticky header, below the navbar.
-  &::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: $sheen-fraction * 100%;
-    z-index: 30;
-    pointer-events: none;
-    background: linear-gradient(
-      100deg,
-      transparent 30%,
-      rgb(255 255 255 / 30%) 50%,
-      transparent 70%
-    );
-    transform: translate3d(-100%, 0, 0);
-    will-change: transform;
-    animation: skeleton-sweep 2s linear infinite;
-  }
-
   th,
   td {
-    // Containing block for the bar, which is taken out of flow so the invisible
-    // text below is what sizes the cell.
-    position: relative;
-
-    // Drawn from the attribute rather than written into the cell, so a placeholder
-    // never lands in the page's text for a screen reader or a query to find.
-    &::before {
-      content: attr(data-skeleton-text);
-      visibility: hidden;
-    }
+    @include skeleton-reserve;
   }
 
   // No value in a real table wraps, so no stand-in for one does either, and every
@@ -81,6 +29,8 @@ $sheen-fraction: 0.6;
   }
 
   .skeleton__bar {
+    @include skeleton-surface;
+
     position: absolute;
     top: 50%;
     // Absolute insets run from the padding box, so the cell's own padding is what
@@ -89,15 +39,11 @@ $sheen-fraction: 0.6;
     right: var(--rak-table-cell-padding-x);
     height: 0.7rem;
     transform: translateY(-50%);
-    border-radius: 3px;
-    background-color: var(--rak-text-tertiary);
-    // Midway between the ends of the pulse this replaces.
-    opacity: 0.3;
   }
 
   .table__header .skeleton__bar {
     // The header is already dark, so the bars read as light gaps in it.
-    background-color: var(--rak-on-solid);
+    background-color: var(--rak-loading-fill-on-solid);
   }
 
   // A real table draws this edge from its sticky player column, which the
@@ -113,13 +59,5 @@ $sheen-fraction: 0.6;
         var(--rak-player-icon-size) + var(--rak-player-icon-gap)
       );
     }
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  // Taken away rather than held still, because a sheen parked across the screen
-  // reads as part of the page rather than as something that was moving.
-  .table.--skeleton::after {
-    display: none;
   }
 }
