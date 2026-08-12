@@ -79,10 +79,35 @@ export function EmojiEventsIcon() {
   );
 }
 
+/**
+ * The trophy drawn as an outline, which is what a player's status wears. Held
+ * apart from the filled one above, which the footer's link keeps.
+ */
+export function EmojiEventsOutlinedIcon() {
+  return (
+    <Icon name="EmojiEventsOutlinedIcon">
+      <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2M5 8V7h2v3.82C5.84 10.4 5 9.3 5 8m7 6c-1.65 0-3-1.35-3-3V5h6v6c0 1.65-1.35 3-3 3m7-6c0 1.3-.84 2.4-2 2.82V7h2z" />
+    </Icon>
+  );
+}
+
 export function SkullIcon() {
   return (
     <Icon name="SkullIcon">
       <path d="M10.5 15.75h3l-1.5-3-1.5 3Zm-2-2.75q.83 0 1.41-.59T10.5 11q0-.83-.59-1.41T8.5 9q-.83 0-1.41.59T6.5 11q0 .83.59 1.41T8.5 13Zm7 0q.83 0 1.41-.59T17.5 11q0-.83-.59-1.41T15.5 9q-.83 0-1.41.59T13.5 11q0 .83.59 1.41T15.5 13ZM6 22v-4.25q-.98-.43-1.71-1.14t-1.25-1.61q-.51-.9-.78-1.93T2 11q0-3.95 2.8-6.48t7.2-2.53q4.4 0 7.2 2.53t2.8 6.48q0 1.05-.26 2.08t-.78 1.93q-.51.9-1.25 1.61T18 17.75v4.25H15v-2h-2v2h-2v-2h-2v2H6Z" />
+    </Icon>
+  );
+}
+
+/**
+ * The skull as an outline, on the same 24 grid as the filled one above. Both are
+ * Material Symbols, which is where the shape comes from at all, so the two differ
+ * only in the `fill` axis.
+ */
+export function SkullOutlinedIcon() {
+  return (
+    <Icon name="SkullOutlinedIcon">
+      <path d="M6 22v-4.25q-.98-.43-1.71-1.14t-1.25-1.61q-.51-.9-.78-1.93T2 11q0-3.95 2.8-6.48t7.2-2.53q4.4 0 7.2 2.53t2.8 6.48q0 1.05-.26 2.08t-.78 1.93q-.51.9-1.25 1.61T18 17.75v4.25H15v-2h-2v2h-2v-2h-2v2H6Zm2-2h1v-2h2v2h2v-2h2v2h1v-3.55q.95-.22 1.69-.75t1.25-1.25q.51-.72.79-1.6T20.5 11q0-3.13-2.21-5.31Q16.07 3.5 12 3.5T5.71 5.69Q3.5 7.87 3.5 11q0 .97.28 1.85t.79 1.6q.51.72 1.25 1.25T7.5 16.45V20H8Zm2.5-4.25h3l-1.5-3-1.5 3ZM8.5 13q.83 0 1.41-.59T10.5 11q0-.83-.59-1.41T8.5 9q-.83 0-1.41.59T6.5 11q0 .83.59 1.41T8.5 13Zm7 0q.83 0 1.41-.59T17.5 11q0-.83-.59-1.41T15.5 9q-.83 0-1.41.59T13.5 11q0 .83.59 1.41T15.5 13ZM12 12Z" />
     </Icon>
   );
 }

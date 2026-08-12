@@ -58,6 +58,9 @@ export default function HomePage() {
   return (
     <PageLayout
       title="Rak Madness"
+      // A bar of controls fits a phone on its side, two columns of it, so this
+      // page keeps working where a week's table cannot.
+      allowLandscape
       navbarLeft={<LogoButton onClick={() => navigate("/")} />}
     >
       {/*
@@ -68,92 +71,104 @@ export default function HomePage() {
         <>
           <div className="home__controls">
             {/*
+              Paired with `home__actions` below. Both are `display: contents`
+              until a phone is on its side, where they become two columns.
+            */}
+            <div className="home__pickers">
+              {/*
               Seasons are named by the year they started in, so the 2025 season
               covers the games played from September 2025 into January 2026.
             */}
-            <Select.Root
-              // The season asked for, not the one loaded, so the trigger shows
-              // the switch immediately. Falls back for `make run`, where there
-              // is no season list to have asked from.
-              value={requestedSeason ?? seasonYear ?? null}
-              onValueChange={(season) =>
-                season != null && setSelectedSeason(season)
-              }
-              disabled={isWeekInfoLoading}
-            >
-              <Select.Trigger
-                aria-label="Season"
-                className="home__week-input home__season-input select__trigger"
+              <Select.Root
+                // The season asked for, not the one loaded, so the trigger shows
+                // the switch immediately. Falls back for `make run`, where there
+                // is no season list to have asked from.
+                value={requestedSeason ?? seasonYear ?? null}
+                onValueChange={(season) =>
+                  season != null && setSelectedSeason(season)
+                }
+                disabled={isWeekInfoLoading}
               >
-                <Select.Value>
-                  {(season: number | null) =>
-                    season != null ? seasonLabel(season) : "Select a season..."
-                  }
-                </Select.Value>
-                <Select.Icon className="select__icon">
-                  <UnfoldMoreIcon />
-                </Select.Icon>
-              </Select.Trigger>
-              <Select.Portal>
-                <Select.Positioner
-                  className="select__positioner"
-                  sideOffset={4}
+                <Select.Trigger
+                  aria-label="Season"
+                  className="home__week-input home__season-input select__trigger"
                 >
-                  <Select.Popup className="select__popup">
-                    {selectableSeasons.map((season) => (
-                      <Select.Item
-                        key={season}
-                        value={season}
-                        className="select__item"
-                      >
-                        <Select.ItemText>{seasonLabel(season)}</Select.ItemText>
-                      </Select.Item>
-                    ))}
-                  </Select.Popup>
-                </Select.Positioner>
-              </Select.Portal>
-            </Select.Root>
+                  <Select.Value>
+                    {(season: number | null) =>
+                      season != null
+                        ? seasonLabel(season)
+                        : "Select a season..."
+                    }
+                  </Select.Value>
+                  <Select.Icon className="select__icon">
+                    <UnfoldMoreIcon />
+                  </Select.Icon>
+                </Select.Trigger>
+                <Select.Portal>
+                  <Select.Positioner
+                    className="select__positioner"
+                    sideOffset={4}
+                  >
+                    <Select.Popup className="select__popup">
+                      {selectableSeasons.map((season) => (
+                        <Select.Item
+                          key={season}
+                          value={season}
+                          className="select__item"
+                        >
+                          <Select.ItemText>
+                            {seasonLabel(season)}
+                          </Select.ItemText>
+                        </Select.Item>
+                      ))}
+                    </Select.Popup>
+                  </Select.Positioner>
+                </Select.Portal>
+              </Select.Root>
 
-            {/*
+              {/*
               `value` holds the WeekInfo object itself, and Base UI compares with
               Object.is by default, so an option only reads as selected when it is
               the same object the week list handed out.
             */}
-            <Select.Root
-              value={selectedWeek ?? null}
-              onValueChange={(week) => setSelectedWeek(week ?? undefined)}
-              disabled={isWeekInfoLoading}
-            >
-              <Select.Trigger
-                aria-label="Week"
-                className="home__week-input select__trigger"
+              <Select.Root
+                value={selectedWeek ?? null}
+                onValueChange={(week) => setSelectedWeek(week ?? undefined)}
+                disabled={isWeekInfoLoading}
               >
-                <Select.Value>
-                  {(week: WeekInfo | null) => week?.label ?? "Select a week..."}
-                </Select.Value>
-                <Select.Icon className="select__icon">
-                  <UnfoldMoreIcon />
-                </Select.Icon>
-              </Select.Trigger>
-              <Select.Portal>
-                <Select.Positioner
-                  className="select__positioner"
-                  sideOffset={4}
+                <Select.Trigger
+                  aria-label="Week"
+                  className="home__week-input select__trigger"
                 >
-                  <Select.Popup className="select__popup">
-                    {selectableWeeks.map((week) => (
-                      <Select.Item
-                        key={week.value}
-                        value={week}
-                        className="select__item"
-                      >
-                        <Select.ItemText>{week.label}</Select.ItemText>
-                      </Select.Item>
-                    ))}
-                  </Select.Popup>
-                </Select.Positioner>
-              </Select.Portal>
-            </Select.Root>
+                  <Select.Value>
+                    {(week: WeekInfo | null) =>
+                      week?.label ?? "Select a week..."
+                    }
+                  </Select.Value>
+                  <Select.Icon className="select__icon">
+                    <UnfoldMoreIcon />
+                  </Select.Icon>
+                </Select.Trigger>
+                <Select.Portal>
+                  <Select.Positioner
+                    className="select__positioner"
+                    sideOffset={4}
+                  >
+                    <Select.Popup className="select__popup">
+                      {selectableWeeks.map((week) => (
+                        <Select.Item
+                          key={week.value}
+                          value={week}
+                          className="select__item"
+                        >
+                          <Select.ItemText>{week.label}</Select.ItemText>
+                        </Select.Item>
+                      ))}
+                    </Select.Popup>
+                  </Select.Positioner>
+                </Select.Portal>
+              </Select.Root>
+            </div>
 
             {/* Hidden behind the button below, which forwards the click. */}
             <input
@@ -163,37 +178,44 @@ export default function HomePage() {
               accept=".xlsx"
               onChange={handleFileUpload}
             />
-            <Button
-              className={`home__button ${getClasses({
-                "--hide": isBusy || !!scores,
-              })}`}
-              onClick={clickFileInput}
-              disabled={!selectedWeek || isBusy}
-            >
-              Use Local Spreadsheet
-            </Button>
-            <Button
-              className={`home__button --scores ${getClasses({
-                "--loading-btn": isBusy,
-              })}`}
-              disabled={hasNoScoresYet}
-              color="success"
-              onClick={() =>
-                navigate(`/${seasonYear}/${selectedWeek?.value}/scoreboard`)
-              }
-            >
-              View Results
-            </Button>
-            <Button
-              className={`home__button --export ${getClasses({
-                "--loading-btn": isBusy || isExportLoading,
-              })}`}
-              disabled={hasNoScoresYet || isExportLoading}
-              color="danger"
-              onClick={exportResults}
-            >
-              Export Results
-            </Button>
+            {/*
+              `display: contents` unless a phone is on its side, where it becomes
+              the second of two columns. So the buttons stack exactly as they did
+              everywhere else.
+            */}
+            <div className="home__actions">
+              <Button
+                className={`home__button ${getClasses({
+                  "--hide": isBusy || !!scores,
+                })}`}
+                onClick={clickFileInput}
+                disabled={!selectedWeek || isBusy}
+              >
+                Use Local Spreadsheet
+              </Button>
+              <Button
+                className={`home__button --scores ${getClasses({
+                  "--loading-btn": isBusy,
+                })}`}
+                disabled={hasNoScoresYet}
+                color="success"
+                onClick={() =>
+                  navigate(`/${seasonYear}/${selectedWeek?.value}/scoreboard`)
+                }
+              >
+                View Results
+              </Button>
+              <Button
+                className={`home__button --export ${getClasses({
+                  "--loading-btn": isBusy || isExportLoading,
+                })}`}
+                disabled={hasNoScoresYet || isExportLoading}
+                color="danger"
+                onClick={exportResults}
+              >
+                Export Results
+              </Button>
+            </div>
           </div>
 
           <Footer />

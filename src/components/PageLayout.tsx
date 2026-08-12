@@ -57,6 +57,7 @@ export default function PageLayout({
   navbarRight,
   showingScores = false,
   scrollable = true,
+  allowLandscape = false,
   children,
 }: PropsWithChildren<{
   /**
@@ -73,6 +74,12 @@ export default function PageLayout({
    * clicked. The content keeps whatever scrollbars it asks for either way.
    */
   scrollable?: boolean;
+  /**
+   * Set by a page that has a landscape layout of its own. Everything else covers
+   * a phone on its side with a note, since a week's table cannot be read across
+   * 400px of height.
+   */
+  allowLandscape?: boolean;
 }>) {
   const areTilesLoaded = useImageLoaded(BACKGROUND_TILE);
 
@@ -100,12 +107,14 @@ export default function PageLayout({
         page with it. `display: none` the rest of the time, so it is out of the
         accessibility tree rather than merely off screen.
       */}
-      <div className="home__rotate">
-        <p className="home__rotate-message">Turn your phone upright</p>
-        <p className="home__rotate-detail">
-          The Rakulator does not support landscape on a phone.
-        </p>
-      </div>
+      {!allowLandscape && (
+        <div className="home__rotate">
+          <p className="home__rotate-message">Turn your phone upright</p>
+          <p className="home__rotate-detail">
+            The Rakulator does not support landscape on a phone.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,8 +1,8 @@
 import { useIsWeekDecided } from "../../../context/AppDataContext";
 import {
-  EmojiEventsIcon,
+  EmojiEventsOutlinedIcon,
   SentimentVerySatisfiedIcon,
-  SkullIcon,
+  SkullOutlinedIcon,
 } from "../../icon/Icon";
 import "./PlayerStatusIcon.scss";
 
@@ -11,6 +11,10 @@ import "./PlayerStatusIcon.scss";
  * player analysis search, so the same player is marked the same way in both.
  *
  * Still standing at the end of the week is what winning the week is.
+ *
+ * Drawn as outlines, against the filled icons the rest of the app uses. A row is
+ * a line of text with one of these at the end of it, and a filled shape at that
+ * size reads as a blot rather than as a face, a trophy, or a skull.
  */
 export default function PlayerStatusIcon({
   isKnockedOut,
@@ -22,9 +26,9 @@ export default function PlayerStatusIcon({
   return (
     <span className="player-status-icon">
       {isKnockedOut ? (
-        <SkullIcon />
+        <SkullOutlinedIcon />
       ) : isWeekDecided ? (
-        <EmojiEventsIcon />
+        <EmojiEventsOutlinedIcon />
       ) : (
         <SentimentVerySatisfiedIcon />
       )}

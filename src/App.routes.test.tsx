@@ -42,7 +42,7 @@ describe("the app, week routes", () => {
   });
 
   const crown = () =>
-    within(screen.getByRole("table")).queryByTestId("EmojiEventsIcon");
+    within(screen.getByRole("table")).queryByTestId("EmojiEventsOutlinedIcon");
 
   it("crowns a player still standing at the end of the week", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
