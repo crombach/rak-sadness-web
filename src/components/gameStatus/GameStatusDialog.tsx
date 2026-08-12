@@ -38,11 +38,11 @@ export function gamesMatching(
 /**
  * Where a game stands, in one mark, on every game the search offers.
  *
- * A dot for a game whose clock has something left to say, red while it is running and
- * grey before it starts. A tick for a game that is over, and a warning for a column
- * ESPN lists no game for, which is the one game the dialog can say nothing else about.
- * The dot on the game being watched pulses, since that game is asked about again every
- * ten seconds.
+ * A game being played says LIVE beside a red dot, since a red dot on its own reads as
+ * a decoration next to a game's name. A grey dot for a game yet to kick off, a tick for
+ * one that is over, and a warning for a column ESPN lists no game for, which is the one
+ * game the dialog can say nothing else about. The dot on the game being watched pulses,
+ * since that game is asked about again every ten seconds.
  */
 function GameMark({
   game,
@@ -72,17 +72,27 @@ function GameMark({
       </span>
     );
   }
-  const isLive = status === GameStatus.LIVE;
+  if (status === GameStatus.LIVE) {
+    return (
+      <span
+        className={`game-status__mark --live ${getClasses({
+          "--polling": polling,
+        })}`}
+        role="img"
+        aria-label={polling ? "Live, refreshing" : "Live"}
+      >
+        {/* Read out by the label above rather than as letters, so a reader being
+            read to hears "Live" and not "L I V E". */}
+        <span className="game-status__live-dot" />
+        LIVE
+      </span>
+    );
+  }
   return (
     <span
-      className={`game-status__mark --dot ${getClasses({
-        "--live": isLive,
-        "--polling": isLive && polling,
-      })}`}
+      className="game-status__mark --dot"
       role="img"
-      aria-label={
-        isLive ? (polling ? "Live, refreshing" : "Live") : "Yet to kick off"
-      }
+      aria-label="Yet to kick off"
     />
   );
 }

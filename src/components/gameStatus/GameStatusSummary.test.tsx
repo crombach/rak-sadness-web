@@ -125,12 +125,11 @@ describe("GameStatusSummary, a game that is over", () => {
     expect(screen.getByText("4-1")).toBeInTheDocument();
   });
 
-  it("heads the scoreline with the kickoff and the venue", () => {
+  it("heads the scoreline with the venue", () => {
     renderFinal();
     // Each part on its own, since a dot between two of them is the stylesheet's.
     expect(screen.getByText("Highmark Stadium")).toBeInTheDocument();
     expect(screen.getByText("Orchard Park, NY")).toBeInTheDocument();
-    expect(screen.getByText(/Sun, Oct 6/)).toBeInTheDocument();
   });
 
   it("shows the quarters for each side, the scores being the totals", () => {
@@ -161,6 +160,42 @@ describe("GameStatusSummary, a game that is over", () => {
     expect(logos()).toEqual([
       "https://espn.com/buf.png",
       "https://espn.com/kc.png",
+    ]);
+  });
+});
+
+/*
+ * `TZ` is what `toLocaleDateString` reads the zone from, and Node picks a change to it
+ * up on the next call. Set here so the kickoff asserted is the same wherever the suite
+ * is run, which the developers' machines and CI do not agree on.
+ */
+describe("GameStatusSummary, the kickoff", () => {
+  const zone = process.env.TZ;
+  afterEach(() => {
+    process.env.TZ = zone;
+  });
+
+  function kickoff(timeZone: string): Array<string | null> {
+    process.env.TZ = timeZone;
+    render(<GameStatusSummary game={game(result())} result={result()} />);
+    return [
+      ...document.querySelectorAll(".game-status__meta-group:first-child span"),
+    ].map((part) => part.textContent);
+  }
+
+  it("says the day and the time in the reader's own zone, and names it", () => {
+    // 17:00 UTC, which is the morning where this reader is.
+    expect(kickoff("America/Los_Angeles")).toEqual([
+      "Sun, Oct 6",
+      "10:00 AM PDT",
+    ]);
+  });
+
+  it("moves the day with the zone, not only the time", () => {
+    // The same instant, on which this reader is already into Monday.
+    expect(kickoff("Australia/Sydney")).toEqual([
+      "Mon, Oct 7",
+      "4:00 AM GMT+11",
     ]);
   });
 });
@@ -202,7 +237,9 @@ describe("GameStatusSummary, a game still being played", () => {
 
   it("shows the clock, the quarter, and the down", () => {
     renderLive();
-    expect(screen.getByText("8:42 - 3rd Quarter")).toBeInTheDocument();
+    // The quarter as `Q3` on every screen, rather than ESPN's own longer wording.
+    expect(screen.getByText("Q3 8:42")).toBeInTheDocument();
+    expect(screen.queryByText("8:42 - 3rd Quarter")).toBeNull();
     expect(screen.getByText("2nd & 7")).toBeInTheDocument();
   });
 
@@ -210,11 +247,6 @@ describe("GameStatusSummary, a game still being played", () => {
     renderLive();
     expect(screen.getByLabelText("Has the ball")).toBeInTheDocument();
     expect(screen.queryByText("KC ball")).toBeNull();
-  });
-
-  it("carries a short form of the clock, for a phone", () => {
-    renderLive();
-    expect(screen.getByText("Q3 8:42")).toBeInTheDocument();
   });
 
   it("marks the side with the ball", () => {
@@ -229,7 +261,7 @@ describe("GameStatusSummary, a game still being played", () => {
 });
 
 describe("GameStatusSummary, a game yet to kick off", () => {
-  it("says when it starts, with nothing to say about how it is going", () => {
+  it("says it is yet to start, leaving the kickoff to the strip above", () => {
     const upcoming = result({
       status: GameStatus.UPCOMING,
       detailMessage: "Sun, October 6th - 1:00 PM EDT",
@@ -247,11 +279,32 @@ describe("GameStatusSummary, a game yet to kick off", () => {
       loser: { team: null, homeAway: null, by: 0 },
     });
     render(<GameStatusSummary game={game(upcoming)} result={upcoming} />);
-    expect(
-      screen.getByText("Sun, October 6th - 1:00 PM EDT"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Pregame")).toBeInTheDocument();
+    // ESPN says a scheduled game as its kickoff, in Eastern time. Shown here it
+    // would be the strip above said twice, and said in the wrong zone.
+    expect(screen.queryByText("Sun, October 6th - 1:00 PM EDT")).toBeNull();
     expect(screen.queryByRole("table")).toBeNull();
     expect(screen.queryByLabelText("Has the ball")).toBeNull();
+  });
+
+  it("keeps ESPN's word for a stage it has no short form for", () => {
+    const postponed = result({
+      // Neither of the three the app knows, which is how ESPN says a game called off.
+      status: "5" as GameStatus,
+      detailMessage: "Postponed",
+      home: {
+        team: { name: "Buffalo Bills", abbreviation: "BUF" },
+        score: 0,
+        linescores: [],
+      },
+      away: {
+        team: { name: "Kansas City Chiefs", abbreviation: "KC" },
+        score: 0,
+        linescores: [],
+      },
+    });
+    render(<GameStatusSummary game={game(postponed)} result={postponed} />);
+    expect(screen.getByText("Postponed")).toBeInTheDocument();
   });
 
   it("takes overtime as another column", () => {

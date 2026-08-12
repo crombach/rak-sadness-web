@@ -30,7 +30,9 @@
 $dot-size: 12px;
 
 // One box whatever is in it, so the marks line up down the list and the search does
-// not shift as the game it names goes from one state to the next.
+// not shift as the game it names goes from one state to the next. The live one is a
+// pill instead, and is the only mark wide enough to need saying: they all sit against
+// the same edge, so what changes as a game kicks off is the width behind that edge.
 .game-status__mark {
   flex: 0 0 auto;
   display: flex;
@@ -48,7 +50,22 @@ $dot-size: 12px;
     background-color: var(--rak-text-tertiary);
   }
 
-  &.--dot.--live::after {
+  &.--live {
+    width: auto;
+    gap: var(--rak-space-1);
+    padding-inline: var(--rak-space-1);
+    border-radius: var(--rak-radius-sm);
+    background-color: var(--rak-danger-100);
+    color: var(--rak-danger-600);
+    font-size: var(--rak-text-xs);
+    font-weight: var(--rak-weight-bold);
+    letter-spacing: 0.06em;
+  }
+
+  .game-status__live-dot {
+    width: $dot-size;
+    height: $dot-size;
+    border-radius: 50%;
     background-color: var(--rak-danger-500);
   }
 
@@ -56,7 +73,7 @@ $dot-size: 12px;
   // asked about again rather than as something gone wrong with it. Never settles
   // anywhere but at rest, so a reader who asked for less movement, whom
   // `index.scss` answers by cutting every animation short, is left the dot itself.
-  &.--dot.--polling::after {
+  &.--polling .game-status__live-dot {
     animation: game-status-pulse 2.4s ease-in-out infinite;
   }
 

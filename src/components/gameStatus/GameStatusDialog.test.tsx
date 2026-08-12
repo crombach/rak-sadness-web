@@ -211,9 +211,10 @@ describe("GameStatusDialog", () => {
       "KC @ BUF",
     );
     expect(screen.getByRole("status")).toHaveTextContent("Loading the game");
+    // In words as well as in a dot, a red dot alone reading as a decoration.
     expect(
       screen.getByRole("img", { name: "Live, refreshing" }),
-    ).toBeInTheDocument();
+    ).toHaveTextContent("LIVE");
 
     // The score the fetch came back with, not the one the week was scored at.
     expect(await screen.findByText("8:42 - 3rd Quarter")).toBeInTheDocument();

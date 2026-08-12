@@ -11,6 +11,15 @@ const REGULATION_PERIODS = 4;
  * columns. */
 const SCORE_DASH = "–";
 
+/**
+ * What a game yet to kick off is doing, said in place of ESPN's own wording.
+ *
+ * ESPN says a scheduled game as its kickoff, in Eastern time. The strip above the
+ * scoreline already says when the game starts, in the reader's own zone, so ESPN's
+ * is the same fact twice and in the wrong zone for anyone outside the east.
+ */
+const PREGAME_DETAIL = "Pregame";
+
 /** Points at the score of the side with the ball, from whichever side that is. */
 const MARKER: Record<HomeAway, string> = {
   [HomeAway.HOME]: "▸",
@@ -18,11 +27,16 @@ const MARKER: Record<HomeAway, string> = {
 };
 
 /**
- * When the game starts, and where it is played, each as its own parts.
+ * When the game starts, as its own parts.
  *
  * Split rather than joined, because the stylesheet is what puts a dot between two
  * parts. Written into the strings instead, the dots inside a half would be spaced one
  * way and the dot between the halves another.
+ *
+ * Both parts are read off the one instant in whatever zone the reader is in, so a
+ * late kickoff falls on the day it falls on for them. The zone is named because this
+ * is now the only time the dialog shows, and a bare `1:00 PM` beside a game played
+ * three zones away reads as ambiguous.
  */
 function kickoffParts(date: Date): Array<string> {
   return [
@@ -31,7 +45,11 @@ function kickoffParts(date: Date): Array<string> {
       month: "short",
       day: "numeric",
     }),
-    date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+    date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      timeZoneName: "short",
+    }),
   ];
 }
 
@@ -75,17 +93,22 @@ function periodsPlayed(result: LeagueResult): number {
 }
 
 /**
- * How the game stands, in the few characters a phone has room for.
+ * How the game stands, in the few characters the column between two scores holds.
  *
- * ESPN's own wording runs to `8:42 - 3rd Quarter`, which wraps to three lines in the
- * column left between two scores. Said as `Q3 8:42` it fits on one.
+ * ESPN's own wording runs to `8:42 - 3rd Quarter`, which wraps to three lines there.
+ * Said as `Q3 8:42` it fits on one, on a phone and on a desktop alike.
  */
-function shortDetail(result: LeagueResult): string {
+function detailText(result: LeagueResult): string {
   if (result.status === GameStatus.FINAL) {
     return periodsPlayed(result) > REGULATION_PERIODS ? "FT/OT" : "FT";
   }
+  if (result.status === GameStatus.UPCOMING) {
+    return PREGAME_DETAIL;
+  }
+  // Postponed, delayed, canceled: a stage the app has no short form for, so ESPN's
+  // own word for it stands. Its wording of those carries no kickoff to repeat.
   if (result.status !== GameStatus.LIVE || result.period == null) {
-    return "Pregame";
+    return result.detailMessage;
   }
   const period =
     result.period <= REGULATION_PERIODS
@@ -98,21 +121,8 @@ function shortDetail(result: LeagueResult): string {
     : period;
 }
 
-/**
- * How the game stands, said twice: once as ESPN says it, and once in the short form a
- * phone has room for. The stylesheet shows whichever the screen can hold.
- */
 function Detail({ result }: { result: LeagueResult }) {
-  return (
-    <p className="game-status__detail">
-      {/* Hidden from a reader who is being read to, since the full wording below is
-          in the page whatever the screen is wide enough to draw. */}
-      <span aria-hidden="true" className="game-status__detail-short">
-        {shortDetail(result)}
-      </span>
-      <span className="game-status__detail-full">{result.detailMessage}</span>
-    </p>
-  );
+  return <p className="game-status__detail">{detailText(result)}</p>;
 }
 
 function LinescoreRow({ side, periods }: { side: GameSide; periods: number }) {

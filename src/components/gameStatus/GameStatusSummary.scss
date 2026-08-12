@@ -55,7 +55,7 @@
   }
 
   &.--detail {
-    width: 7rem;
+    width: 5rem;
   }
 
   &.--detail-narrow {
@@ -305,22 +305,6 @@
   color: var(--rak-text-primary);
   font-size: var(--rak-text-md);
   font-weight: var(--rak-weight-semibold);
-}
-
-// The short form on a phone and ESPN's own wording once there is a column wide enough
-// to hold it. Both are in the page, so neither costs a measurement to choose between.
-.game-status__detail-full {
-  display: none;
-}
-
-@include roomy-screen {
-  .game-status__detail-short {
-    display: none;
-  }
-
-  .game-status__detail-full {
-    display: inline;
-  }
 }
 
 .game-status__down {
