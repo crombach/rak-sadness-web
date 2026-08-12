@@ -1,4 +1,9 @@
 @use "sass:math";
+@use "../../styles/a11y" as *;
+
+.skeleton__status {
+  @include visually-hidden;
+}
 
 // The fraction of the table's width the sheen covers. A transform percentage is of
 // the sheen's own width, so crossing the whole table takes 100% divided by that

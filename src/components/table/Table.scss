@@ -1,10 +1,8 @@
 @use "../../styles/breakpoints" as *;
+@use "../../styles/a11y" as *;
 
 .table {
   margin: auto;
-  // Tapping a cell opens a toast about it, and a drag across one selected the text
-  // instead of reading as a tap.
-  user-select: none;
   // A phone's size, which a roomier screen puts back up at the foot of this file.
   font-size: 0.8rem;
   // Read back by useFillerRows, which needs a row height to work out how many
@@ -24,6 +22,13 @@
   // `currentColor`: Dark Reader forces a zero-width border visible, and white is
   // what it would then draw between the rank and the player.
   --rak-table-no-border: 0 solid var(--rak-primary-800);
+
+  // The table's own accessible name. Not shown: a caption here would add a line
+  // above the header no sighted reader needs, since the page around the table
+  // already says what week and view this is.
+  .table__caption {
+    @include visually-hidden;
+  }
 
   .table__header {
     z-index: 20;
@@ -71,6 +76,28 @@
     text-align: center;
   }
 
+  // The clickable surface inside a tappable cell. The cell keeps the fill and the
+  // padding it always had; this resets both away and fills the cell edge to edge,
+  // so the whole cell, padding included, is inside the button's own hit area.
+  .table__cell-button {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: var(--rak-table-cell-padding-y) var(--rak-table-cell-padding-x);
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: inherit;
+    cursor: pointer;
+  }
+
+  // A pick's or a player's status, said in words for the fill color a sighted
+  // reader gets instead.
+  .table__sr-only {
+    @include visually-hidden;
+  }
+
   tbody .table__pick {
     white-space: nowrap;
   }
@@ -83,10 +110,14 @@
   }
 
   tbody {
-    // Both of these open a toast when tapped, so both answer to a touch the same
-    // way. The wireframe takes no clicks at all, so it never reaches this.
+    // Both of these hold a `.table__cell-button` filling them, so both answer to a
+    // touch the same way. The wireframe takes no clicks at all, so it never
+    // reaches this.
     .table__player-col,
     .table__pick {
+      // The button inside carries this instead, so the cell's whole box is inside
+      // its hit area.
+      padding: 0;
       cursor: pointer;
       transition: filter 150ms;
 
