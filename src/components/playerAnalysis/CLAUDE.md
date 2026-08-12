@@ -34,9 +34,12 @@ found past the eight kept, held back until the rest have been asked for.
 A player picked always reads a sentence, down to the week resting on the
 tiebreaker alone.
 
-A tiebreaker every route shares is stated once under `MNF points`, and left off
-the routes themselves. Where they disagree each route carries its own, and that
-section does not render.
+A tiebreaker every route shares is stated once under `MNF points`, as a sentence,
+and left off the routes themselves. Where they disagree each route carries its own
+and that section does not render. A route says it the way it says its picks: set
+monospace under them, with `AND`, `TO BEAT`, and the commas between the players in
+the grey a pick's label carries. The total and the players it beats wrap as wholes,
+so a narrow screen breaks between them.
 
 One suite here mounts one dialog, on purpose. Base UI leaves its scroll lock, focus
 guards, and inert markers on the document when a second one mounts, which puts the

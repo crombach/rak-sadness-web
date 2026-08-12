@@ -208,7 +208,7 @@ describe("AnalysisSummary", () => {
     render(<AnalysisSummary result={result} />);
 
     expect(
-      screen.getByText("38 ≤ MNF points ≤ 44 to beat Rak and Bill."),
+      screen.getByText("38 ≤ MNF Points ≤ 44 to beat Rak and Bill."),
     ).toBeInTheDocument();
   });
 
@@ -221,7 +221,7 @@ describe("AnalysisSummary", () => {
     render(<AnalysisSummary result={result} />);
 
     expect(
-      screen.getByText("MNF points ≤ 45 to beat Rak."),
+      screen.getByText("MNF Points ≤ 45 to beat Rak."),
     ).toBeInTheDocument();
   });
 
@@ -318,7 +318,7 @@ describe("AnalysisSummary", () => {
     const routes = [...document.querySelectorAll(".analysis__route")];
     expect(routes.map((route) => route.textContent)).toEqual([
       "P1KC -3",
-      "P2BUF -1P3SF -6MNF points ≤ 32 to beat Rak.",
+      "P2BUF -1P3SF -6ANDMNF Points ≤ 32TO BEAT Rak",
     ]);
   });
 
@@ -358,7 +358,7 @@ describe("AnalysisSummary", () => {
       "P2BUF -1",
     ]);
     expect(
-      screen.getByText("MNF points ≤ 32 to beat Rak."),
+      screen.getByText("MNF Points ≤ 32 to beat Rak."),
     ).toBeInTheDocument();
   });
 

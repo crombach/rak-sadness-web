@@ -5,6 +5,11 @@
   // stand under that text rather than under the chip.
   --rak-pick-inset: 8px;
   --rak-pick-gap: 6px;
+  // A game label is a league letter and at most two digits. A pick is a team
+  // abbreviation of at most five characters, a space, and a spread of at most three
+  // counting its sign. Monospace, so those are widths rather than guesses.
+  --rak-pick-label-width: 3ch;
+  --rak-pick-value-width: 9ch;
 
   display: flex;
   flex-direction: column;
@@ -53,14 +58,8 @@
 // Columns rather than a wrapping row, so the same game sits at the same x down
 // every route. Each list is the same width, so each divides the same way.
 .analysis__picks {
-  // A game label is a league letter and at most two digits. A pick is a team
-  // abbreviation of at most five characters, a space, and a spread of at most
-  // three counting its sign. Monospace, so those are widths rather than guesses,
-  // and a column is only ever as wide as the widest thing it can hold.
-  --rak-pick-label-width: 3ch;
-  --rak-pick-value-width: 9ch;
-
   display: grid;
+  // A column is only ever as wide as the widest thing it can hold.
   grid-template-columns: repeat(
     auto-fit,
     minmax(
@@ -91,11 +90,16 @@
   white-space: nowrap;
 }
 
+// A word naming what follows it rather than saying anything itself.
+.analysis__pick-label,
+.analysis__term {
+  color: var(--rak-text-tertiary);
+  font-weight: 700;
+}
+
 .analysis__pick-label {
   // Held to its widest, so the teams line up down a column whatever the labels do.
   flex: 0 0 var(--rak-pick-label-width);
-  color: var(--rak-text-tertiary);
-  font-weight: 700;
 }
 
 .analysis__pick-team {
@@ -155,11 +159,24 @@
   font-size: 0.875rem;
 }
 
-// Reads as part of the route it closes, so it takes the picks' ink and lines up
-// with their text. Left unbolded, since it is a condition rather than a pick.
+// Reads as part of the route it closes, so it is set like the picks above it, in
+// under their text and labelled the way they are.
 .analysis__route-mnf {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rak-pick-gap);
   padding-inline-start: var(--rak-pick-inset);
   color: var(--rak-text);
+  font-family: monospace;
+  font-weight: 600;
+}
+
+// Each half stays whole, so a screen too narrow for the line breaks between the
+// total and the players it beats rather than inside either.
+.analysis__route-mnf-terms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--rak-pick-gap);
 }
 
 .analysis__message {

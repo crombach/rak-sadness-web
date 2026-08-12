@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { Fragment, ReactNode, useState } from "react";
 import {
   MondayNightOutlook,
   PlayerAnalysis,
@@ -18,6 +18,9 @@ type PathsResult = Extract<PlayerAnalysis, { kind: "paths" }>;
 
 /** The outlooks worth a sentence: a week won outright says so on its own line. */
 type DecidingOutlook = Exclude<MondayNightOutlook, { kind: "notNeeded" }>;
+
+/** The one outlook a route of its own carries, which is a total still to come. */
+type MondayNightRange = Extract<MondayNightOutlook, { kind: "range" }>;
 
 const NAMES = new Intl.ListFormat("en-US");
 
@@ -107,20 +110,45 @@ function Picks({
 }
 
 /** The MNF points that win, named the way the scoreboard column is. */
+function mondayNightPoints({ min, max }: MondayNightRange): string {
+  if (min != null && max != null) {
+    return min === max ? `MNF Points = ${min}` : `${min} ≤ MNF Points ≤ ${max}`;
+  }
+  return min != null ? `MNF Points ≥ ${min}` : `MNF Points ≤ ${max}`;
+}
+
 function mondayNightSentence(outlook: DecidingOutlook): string {
   if (outlook.kind === "settled") {
-    return "MNF points are already final, so the games above settle it.";
+    return "MNF Points are already final, so the games above settle it.";
   }
-  const { min, max } = outlook;
-  const points =
-    min != null && max != null
-      ? min === max
-        ? `MNF points = ${min}`
-        : `${min} ≤ MNF points ≤ ${max}`
-      : min != null
-        ? `MNF points ≥ ${min}`
-        : `MNF points ≤ ${max}`;
-  return `${points} to beat ${NAMES.format(outlook.contenders)}.`;
+  return `${mondayNightPoints(outlook)} to beat ${NAMES.format(outlook.contenders)}.`;
+}
+
+/**
+ * The total a route of its own asks for, set out the way its picks are: what to do
+ * in the ink they use, and the words holding it together in the ink their labels
+ * use. The two halves wrap as wholes, so a narrow screen breaks between them.
+ */
+function RouteMondayNight({ outlook }: { outlook: MondayNightRange }) {
+  return (
+    <p className="analysis__line analysis__route-mnf">
+      <span className="analysis__pick-label">AND</span>
+      <span className="analysis__route-mnf-terms">
+        <span>{mondayNightPoints(outlook)}</span>
+        <span>
+          {/* A list rather than a sentence, since the line around it is one too,
+              and what holds it together is grey the way the rest of it is. */}
+          <span className="analysis__term">TO BEAT</span>{" "}
+          {outlook.contenders.map((name, index) => (
+            <Fragment key={name}>
+              {index > 0 && <span className="analysis__term">, </span>}
+              {name}
+            </Fragment>
+          ))}
+        </span>
+      </span>
+    </p>
+  );
 }
 
 /** Whether anything below the outright line asks the player for a game. */
@@ -217,9 +245,7 @@ function Routes({
           >
             <Picks games={route.games} />
             {showMondayNight && route.mondayNight.kind === "range" && (
-              <p className="analysis__line analysis__route-mnf">
-                {mondayNightSentence(route.mondayNight)}
-              </p>
+              <RouteMondayNight outlook={route.mondayNight} />
             )}
           </li>
         ))}
