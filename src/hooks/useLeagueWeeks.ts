@@ -72,10 +72,11 @@ export default function useLeagueWeeks(
       }
       const calendarWeeks = proLeagueInfo.activeCalendar.weeks;
       setWeeks(calendarWeeks);
-      setCurrentWeek(proLeagueInfo.activeWeek.value);
+      setCurrentWeek(proLeagueInfo.activeWeek?.value);
       setSeasonYear(proLeagueInfo.season);
       // The week the URL named, or the one the season has reached. That is the
-      // last regular week once the season is over.
+      // last regular week once the season is over, and none at all until its
+      // opener has been played.
       setSelectedWeek(
         calendarWeeks.find((week) => week.value === initialWeekRef.current) ??
           proLeagueInfo.activeWeek,
@@ -95,9 +96,11 @@ export default function useLeagueWeeks(
   const isWeekInfoLoading =
     !enabled || isLookupPending || (season != null && season !== seasonYear);
 
-  // Newest first, and never a week the season has not reached.
+  // Newest first, and never a week the season has not reached. Held apart from
+  // the slice, which reads a missing end as the whole array.
   const selectableWeeks = useMemo(
-    () => (weeks ?? []).slice(0, currentWeek).reverse(),
+    () =>
+      currentWeek == null ? [] : (weeks ?? []).slice(0, currentWeek).reverse(),
     [weeks, currentWeek],
   );
 

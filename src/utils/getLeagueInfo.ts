@@ -158,20 +158,18 @@ async function fetchLeagueInfo(
           );
         });
 
-  // Find the active week for the current date/time, if applicable.
-  // Fall back to the last week in the active calendar.
-  const activeWeek = activeCalendar?.weeks.find((week, index) => {
-    return (
-      (week.startDate <= now && week.endDate >= now) ||
-      index === activeCalendar.weeks.length - 1
-    );
-  });
+  // The week being played now, or the last one begun once the season is over.
+  // `findLast` would say this in one call, but it is ES2023 and this builds to
+  // ES2022.
+  const activeWeek = activeCalendar?.weeks
+    .filter((week) => week.startDate <= now)
+    .at(-1);
 
-  // Both lookups fall back to the last entry, so they only come back empty when
-  // the response carried no calendars or no weeks at all.
-  if (activeCalendar == null || activeWeek == null) {
+  // The calendar lookup falls back to the last entry, so it only comes back empty
+  // when the response carried no calendar with any weeks in it.
+  if (activeCalendar == null) {
     console.error(
-      `Scoreboard response has no active week for league ${league}`,
+      `Scoreboard response has no dated calendar for league ${league}`,
     );
     return null;
   }

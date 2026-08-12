@@ -37,6 +37,10 @@ export type LeagueInfo = {
    */
   season: number;
   activeCalendar: LeagueCalendar;
-  activeWeek: WeekInfo;
+  /**
+   * The week being played now, or the last one that has begun. Absent where the
+   * season's opener is still ahead, which means no week of it can be scored yet.
+   */
+  activeWeek?: WeekInfo;
   calendars: LeagueCalendar[];
 };

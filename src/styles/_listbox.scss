@@ -3,9 +3,21 @@
 // dialog. Mixins only, so this emits no CSS of its own however many files pull it
 // in. Each caller adds what makes its own list different.
 
+// The most rows any of these lists shows before it scrolls.
+$-max-rows: 5;
+
 @mixin listbox-popup {
   box-sizing: border-box;
   min-width: var(--anchor-width);
+  // A count of rows is a height, because every row is a touch target. The rules
+  // between them and the padding either end of the popup make up the rest.
+  max-height: min(
+    calc(
+      #{$-max-rows} * var(--rak-touch-target) + #{$-max-rows - 1} *
+        var(--rak-border-width-hairline) + 2 * var(--rak-space-1)
+    ),
+    var(--available-height, 100dvh)
+  );
   overflow-y: auto;
   padding: var(--rak-space-1) 0;
   border: var(--rak-border-width-hairline) solid var(--rak-border);

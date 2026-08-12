@@ -1,4 +1,4 @@
-// Whatever the answer turns out to be, it plays in under a dialog already growing
+// Whatever the answer turns out to be, it fades in under a dialog already growing
 // to hold it.
 .analysis {
   // What a pick chip sets its text in by, which a line under one indents by to
@@ -18,10 +18,11 @@
   }
 }
 
+// The fade alone. A transform counts against the scrollable overflow of the body
+// this sits in, so any travel draws a scrollbar over the answer while it runs.
 @keyframes analysis-in {
   from {
     opacity: 0;
-    transform: translateY(6px);
   }
 }
 

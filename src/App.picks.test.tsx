@@ -123,6 +123,40 @@ describe("the app, first load", () => {
     ]);
   });
 
+  it("leaves out the season running now until its opener has been played", async () => {
+    // ESPN moves on to the next season as soon as the last one ends, months
+    // before anything is played. Asked for no season it answers with that one,
+    // which has no week behind it and so nothing anybody could score.
+    getLeagueInfoMock.mockImplementation(async (_league, season) =>
+      season == null
+        ? { ...leagueInfo, season: SEASON + 1, activeWeek: undefined }
+        : { ...leagueInfo, season },
+    );
+    global.fetch = routedFetch(notFoundResponse, [SEASON, SEASON - 1]);
+    const user = await mountLoadedApp();
+
+    await user.click(screen.getByRole("combobox", { name: "Season" }));
+    const options = (await screen.findAllByRole("option")).map(
+      (option) => option.textContent,
+    );
+    expect(options).toEqual([`${SEASON} Season`, `${SEASON - 1} Season`]);
+  });
+
+  it("offers no weeks of a season whose opener is still ahead", async () => {
+    getLeagueInfoMock.mockResolvedValue({
+      ...leagueInfo,
+      activeWeek: undefined,
+    });
+    await mountLoadedApp();
+
+    // Nothing selected, and nothing to select: the trigger is left asking for a
+    // week it has none of.
+    expect(screen.getByRole("combobox", { name: "Week" })).toHaveTextContent(
+      "Select a week...",
+    );
+    expect(screen.queryByRole("option")).not.toBeInTheDocument();
+  });
+
   it("offers the current season alone when the list cannot be had", async () => {
     const user = await mountLoadedApp();
 

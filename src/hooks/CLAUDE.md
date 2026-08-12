@@ -4,7 +4,7 @@ The app's data layer, and the two hooks that measure the page. The first four mo
 once, in `AppDataContext`, above the routes.
 
 - `usePicksSeasons`: the seasons that have picks, from `/api/picks`, newest first
-- `useCurrentSeason`: the season running now, asked of ESPN
+- `useCurrentSeason`: the season running now, once it starts
 - `useLeagueWeeks`: the season's weeks from ESPN, and which one is selected
 - `usePlayerScores`: a week's scores from the API, cache, or an uploaded file.
   Owns the refresh throttle

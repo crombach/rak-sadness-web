@@ -31,8 +31,6 @@
 
 .select__popup {
   @include listbox-popup;
-
-  max-height: var(--available-height);
 }
 
 .select__item {

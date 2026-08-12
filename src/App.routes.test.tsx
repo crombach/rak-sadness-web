@@ -261,6 +261,28 @@ describe("the app, week routes", () => {
     expect(await screen.findByText("Select a week...")).toBeInTheDocument();
   });
 
+  it("sends /scoreboard home when the season has no week behind it", async () => {
+    getLeagueInfoMock.mockResolvedValue({
+      ...leagueInfo,
+      activeWeek: undefined,
+    });
+    global.fetch = routedFetch(spreadsheetResponse, [SEASON]);
+    mountApp("/scoreboard");
+
+    expect(await screen.findByText("Select a week...")).toBeInTheDocument();
+  });
+
+  it("sends a week of a season with no week behind it home", async () => {
+    getLeagueInfoMock.mockResolvedValue({
+      ...leagueInfo,
+      activeWeek: undefined,
+    });
+    await mountLoadedApp(`/${SEASON}/1/scoreboard`);
+
+    expect(await screen.findByText("Unknown Week")).toBeInTheDocument();
+    expect(getPlayerScoresMock).not.toHaveBeenCalled();
+  });
+
   it("sends a season that is not a year home", async () => {
     await mountLoadedApp(`/nope/${CURRENT_WEEK}/scoreboard`);
 

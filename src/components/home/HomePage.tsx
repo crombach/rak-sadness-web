@@ -98,6 +98,9 @@ export default function HomePage() {
                 <Select.Positioner
                   className="select__positioner"
                   sideOffset={4}
+                  // Base UI otherwise lays the popup over the trigger and sizes it
+                  // to the viewport to do so, past the rows the stylesheet allows.
+                  alignItemWithTrigger={false}
                 >
                   <Select.Popup className="select__popup">
                     {selectableSeasons.map((season) => (
@@ -139,6 +142,7 @@ export default function HomePage() {
                 <Select.Positioner
                   className="select__positioner"
                   sideOffset={4}
+                  alignItemWithTrigger={false}
                 >
                   <Select.Popup className="select__popup">
                     {selectableWeeks.map((week) => (
@@ -173,9 +177,8 @@ export default function HomePage() {
               Use Local Spreadsheet
             </Button>
             <Button
-              className={`home__button --scores ${getClasses({
-                "--loading-btn": isBusy,
-              })}`}
+              className="home__button --scores"
+              busy={isBusy}
               disabled={hasNoScoresYet}
               color="success"
               onClick={() =>
@@ -185,9 +188,8 @@ export default function HomePage() {
               View Results
             </Button>
             <Button
-              className={`home__button --export ${getClasses({
-                "--loading-btn": isBusy || isExportLoading,
-              })}`}
+              className="home__button --export"
+              busy={isBusy || isExportLoading}
               disabled={hasNoScoresYet || isExportLoading}
               color="danger"
               onClick={exportResults}

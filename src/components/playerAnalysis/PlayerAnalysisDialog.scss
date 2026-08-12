@@ -141,7 +141,6 @@
   // Held to the width of the search above it, so a long name is cut short rather
   // than widening the popup past the input it hangs off.
   max-width: var(--anchor-width);
-  max-height: min(240px, var(--available-height));
 }
 
 // An entry carries the status icon the tables give the same player, in the hue
@@ -274,10 +273,12 @@ $bar-height: 2px;
     border-radius: var(--rak-radius-lg);
     transform: translate(-50%, -50%);
 
+    // The fade alone, at the transform it rests at, so the window opens where it
+    // will stand rather than travelling into place.
     &[data-starting-style],
     &[data-ending-style] {
       opacity: 0;
-      transform: translate(-50%, -46%);
+      transform: translate(-50%, -50%);
     }
   }
 }
