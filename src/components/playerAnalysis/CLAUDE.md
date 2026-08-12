@@ -25,7 +25,7 @@ search, and names no leader until a pick is settled. Picks sit in a
 grid rather than a wrapping row, so the same game holds the same column down every
 route. A must-win game carries a red line where a route carries gold. Routes stand
 four deep and unfold on a click, and the dialog's own key on the player is what
-starts a new one folded. A closing note counts the routes found past the ten kept.
+starts a new one folded. A closing note counts the routes found past the eight kept.
 A player picked always reads a sentence, down to the week resting on the
 tiebreaker alone.
 

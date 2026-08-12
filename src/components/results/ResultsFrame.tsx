@@ -40,10 +40,8 @@ export default function ResultsFrame({
   scores?: RakMadnessScores;
 }>) {
   const navigate = useNavigate();
-  // Once every game is final there is nothing left to fetch, and the analysis of
-  // every player is settled, so the refresh and analysis buttons and the divider
-  // beside them go rather than sit there doing nothing. A player's name still
-  // opens the analysis, which then reads as the week's result.
+  // Once every game is final there is nothing left to fetch, so the refresh button
+  // and the divider beside it go rather than sit there doing nothing.
   const isWeekDecided = useIsWeekDecided();
   const [isAnalysisOpen, setAnalysisOpen] = useState(false);
   const [analysisPlayer, setAnalysisPlayer] = useState<string>();
@@ -70,10 +68,6 @@ export default function ResultsFrame({
           isWeekLive={!isWeekDecided}
           onViewChange={onViewChange}
           onRefresh={onRefresh}
-          onShowAnalysis={() => {
-            setAnalysisPlayer(undefined);
-            setAnalysisOpen(true);
-          }}
           isRefreshing={isRefreshing}
         />
       }

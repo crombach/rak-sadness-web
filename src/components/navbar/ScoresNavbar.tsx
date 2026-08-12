@@ -1,10 +1,5 @@
 import { CSSProperties, useEffect, useState } from "react";
-import {
-  EmojiEventsIcon,
-  FactCheckIcon,
-  LeaderboardIcon,
-  RefreshIcon,
-} from "../icon/Icon";
+import { FactCheckIcon, LeaderboardIcon, RefreshIcon } from "../icon/Icon";
 import getClasses from "../../utils/getClasses";
 import Button from "../button/Button";
 import "./ScoresNavbar.scss";
@@ -18,12 +13,11 @@ export type ScoresView = "Scoreboard" | "Picks";
  */
 export const COLLAPSE_DURATION_MS = 300;
 
-/** The scoreboard/picks switch, and the buttons a week still being played gets. */
+/** The scoreboard/picks switch, and the refresh a week still being played gets. */
 export default function ScoresNavbar({
   view,
   onViewChange,
   onRefresh,
-  onShowAnalysis,
   isRefreshing,
   disabled = false,
   isWeekLive,
@@ -31,19 +25,15 @@ export default function ScoresNavbar({
   view: ScoresView;
   onViewChange: (view: ScoresView) => void;
   onRefresh: () => void;
-  onShowAnalysis: () => void;
   isRefreshing: boolean;
   /** Set while a week is still loading, so the navbar keeps its shape. */
   disabled?: boolean;
-  /**
-   * Cleared once the week is over, when rescoring cannot change anything and
-   * nobody has a route left to work out. A player's name still opens the analysis.
-   */
+  /** Cleared once the week is over, when rescoring cannot change anything. */
   isWeekLive: boolean;
 }) {
-  // A week arrives loading, so these are usually on screen by the time it turns
-  // out to be decided. Kept mounted for the length of the collapse so they animate
-  // out, and a week already known to be decided never renders them at all.
+  // A week arrives loading, so this is usually on screen by the time it turns out
+  // to be decided. Kept mounted for the length of the collapse so it animates out,
+  // and a week already known to be decided never renders it at all.
   const [isLiveMounted, setLiveMounted] = useState(isWeekLive);
   if (isWeekLive && !isLiveMounted) setLiveMounted(true);
   useEffect(() => {
@@ -101,15 +91,6 @@ export default function ScoresNavbar({
               })}`}
             >
               <RefreshIcon />
-            </Button>
-            <Button
-              ariaLabel="Player Analysis"
-              color="gold"
-              disabled={disabled}
-              onClick={onShowAnalysis}
-              className="home__scores-header-button home__scores-header-analysis"
-            >
-              <EmojiEventsIcon />
             </Button>
           </div>
         </div>

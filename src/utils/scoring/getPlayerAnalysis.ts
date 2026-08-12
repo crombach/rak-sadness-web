@@ -20,7 +20,7 @@ import remainingGames, {
 const MAX_SEARCHED_GAMES = 10;
 
 /** How many routes are carried before the rest are only counted. */
-const MAX_LISTED_ROUTES = 10;
+const MAX_LISTED_ROUTES = 8;
 
 /**
  * Where a player takes a point, as one bit per open game.

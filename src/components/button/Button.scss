@@ -80,20 +80,6 @@
         background-color: var(--rak-danger-700);
       }
     }
-
-    // The only solid color light enough that white on it fails to read, so it
-    // overrides the fill and the text both.
-    &.--gold {
-      background-color: var(--rak-gold-500);
-      color: var(--rak-primary-800);
-
-      &:hover {
-        background-color: var(--rak-gold-600);
-      }
-      &:active {
-        background-color: var(--rak-gold-700);
-      }
-    }
   }
 
   // Soft buttons inherit the surrounding tint, which is how the toast close

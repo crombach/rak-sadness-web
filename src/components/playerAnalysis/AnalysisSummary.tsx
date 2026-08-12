@@ -142,22 +142,25 @@ function fewestWins(result: PathsResult): number {
 
 /**
  * Winning the week on points alone leads, since it settles the tiebreaker before
- * the reader has to think about it.
+ * the reader has to think about it. Where there is no such line the player is
+ * named as standing instead, so the sections below never open on their own.
  */
-function Outright({ result }: { result: PathsResult }) {
-  const line =
+function Lead({ result }: { result: PathsResult }) {
+  const outright =
     result.mondayNight?.kind === "notNeeded"
       ? "Takes the week outright, whatever the MNF points come to."
       : // Only worth saying where it asks more than the routes below already do.
         result.outrightAt != null && result.outrightAt > fewestWins(result)
         ? `Winning ${plural(result.outrightAt, "game")} takes it outright.`
         : null;
-  if (line == null) return null;
+  // Nothing below to lead into, and the closing sentence there is the answer.
+  if (outright == null && !hasGames(result)) return null;
   return (
     <p className="analysis__line">
-      {line}
+      {outright ?? `${result.player} is still live to win the week.`}
       {/* Hands over to the sections under it, which ask for less. */}
-      {hasGames(result) && " Otherwise:"}
+      {hasGames(result) &&
+        (outright != null ? " Otherwise:" : " What it takes:")}
     </p>
   );
 }
@@ -303,7 +306,7 @@ export default function AnalysisSummary({
 
   return (
     <Answer>
-      <Outright result={result} />
+      <Lead result={result} />
 
       {result.mustWin.length > 0 && (
         <Section title="Must win">
