@@ -1,20 +1,14 @@
 # results
 
 The `/:season/:week` routes, plus `CurrentWeekRedirect`, which backs `/scoreboard`
-and `/picks` by redirecting to the latest week worth showing. `ResultsLayout` is
-the layout route: it runs `useWeekRouteGuard`, keeps the URL and the selected week
-in step, and holds the navbar so switching views does not restart the refresh
-throttle. `ScoreboardRoute` and `PicksRoute` each render one table from context.
-`ResultsFrame` is the page and wireframe both `ResultsLayout` and
-`CurrentWeekRedirect` render into, and `ResultsFrame.scss` colors the scores area
-so the gap below it reads as part of the table. It reads `useIsWeekDecided` to
-pass `ScoresNavbar` its `isWeekLive` prop, and holds the one `PlayerAnalysisDialog`
-the app has, fed the `scores` `ResultsLayout` passes down. One dialog toggled rather
-than one mounted per opening, because Base UI ties its scroll lock and focus guards
-to a dialog being open.
+and `/picks` by redirecting to the latest week worth showing.
 
-A player's name is the only way in, through the `PlayerAnalysisContextProvider`
-wrapped around the tables, since they arrive through a routed `Outlet` and cannot be
-handed a callback on the way. So the name held is what says the dialog is open, and
-it is cleared as the dialog closes, which makes the same name again a change the
-dialog can see.
+- `ResultsLayout`: the layout route. Runs `useWeekRouteGuard`, keeps the URL and the
+  selected week in step, and holds the navbar.
+- `ScoreboardRoute` and `PicksRoute`: one table each, from context.
+- `ResultsFrame`: the page and wireframe both `ResultsLayout` and
+  `CurrentWeekRedirect` render into. Holds the app's one `PlayerAnalysisDialog` and
+  the `PlayerAnalysisContextProvider` around the tables, and reads
+  `useIsWeekDecided` for `ScoresNavbar`'s `isWeekLive`.
+- `ResultsFrame.scss`: colors the scores area so the gap below reads as part of the
+  table.

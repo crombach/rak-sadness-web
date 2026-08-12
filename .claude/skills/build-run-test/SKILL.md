@@ -7,6 +7,8 @@ description: How to build, run, and test this repo. Read before any npm, make, t
 
 `make help` lists targets. Run targets, not raw npm scripts.
 
+`make check` also runs `make lint-docs`, which holds every CLAUDE.md to the 120-word ceiling the root file states. Python 3 only, no npm. It runs the `length` check alone: the structure and duplication checks want a CLAUDE.md in `public/`, which stays out because that directory is served to the web.
+
 ## Toolchain
 
 - Vite 8, React 19, TypeScript 6, Vitest 4, ESLint 9 flat config, wrangler 4.
