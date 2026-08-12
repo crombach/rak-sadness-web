@@ -1,8 +1,9 @@
 # scoring
 
 The picks-to-scoreboard pipeline, one concern per file. `getPlayerScores` is the only
-entry point the app calls for a week's results; everything else is a step it
-sequences. `getPlayerAnalysis` is a second entry point, reading those results back.
+entry point that turns a workbook into a week's results; everything else is a step it
+sequences. Three more read those results back for the UI: `getPlayerAnalysis`,
+`isWeekOver`, and `unscoreableGames`.
 
 - `parsePicksWorkbook`: xlsx buffer to rows, column keys, and per-game matchups.
   Async because it imports `xlsx-js-style` on demand, which is over half the bundle.
@@ -11,7 +12,11 @@ sequences. `getPlayerAnalysis` is a second entry point, reading those results ba
 - `parsePick`: one cell to a team abbreviation and a spread. Anchors the spread to
   the end of the cell, so an abbreviation with a hyphen (`M-OH`) survives
 - `validateSpreads`: the games whose rows contradict each other about the spread
-- `getPickResults`: scores picks against game results, plus `getStatus`
+- `getPickResults`: scores picks against game results, plus `getStatus`. Exports
+  `MISSING_PICK`, the explanation header a blank cell carries, which is how
+  `unscoreableGames` tells one from a game the app could not score
+- `gameColumns`: `LEAGUES`, the order a week's games are walked in, and `gameLabels`,
+  the `C1`/`P11` column labels the picks table gives them
 - `getTiebreakerScore`: the Monday night game's real total, once it is final
 - `scorePlayers`: per-player totals, sorted
 - `comparePlayerScores`: the rank order. `comparePlayerScoresOnMerit` is every
@@ -27,6 +32,10 @@ sequences. `getPlayerAnalysis` is a second entry point, reading those results ba
   label. A contradicted spread or a game the results do not hold is a hole in the
   week, so a week carrying one is not finished however many of its games are. A
   blank cell is not one of those, and every week has some
+- `isWeekOver`: whether a week has a result to state, which is nothing left to play
+  and no such hole. The one place that question is answered, so the analysis header
+  and the answer under it cannot disagree about it. Not `isWeekDecided`, which asks
+  whether the knockouts have settled who won
 - `applyKnockouts`: who can still win, and why not
 - `getPlayerAnalysis`: the other half of `applyKnockouts`, for any player named. One
   already knocked out reads back the reason they carry, and a decided week is

@@ -25,12 +25,12 @@ text is selectable again. Status conveyed by fill color alone also gets a
 inside the button, read by a screen reader and drawn nowhere.
 
 An edge that carries no border is `0 solid var(--rak-primary-800)`, never `none`.
-The shorthand resets the color to `currentColor`, which is white here.
+The shorthand resets the color to `currentColor`, which in the header is white.
 
 `SkeletonTable`: the wireframe shown while a week's results are being worked out,
-shaped like the view it stands in for. One sheen sweeps across the screen rather
-than each of its ~1500 bars pulsing, which is a single compositor transform in
-place of an animation per bar. Its cells hold no text: each
+shaped like the view it stands in for. Its bar fill, its sweeping sheen, and the way
+it reserves room come from `styles/_skeleton.scss`, which the button's busy state
+draws from too. Its cells hold no text: each
 carries a `data-skeleton-text` stand-in that the stylesheet draws invisibly, so the
 table's own `max-content` sizing gives the wireframe a real table's measurements at
 any font size, and no placeholder reaches the page's text. No stand-in for a value
