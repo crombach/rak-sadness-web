@@ -77,17 +77,13 @@ export default function PlayerAnalysisDialog({
   // rather than a beat behind it.
   //
   // Only an arrival is acted on. The name is cleared as the dialog closes, and
-  // taking that would empty the dialog while it is still fading out. `arrivals`
-  // counts them rather than naming the latest, so opening on the same player twice
-  // running is still a change the combobox below can see.
-  const [arrival, setArrival] = useState({ named, arrivals: 0 });
-  if (named !== arrival.named) {
-    setArrival({
-      named,
-      arrivals: named != null ? arrival.arrivals + 1 : arrival.arrivals,
-    });
+  // taking that would empty the dialog while it is still fading out.
+  const [arrived, setArrived] = useState(named);
+  if (named !== arrived) {
+    setArrived(named);
     if (named != null) {
       setPlayer(options.find((option) => option.name === named));
+      setQuery(named);
     }
   }
 
@@ -136,23 +132,38 @@ export default function PlayerAnalysisDialog({
             </Button>
           </header>
 
-          <Combobox.Root
-            // Remounted on a name arriving from outside, which is what puts that
-            // name in the input. The combobox keeps the choice itself, and handing
-            // it a value it started without reads as a controlled input arriving
-            // late, so a fresh one starts on the right player instead.
-            key={arrival.arrivals}
-            defaultValue={player}
+          {/*
+            Typed on `PlayerOption | null` rather than on `PlayerOption`, because
+            nobody is chosen until a name arrives and a controlled combobox has to
+            be handed something other than `undefined` from its first render.
+          */}
+          <Combobox.Root<PlayerOption | null>
+            // The choice and the text in the input are both held here rather than
+            // by the combobox, so a name arriving from outside can be taken without
+            // the combobox being torn down and rebuilt around it.
+            value={player ?? null}
             items={options}
             filteredItems={playersMatching(options, query)}
-            itemToStringLabel={(option: PlayerOption) => option.name}
+            itemToStringLabel={(option: PlayerOption | null) =>
+              option?.name ?? ""
+            }
             // Null arrives when the input is cleared to type another name. The
             // dialog is opened on a player and answers for one from then on, so
             // that clears the search rather than the answer under it.
             onValueChange={(chosen: PlayerOption | null) => {
               if (chosen != null) setPlayer(chosen);
             }}
+            // Base UI writes the chosen name back through this on the way out, so
+            // dismissing without picking anyone restores it.
+            inputValue={query}
             onInputValueChange={setQuery}
+            // Tapping the search is the start of looking someone else up, so the
+            // name already in it goes rather than being deleted by hand. Only a
+            // press: opening by typing reports `input-change`, and wiping that
+            // would take the letters that opened the list.
+            onOpenChange={(open, details) => {
+              if (open && details.reason === "trigger-press") setQuery("");
+            }}
             // The list is short and already on screen, so the first match being
             // highlighted saves an arrow key before Enter.
             autoHighlight

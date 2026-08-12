@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { viewportInsets } from "./useViewportInsets";
+import { sameInsets, viewportInsets } from "./useViewportInsets";
 
 const SCREEN = 800;
 
@@ -57,5 +57,23 @@ describe("viewportInsets", () => {
       offset: 0,
       keyboardInset: 0,
     });
+  });
+});
+
+describe("sameInsets", () => {
+  const measured = insets({ viewportHeight: 460, offsetTop: 120 });
+
+  it("says a keyboard still on its way is not settled", () => {
+    expect(sameInsets(insets({ viewportHeight: 600 }), measured)).toBe(false);
+  });
+
+  it("says a keyboard that stopped where it was is settled", () => {
+    expect(
+      sameInsets(measured, insets({ viewportHeight: 460, offsetTop: 120 })),
+    ).toBe(true);
+  });
+
+  it("has nothing to compare the first measurement against", () => {
+    expect(sameInsets(undefined, measured)).toBe(false);
   });
 });
