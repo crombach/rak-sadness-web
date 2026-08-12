@@ -2,6 +2,12 @@
 @use "../../styles/breakpoints" as *;
 @use "../../styles/skeleton" as *;
 
+// What separates one part of the strip above the scoreline from the next.
+@mixin meta-dot {
+  content: "·";
+  margin-inline: var(--rak-space-2);
+}
+
 .game-status {
   display: flex;
   flex-direction: column;
@@ -90,11 +96,24 @@
   font-size: var(--rak-text-sm);
   text-align: center;
 
+  // Between two parts of the same half.
+  .game-status__meta-group span + span::before {
+    @include meta-dot;
+  }
+
   @include wide-screen {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-    column-gap: var(--rak-space-4);
+    // The dots carry the spacing, so a gap here would set the halves further apart
+    // than the parts inside them.
+    column-gap: 0;
+
+    // Between the halves, now that they are on one line. Spaced by the same rule as
+    // the dots inside them, so every dot on that line reads the same.
+    .game-status__meta-group + .game-status__meta-group::before {
+      @include meta-dot;
+    }
   }
 }
 
@@ -220,6 +239,9 @@
 }
 
 .game-status__team-name {
+  // Centered in the row the two names share, so a name on one line sits against the
+  // middle of a name that took three rather than against its first line.
+  align-self: center;
   color: var(--rak-text-primary);
   font-size: var(--rak-text-md);
   font-weight: var(--rak-weight-semibold);
@@ -331,11 +353,6 @@
   tbody th {
     text-align: left;
   }
-}
-
-.game-status__total {
-  color: var(--rak-text-primary);
-  font-weight: var(--rak-weight-bold);
 }
 
 .game-status__missing {

@@ -17,24 +17,40 @@ const MARKER: Record<HomeAway, string> = {
   [HomeAway.AWAY]: "◂",
 };
 
-function kickoff(date: Date): string {
-  const day = date.toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
-  const time = date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-  return `${day} · ${time}`;
+/**
+ * When the game starts, and where it is played, each as its own parts.
+ *
+ * Split rather than joined, because the stylesheet is what puts a dot between two
+ * parts. Written into the strings instead, the dots inside a half would be spaced one
+ * way and the dot between the halves another.
+ */
+function kickoffParts(date: Date): Array<string> {
+  return [
+    date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    }),
+    date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+  ];
 }
 
-function venueLine(result: LeagueResult): string | undefined {
+function venueParts(result: LeagueResult): Array<string> | undefined {
   const { venue } = result;
   if (venue == null) return undefined;
   const place = [venue.city, venue.state].filter((it) => it != null).join(", ");
-  return place !== "" ? `${venue.name} · ${place}` : venue.name;
+  return place !== "" ? [venue.name, place] : [venue.name];
+}
+
+/** One half of the strip above the scoreline, its parts dotted apart. */
+function MetaGroup({ parts }: { parts: Array<string> }) {
+  return (
+    <span className="game-status__meta-group">
+      {parts.map((part) => (
+        <span key={part}>{part}</span>
+      ))}
+    </span>
+  );
 }
 
 /** `OT` for the first period past regulation, `2OT` for the next, and so on. */
@@ -106,7 +122,6 @@ function LinescoreRow({ side, periods }: { side: GameSide; periods: number }) {
       {[...Array(periods).keys()].map((index) => (
         <td key={index}>{side.linescores[index] ?? "-"}</td>
       ))}
-      <td className="game-status__total">{side.score}</td>
     </tr>
   );
 }
@@ -126,12 +141,12 @@ function Center({ result }: { result: LeagueResult }) {
               <th scope="col">
                 <span className="game-status__sr-only">Team</span>
               </th>
+              {/* No total: the scores either side of this are already it. */}
               {periodLabels(periods).map((label) => (
                 <th key={label} scope="col">
                   {label}
                 </th>
               ))}
-              <th scope="col">T</th>
             </tr>
           </thead>
           <tbody>
@@ -290,7 +305,7 @@ export default function GameStatusSummary({
     return <Wireframe />;
   }
 
-  const venue = venueLine(result);
+  const venue = venueParts(result);
   // Who has the ball, which is nobody once the game is over: a marker left on the
   // winner reads as a game still being played.
   const hasBall =
@@ -307,8 +322,8 @@ export default function GameStatusSummary({
   return (
     <div className="game-status">
       <div className="game-status__meta">
-        <span>{kickoff(result.date)}</span>
-        {venue != null && <span>{venue}</span>}
+        <MetaGroup parts={kickoffParts(result.date)} />
+        {venue != null && <MetaGroup parts={venue} />}
       </div>
       <div className="game-status__scoreline">
         <Side

@@ -127,16 +127,16 @@ describe("GameStatusSummary, a game that is over", () => {
 
   it("heads the scoreline with the kickoff and the venue", () => {
     renderFinal();
-    expect(
-      screen.getByText("Highmark Stadium · Orchard Park, NY"),
-    ).toBeInTheDocument();
+    // Each part on its own, since a dot between two of them is the stylesheet's.
+    expect(screen.getByText("Highmark Stadium")).toBeInTheDocument();
+    expect(screen.getByText("Orchard Park, NY")).toBeInTheDocument();
     expect(screen.getByText(/Sun, Oct 6/)).toBeInTheDocument();
   });
 
-  it("shows the quarters and the total for each side", () => {
+  it("shows the quarters for each side, the scores being the totals", () => {
     renderFinal();
-    expect(rowOf("KC")).toEqual(["7", "3", "10", "0", "20"]);
-    expect(rowOf("BUF")).toEqual(["7", "10", "3", "10", "30"]);
+    expect(rowOf("KC")).toEqual(["7", "3", "10", "0"]);
+    expect(rowOf("BUF")).toEqual(["7", "10", "3", "10"]);
   });
 
   it("marks neither side, the ball being nobody's once the game is over", () => {
@@ -274,6 +274,6 @@ describe("GameStatusSummary, a game yet to kick off", () => {
         .getAllByRole("columnheader")
         .map((header) => header.textContent)
         .filter((text) => text !== "Team"),
-    ).toEqual(["1", "2", "3", "4", "OT", "T"]);
+    ).toEqual(["1", "2", "3", "4", "OT"]);
   });
 });
