@@ -4,6 +4,7 @@
   // What a pick chip sets its text in by, which a line under one indents by to
   // stand under that text rather than under the chip.
   --rak-pick-inset: 8px;
+  --rak-pick-gap: 6px;
 
   display: flex;
   flex-direction: column;
@@ -47,30 +48,47 @@
 // Columns rather than a wrapping row, so the same game sits at the same x down
 // every route. Each list is the same width, so each divides the same way.
 .analysis__picks {
+  // A game label is a league letter and at most two digits. A pick is a team
+  // abbreviation of at most five characters, a space, and a spread of at most
+  // three counting its sign. Monospace, so those are widths rather than guesses,
+  // and a column is only ever as wide as the widest thing it can hold.
+  --rak-pick-label-width: 3ch;
+  --rak-pick-value-width: 9ch;
+
   display: grid;
-  // The floor is what the longest pick a sheet can hold measures, so a column
-  // never has to cut one short or wrap it.
-  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(
+      calc(
+        var(--rak-pick-label-width) + var(--rak-pick-value-width) +
+          var(--rak-pick-gap) + var(--rak-pick-inset) * 2
+      ),
+      1fr
+    )
+  );
+  gap: var(--rak-pick-gap);
   margin: 0;
   padding: 0;
   list-style: none;
+  font-family: monospace;
+  font-size: 0.875rem;
 }
 
 // One pick reads as a chip of two halves: which game, then what to back in it.
 .analysis__pick {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: var(--rak-pick-gap);
   padding: 4px var(--rak-pick-inset);
   border-radius: var(--rak-radius-sm);
   background-color: var(--rak-level1);
-  font-size: 0.875rem;
   font-weight: 600;
   white-space: nowrap;
 }
 
 .analysis__pick-label {
+  // Held to its widest, so the teams line up down a column whatever the labels do.
+  flex: 0 0 var(--rak-pick-label-width);
   color: var(--rak-text-tertiary);
   font-weight: 700;
 }
