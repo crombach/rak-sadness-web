@@ -59,7 +59,7 @@
   display: none;
 }
 
-.home .home__button {
+.home__controls .home__button {
   width: 100%;
   min-width: min-content;
   transition-property: height, min-height, opacity, color, background-color;
@@ -70,7 +70,7 @@
   visibility: visible;
 }
 
-.home .home__button.--hide {
+.home__controls .home__button.--hide {
   height: 0;
   min-height: 0px;
   margin-top: 0px;

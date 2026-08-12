@@ -75,7 +75,9 @@ export default function ResultsFrame({
         />
       }
     >
-      <div className={`home__scores ${getClasses({ "--loading": !isReady })}`}>
+      <div
+        className={`results-scores ${getClasses({ "--loading": !isReady })}`}
+      >
         <PlayerAnalysisContextProvider showPlayerAnalysis={setAnalysisPlayer}>
           {isReady ? children : <SkeletonTable view={view} />}
         </PlayerAnalysisContextProvider>

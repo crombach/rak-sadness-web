@@ -1,7 +1,7 @@
 @use "../../styles/breakpoints" as *;
 @use "../../styles/a11y" as *;
 
-.home {
+.page {
   position: relative;
   box-sizing: border-box;
   width: 100%;
@@ -24,7 +24,7 @@
   // this element's own background and below everything on the page.
   isolation: isolate;
 
-  // The tiled logo. Drawn here rather than on `.home` itself so it can be faded
+  // The tiled logo. Drawn here rather than on `.page` itself so it can be faded
   // in: a background image cannot be, and the tiles arriving at full strength
   // all at once is disorienting.
   &::before {
@@ -42,7 +42,7 @@
   }
 }
 
-.home__content {
+.page__content {
   flex: 1;
   width: min(1024px, 100%);
   max-width: 100%;
@@ -69,7 +69,7 @@
 }
 
 /** Straight to the results, past a navbar that is the same on every page. */
-.home__skip-link {
+.page__skip-link {
   position: absolute;
   left: var(--rak-space-2);
   top: var(--rak-space-2);
@@ -90,7 +90,7 @@
 }
 
 /** The page has no heading to show, so its one `<h1>` is read and not drawn. */
-.home__title {
+.page__title {
   @include visually-hidden;
 }
 
@@ -102,12 +102,12 @@
  * `display: none` off that screen, which keeps it out of the accessibility tree
  * as well as out of sight.
  */
-.home__rotate {
+.page__rotate {
   display: none;
 }
 
 @include phone-landscape {
-  .home__rotate {
+  .page__rotate {
     position: fixed;
     inset: 0;
     z-index: var(--rak-z-toast);
@@ -123,7 +123,7 @@
 
   // The shape says which way to turn before the words do, so it leads, at the
   // size a heading would have been.
-  .home__rotate-icon {
+  .page__rotate-icon {
     display: flex;
 
     > svg {
@@ -133,14 +133,14 @@
     }
   }
 
-  .home__rotate-message {
+  .page__rotate-message {
     margin: 0;
     font-size: var(--rak-text-lg);
     font-weight: var(--rak-weight-bold);
     color: var(--rak-text);
   }
 
-  .home__rotate-detail {
+  .page__rotate-detail {
     margin: 0;
     max-width: 40ch;
     font-size: var(--rak-text-sm);

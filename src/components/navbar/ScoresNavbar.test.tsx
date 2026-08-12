@@ -10,7 +10,7 @@ const props = {
 };
 
 function liveWrapper() {
-  return document.querySelector(".home__scores-header-live");
+  return document.querySelector(".scores-nav__live");
 }
 
 describe("ScoresNavbar", () => {
@@ -54,7 +54,7 @@ describe("ScoresNavbar", () => {
 
     expect(liveWrapper()).not.toBeInTheDocument();
     expect(
-      document.querySelector(".home__scores-header-divider"),
+      document.querySelector(".scores-nav__divider"),
     ).not.toBeInTheDocument();
   });
 

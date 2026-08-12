@@ -112,7 +112,7 @@ describe("the app, results views", () => {
       ).not.toBeInTheDocument();
     });
     expect(
-      document.querySelector(".home__scores-header-divider"),
+      document.querySelector(".scores-nav__divider"),
     ).not.toBeInTheDocument();
   });
 
@@ -122,9 +122,7 @@ describe("the app, results views", () => {
     await user.click(screen.getByText("View Results"));
 
     expect(screen.getByRole("button", { name: "Refresh" })).toBeInTheDocument();
-    expect(
-      document.querySelector(".home__scores-header-divider"),
-    ).toBeInTheDocument();
+    expect(document.querySelector(".scores-nav__divider")).toBeInTheDocument();
   });
 
   it("reports a scoring failure instead of crashing", async () => {

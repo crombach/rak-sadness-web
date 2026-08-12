@@ -151,10 +151,10 @@ describe("the app, week routes", () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
     mountApp(`/${SEASON}/${CURRENT_WEEK}/picks`);
 
-    expect(document.querySelector(".home__content")).toHaveClass("--frozen");
+    expect(document.querySelector(".page__content")).toHaveClass("--frozen");
 
     await screen.findByText("College Score");
-    expect(document.querySelector(".home__content")).not.toHaveClass(
+    expect(document.querySelector(".page__content")).not.toHaveClass(
       "--frozen",
     );
   });
