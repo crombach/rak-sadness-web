@@ -16,7 +16,7 @@ Single build root, one `package.json`, one `package-lock.json`. No module bounda
 ## Watch, don't serialize
 
 - `src/setupTests.ts` is shared by every suite, but it holds one import line and rarely changes.
-- `src/App.test.tsx` is the only suite covering both routes end to end, so two agents adding cases for different pages do land in the same file.
+- The three app-mounting suites at `src/` (`App.picks`, `App.routes`, `App.results`) split by axis, so two agents adding cases for different pages usually land in different files. They share `src/appTestFixtures.tsx`, which is the file to watch.
 - `src/styles/_breakpoints.scss` and `src/index.scss` hold shared tokens. Small and append-mostly.
 - Each `*.test.*` file pairs with one source file, so test work splits the same way the source does. Two agents adding suites for different files do not collide.
 
