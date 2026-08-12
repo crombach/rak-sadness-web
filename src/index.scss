@@ -1,3 +1,5 @@
+@use "./styles/breakpoints" as *;
+
 // Design tokens. Base UI ships no styles, so every visual in the app resolves
 // back to these.
 :root {
@@ -222,7 +224,7 @@ html {
 // Anything the app animates is either decoration or a state it also says in
 // words, so all of it can stop. The two placeholders that do something smarter
 // than stopping override this themselves.
-@media (prefers-reduced-motion: reduce) {
+@include reduced-motion {
   *,
   *::before,
   *::after {

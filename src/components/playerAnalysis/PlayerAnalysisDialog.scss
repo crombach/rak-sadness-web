@@ -228,7 +228,7 @@ $bar-height: 2px;
   }
 
   // Still says work is under way, without a thing crossing the screen to say it.
-  @media (prefers-reduced-motion: reduce) {
+  @include reduced-motion {
     &::after {
       width: 100%;
       animation: none;

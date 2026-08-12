@@ -1,4 +1,5 @@
 @use "sass:math";
+@use "breakpoints" as *;
 
 // The one way the app says it is still working. A wireframe stands in for content
 // that is not there yet; a sheen crosses content that is there but stale. Nothing
@@ -70,7 +71,7 @@ $sheen-fraction: 0.6;
   // reads as part of the page rather than as something that was moving. Written
   // out rather than left to the global guard in `index.scss`, which only makes
   // the loop instant.
-  @media (prefers-reduced-motion: reduce) {
+  @include reduced-motion {
     &::after {
       display: none;
     }

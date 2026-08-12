@@ -2,9 +2,9 @@
 // inside a media query. Variables and mixins only, so this emits no CSS of its
 // own however many files pull it in.
 //
-// Every mixin here is `min-width`. A phone gets the base rules, and wider screens
-// opt into what the extra room allows. Written the other way round, the floor a
-// finger needs would be the exception rather than the default.
+// Every width mixin here is `min-width`. A phone gets the base rules, and wider
+// screens opt into what the extra room allows. Written the other way round, the
+// floor a finger needs would be the exception rather than the default.
 
 /**
  * Above the widest phone held in portrait. Below it the tables and the navbar
@@ -70,6 +70,17 @@ $breakpoint-wide: 601px;
  */
 @mixin can-hover {
   @media (hover: hover) and (pointer: fine) {
+    @content;
+  }
+}
+
+/**
+ * A reader who has asked for less movement. `index.scss` answers this app-wide by
+ * making every animation instant; this is for the two placeholders that have
+ * something smarter to do than stop.
+ */
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
     @content;
   }
 }

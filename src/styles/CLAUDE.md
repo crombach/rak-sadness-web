@@ -5,7 +5,7 @@ files `@use` it. `_skeleton.scss` is the one exception, and says so: it holds
 keyframes. Design tokens live in `src/index.scss` instead.
 
 - `_breakpoints.scss`: `roomy-screen`, `labelled-navbar`, `wide-screen`,
-  `can-hover`, `phone-landscape`
+  `can-hover`, `phone-landscape`, `reduced-motion`
 - `_focus.scss`: `focus-ring`, the app's one focus ring
 - `_a11y.scss`: `visually-hidden`
 - `_field.scss`: `field-shell` and `field-icon`, the home page selects' box
