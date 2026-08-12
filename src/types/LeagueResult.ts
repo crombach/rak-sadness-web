@@ -42,6 +42,8 @@ export type LeagueResult = {
   home: GameSide;
   away: GameSide;
   venue?: GameVenue;
+  /** ESPN's own tracker for the game. Absent where ESPN listed no link to it. */
+  gamecastUrl?: string;
   possession: Possession;
   winner: {
     team: Team | null;

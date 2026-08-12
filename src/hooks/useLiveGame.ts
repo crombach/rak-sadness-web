@@ -7,15 +7,15 @@ import { getGameResult } from "../utils/getLeagueResults";
 import latestOnly from "../utils/latestOnly";
 
 /** How often a game still being played is asked about again. */
-export const POLL_MS = 10_000;
+export const POLL_MS = 20_000;
 
 /**
  * One game, kept up to date for as long as it is being looked at.
  *
  * The week's scores carry the game as it stood when they were worked out, which is
  * stale the moment a live game moves, so a game is fetched again before it is
- * shown and then every ten seconds until it is final. A final game is fetched once
- * and left alone.
+ * shown and then on `POLL_MS` until it is final. A final game is fetched once and
+ * left alone.
  *
  * The game already on screen stays there while the next one is fetched, the way the
  * player analysis holds the last answer up behind its progress bar. `games` is the
@@ -34,12 +34,13 @@ export default function useLiveGame({
   games?: Array<WeekGame>;
   week?: WeekInfo;
   season?: number;
-}): { shown?: LeagueResult; isLoading: boolean } {
+}): { shown?: LeagueResult; isLoading: boolean; isFetching: boolean } {
   const [found, setFound] = useState<{
     games: Array<WeekGame>;
     label: string;
     result: LeagueResult;
   }>();
+  const [fetching, setFetching] = useState(false);
 
   // The pieces the fetch needs, rather than the game itself, so a rebuilt object
   // cannot restart the poll on every render.
@@ -54,12 +55,14 @@ export default function useLiveGame({
     const stop = latestOnly(async (isCurrent) => {
       const poll = async () => {
         let result: LeagueResult | null = null;
+        setFetching(true);
         try {
           result = await getGameResult(league, week, eventId, season);
         } catch (error) {
           console.warn(`Failed to fetch game ${eventId}`, error);
         }
         if (!isCurrent()) return;
+        setFetching(false);
         if (result != null) {
           setFound({ games, label, result });
         }
@@ -76,6 +79,9 @@ export default function useLiveGame({
     return () => {
       stop();
       window.clearTimeout(timer);
+      // The answer to the fetch this leaves behind is dropped, so nothing is
+      // outstanding whatever it comes back with.
+      setFetching(false);
     };
   }, [open, games, label, league, eventId, week, season]);
 
@@ -85,5 +91,7 @@ export default function useLiveGame({
     game != null &&
     eventId != null &&
     (shown == null || found?.label !== label);
-  return { shown, isLoading };
+  // `isLoading` is the wait with nothing to show behind it, and `isFetching` every
+  // wait, a poll of a game already on screen included.
+  return { shown, isLoading, isFetching: fetching };
 }

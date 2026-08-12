@@ -6,7 +6,6 @@ import { GameStatus } from "../../types/ESPN";
 import { WeekInfo } from "../../types/League";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import { WeekGame } from "../../types/WeekGame";
-import getClasses from "../../utils/getClasses";
 import DialogCombobox from "../dialog/DialogCombobox";
 import DialogShell from "../dialog/DialogShell";
 import { CheckBoxIcon, EventIcon, WarningIcon } from "../icon/Icon";
@@ -42,18 +41,16 @@ export function gamesMatching(
  * game being played, and WARN beside a warning for a column ESPN lists no game for,
  * which is the one game the dialog can say nothing else about. A shape alone carries
  * the two that are not: a calendar before kickoff and a tick once the game is over.
- * The dot on the game being watched pulses, since that game is asked about again every
- * ten seconds.
+ * That a live game is being asked about again is the progress bar's to say, which is
+ * how every other wait in the app says it.
  */
 function GameMark({
   game,
   status,
-  polling = false,
 }: {
   game: WeekGame;
   /** The freshest status known, which for the chosen game is not the scoring pass's. */
   status?: GameStatus;
-  polling?: boolean;
 }) {
   if (game.result == null) {
     return (
@@ -76,13 +73,7 @@ function GameMark({
   }
   if (status === GameStatus.LIVE) {
     return (
-      <span
-        className={`game-status__mark --live ${getClasses({
-          "--polling": polling,
-        })}`}
-        role="img"
-        aria-label={polling ? "Live, refreshing" : "Live"}
-      >
+      <span className="game-status__mark --live" role="img" aria-label="Live">
         {/* Read out by the label above rather than as letters, so a reader being
             read to hears "Live" and not "L I V E". */}
         <span className="game-status__live-dot" />
@@ -105,7 +96,7 @@ function GameMark({
  * How a game in the week on screen is going, opened from a pick cell in the picks
  * table.
  *
- * The game is fetched again on the way in and every ten seconds after that until it
+ * The game is fetched again on the way in and every twenty seconds after that until it
  * is final, so a live game on screen is the game as it stands rather than as the
  * week was last scored.
  */
@@ -152,7 +143,7 @@ export default function GameStatusDialog({
     setQuery(arrived?.name ?? label);
   });
 
-  const { shown, isLoading } = useLiveGame({
+  const { shown, isLoading, isFetching } = useLiveGame({
     open,
     game,
     games: scores?.games,
@@ -165,7 +156,9 @@ export default function GameStatusDialog({
       open={open}
       onOpenChange={onOpenChange}
       title="Game Status"
-      busy={isLoading}
+      // Every fetch, a poll of the game already on screen included, so a live game
+      // being asked about again is said the way a first fetch is.
+      busy={isFetching}
       busyLabel="Fetching the game"
       search={
         <DialogCombobox<WeekGame>
@@ -193,7 +186,6 @@ export default function GameStatusDialog({
                 status={
                   (isLoading ? undefined : shown?.status) ?? game.result?.status
                 }
-                polling
               />
             )
           }

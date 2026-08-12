@@ -111,7 +111,7 @@ function detailText(result: LeagueResult): string {
 }
 
 /**
- * Where the game is up to, over the scores rather than between them.
+ * Where the game is up to, over the scores.
  *
  * No points by quarter: the pool is scored on the game's own result, so a quarter's
  * points are of no use to anyone reading this.
@@ -132,6 +132,65 @@ function Down({ result }: { result: LeagueResult }) {
   return <p className="game-status__down">{downDistanceText}</p>;
 }
 
+function Score({
+  side,
+  homeAway,
+  hasBall,
+}: {
+  side: GameSide;
+  homeAway: HomeAway;
+  hasBall: boolean;
+}) {
+  return (
+    <p className={`game-status__score --${homeAway}`}>
+      {side.score}
+      {hasBall && (
+        <span className="game-status__marker" aria-label="Has the ball">
+          {MARKER[homeAway]}
+        </span>
+      )}
+    </p>
+  );
+}
+
+/**
+ * The two scores and, stacked either side of them, where the game is up to and what
+ * the offense is facing.
+ *
+ * One block rather than three bands across the scoreline, so both lines are read
+ * against the numbers they belong to instead of against the dialog's edges.
+ */
+function Center({
+  result,
+  hasBall,
+}: {
+  result: LeagueResult;
+  /** Which side has the ball, and neither once the game is over. */
+  hasBall?: HomeAway;
+}) {
+  return (
+    <div className="game-status__center">
+      <Detail result={result} />
+      <div className="game-status__scores">
+        <Score
+          side={result.home}
+          homeAway={HomeAway.HOME}
+          hasBall={hasBall === HomeAway.HOME}
+        />
+        <span aria-hidden="true" className="game-status__dash">
+          {SCORE_DASH}
+        </span>
+        <Score
+          side={result.away}
+          homeAway={HomeAway.AWAY}
+          hasBall={hasBall === HomeAway.AWAY}
+        />
+      </div>
+      <Down result={result} />
+    </div>
+  );
+}
+
 /** A side of the scoreline with nothing in it yet, at the size it will come out. */
 function WireframeSide({ homeAway }: { homeAway: HomeAway }) {
   return (
@@ -144,7 +203,6 @@ function WireframeSide({ homeAway }: { homeAway: HomeAway }) {
         <span className="game-status__team-name game-status__bar --name" />
         <span className="game-status__record game-status__bar --record" />
       </div>
-      <span className="game-status__score game-status__bar --score" />
     </div>
   );
 }
@@ -162,32 +220,41 @@ function Wireframe() {
       <span className="game-status__sr-only" role="status">
         Loading the game
       </span>
+      {/* Two bars, because the strip is the kickoff and the venue, which are one line
+          apiece until there is width to hold both on one. */}
       <div aria-hidden="true" className="game-status__meta">
         <span className="game-status__bar --meta" />
+        <span className="game-status__bar --meta-venue" />
       </div>
       <div aria-hidden="true" className="game-status__scoreline">
-        {/* The classes the two lines carry as well as a bar's, so each is laid in the
-            row the line it stands in for is laid in. */}
-        <span className="game-status__detail game-status__bar --detail" />
         <WireframeSide homeAway={HomeAway.HOME} />
-        <span className="game-status__dash">{SCORE_DASH}</span>
+        {/* The classes the block's own lines carry as well as a bar's, so each bar is
+            laid where the line it stands in for is laid. */}
+        <div className="game-status__center">
+          <span className="game-status__detail game-status__bar --detail" />
+          <div className="game-status__scores">
+            <span className="game-status__score game-status__bar --score" />
+            <span className="game-status__dash">{SCORE_DASH}</span>
+            <span className="game-status__score game-status__bar --score" />
+          </div>
+          <span className="game-status__down game-status__bar --detail-narrow" />
+        </div>
         <WireframeSide homeAway={HomeAway.AWAY} />
-        <span className="game-status__down game-status__bar --detail-narrow" />
       </div>
+      <span className="game-status__gamecast game-status__bar --link" />
     </div>
   );
 }
 
+/** A side's mark and text. Its score is in the block between the two sides. */
 function Side({
   side,
   homeAway,
-  hasBall,
   logoUrl,
   onLogoError,
 }: {
   side: GameSide;
   homeAway: HomeAway;
-  hasBall: boolean;
   /** Left out where either side has no mark to draw, so neither draws one. */
   logoUrl?: string;
   onLogoError: () => void;
@@ -221,22 +288,14 @@ function Side({
           <span className="game-status__record">{side.record}</span>
         )}
       </div>
-      <p className="game-status__score">
-        {side.score}
-        {hasBall && (
-          <span className="game-status__marker" aria-label="Has the ball">
-            {MARKER[homeAway]}
-          </span>
-        )}
-      </p>
     </div>
   );
 }
 
 /**
- * A game the way ESPN's own boxscore says it: each side out on its own edge with its
- * score inboard against a dash, where the game is up to written over the two scores and
- * what the offense faces under them.
+ * A game the way ESPN's own boxscore says it: each side out on its own edge, the two
+ * scores meeting at a dash between them, with where the game is up to over those scores
+ * and what the offense faces under them.
  *
  * `result` is the game as it was last fetched, and `isLoading` says it is not yet the
  * game `game` names. A wireframe stands in until it is, so a live game is never shown
@@ -294,26 +353,30 @@ export default function GameStatusSummary({
         {venue != null && <MetaGroup parts={venue} />}
       </div>
       <div className="game-status__scoreline">
-        <Detail result={result} />
         <Side
           side={result.home}
           homeAway={HomeAway.HOME}
-          hasBall={hasBall === HomeAway.HOME}
           logoUrl={logos ? result.home.team.logoUrl : undefined}
           onLogoError={dropLogos}
         />
-        <span aria-hidden="true" className="game-status__dash">
-          {SCORE_DASH}
-        </span>
+        <Center result={result} hasBall={hasBall} />
         <Side
           side={result.away}
           homeAway={HomeAway.AWAY}
-          hasBall={hasBall === HomeAway.AWAY}
           logoUrl={logos ? result.away.team.logoUrl : undefined}
           onLogoError={dropLogos}
         />
-        <Down result={result} />
       </div>
+      {result.gamecastUrl != null && (
+        <a
+          className="game-status__gamecast"
+          href={result.gamecastUrl}
+          target="_blank"
+          rel="noreferrer"
+        >
+          ESPN Gamecast
+        </a>
+      )}
     </div>
   );
 }

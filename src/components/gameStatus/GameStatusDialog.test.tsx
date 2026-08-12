@@ -229,9 +229,7 @@ describe("GameStatusDialog", () => {
     );
     expect(screen.getByRole("status")).toHaveTextContent("Loading the game");
     // In words as well as in a dot, a red dot alone reading as a decoration.
-    expect(
-      screen.getByRole("img", { name: "Live, refreshing" }),
-    ).toHaveTextContent("LIVE");
+    expect(screen.getByRole("img", { name: "Live" })).toHaveTextContent("LIVE");
 
     // The score the fetch came back with, not the one the week was scored at.
     expect(await screen.findByText("8:42 - 3rd Quarter")).toBeInTheDocument();
@@ -253,6 +251,20 @@ describe("GameStatusDialog", () => {
     await vi.advanceTimersByTimeAsync(POLL_MS);
     expect(getGameResultMock).toHaveBeenCalledTimes(2);
     expect(await screen.findByText("14")).toBeInTheDocument();
+
+    // A poll says it is out the way a first fetch does, and the game already on
+    // screen stays up behind the bar rather than a wireframe standing in for it.
+    const held = deferred();
+    getGameResultMock.mockReturnValue(held.promise);
+    await vi.advanceTimersByTimeAsync(POLL_MS);
+    expect(
+      await screen.findByRole("progressbar", { name: "Fetching the game" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("BUF Team")).toBeInTheDocument();
+
+    held.settle(proGame);
+    expect(await screen.findByText("0")).toBeInTheDocument();
+    expect(screen.queryByRole("progressbar")).toBeNull();
 
     // Another game chosen from the search. The one on screen stays there behind the
     // bar until the new one arrives, rather than the dialog emptying and filling.

@@ -161,6 +161,20 @@ describe("GameStatusSummary, a game that is over", () => {
     short.forEach((it) => expect(it).toHaveAttribute("aria-hidden", "true"));
   });
 
+  it("links out to ESPN's own tracker, in a tab of its own", () => {
+    const tracked = result({ gamecastUrl: "https://espn.com/game/401" });
+    render(<GameStatusSummary game={game(tracked)} result={tracked} />);
+    const link = screen.getByRole("link", { name: "ESPN Gamecast" });
+    expect(link).toHaveAttribute("href", "https://espn.com/game/401");
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noreferrer");
+  });
+
+  it("offers no tracker where ESPN listed no link to one", () => {
+    renderFinal();
+    expect(screen.queryByRole("link")).toBeNull();
+  });
+
   it("wears both teams' marks, home first", () => {
     renderFinal();
     expect(logos()).toEqual([
@@ -249,19 +263,26 @@ describe("GameStatusSummary, a game still being played", () => {
     expect(screen.getByText("2nd & 7")).toBeInTheDocument();
   });
 
-  it("bands the status over the two scores and the down under them", () => {
+  it("stacks the status over the two scores and the down under them", () => {
     renderLive();
-    // Grid placement is what stacks the scoreline, and it follows this order, so what
-    // is asserted is which band each line ends up in.
+    // One block between the two sides, so both lines are read against the numbers
+    // rather than against the dialog's edges.
     expect(
       [...document.querySelectorAll(".game-status__scoreline > *")].map(
         (it) => it.className,
       ),
     ).toEqual([
-      "game-status__detail",
       "game-status__side --home",
-      "game-status__dash",
+      "game-status__center",
       "game-status__side --away",
+    ]);
+    expect(
+      [...document.querySelectorAll(".game-status__center > *")].map(
+        (it) => it.className,
+      ),
+    ).toEqual([
+      "game-status__detail",
+      "game-status__scores",
       "game-status__down",
     ]);
   });

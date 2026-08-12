@@ -77,14 +77,6 @@ $dot-size: 12px;
     background-color: var(--rak-danger-500);
   }
 
-  // Only on the game being watched, and slow, so the pulse reads as that game being
-  // asked about again rather than as something gone wrong with it. Never settles
-  // anywhere but at rest, so a reader who asked for less movement, whom
-  // `index.scss` answers by cutting every animation short, is left the dot itself.
-  &.--polling .game-status__live-dot {
-    animation: game-status-pulse 2.4s ease-in-out infinite;
-  }
-
   > svg {
     width: var(--rak-icon-sm);
     height: var(--rak-icon-sm);
@@ -103,12 +95,5 @@ $dot-size: 12px;
     width: $dot-size;
     height: $dot-size;
     fill: currentColor;
-  }
-}
-
-@keyframes game-status-pulse {
-  50% {
-    opacity: 0.25;
-    transform: scale(0.7);
   }
 }

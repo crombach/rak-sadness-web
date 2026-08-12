@@ -8,7 +8,7 @@ The data layer, plus the two page measurements. The first four mount once in
 - `useLeagueWeeks`: the season's ESPN weeks, and which is selected
 - `usePlayerScores`: a week's scores from the API, cache, or an upload. Owns
   the throttle
-- `useLiveGame`: one game, refetched every ten seconds
+- `useLiveGame`: one game, refetched every twenty seconds
 - `useArrival`: an outside value, taken as it arrives
 - `useExportScores`: the scores, as a workbook
 - `useWeekRouteGuard`: whether a `/:season/:week` URL has anything to show

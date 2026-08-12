@@ -135,6 +135,13 @@ function gameSide(competitor: EspnCompetitor): GameSide {
   };
 }
 
+/** What ESPN calls the link to its tracker for a game. */
+const GAMECAST_LINK = "Gamecast";
+
+function gamecastUrl(event: EspnEvent): string | undefined {
+  return event.links?.find((link) => link.text === GAMECAST_LINK)?.href;
+}
+
 function gameVenue(venue?: EspnVenue): GameVenue | undefined {
   return venue?.fullName != null
     ? {
@@ -238,6 +245,7 @@ export function toLeagueResult(event: EspnEvent): LeagueResult | null {
     home: homeSide,
     away: awaySide,
     venue: gameVenue(competition.venue),
+    gamecastUrl: gamecastUrl(event),
     possession,
     winner: {
       team: winner && {

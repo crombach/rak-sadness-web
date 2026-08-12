@@ -16,6 +16,14 @@ export type EspnEvent = {
   date: string;
   competitions: Array<EspnCompetition>;
   status: EspnStatus;
+  /** Where ESPN's own pages for the game are, one of which is its tracker. */
+  links?: Array<EspnLink>;
+};
+
+export type EspnLink = {
+  href: string;
+  /** What the link is called, like `Gamecast`. */
+  text?: string;
 };
 
 export type EspnStatus = {
