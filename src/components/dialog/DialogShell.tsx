@@ -35,7 +35,7 @@ export default function DialogShell({
   busyLabel: string;
 }>) {
   // Tapping a search opens a keyboard over the bottom of the screen, which the
-  // sheet is sized and stood against. Only while the dialog is up, since nothing
+  // sheet is sized and padded against. Only while the dialog is up, since nothing
   // else on any page has an input to open one.
   useViewportInsets(open);
 
