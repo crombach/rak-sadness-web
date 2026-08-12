@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { GameStatus, HomeAway } from "../../types/ESPN";
 import { LeagueResult } from "../../types/LeagueResult";
 import { League } from "../../types/League";
@@ -59,12 +59,6 @@ function result(over: Partial<LeagueResult> = {}): LeagueResult {
     totalScore: 50,
     ...over,
   };
-}
-
-function rowOf(abbreviation: string): Array<string | null> {
-  return within(screen.getByRole("row", { name: new RegExp(abbreviation) }))
-    .getAllByRole("cell")
-    .map((cell) => cell.textContent);
 }
 
 /*
@@ -132,10 +126,11 @@ describe("GameStatusSummary, a game that is over", () => {
     expect(screen.getByText("Orchard Park, NY")).toBeInTheDocument();
   });
 
-  it("shows the quarters for each side, the scores being the totals", () => {
+  it("says FT/OT, and nothing about how the quarters went", () => {
     renderFinal();
-    expect(rowOf("KC")).toEqual(["7", "3", "10", "0"]);
-    expect(rowOf("BUF")).toEqual(["7", "10", "3", "10"]);
+    expect(screen.getByText("FT")).toBeInTheDocument();
+    // The pool is scored on the result, so a quarter's points are nobody's business.
+    expect(screen.queryByRole("table")).toBeNull();
   });
 
   it("marks neither side, the ball being nobody's once the game is over", () => {
@@ -143,16 +138,13 @@ describe("GameStatusSummary, a game that is over", () => {
     expect(screen.queryByLabelText("Has the ball")).toBeNull();
   });
 
-  it("stands the home side on the left, and heads the quarters with it", () => {
+  it("stands the home side on the left", () => {
     renderFinal();
     expect(
       [...document.querySelectorAll(".game-status__side")].map(
         (side) => side.className,
       ),
     ).toEqual(["game-status__side --home", "game-status__side --away"]);
-    expect(
-      screen.getAllByRole("rowheader").map((cell) => cell.textContent),
-    ).toEqual(["BUF", "KC"]);
   });
 
   it("carries each side's abbreviation, which is what a phone shows", () => {
@@ -261,11 +253,6 @@ describe("GameStatusSummary, a game still being played", () => {
     renderLive();
     expect(screen.getByLabelText("Has the ball")).toBeInTheDocument();
   });
-
-  it("holds the quarter scores back until the game is over", () => {
-    renderLive();
-    expect(screen.queryByRole("table")).toBeNull();
-  });
 });
 
 describe("GameStatusSummary, a game yet to kick off", () => {
@@ -315,12 +302,13 @@ describe("GameStatusSummary, a game yet to kick off", () => {
     expect(screen.getByText("Postponed")).toBeInTheDocument();
   });
 
-  it("takes overtime as another column", () => {
+  it("says a game that needed overtime went to it", () => {
     const overtime = result({
       detailMessage: "Final/OT",
       home: {
         team: { name: "Buffalo Bills", abbreviation: "BUF" },
         score: 36,
+        // Five periods, which is the only thing the quarters are still read for.
         linescores: [7, 10, 3, 10, 6],
       },
       away: {
@@ -330,11 +318,6 @@ describe("GameStatusSummary, a game yet to kick off", () => {
       },
     });
     render(<GameStatusSummary game={game(overtime)} result={overtime} />);
-    expect(
-      screen
-        .getAllByRole("columnheader")
-        .map((header) => header.textContent)
-        .filter((text) => text !== "Team"),
-    ).toEqual(["1", "2", "3", "4", "OT"]);
+    expect(screen.getByText("FT/OT")).toBeInTheDocument();
   });
 });

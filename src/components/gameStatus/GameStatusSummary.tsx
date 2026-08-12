@@ -77,16 +77,6 @@ function overtimeLabel(period: number): string {
   return overtime === 1 ? "OT" : `${overtime}OT`;
 }
 
-/** `1`…`4`, then `OT`, `2OT`, for as many periods as were played. */
-function periodLabels(count: number): Array<string> {
-  return [...Array(count).keys()].map((index) => {
-    const period = index + 1;
-    return period <= REGULATION_PERIODS
-      ? String(period)
-      : overtimeLabel(period);
-  });
-}
-
 /** How many periods the game has scores for, overtime included. */
 function periodsPlayed(result: LeagueResult): number {
   return Math.max(result.away.linescores.length, result.home.linescores.length);
@@ -125,52 +115,14 @@ function Detail({ result }: { result: LeagueResult }) {
   return <p className="game-status__detail">{detailText(result)}</p>;
 }
 
-function LinescoreRow({ side, periods }: { side: GameSide; periods: number }) {
-  return (
-    <tr>
-      <th scope="row">{side.team.abbreviation}</th>
-      {[...Array(periods).keys()].map((index) => (
-        <td key={index}>{side.linescores[index] ?? "-"}</td>
-      ))}
-    </tr>
-  );
-}
-
-/** How the game stands, which is a different thing to say at each stage of one. */
+/**
+ * How the game stands, which is where it is up to and, while it is being played, what
+ * the offense is facing. Who has the ball is left to the marker beside their score.
+ *
+ * No points by quarter: the pool is scored on the game's own result, so a quarter's
+ * points are of no use to anyone reading this.
+ */
 function Center({ result }: { result: LeagueResult }) {
-  const periods = periodsPlayed(result);
-
-  if (result.status === GameStatus.FINAL && periods > 0) {
-    return (
-      <>
-        <Detail result={result} />
-        <table className="game-status__linescores">
-          <caption className="game-status__sr-only">Points by quarter</caption>
-          <thead>
-            <tr>
-              <th scope="col">
-                <span className="game-status__sr-only">Team</span>
-              </th>
-              {/* No total: the scores either side of this are already it. */}
-              {periodLabels(periods).map((label) => (
-                <th key={label} scope="col">
-                  {label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            <LinescoreRow side={result.home} periods={periods} />
-            <LinescoreRow side={result.away} periods={periods} />
-          </tbody>
-        </table>
-      </>
-    );
-  }
-
-  // Everything the app knows about a game still being played. `detailMessage`
-  // carries the quarter and the clock together, which is how ESPN says it. Who has
-  // the ball is left to the marker beside their score.
   return (
     <>
       <Detail result={result} />

@@ -333,32 +333,6 @@
   font-size: var(--rak-text-sm);
 }
 
-// Monospace and tabular, so the quarters line up under their headings however many
-// digits a quarter's points took.
-.game-status__linescores {
-  border-collapse: collapse;
-  color: var(--rak-text-secondary);
-  font-family: var(--rak-font-mono);
-  font-size: var(--rak-text-sm);
-  font-variant-numeric: tabular-nums;
-
-  th,
-  td {
-    padding: 2px var(--rak-space-1);
-    text-align: right;
-    font-weight: var(--rak-weight-medium);
-  }
-
-  thead th {
-    border-bottom: var(--rak-border-width-hairline) solid var(--rak-divider);
-    color: var(--rak-text-tertiary);
-  }
-
-  tbody th {
-    text-align: left;
-  }
-}
-
 .game-status__missing {
   margin: 0;
   color: var(--rak-text-secondary);
