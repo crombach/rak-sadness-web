@@ -251,7 +251,7 @@ describe("getPlayerScores, scoring", () => {
         { Name: "Alice", C1: "OSU -3", P1: "BUF -7", P2: "MIA -3", Pts: 41 },
       ]),
     );
-    expect(result.scores[0].pro[1].status).toBe("error");
+    expect(result.scores[0].pro[1].status).toBe("unscoreable");
   });
 });
 
@@ -376,7 +376,7 @@ describe("getPlayerScores, spreads the workbook contradicts", () => {
     const result = await getPlayerScores(WEEK, picksBuffer(contradictoryP1));
 
     result.scores.forEach((score) => {
-      expect(score.pro[0].status).toBe("error");
+      expect(score.pro[0].status).toBe("unscoreable");
       expect(score.pro[0].explanation.header).toBe("Invalid Spread");
       expect(score.pro[0].explanation.message).toBe(
         'Picks disagree about the spread: "BUF -7" and "KC -8".',

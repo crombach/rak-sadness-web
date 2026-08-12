@@ -23,7 +23,7 @@ function under(title: string): Array<string> {
 const RAK_BY_45 = {
   kind: "range" as const,
   max: 45,
-  contenders: ["Rak"],
+  rivals: ["Rak"],
 };
 
 const base = {
@@ -41,9 +41,9 @@ describe("AnalysisSummary", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("gives an eliminated player the reason they carry", () => {
+  it("gives a knocked out player the reason they carry", () => {
     const result: PlayerAnalysis = {
-      kind: "eliminated",
+      kind: "knockedOut",
       player: "Bob",
       explanation: "Knocked out on Total Score by Alice.",
     };
@@ -56,8 +56,8 @@ describe("AnalysisSummary", () => {
     expect(screen.queryByText("Bob cannot win this week.")).toBeNull();
   });
 
-  it("tells an eliminated player carrying no reason that they cannot win", () => {
-    const result: PlayerAnalysis = { kind: "eliminated", player: "Bob" };
+  it("tells a knocked out player carrying no reason that they cannot win", () => {
+    const result: PlayerAnalysis = { kind: "knockedOut", player: "Bob" };
     render(<AnalysisSummary result={result} />);
 
     expect(screen.getByText("Bob cannot win this week.")).toBeInTheDocument();
@@ -162,7 +162,7 @@ describe("AnalysisSummary", () => {
         kind: "range",
         min: 38,
         max: 44,
-        contenders: ["Rak", "Bill"],
+        rivals: ["Rak", "Bill"],
       },
     };
     render(<AnalysisSummary result={result} />);
@@ -267,7 +267,7 @@ describe("AnalysisSummary", () => {
             { label: "P2", pick: "BUF -1" },
             { label: "P3", pick: "SF -6" },
           ],
-          mondayNight: { kind: "range", max: 32, contenders: ["Rak"] },
+          mondayNight: { kind: "range", max: 32, rivals: ["Rak"] },
         },
       ],
     };
@@ -320,7 +320,7 @@ describe("AnalysisSummary", () => {
       routes: [
         {
           games: [{ label: "P1", pick: "KC -3" }],
-          mondayNight: { kind: "range", min: 30, contenders: ["Rak", "Bill"] },
+          mondayNight: { kind: "range", min: 30, rivals: ["Rak", "Bill"] },
         },
       ],
     };
@@ -332,7 +332,7 @@ describe("AnalysisSummary", () => {
   });
 
   it("states a total every route shares once, not on each of them", () => {
-    const shared = { kind: "range" as const, max: 32, contenders: ["Rak"] };
+    const shared = { kind: "range" as const, max: 32, rivals: ["Rak"] };
     const result: PlayerAnalysis = {
       ...base,
       routes: [

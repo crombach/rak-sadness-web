@@ -22,7 +22,7 @@ const FIXED_COLUMN_COUNT = 5;
 const PICK_STATUS_LABEL: Partial<Record<Status, string>> = {
   yes: "Right",
   no: "Wrong",
-  error: "Unscoreable",
+  unscoreable: "Unscoreable",
 };
 
 function leagueHeaders(count: number, prefix: string) {

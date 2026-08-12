@@ -21,7 +21,7 @@ export default function unscoreableGames(
       .map((_, index) =>
         players.some(
           (player) =>
-            player[league][index].status === "error" &&
+            player[league][index].status === "unscoreable" &&
             player[league][index].explanation.header !== MISSING_PICK,
         )
           ? labels[index]

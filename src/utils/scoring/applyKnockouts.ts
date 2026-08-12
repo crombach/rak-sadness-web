@@ -28,7 +28,7 @@ type PairDifferences = {
 function countDifferences(
   games: Array<RemainingGame>,
   activeIndex: number,
-  oppIndex: number,
+  rivalIndex: number,
 ): PairDifferences {
   const differences = {
     differentCollegePicks: 0,
@@ -36,7 +36,7 @@ function countDifferences(
     differentProPicksWithSpreads: 0,
   };
   games.forEach((game) => {
-    if (pickDifference(game, activeIndex, oppIndex) === "none") return;
+    if (pickDifference(game, activeIndex, rivalIndex) === "none") return;
     const activeCell = game.cells[activeIndex];
     if (game.league === "college") {
       differences.differentCollegePicks += 1;
@@ -75,59 +75,60 @@ export default function applyKnockouts(
     // same Monday night pick is settled.
     if (activeIndex > 0) {
       for (
-        let oppIndex = 0;
-        oppIndex < sortedScores.length &&
-        sortedScores[oppIndex].score.total >= activeScore.score.total;
-        oppIndex++
+        let rivalIndex = 0;
+        rivalIndex < sortedScores.length &&
+        sortedScores[rivalIndex].score.total >= activeScore.score.total;
+        rivalIndex++
       ) {
-        const oppScore = sortedScores[oppIndex];
+        const rivalScore = sortedScores[rivalIndex];
 
         // No use comparing a player to themself or a player with no picks.
-        if (oppIndex === activeIndex || oppScore.status.hasNoPicks) continue;
+        if (rivalIndex === activeIndex || rivalScore.status.hasNoPicks)
+          continue;
 
         const {
           differentCollegePicks,
           differentProPicks,
           differentProPicksWithSpreads,
-        } = countDifferences(games, activeIndex, oppIndex);
+        } = countDifferences(games, activeIndex, rivalIndex);
 
-        const totalScoreDiff = oppScore.score.total - activeScore.score.total;
+        const totalScoreDiff = rivalScore.score.total - activeScore.score.total;
         const totalDifferentPicks = differentCollegePicks + differentProPicks;
         if (totalDifferentPicks < totalScoreDiff) {
           // If the active player can't catch up on points, they're knocked out.
           return knockedOut(
             activeScore,
-            `Knocked out on Total Score by ${oppScore.name}. ` +
+            `Knocked out on Total Score by ${rivalScore.name}. ` +
               `Behind by ${totalScoreDiff} with ${plural(totalDifferentPicks, "different pick")} remaining.`,
           );
         } else if (totalDifferentPicks === totalScoreDiff) {
           // Either distance is absent when that player left the Monday night
           // points cell blank, even once the game itself is final.
-          const oppDistance = oppScore.tiebreaker.distance;
+          const rivalDistance = rivalScore.tiebreaker.distance;
           const activeDistance = activeScore.tiebreaker.distance;
-          // If the best a player can do is tie the opponent, check if they're knocked out on breakers.
+          // If the best a player can do is tie the rival, check if they're knocked out on breakers.
           if (
-            oppScore.tiebreaker.pick === activeScore.tiebreaker.pick ||
-            (tiebreakerScore != null && oppDistance === activeDistance)
+            rivalScore.tiebreaker.pick === activeScore.tiebreaker.pick ||
+            (tiebreakerScore != null && rivalDistance === activeDistance)
           ) {
-            // If the active player has the same tiebreaker pick as the opponent, run through the list of other tiebreakers.
-            // If the opponent has a better college score, check if the active player can catch up.
+            // If the active player has the same tiebreaker pick as the rival, run through the list of other tiebreakers.
+            // If the rival has a better college score, check if the active player can catch up.
             const collegeScoreDiff =
-              oppScore.score.college - activeScore.score.college;
+              rivalScore.score.college - activeScore.score.college;
             if (
               collegeScoreDiff > 0 &&
               differentCollegePicks < collegeScoreDiff
             ) {
               return knockedOut(
                 activeScore,
-                `Knocked out on College Score tiebreaker by ${oppScore.name}. ` +
+                `Knocked out on College Score tiebreaker by ${rivalScore.name}. ` +
                   `Behind by ${collegeScoreDiff} with ${plural(differentCollegePicks, "different college pick")} remaining.`,
               );
             }
             // If college games are done and players are tied, check pro against the spread tiebreaker.
             if (collegeScoreDiff === 0 && isCollegeDone) {
               const proAgainstTheSpreadScoreDiff =
-                oppScore.score.proAgainstTheSpread -
+                rivalScore.score.proAgainstTheSpread -
                 activeScore.score.proAgainstTheSpread;
               if (
                 proAgainstTheSpreadScoreDiff > 0 &&
@@ -135,7 +136,7 @@ export default function applyKnockouts(
               ) {
                 return knockedOut(
                   activeScore,
-                  `Knocked out on Pro Score Against the Spread tiebreaker by ${oppScore.name}. ` +
+                  `Knocked out on Pro Score Against the Spread tiebreaker by ${rivalScore.name}. ` +
                     `Behind by ${proAgainstTheSpreadScoreDiff} with ${plural(differentProPicksWithSpreads, "different pick")} remaining ` +
                     `for pro games with spreads.`,
                 );
@@ -143,17 +144,17 @@ export default function applyKnockouts(
             }
           } else if (
             tiebreakerScore != null &&
-            oppDistance != null &&
+            rivalDistance != null &&
             activeDistance != null &&
-            oppDistance - activeDistance < 0
+            rivalDistance - activeDistance < 0
           ) {
             // If the tiebreaker score has been scraped, all games must be over.
-            // Unless the active player has tied the opponent, they are knocked out.
+            // Unless the active player has tied the rival, they are knocked out.
             return knockedOut(
               activeScore,
-              `Knocked out on MNF Points tiebreaker by ${oppScore.name}. ` +
-                `${activeScore.name} is ${plural(activeDistance, "point")} off, and ${oppScore.name} is ` +
-                `${plural(oppDistance, "point")} off.`,
+              `Knocked out on MNF Points tiebreaker by ${rivalScore.name}. ` +
+                `${activeScore.name} is ${plural(activeDistance, "point")} off, and ${rivalScore.name} is ` +
+                `${plural(rivalDistance, "point")} off.`,
             );
           }
         }

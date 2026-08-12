@@ -186,7 +186,7 @@ describe("Standing", () => {
         pro: [
           {
             ...it.pro[0],
-            status: "error" as const,
+            status: "unscoreable" as const,
             explanation: { header: "Invalid Spread", message: "" },
           },
           ...it.pro.slice(1),
@@ -216,7 +216,7 @@ describe("Standing", () => {
             : [
                 {
                   ...it.pro[0],
-                  status: "error" as const,
+                  status: "unscoreable" as const,
                   explanation: { header: "Missing Pick", message: "" },
                 },
                 ...it.pro.slice(1),

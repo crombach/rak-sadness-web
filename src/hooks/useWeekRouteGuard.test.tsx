@@ -50,7 +50,7 @@ function appData(overrides: Record<string, unknown> = {}) {
     selectedWeek: WEEKS[CURRENT_WEEK - 1],
     setSelectedWeek,
     scores: { scores: [{ name: "Alice" }] },
-    settled: { season: SEASON, week: CURRENT_WEEK },
+    attemptedFor: { season: SEASON, week: CURRENT_WEEK },
     ...overrides,
   };
 }
@@ -115,7 +115,7 @@ describe("useWeekRouteGuard", () => {
       weeks: undefined,
       seasonYear: undefined,
       scores: undefined,
-      settled: undefined,
+      attemptedFor: undefined,
     });
 
     expect(result).toEqual({ status: "loading" });
@@ -171,7 +171,7 @@ describe("useWeekRouteGuard", () => {
     // Last week's scores are still there until this week's land, and judging them
     // would send the user home from a week that is about to have results.
     const result = guard(String(SEASON), "3", {
-      settled: { season: SEASON, week: CURRENT_WEEK },
+      attemptedFor: { season: SEASON, week: CURRENT_WEEK },
     });
 
     expect(result).toEqual({
@@ -183,7 +183,7 @@ describe("useWeekRouteGuard", () => {
 
   it("waits while the scores on hand answer for the same week of another season", () => {
     const result = guard(String(SEASON), String(CURRENT_WEEK), {
-      settled: { season: SEASON - 1, week: CURRENT_WEEK },
+      attemptedFor: { season: SEASON - 1, week: CURRENT_WEEK },
     });
 
     expect(result.status).toBe("loading");

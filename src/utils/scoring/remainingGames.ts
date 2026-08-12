@@ -20,7 +20,7 @@ export type RemainingGame = {
 /**
  * The positions of the games still to be played, read across every row.
  *
- * A row that left a game blank scores it "error", not "incomplete", so reading one
+ * A row that left a game blank scores it "unscoreable", not "incomplete", so reading one
  * row alone would drop a game the leader happened to skip and knock out everybody
  * who needed it.
  */

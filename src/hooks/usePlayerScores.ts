@@ -12,7 +12,7 @@ import { getPlayerScores } from "../utils/scoring/getPlayerScores";
 const REFRESH_THROTTLE_MS = 500;
 
 /** The season and week a scoring attempt has finished, however it turned out. */
-type SettledAttempt = { season: number; week: number };
+type LastAttempt = { season: number; week: number };
 
 /** Scoring threw on picks the app already had, which every path can hit. */
 function scoringFailed(week: number): Toast {
@@ -41,11 +41,11 @@ type ScoringRequest = {
  * played in January still scores against the season it belongs to. Nothing is
  * attempted until it is known.
  *
- * `settled` names the season and week this hook has finished trying, which is not
- * always the pair asked for: switching either leaves the old scores in place until
- * the new ones arrive. Anything reacting to a missing score has to wait for
- * `settled` to catch up, or it will act on the previous week's outcome. The season
- * belongs there as much as the week, since week 5 exists in every season.
+ * `attemptedFor` names the season and week this hook has finished trying, which
+ * is not always the pair asked for: switching either leaves the old scores in
+ * place until the new ones arrive. Anything reacting to a missing score has to
+ * wait for it to catch up, or it will act on the previous week's outcome. The
+ * season belongs there as much as the week, since week 5 exists in every season.
  */
 export default function usePlayerScores(
   selectedWeek?: WeekInfo,
@@ -55,7 +55,7 @@ export default function usePlayerScores(
 
   const [picksBuffer, setPicksBuffer] = useState<ArrayBuffer>();
   const [scores, setScores] = useState<RakMadnessScores>();
-  const [settled, setSettled] = useState<SettledAttempt>();
+  const [attemptedFor, setAttemptedFor] = useState<LastAttempt>();
   const [isScoresLoading, setScoresLoading] = useState(true);
   const [isRefreshing, setRefreshing] = useState(false);
   // Counts scoring attempts, so a superseded one cannot write its week's scores
@@ -91,7 +91,7 @@ export default function usePlayerScores(
           error,
         );
         setScores(undefined);
-        setSettled(attempted);
+        setAttemptedFor(attempted);
         setScoresLoading(false);
         showToast(onLoadFailure);
         return;
@@ -112,7 +112,7 @@ export default function usePlayerScores(
       } finally {
         if (isLatest()) {
           setScoresLoading(false);
-          setSettled(attempted);
+          setAttemptedFor(attempted);
         }
       }
     },
@@ -208,12 +208,19 @@ export default function usePlayerScores(
   return useMemo(
     () => ({
       scores,
-      settled,
+      attemptedFor,
       isScoresLoading,
       isRefreshing,
       scoreLocalFile,
       refresh,
     }),
-    [scores, settled, isScoresLoading, isRefreshing, scoreLocalFile, refresh],
+    [
+      scores,
+      attemptedFor,
+      isScoresLoading,
+      isRefreshing,
+      scoreLocalFile,
+      refresh,
+    ],
   );
 }

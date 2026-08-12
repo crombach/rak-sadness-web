@@ -41,11 +41,11 @@ describe("unscoreableGames", () => {
       unscoreableGames([
         player("Rak", [
           { status: "yes" },
-          { status: "error", header: "Invalid Spread" },
+          { status: "unscoreable", header: "Invalid Spread" },
         ]),
         player("Alice", [
           { status: "yes" },
-          { status: "error", header: "Invalid Spread" },
+          { status: "unscoreable", header: "Invalid Spread" },
         ]),
       ]),
     ).toEqual(["P2"]);
@@ -54,7 +54,7 @@ describe("unscoreableGames", () => {
   it("names a game the results do not hold", () => {
     expect(
       unscoreableGames([
-        player("Rak", [{ status: "error", header: "Missing Game" }]),
+        player("Rak", [{ status: "unscoreable", header: "Missing Game" }]),
         player("Alice", [{ status: "yes" }]),
       ]),
     ).toEqual(["P1"]);
@@ -63,7 +63,7 @@ describe("unscoreableGames", () => {
   it("leaves a blank cell alone, which is the player's own doing", () => {
     expect(
       unscoreableGames([
-        player("Rak", [{ status: "error", header: "Missing Pick" }]),
+        player("Rak", [{ status: "unscoreable", header: "Missing Pick" }]),
         player("Alice", [{ status: "yes" }]),
       ]),
     ).toEqual([]);

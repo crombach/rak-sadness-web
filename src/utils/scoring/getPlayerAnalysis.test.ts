@@ -87,7 +87,7 @@ describe("getPlayerAnalysis, whether there is anything to work out", () => {
       "Knocked out on Total Score by Alice.";
 
     expect(getPlayerAnalysis(scores, "Bob")).toEqual({
-      kind: "eliminated",
+      kind: "knockedOut",
       player: "Bob",
       explanation: "Knocked out on Total Score by Alice.",
     });
@@ -161,7 +161,7 @@ describe("getPlayerAnalysis, whether there is anything to work out", () => {
       "Knocked out on Total Score by Alice.";
 
     expect(getPlayerAnalysis(scores, "Bob")).toEqual({
-      kind: "eliminated",
+      kind: "knockedOut",
       player: "Bob",
       explanation: "Knocked out on Total Score by Alice.",
     });
@@ -279,7 +279,7 @@ describe("getPlayerAnalysis, the Monday night tiebreaker", () => {
       kind: "range",
       min: undefined,
       max: 45,
-      contenders: ["Bob"],
+      rivals: ["Bob"],
     });
     expect(result.outrightAt).toBeUndefined();
   });
@@ -305,7 +305,7 @@ describe("getPlayerAnalysis, the Monday night tiebreaker", () => {
       kind: "range",
       min: 46,
       max: undefined,
-      contenders: ["Bob"],
+      rivals: ["Bob"],
     });
   });
 
@@ -334,7 +334,7 @@ describe("getPlayerAnalysis, the Monday night tiebreaker", () => {
       kind: "range",
       min: 45,
       max: undefined,
-      contenders: ["Bob"],
+      rivals: ["Bob"],
     });
   });
 
@@ -373,7 +373,7 @@ describe("getPlayerAnalysis, the Monday night tiebreaker", () => {
           kind: "range",
           min: undefined,
           max: 32,
-          contenders: ["Bob"],
+          rivals: ["Bob"],
         },
       },
     ]);

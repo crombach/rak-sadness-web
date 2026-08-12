@@ -68,7 +68,7 @@ function mondayNightSentence(outlook: DecidingOutlook): string {
   if (outlook.kind === "settled") {
     return "MNF Points are already final, so the games above settle it.";
   }
-  return `${mondayNightPoints(outlook)} to beat ${NAMES.format(outlook.contenders)}.`;
+  return `${mondayNightPoints(outlook)} to beat ${NAMES.format(outlook.rivals)}.`;
 }
 
 /**
@@ -83,7 +83,7 @@ function RouteMondayNight({ outlook }: { outlook: MondayNightRange }) {
       <span>
         {/* A list rather than a sentence, since the line around it is one too. */}
         <span className="analysis__term">TO BEAT</span>{" "}
-        {outlook.contenders.map((name, index) => (
+        {outlook.rivals.map((name, index) => (
           <Fragment key={name}>
             {index > 0 && <span className="analysis__term">, </span>}
             {name}
@@ -241,7 +241,7 @@ function Body({
   isOver?: boolean;
   week?: number;
 }) {
-  if (result.kind === "eliminated") {
+  if (result.kind === "knockedOut") {
     // The explanation names who knocked them out and by how much, so it says they
     // cannot win on its own. Only a player without one needs telling.
     return (

@@ -21,7 +21,7 @@ function winners(players: Array<PlayerScore>): Array<PlayerScore> {
   );
 }
 
-/** Whether any pick has been settled, which is when a standing means anything. */
+/** Whether any pick has an outcome yet, which is when a standing means anything. */
 function hasKickedOff(players: Array<PlayerScore>): boolean {
   return players.some((player) =>
     [...player.college, ...player.pro].some(
