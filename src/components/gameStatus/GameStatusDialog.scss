@@ -31,6 +31,10 @@ $dot-size: 12px;
 
 // What a mark that says its state in a word is shaped like. The word is what makes it
 // wider than the box below, so the two that carry one share everything but their hue.
+//
+// Monospace, and both words four letters, so the two come out the same size: set in the
+// body face, `WARN` would run wider than `LIVE` and the list's right edge would step in
+// and out as a game kicked off.
 @mixin mark-pill($background, $foreground) {
   width: auto;
   gap: var(--rak-space-1);
@@ -38,6 +42,7 @@ $dot-size: 12px;
   border-radius: var(--rak-radius-sm);
   background-color: $background;
   color: $foreground;
+  font-family: var(--rak-font-mono);
   font-size: var(--rak-text-xs);
   font-weight: var(--rak-weight-bold);
   letter-spacing: 0.06em;
@@ -59,8 +64,10 @@ $dot-size: 12px;
     @include mark-pill(var(--rak-danger-100), var(--rak-danger-600));
   }
 
+  // The yellow the picks table fills a pick it cannot score with, this mark and that
+  // cell saying the same thing about the same game.
   &.--invalid {
-    @include mark-pill(var(--rak-warning-100), var(--rak-warning-500));
+    @include mark-pill(var(--rak-warning-300), var(--rak-warning-700));
   }
 
   .game-status__live-dot {
