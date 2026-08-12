@@ -18,22 +18,32 @@ search holds still: everything under the rule below it scrolls. A `player` prop
 stands in for a choice made in the search, and remounts the combobox so the name
 reaches its input. `PlayerAnalysisDialog.scss` stands the one dialog on the bottom
 edge as a sheet, and stands it up as a centered modal at `wide-screen`, replacing
-both ends of the transition, since a window cannot inherit a sheet's slide. The search marks the player named in it with the icon the tables give them, right
+both ends of the transition, since a window cannot inherit a sheet's slide. The
+answer's scrollbar gutter is held whether or not there is a scrollbar, so a long
+answer replacing a short one does not narrow the text. The list's empty message is
+a live region Base UI keeps mounted, so its padding is dropped while it is empty
+rather than standing over the first name. The search marks the player named in it with the icon the tables give them, right
 of the input, so it says where they stand before the answer has been worked out.
 Its popup list
 takes its shape from `styles/_listbox.scss`, which the home page selects share.
 
 `AnalysisSummary`: renders `PlayerAnalysis`, working out only what it takes to say
 it. The standing leads, from `Standing`, which reads the scores rather than the
-search, and names no leader until a pick is settled. With nothing left to play it
-reads as a result rather than a standing: a leader wins, the player picked is the
+search, and says no game has been played until a pick is settled. It answers for
+the player picked and for nobody else: the dialog is opened on a name and holds one
+from then on, so clearing the search filters the list rather than taking the answer
+away. With nothing left to play it
+reads as a result rather than a standing: the player picked is the
 winner rather than tied for the lead, and the tail says the week is complete
-instead of counting no games. A week whose games are all played but not all
+instead of counting no games. Who won is settled on merit rather than on points,
+through `comparePlayerScoresOnMerit`, so two players level on points that the
+tiebreakers separate leave one winner rather than a tie. Points alone still say who
+leads a week still being played, since the tiebreakers are not settled yet. A week whose games are all played but not all
 scoreable says so rather than reading as complete, since a leader on a total the
 app could not work out is not a winner yet. `Standing` also takes the analysis once it lands,
 read only for a clinch: a clinched player is called the winner outright even with
-games left, so the body underneath only has to say why that holds, and never why
-they won at all. Trusted only where the analysis answers for the player named,
+games left, so the body underneath only names the week they won and, where games
+remain, says nothing left to play can undo it. Trusted only where the analysis answers for the player named,
 since the dialog keeps the last one on screen while the next is worked out.
 Nothing an `eliminated` or `headline` result says repeats the header either: a
 player already called `Knocked out` there is left to the explanation below, and

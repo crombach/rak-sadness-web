@@ -89,6 +89,7 @@ export default function ResultsFrame({
         }}
         player={analysisPlayer}
         scores={scores}
+        week={week != null ? Number(week) : undefined}
       />
     </PageLayout>
   );

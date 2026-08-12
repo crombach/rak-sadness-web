@@ -46,12 +46,15 @@ export default function PlayerAnalysisDialog({
   onOpenChange,
   player: named,
   scores,
+  week,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** Set where the dialog was opened on one player, by clicking their name. */
   player?: string;
   scores?: RakMadnessScores;
+  /** Which week the scores are for, which a won week is named by. */
+  week?: number;
 }) {
   const [player, setPlayer] = useState<PlayerOption>();
   const [query, setQuery] = useState("");
@@ -140,9 +143,12 @@ export default function PlayerAnalysisDialog({
             items={options}
             filteredItems={playersMatching(options, query)}
             itemToStringLabel={(option: PlayerOption) => option.name}
-            onValueChange={(chosen: PlayerOption | null) =>
-              setPlayer(chosen ?? undefined)
-            }
+            // Null arrives when the input is cleared to type another name. The
+            // dialog is opened on a player and answers for one from then on, so
+            // that clears the search rather than the answer under it.
+            onValueChange={(chosen: PlayerOption | null) => {
+              if (chosen != null) setPlayer(chosen);
+            }}
             onInputValueChange={setQuery}
             // The list is short and already on screen, so the first match being
             // highlighted saves an arrow key before Enter.
@@ -227,6 +233,7 @@ export default function PlayerAnalysisDialog({
                 key={shown?.name}
                 result={shown?.paths}
                 isOver={isOver}
+                week={week}
               />
             </div>
           </div>

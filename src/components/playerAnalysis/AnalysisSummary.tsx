@@ -7,6 +7,7 @@ import {
   VictoryRoute,
 } from "../../types/PlayerAnalysis";
 import { PlayerScore, RakMadnessScores } from "../../types/RakMadnessScores";
+import { comparePlayerScoresOnMerit } from "../../utils/scoring/comparePlayerScores";
 import remainingGames from "../../utils/scoring/remainingGames";
 import unscoreableGames from "../../utils/scoring/unscoreableGames";
 import Button from "../button/Button";
@@ -29,6 +30,18 @@ function plural(count: number, noun: string): string {
   return `${count} ${noun}${count === 1 ? "" : "s"}`;
 }
 
+/**
+ * Everyone the tiers leave tied at the top, which is everyone who won the week.
+ * Points alone would not do: two players level on them can still be told apart by
+ * the tiebreakers, leaving one winner rather than two.
+ */
+function winners(players: Array<PlayerScore>): Array<PlayerScore> {
+  const [leader] = players;
+  return players.filter(
+    (player) => comparePlayerScoresOnMerit(leader, player) === 0,
+  );
+}
+
 /** Whether any pick has been settled, which is when a standing means anything. */
 function hasKickedOff(players: Array<PlayerScore>): boolean {
   return players.some((player) =>
@@ -39,42 +52,32 @@ function hasKickedOff(players: Array<PlayerScore>): boolean {
 }
 
 /**
- * Where the player picked stands, or where the week does before one is. Nothing
- * here repeats the answer below it: a player who cannot win reads as knocked out
- * and leaves the points to the explanation, and a clinched player reads as the
- * winner outright, games left or not, leaving the body to say only why that
- * holds where some remain.
+ * Where the player picked stands. Nothing here repeats the answer below it: a
+ * player who cannot win reads as knocked out and leaves the points to the
+ * explanation, and a clinched player reads as the winner outright, games left or
+ * not, leaving the body to say only why that holds where some remain.
  */
 function headline(
   players: Array<PlayerScore>,
   isOver: boolean,
-  player: string | undefined,
+  chosen: PlayerScore,
   isClinched: boolean,
 ): string {
   if (!hasKickedOff(players)) return "No finished games";
   const [leader] = players;
-  const top = leader.score.total;
-  const chosen = players.find((it) => it.name === player);
-  if (chosen == null) {
-    const leaders = players.filter((it) => it.score.total === top).length;
-    const verb = isOver ? "win" : "lead";
-    const points = plural(top, "point");
-    return leaders > 1
-      ? `${leaders} players ${verb} with ${points}`
-      : `${leader.name} ${verb}s with ${points}`;
-  }
   if (chosen.status.isKnockedOut) return "Knocked out";
-  const behind = top - chosen.score.total;
+  const behind = leader.score.total - chosen.score.total;
   if (behind > 0) return `${plural(behind, "point")} behind ${leader.name}`;
   if (!isOver && !isClinched) return "Tied for the lead";
-  return players.filter((it) => it.score.total === top).length > 1
-    ? "Tied for the win"
-    : "Winner";
+  const won = winners(players);
+  // Level on points and still beaten, which only the tiebreakers can do.
+  if (!won.includes(chosen)) return `Loses the tiebreaker to ${leader.name}`;
+  return won.length > 1 ? "Tied for the win" : "Winner";
 }
 
 /**
- * Where the week stands, which the scores already say. Read straight off them so
- * it is on screen before anyone is picked, and while their routes are worked out.
+ * Where the player picked stands, which the scores already say. Read straight off
+ * them, so it is on screen while their routes are still being worked out.
  *
  * `result` is the analysis once it lands, read only for the "clinched" word: the
  * header and the answer below it are worked out from the same fact this way, so
@@ -92,8 +95,10 @@ export function Standing({
   result?: PlayerAnalysis;
 }) {
   const players = scores?.scores ?? [];
-  const [leader] = players;
-  if (leader == null) return null;
+  // The dialog is opened on a player and never lets go of one, so there is no
+  // standing to give until the scores holding them arrive.
+  const chosen = players.find((it) => it.name === player);
+  if (chosen == null) return null;
   const remaining = remainingGames(players).length;
   // A game nobody can be scored on is a hole in the week, so the week is not over
   // however few of its games are still being played. Saying otherwise would call a
@@ -103,7 +108,7 @@ export function Standing({
   const isClinched = result?.kind === "clinched" && result.player === player;
   return (
     <p className="analysis__standing">
-      {headline(players, isOver, player, isClinched)}
+      {headline(players, isOver, chosen, isClinched)}
       {" · "}
       {remaining > 0
         ? `${plural(remaining, "game")} still to play`
@@ -328,10 +333,13 @@ function Message({ lines }: { lines: Array<string | undefined> }) {
 export default function AnalysisSummary({
   result,
   isOver,
+  week,
 }: {
   result?: PlayerAnalysis;
   /** Whether the week itself is done, which is what the "clinched" case needs. */
   isOver?: boolean;
+  /** Which week this is, named by the one line that congratulates a winner. */
+  week?: number;
 }) {
   // Nothing under the search until a name is picked, which the placeholder in it
   // already asks for.
@@ -354,10 +362,12 @@ export default function AnalysisSummary({
   if (result.kind === "clinched") {
     return (
       <Answer>
-        {/* The header already calls a clinched player the winner, week over or
-            not, so a week still running is the only case left to explain. */}
+        {/* The header calls a clinched player the winner without saying of what,
+            so this names the week. Only a week still running needs the line
+            under it, since a week with nothing left to play cannot be undone. */}
         <Message
           lines={[
+            `${result.player} has won ${week != null ? `week ${week}` : "the week"}.`,
             isOver ? undefined : "Nothing still to be played can take it away.",
           ]}
         />
