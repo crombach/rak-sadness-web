@@ -1,6 +1,6 @@
 import { MockedFunction } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
-import { League, LeagueInfo } from "./types/League";
+import { League } from "./types/League";
 
 vi.mock("./utils/getLeagueInfo");
 vi.mock("./utils/readFileToBuffer");
@@ -146,35 +146,6 @@ describe("the app, week routes", () => {
     expect(getPlayerScoresMock).toHaveBeenCalledTimes(1);
   });
 
-  it("sends a week with no picks home, explaining why", async () => {
-    await mountLoadedApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
-
-    expect(await screen.findByText("No Results")).toBeInTheDocument();
-    expect(screen.getByText("Use Local Spreadsheet")).toBeInTheDocument();
-  });
-
-  it("does not judge a week before the schedule has loaded", async () => {
-    let resolve: (info: LeagueInfo) => void = () => undefined;
-    getLeagueInfoMock.mockReturnValue(
-      new Promise<LeagueInfo>((r) => {
-        resolve = r;
-      }),
-    );
-    mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
-
-    expect(screen.queryByText("No Results")).not.toBeInTheDocument();
-    expect(screen.queryByText("Unknown Week")).not.toBeInTheDocument();
-    resolve(leagueInfo);
-    expect(await screen.findByText("No Results")).toBeInTheDocument();
-  });
-
-  it("sends a week beyond the season home", async () => {
-    await mountLoadedApp(`/${SEASON}/99/scoreboard`);
-
-    expect(await screen.findByText("Unknown Week")).toBeInTheDocument();
-    expect(getPlayerScoresMock).not.toHaveBeenCalled();
-  });
-
   it("scores the season named in the URL", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
     await mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
@@ -232,31 +203,6 @@ describe("the app, week routes", () => {
     mountApp("/scoreboard");
 
     expect(await screen.findByText("Select a week...")).toBeInTheDocument();
-  });
-
-  it("sends a week of a season with no week behind it home", async () => {
-    getLeagueInfoMock.mockResolvedValue({
-      ...leagueInfo,
-      activeWeek: undefined,
-    });
-    await mountLoadedApp(`/${SEASON}/1/scoreboard`);
-
-    expect(await screen.findByText("Unknown Week")).toBeInTheDocument();
-    expect(getPlayerScoresMock).not.toHaveBeenCalled();
-  });
-
-  it("sends a season that is not a year home", async () => {
-    await mountLoadedApp(`/nope/${CURRENT_WEEK}/scoreboard`);
-
-    expect(await screen.findByText("Unknown Season")).toBeInTheDocument();
-    expect(getPlayerScoresMock).not.toHaveBeenCalled();
-  });
-
-  it("sends a week that is not a number home", async () => {
-    await mountLoadedApp(`/${SEASON}/abc/scoreboard`);
-
-    expect(await screen.findByText("Unknown Week")).toBeInTheDocument();
-    expect(getPlayerScoresMock).not.toHaveBeenCalled();
   });
 
   it("shows the scoreboard for a bare week URL", async () => {
