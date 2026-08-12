@@ -5,9 +5,9 @@ import {
   useEffect,
   useState,
 } from "react";
-import getClasses from "../utils/getClasses";
-import { ScreenRotationIcon } from "./icon/Icon";
-import Navbar from "./navbar/Navbar";
+import getClasses from "../../utils/getClasses";
+import { ScreenRotationIcon } from "../icon/Icon";
+import Navbar from "../navbar/Navbar";
 import "./PageLayout.scss";
 
 const BACKGROUND_TILE = "/logo512.png";

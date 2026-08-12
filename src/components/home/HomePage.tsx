@@ -8,8 +8,8 @@ import { WeekInfo } from "../../types/League";
 import getClasses from "../../utils/getClasses";
 import Button from "../button/Button";
 import Footer from "../footer/Footer";
-import LogoButton from "../navbar/LogoButton/LogoButton";
-import PageLayout from "../PageLayout";
+import LogoButton from "../navbar/LogoButton";
+import PageLayout from "../pageLayout/PageLayout";
 import "./HomePage.scss";
 
 /** Title case, to read like the week labels ESPN sends. */

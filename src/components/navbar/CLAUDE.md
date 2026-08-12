@@ -5,10 +5,8 @@
 - `ScoresNavbar`: the scoreboard/picks switch plus the refresh a week still being
   played gets, for the results routes. Clearing `isWeekLive` collapses the refresh
   button and the divider before it.
+- `LogoButton`: the logo and `APP_NAME`, which it exports, as one target. Used by
+  the home page and the results frame as well as here.
 
 Nothing here opens the player analysis. A player's name does, in either table, on a
 finished week as well as a live one.
-
-## Subdirectories
-
-- [`LogoButton/`](LogoButton/CLAUDE.md) — logo button, navbar left
