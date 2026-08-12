@@ -151,10 +151,9 @@
   font-size: var(--rak-text-sm);
 }
 
-// A fixed height per breakpoint rather than one sized to the answer: short
-// content tracks the kind of answer, not the week's status, so keying the
-// height to any one flag would only fix one of the shapes an answer takes.
-// Whatever does not fit scrolls, since everything under the rule above scrolls.
+// Sized to the answer, and capped by the popup above it. A tall floor would
+// leave a two-line answer sitting over an empty half-screen, and the answers
+// that need the room scroll instead.
 .player-analysis__body {
   // How far the answer stands off the rule above it, which the progress bar reads
   // back to sit on that rule without moving the answer.
@@ -163,7 +162,6 @@
   box-sizing: border-box;
   flex: 0 1 auto;
   min-height: 0;
-  height: 85dvh;
   padding-top: var(--rak-analysis-inset);
   // Everything under here scrolls. Only the search above it holds still.
   border-top: 1px solid var(--rak-border);
@@ -245,9 +243,5 @@ $bar-height: 2px;
       opacity: 0;
       transform: translate(-50%, -46%);
     }
-  }
-
-  .player-analysis__body {
-    height: min(560px, calc(100dvh - 64px));
   }
 }
