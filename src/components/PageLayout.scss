@@ -1,3 +1,5 @@
+@use "../styles/a11y" as *;
+
 .home {
   position: relative;
   box-sizing: border-box;
@@ -84,4 +86,9 @@
   &:focus-visible {
     transform: none;
   }
+}
+
+/** The page has no heading to show, so its one `<h1>` is read and not drawn. */
+.home__title {
+  @include visually-hidden;
 }

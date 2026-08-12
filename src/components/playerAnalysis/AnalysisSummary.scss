@@ -74,7 +74,7 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  font-family: monospace;
+  font-family: var(--rak-font-mono);
   font-size: 0.875rem;
 }
 
@@ -169,7 +169,7 @@
   gap: 0 var(--rak-pick-gap);
   padding-inline-start: var(--rak-pick-inset);
   color: var(--rak-text);
-  font-family: monospace;
+  font-family: var(--rak-font-mono);
   font-weight: 600;
 }
 

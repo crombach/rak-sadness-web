@@ -52,12 +52,19 @@ function useImageLoaded(source: string): boolean {
 
 /** The chrome every page shares: the background, the navbar, and the main area. */
 export default function PageLayout({
+  title,
   navbarLeft,
   navbarRight,
   showingScores = false,
   scrollable = true,
   children,
 }: PropsWithChildren<{
+  /**
+   * The page's one `<h1>`, drawn nowhere. Every route here is a logo, a bar of
+   * controls, and a table, so there is no heading to show, and a page with no
+   * `<h1>` gives a screen reader nothing to say about where it has landed.
+   */
+  title: string;
   navbarLeft: ReactNode;
   navbarRight?: ReactNode;
   showingScores?: boolean;
@@ -85,6 +92,7 @@ export default function PageLayout({
           "--frozen": !scrollable,
         })}`}
       >
+        <h1 className="home__title">{title}</h1>
         {children}
       </main>
     </div>

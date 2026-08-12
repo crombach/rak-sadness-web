@@ -1,8 +1,10 @@
 # components
 
 `PageLayout`: chrome every page shares, the background, the navbar, and `<main>`.
-Route components live in `home/` and `results/`; the routes themselves are in
-`src/App.tsx`.
+Its required `title` is the page's one `<h1>`, first inside `<main>` and drawn
+nowhere. No route here shows a heading, so this is the only thing telling a screen
+reader which page it landed on. Route components live in `home/` and `results/`;
+the routes themselves are in `src/App.tsx`.
 
 ## Subdirectories
 

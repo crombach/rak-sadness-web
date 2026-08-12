@@ -56,7 +56,10 @@ export default function HomePage() {
   const hasNoScoresYet = !selectedWeek || isBusy || !scores;
 
   return (
-    <PageLayout navbarLeft={<LogoButton onClick={() => navigate("/")} />}>
+    <PageLayout
+      title="Rak Madness"
+      navbarLeft={<LogoButton onClick={() => navigate("/")} />}
+    >
       {/*
         Only the first load hides the controls. Switching seasons disables them
         instead, so the picker the user just used does not vanish under them.

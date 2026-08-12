@@ -121,8 +121,10 @@
       cursor: pointer;
       transition: filter 150ms;
 
-      &:hover {
-        filter: brightness(0.85);
+      @include can-hover {
+        &:hover {
+          filter: brightness(0.85);
+        }
       }
 
       &:active {
@@ -146,7 +148,7 @@
       // says so by setting this, and its stripe follows.
       --rak-cell-fill: var(--rak-surface);
       background-color: var(--rak-cell-fill);
-      font-family: monospace;
+      font-family: var(--rak-font-mono);
       min-width: max-content;
       height: var(--rak-table-row-height);
       padding: var(--rak-table-cell-padding-y) var(--rak-table-cell-padding-x);
