@@ -52,7 +52,6 @@ function espnEvent({
   homeExtras,
   awayExtras,
   venue,
-  links,
 }: {
   home: string;
   away: string;
@@ -65,14 +64,12 @@ function espnEvent({
   homeExtras?: Partial<EspnCompetitor>;
   awayExtras?: Partial<EspnCompetitor>;
   venue?: EspnEvent["competitions"][0]["venue"];
-  links?: EspnEvent["links"];
 }): EspnEvent {
   return {
     id,
     name: `${away} Team at ${home} Team`,
     shortName: `${away} @ ${home}`,
     date,
-    links,
     status: {
       type: {
         id: status,
@@ -317,7 +314,7 @@ describe("getLeagueResults, mapping", () => {
     expect(result.away.linescores).toEqual([]);
   });
 
-  it("carries the venue and the Gamecast link", async () => {
+  it("carries the venue", async () => {
     mockFetch([
       espnEvent({
         home: "BUF",
@@ -326,10 +323,6 @@ describe("getLeagueResults, mapping", () => {
           fullName: "Highmark Stadium",
           address: { city: "Orchard Park", state: "NY" },
         },
-        links: [
-          { text: "Box Score", href: "https://espn.com/box" },
-          { text: "Gamecast", href: "https://espn.com/game" },
-        ],
       }),
     ]);
     const [result] = await getLeagueResults(League.PRO, WEEK, [BUF_KC]);
@@ -338,14 +331,32 @@ describe("getLeagueResults, mapping", () => {
       city: "Orchard Park",
       state: "NY",
     });
-    expect(result.gamecastUrl).toBe("https://espn.com/game");
   });
 
-  it("leaves the venue and the link out where ESPN sent neither", async () => {
+  it("carries each side's logo, and neither where ESPN sent none", async () => {
+    mockFetch([
+      espnEvent({
+        home: "BUF",
+        away: "KC",
+        homeExtras: {
+          team: {
+            displayName: "BUF Team",
+            shortDisplayName: "BUF",
+            abbreviation: "BUF",
+            logo: "https://espn.com/buf.png",
+          },
+        },
+      }),
+    ]);
+    const [result] = await getLeagueResults(League.PRO, WEEK, [BUF_KC]);
+    expect(result.home.team.logoUrl).toBe("https://espn.com/buf.png");
+    expect(result.away.team.logoUrl).toBeUndefined();
+  });
+
+  it("leaves the venue out where ESPN sent none", async () => {
     mockFetch([bufVsKc]);
     const [result] = await getLeagueResults(League.PRO, WEEK, [BUF_KC]);
     expect(result.venue).toBeUndefined();
-    expect(result.gamecastUrl).toBeUndefined();
   });
 });
 

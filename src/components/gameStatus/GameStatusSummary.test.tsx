@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { GameStatus, HomeAway } from "../../types/ESPN";
 import { LeagueResult } from "../../types/LeagueResult";
 import { League } from "../../types/League";
@@ -25,19 +25,26 @@ function result(over: Partial<LeagueResult> = {}): LeagueResult {
     status: GameStatus.FINAL,
     detailMessage: "Final",
     home: {
-      team: { name: "Buffalo Bills", abbreviation: "BUF" },
+      team: {
+        name: "Buffalo Bills",
+        abbreviation: "BUF",
+        logoUrl: "https://espn.com/buf.png",
+      },
       score: 30,
       record: "4-1",
       linescores: [7, 10, 3, 10],
     },
     away: {
-      team: { name: "Kansas City Chiefs", abbreviation: "KC" },
+      team: {
+        name: "Kansas City Chiefs",
+        abbreviation: "KC",
+        logoUrl: "https://espn.com/kc.png",
+      },
       score: 20,
       record: "3-2",
       linescores: [7, 3, 10, 0],
     },
     venue: { name: "Highmark Stadium", city: "Orchard Park", state: "NY" },
-    gamecastUrl: "https://espn.com/game",
     possession: {},
     winner: {
       team: { name: "Buffalo Bills", abbreviation: "BUF" },
@@ -60,15 +67,39 @@ function rowOf(abbreviation: string): Array<string | null> {
     .map((cell) => cell.textContent);
 }
 
+/*
+ * The wireframe's bars and the teams' marks, neither of which any query reaches: a
+ * bar has nothing in it to read, and a mark is decorative beside the name it stands
+ * next to.
+ */
+function bars(): number {
+  return document.querySelectorAll(".game-status__bar").length;
+}
+
+function logos(): Array<string | null> {
+  return [...document.querySelectorAll("img")].map((logo) =>
+    logo.getAttribute("src"),
+  );
+}
+
 describe("GameStatusSummary, before there is anything to show", () => {
   it("draws nothing with no game chosen", () => {
     const { container } = render(<GameStatusSummary />);
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("draws nothing until the game has been fetched", () => {
-    const { container } = render(<GameStatusSummary game={game(result())} />);
-    expect(container).toBeEmptyDOMElement();
+  it("stands a wireframe in until the game has been fetched", () => {
+    render(<GameStatusSummary game={game(result())} />);
+    expect(screen.getByRole("status")).toHaveTextContent("Loading the game");
+    expect(bars()).toBeGreaterThan(0);
+  });
+
+  it("stands a wireframe in over the game before it while one is fetched", () => {
+    render(
+      <GameStatusSummary game={game(result())} result={result()} isLoading />,
+    );
+    expect(screen.queryByText("Buffalo Bills")).toBeNull();
+    expect(bars()).toBeGreaterThan(0);
   });
 
   it("says so where ESPN listed no game for the column", () => {
@@ -76,6 +107,7 @@ describe("GameStatusSummary, before there is anything to show", () => {
     expect(screen.getByText(/No game was found for P1/)).toHaveTextContent(
       "KC / BUF",
     );
+    expect(bars()).toBe(0);
   });
 });
 
@@ -107,18 +139,50 @@ describe("GameStatusSummary, a game that is over", () => {
     expect(rowOf("BUF")).toEqual(["7", "10", "3", "10", "30"]);
   });
 
-  it("marks the winner", () => {
+  it("marks neither side, the ball being nobody's once the game is over", () => {
     renderFinal();
-    expect(screen.getByLabelText("Winner")).toBeInTheDocument();
     expect(screen.queryByLabelText("Has the ball")).toBeNull();
   });
 
-  it("links out to the Gamecast", () => {
+  it("stands the home side on the left, and heads the quarters with it", () => {
     renderFinal();
-    expect(screen.getByRole("link", { name: "ESPN Gamecast" })).toHaveAttribute(
-      "href",
-      "https://espn.com/game",
-    );
+    expect(
+      [...document.querySelectorAll(".game-status__side")].map(
+        (side) => side.className,
+      ),
+    ).toEqual(["game-status__side --home", "game-status__side --away"]);
+    expect(
+      screen.getAllByRole("rowheader").map((cell) => cell.textContent),
+    ).toEqual(["BUF", "KC"]);
+  });
+
+  it("wears both teams' marks, home first", () => {
+    renderFinal();
+    expect(logos()).toEqual([
+      "https://espn.com/buf.png",
+      "https://espn.com/kc.png",
+    ]);
+  });
+});
+
+describe("GameStatusSummary, a team with no mark", () => {
+  it("drops both marks where either team has none", () => {
+    const oneLogo = result({
+      away: {
+        team: { name: "Kansas City Chiefs", abbreviation: "KC" },
+        score: 20,
+        record: "3-2",
+        linescores: [7, 3, 10, 0],
+      },
+    });
+    render(<GameStatusSummary game={game(oneLogo)} result={oneLogo} />);
+    expect(logos()).toEqual([]);
+  });
+
+  it("drops both marks where one of them fails to load", () => {
+    render(<GameStatusSummary game={game(result())} result={result()} />);
+    fireEvent.error(document.querySelectorAll("img")[0]);
+    expect(logos()).toEqual([]);
   });
 });
 
@@ -126,6 +190,8 @@ describe("GameStatusSummary, a game still being played", () => {
   const live = result({
     status: GameStatus.LIVE,
     detailMessage: "8:42 - 3rd Quarter",
+    period: 3,
+    clock: "8:42",
     possession: { homeAway: HomeAway.AWAY, downDistanceText: "2nd & 7" },
     winner: { team: null, homeAway: null, by: 10 },
     loser: { team: null, homeAway: null, by: 10 },
@@ -134,17 +200,26 @@ describe("GameStatusSummary, a game still being played", () => {
   const renderLive = () =>
     render(<GameStatusSummary game={game(live)} result={live} />);
 
-  it("shows the clock, the quarter, the ball, and the down", () => {
+  it("shows the clock, the quarter, and the down", () => {
     renderLive();
     expect(screen.getByText("8:42 - 3rd Quarter")).toBeInTheDocument();
-    expect(screen.getByText("KC ball")).toBeInTheDocument();
     expect(screen.getByText("2nd & 7")).toBeInTheDocument();
   });
 
-  it("marks who has the ball rather than a winner", () => {
+  it("says who has the ball with the marker alone", () => {
     renderLive();
     expect(screen.getByLabelText("Has the ball")).toBeInTheDocument();
-    expect(screen.queryByLabelText("Winner")).toBeNull();
+    expect(screen.queryByText("KC ball")).toBeNull();
+  });
+
+  it("carries a short form of the clock, for a phone", () => {
+    renderLive();
+    expect(screen.getByText("Q3 8:42")).toBeInTheDocument();
+  });
+
+  it("marks the side with the ball", () => {
+    renderLive();
+    expect(screen.getByLabelText("Has the ball")).toBeInTheDocument();
   });
 
   it("holds the quarter scores back until the game is over", () => {

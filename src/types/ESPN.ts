@@ -16,15 +16,13 @@ export type EspnEvent = {
   date: string;
   competitions: Array<EspnCompetition>;
   status: EspnStatus;
-  links?: Array<EspnLink>;
-};
-
-export type EspnLink = {
-  href: string;
-  text?: string;
 };
 
 export type EspnStatus = {
+  /** Which quarter the game is in, counting on past four into overtime. */
+  period?: number;
+  /** The clock as ESPN writes it, like `8:42`. */
+  displayClock?: string;
   type: {
     id: GameStatus;
     shortDetail: string;
@@ -75,4 +73,6 @@ export type EspnTeam = {
   displayName: string;
   shortDisplayName: string;
   abbreviation: string;
+  /** The team's mark, which ESPN leaves off the smaller college programs. */
+  logo?: string;
 };

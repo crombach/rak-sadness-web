@@ -1,31 +1,90 @@
 import { useMemo, useState } from "react";
+import { preload } from "react-dom";
 import useArrival from "../../hooks/useArrival";
 import useLiveGame from "../../hooks/useLiveGame";
+import { GameStatus } from "../../types/ESPN";
 import { WeekInfo } from "../../types/League";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import { WeekGame } from "../../types/WeekGame";
+import getClasses from "../../utils/getClasses";
 import DialogCombobox from "../dialog/DialogCombobox";
 import DialogShell from "../dialog/DialogShell";
+import { CheckCircleIcon, WarningIcon } from "../icon/Icon";
 import GameStatusSummary from "./GameStatusSummary";
 import "./GameStatusDialog.scss";
 
-/** What an entry reads as: the column it is, then the game it holds. */
-export function gameLabel(game: WeekGame): string {
+/**
+ * What a query is matched against: the column the game is, then the game itself.
+ *
+ * Wider than the input reads once a game is chosen, which is the game alone. The
+ * column is how a reader who came from a cell knows which game they clicked, so it
+ * is worth typing even where it is not worth keeping on screen.
+ */
+export function gameSearchText(game: WeekGame): string {
   return `${game.label}  ${game.name}`;
 }
 
-/**
- * The games a query offers, in picks table column order.
- *
- * Matched against the column label as well as the teams, since the label is half
- * of what an entry reads as, and a reader who came from a cell knows that first.
- */
+/** The games a query offers, in picks table column order. */
 export function gamesMatching(
   games: Array<WeekGame>,
   query: string,
 ): Array<WeekGame> {
   const needle = query.trim().toLowerCase();
-  return games.filter((game) => gameLabel(game).toLowerCase().includes(needle));
+  return games.filter((game) =>
+    gameSearchText(game).toLowerCase().includes(needle),
+  );
+}
+
+/**
+ * Where a game stands, in one mark, on every game the search offers.
+ *
+ * A dot for a game whose clock has something left to say, red while it is running and
+ * grey before it starts. A tick for a game that is over, and a warning for a column
+ * ESPN lists no game for, which is the one game the dialog can say nothing else about.
+ * The dot on the game being watched pulses, since that game is asked about again every
+ * ten seconds.
+ */
+function GameMark({
+  game,
+  status,
+  polling = false,
+}: {
+  game: WeekGame;
+  /** The freshest status known, which for the chosen game is not the scoring pass's. */
+  status?: GameStatus;
+  polling?: boolean;
+}) {
+  if (game.result == null) {
+    return (
+      <span
+        className="game-status__mark --invalid"
+        role="img"
+        aria-label="Not listed by ESPN"
+      >
+        <WarningIcon />
+      </span>
+    );
+  }
+  if (status === GameStatus.FINAL) {
+    return (
+      <span className="game-status__mark --final" role="img" aria-label="Final">
+        <CheckCircleIcon />
+      </span>
+    );
+  }
+  const isLive = status === GameStatus.LIVE;
+  return (
+    <span
+      className={`game-status__mark --dot ${getClasses({
+        "--live": isLive,
+        "--polling": isLive && polling,
+      })}`}
+      role="img"
+      aria-label={
+        isLive ? (polling ? "Live, refreshing" : "Live") : "Yet to kick off"
+      }
+    />
+  );
 }
 
 /**
@@ -61,11 +120,22 @@ export default function GameStatusDialog({
   // this list by identity.
   const games = useMemo(() => scores?.games ?? [], [scores]);
 
+  // Every mark the week could draw, asked for as soon as the week is scored rather
+  // than when a game is opened, so the scoreline comes up with its marks already on
+  // it. React holds one request per URL however many renders ask for it.
+  games.forEach((it) => {
+    [it.result?.home.team.logoUrl, it.result?.away.team.logoUrl].forEach(
+      (url) => {
+        if (url != null) preload(url, { as: "image" });
+      },
+    );
+  });
+
   // A column arriving from outside stands in for a choice made in the search.
   useArrival(named, (label) => {
     const arrived = games.find((it) => it.label === label);
     setGame(arrived);
-    setQuery(arrived != null ? gameLabel(arrived) : label);
+    setQuery(arrived?.name ?? label);
   });
 
   const { shown, isLoading } = useLiveGame({
@@ -94,18 +164,32 @@ export default function GameStatusDialog({
           onValueChange={setGame}
           query={query}
           onQueryChange={setQuery}
-          itemToStringLabel={gameLabel}
+          // The game alone. The column is what the list is read by and what the
+          // search matches, and saying it back here only crowds the game's name.
+          itemToStringLabel={(option) => option.name}
           itemKey={(option) => option.label}
+          // The chosen game's own mark, on the freshest status rather than the one
+          // the week was scored at, so a game going final stops pulsing.
+          adornment={
+            game != null && (
+              <GameMark
+                game={game}
+                status={shown?.status ?? game.result?.status}
+                polling
+              />
+            )
+          }
           renderOption={(option) => (
             <>
               <span className="game-status__option-label">{option.label}</span>
               <span className="game-status__option-name">{option.name}</span>
+              <GameMark game={option} status={option.result?.status} />
             </>
           )}
         />
       }
     >
-      <GameStatusSummary game={game} result={shown} />
+      <GameStatusSummary game={game} result={shown} isLoading={isLoading} />
     </DialogShell>
   );
 }

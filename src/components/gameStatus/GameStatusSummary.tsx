@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { GameStatus, HomeAway } from "../../types/ESPN";
 import { GameSide, LeagueResult } from "../../types/LeagueResult";
 import { WeekGame } from "../../types/WeekGame";
@@ -6,10 +7,14 @@ import "./GameStatusSummary.scss";
 /** Regulation is four quarters, and anything past them is overtime. */
 const REGULATION_PERIODS = 4;
 
-/** Points the reader at the score it belongs to, from whichever side it is on. */
+/** Joins the two scores where they meet, which is on a screen too narrow for three
+ * columns. */
+const SCORE_DASH = "–";
+
+/** Points at the score of the side with the ball, from whichever side that is. */
 const MARKER: Record<HomeAway, string> = {
-  [HomeAway.AWAY]: "◂",
   [HomeAway.HOME]: "▸",
+  [HomeAway.AWAY]: "◂",
 };
 
 function kickoff(date: Date): string {
@@ -32,14 +37,66 @@ function venueLine(result: LeagueResult): string | undefined {
   return place !== "" ? `${venue.name} · ${place}` : venue.name;
 }
 
+/** `OT` for the first period past regulation, `2OT` for the next, and so on. */
+function overtimeLabel(period: number): string {
+  const overtime = period - REGULATION_PERIODS;
+  return overtime === 1 ? "OT" : `${overtime}OT`;
+}
+
 /** `1`…`4`, then `OT`, `2OT`, for as many periods as were played. */
 function periodLabels(count: number): Array<string> {
   return [...Array(count).keys()].map((index) => {
     const period = index + 1;
-    if (period <= REGULATION_PERIODS) return String(period);
-    const overtime = period - REGULATION_PERIODS;
-    return overtime === 1 ? "OT" : `${overtime}OT`;
+    return period <= REGULATION_PERIODS
+      ? String(period)
+      : overtimeLabel(period);
   });
+}
+
+/** How many periods the game has scores for, overtime included. */
+function periodsPlayed(result: LeagueResult): number {
+  return Math.max(result.away.linescores.length, result.home.linescores.length);
+}
+
+/**
+ * How the game stands, in the few characters a phone has room for.
+ *
+ * ESPN's own wording runs to `8:42 - 3rd Quarter`, which wraps to three lines in the
+ * column left between two scores. Said as `Q3 8:42` it fits on one.
+ */
+function shortDetail(result: LeagueResult): string {
+  if (result.status === GameStatus.FINAL) {
+    return periodsPlayed(result) > REGULATION_PERIODS ? "FT/OT" : "FT";
+  }
+  if (result.status !== GameStatus.LIVE || result.period == null) {
+    return "Pregame";
+  }
+  const period =
+    result.period <= REGULATION_PERIODS
+      ? `Q${result.period}`
+      : overtimeLabel(result.period);
+  // A clock reading zero is a period that has ended rather than one being played, and
+  // saying so adds nothing to the period itself.
+  return result.clock != null && !result.clock.startsWith("0:00")
+    ? `${period} ${result.clock}`
+    : period;
+}
+
+/**
+ * How the game stands, said twice: once as ESPN says it, and once in the short form a
+ * phone has room for. The stylesheet shows whichever the screen can hold.
+ */
+function Detail({ result }: { result: LeagueResult }) {
+  return (
+    <p className="game-status__detail">
+      {/* Hidden from a reader who is being read to, since the full wording below is
+          in the page whatever the screen is wide enough to draw. */}
+      <span aria-hidden="true" className="game-status__detail-short">
+        {shortDetail(result)}
+      </span>
+      <span className="game-status__detail-full">{result.detailMessage}</span>
+    </p>
+  );
 }
 
 function LinescoreRow({ side, periods }: { side: GameSide; periods: number }) {
@@ -56,15 +113,12 @@ function LinescoreRow({ side, periods }: { side: GameSide; periods: number }) {
 
 /** How the game stands, which is a different thing to say at each stage of one. */
 function Center({ result }: { result: LeagueResult }) {
-  const periods = Math.max(
-    result.away.linescores.length,
-    result.home.linescores.length,
-  );
+  const periods = periodsPlayed(result);
 
   if (result.status === GameStatus.FINAL && periods > 0) {
     return (
       <>
-        <p className="game-status__detail">{result.detailMessage}</p>
+        <Detail result={result} />
         <table className="game-status__linescores">
           <caption className="game-status__sr-only">Points by quarter</caption>
           <thead>
@@ -81,8 +135,8 @@ function Center({ result }: { result: LeagueResult }) {
             </tr>
           </thead>
           <tbody>
-            <LinescoreRow side={result.away} periods={periods} />
             <LinescoreRow side={result.home} periods={periods} />
+            <LinescoreRow side={result.away} periods={periods} />
           </tbody>
         </table>
       </>
@@ -90,17 +144,11 @@ function Center({ result }: { result: LeagueResult }) {
   }
 
   // Everything the app knows about a game still being played. `detailMessage`
-  // carries the quarter and the clock together, which is how ESPN says it.
-  const possessing =
-    result.possession.homeAway != null
-      ? result[result.possession.homeAway].team.abbreviation
-      : undefined;
+  // carries the quarter and the clock together, which is how ESPN says it. Who has
+  // the ball is left to the marker beside their score.
   return (
     <>
-      <p className="game-status__detail">{result.detailMessage}</p>
-      {possessing != null && (
-        <p className="game-status__possession">{possessing} ball</p>
-      )}
+      <Detail result={result} />
       {result.possession.downDistanceText != null && (
         <p className="game-status__down">
           {result.possession.downDistanceText}
@@ -110,20 +158,78 @@ function Center({ result }: { result: LeagueResult }) {
   );
 }
 
+/** A side of the scoreline with nothing in it yet, at the size it will come out. */
+function WireframeSide({ homeAway }: { homeAway: HomeAway }) {
+  return (
+    /* The classes the game's own pieces carry, so a bar is laid out where the thing
+       it stands in for will be. */
+    <div className={`game-status__side --${homeAway}`}>
+      <span className="game-status__logo game-status__bar" />
+      <div className="game-status__team">
+        <span className="game-status__side-label game-status__bar --label" />
+        <span className="game-status__team-name game-status__bar --name" />
+        <span className="game-status__record game-status__bar --record" />
+      </div>
+      <span className="game-status__score game-status__bar --score" />
+    </div>
+  );
+}
+
+/**
+ * The scoreline before the game it holds has been fetched.
+ *
+ * Shaped like the game it stands in for, and crossed by the one sheen the tables'
+ * wireframe uses, so a wait looks the same wherever the app is waiting.
+ */
+function Wireframe() {
+  return (
+    <div className="game-status --skeleton">
+      {/* Nothing below is worth reading out, so this says what it stands in for. */}
+      <span className="game-status__sr-only" role="status">
+        Loading the game
+      </span>
+      <div aria-hidden="true" className="game-status__meta">
+        <span className="game-status__bar --meta" />
+      </div>
+      <div aria-hidden="true" className="game-status__scoreline">
+        <WireframeSide homeAway={HomeAway.HOME} />
+        <span className="game-status__dash">{SCORE_DASH}</span>
+        <div className="game-status__center">
+          <span className="game-status__bar --detail" />
+          <span className="game-status__bar --detail-narrow" />
+        </div>
+        <WireframeSide homeAway={HomeAway.AWAY} />
+      </div>
+    </div>
+  );
+}
+
 function Side({
   side,
   homeAway,
-  marked,
-  markerLabel,
+  hasBall,
+  logoUrl,
+  onLogoError,
 }: {
   side: GameSide;
   homeAway: HomeAway;
-  /** Set on the side with the ball, or the side that won. */
-  marked: boolean;
-  markerLabel: string;
+  hasBall: boolean;
+  /** Left out where either side has no mark to draw, so neither draws one. */
+  logoUrl?: string;
+  onLogoError: () => void;
 }) {
   return (
     <div className={`game-status__side --${homeAway}`}>
+      {logoUrl != null && (
+        <img
+          className="game-status__logo"
+          src={logoUrl}
+          // The team's name is beside it, so the mark says nothing a reader of the
+          // page in words is missing.
+          alt=""
+          onError={onLogoError}
+        />
+      )}
       <div className="game-status__team">
         <span className="game-status__side-label">
           {homeAway === HomeAway.HOME ? "Home" : "Away"}
@@ -135,8 +241,8 @@ function Side({
       </div>
       <p className="game-status__score">
         {side.score}
-        {marked && (
-          <span className="game-status__marker" aria-label={markerLabel}>
+        {hasBall && (
+          <span className="game-status__marker" aria-label="Has the ball">
             {MARKER[homeAway]}
           </span>
         )}
@@ -149,18 +255,24 @@ function Side({
  * A game the way ESPN's own boxscore says it: each side out on its own edge with
  * its score inboard, and how the game stands between them.
  *
- * `result` is the game as it was last fetched, which is not always the column
- * `game` names: while the next game is on its way the one before it stays up.
- * Nothing is drawn before the first fetch lands, so a live game is never shown at
- * the score the week was last worked out at.
+ * `result` is the game as it was last fetched, and `isLoading` says it is not yet the
+ * game `game` names. A wireframe stands in until it is, so a live game is never shown
+ * at the score the week was last worked out at, nor at another game's.
  */
 export default function GameStatusSummary({
   game,
   result,
+  isLoading = false,
 }: {
   game?: WeekGame;
   result?: LeagueResult;
+  /** Set while the chosen game is being fetched for the first time. */
+  isLoading?: boolean;
 }) {
+  // Which game's marks failed to load, rather than a flag, so moving to another
+  // game asks about its marks instead of inheriting a verdict on the last one's.
+  const [logolessId, setLogolessId] = useState<string>();
+
   if (game == null) {
     return null;
   }
@@ -172,14 +284,25 @@ export default function GameStatusSummary({
       </p>
     );
   }
-  if (result == null) {
-    return null;
+  // The wireframe rather than the game before it, so what is on screen is always the
+  // game the search names.
+  if (isLoading || result == null) {
+    return <Wireframe />;
   }
 
   const venue = venueLine(result);
-  const isFinal = result.status === GameStatus.FINAL;
-  const marked = isFinal ? result.winner.homeAway : result.possession.homeAway;
-  const markerLabel = isFinal ? "Winner" : "Has the ball";
+  // Who has the ball, which is nobody once the game is over: a marker left on the
+  // winner reads as a game still being played.
+  const hasBall =
+    result.status !== GameStatus.FINAL ? result.possession.homeAway : undefined;
+
+  // Both marks or neither: one side wearing its logo while the other shows a broken
+  // image, or nothing at all, reads as the app having lost track of a team.
+  const logos =
+    result.away.team.logoUrl != null &&
+    result.home.team.logoUrl != null &&
+    logolessId !== result.id;
+  const dropLogos = () => setLogolessId(result.id);
 
   return (
     <div className="game-status">
@@ -189,31 +312,26 @@ export default function GameStatusSummary({
       </div>
       <div className="game-status__scoreline">
         <Side
-          side={result.away}
-          homeAway={HomeAway.AWAY}
-          marked={marked === HomeAway.AWAY}
-          markerLabel={markerLabel}
+          side={result.home}
+          homeAway={HomeAway.HOME}
+          hasBall={hasBall === HomeAway.HOME}
+          logoUrl={logos ? result.home.team.logoUrl : undefined}
+          onLogoError={dropLogos}
         />
+        <span aria-hidden="true" className="game-status__dash">
+          {SCORE_DASH}
+        </span>
         <div className="game-status__center">
           <Center result={result} />
         </div>
         <Side
-          side={result.home}
-          homeAway={HomeAway.HOME}
-          marked={marked === HomeAway.HOME}
-          markerLabel={markerLabel}
+          side={result.away}
+          homeAway={HomeAway.AWAY}
+          hasBall={hasBall === HomeAway.AWAY}
+          logoUrl={logos ? result.away.team.logoUrl : undefined}
+          onLogoError={dropLogos}
         />
       </div>
-      {result.gamecastUrl != null && (
-        <a
-          className="game-status__gamecast"
-          href={result.gamecastUrl}
-          target="_blank"
-          rel="noreferrer"
-        >
-          ESPN Gamecast
-        </a>
-      )}
     </div>
   );
 }

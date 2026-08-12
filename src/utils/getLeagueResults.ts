@@ -118,14 +118,12 @@ async function getLeagueEvents(
 /** The season record, which ESPN sends beside the home and road splits. */
 const RECORD_TYPE_SEASON = "total";
 
-/** ESPN's own name for the game's page, among the several links it sends. */
-const GAMECAST_LINK_TEXT = "Gamecast";
-
 function gameSide(competitor: EspnCompetitor): GameSide {
   return {
     team: {
       name: competitor.team.displayName,
       abbreviation: competitor.team.abbreviation?.toUpperCase(),
+      logoUrl: competitor.team.logo,
     },
     score: Number(competitor.score),
     record: competitor.records?.find(
@@ -235,11 +233,11 @@ export function toLeagueResult(event: EspnEvent): LeagueResult | null {
     date: new Date(event.date),
     status,
     detailMessage: event.status.type.shortDetail,
+    period: event.status.period,
+    clock: event.status.displayClock,
     home: homeSide,
     away: awaySide,
     venue: gameVenue(competition.venue),
-    gamecastUrl: event.links?.find((link) => link.text === GAMECAST_LINK_TEXT)
-      ?.href,
     possession,
     winner: {
       team: winner && {

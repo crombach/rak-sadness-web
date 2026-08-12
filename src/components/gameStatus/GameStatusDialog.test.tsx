@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MockedFunction } from "vitest";
 import { GameStatus, HomeAway } from "../../types/ESPN";
@@ -47,12 +47,20 @@ function result({
     status,
     detailMessage: isFinal ? "Final" : "8:42 - 3rd Quarter",
     home: {
-      team: { name: `${home} Team`, abbreviation: home },
+      team: {
+        name: `${home} Team`,
+        abbreviation: home,
+        logoUrl: `https://espn.com/${home}.png`,
+      },
       score: homeScore,
       linescores: isFinal ? [homeScore] : [],
     },
     away: {
-      team: { name: `${away} Team`, abbreviation: away },
+      team: {
+        name: `${away} Team`,
+        abbreviation: away,
+        logoUrl: `https://espn.com/${away}.png`,
+      },
       score: awayScore,
       linescores: isFinal ? [awayScore] : [],
     },
@@ -96,6 +104,13 @@ const games: Array<WeekGame> = [
     name: collegeGame.shortName,
     result: collegeGame,
   },
+  // A column ESPN listed no game for, which is a game the dialog can only report as
+  // missing.
+  {
+    label: "C2",
+    league: League.COLLEGE,
+    name: "PSU / IOWA",
+  },
   {
     label: "P1",
     league: League.PRO,
@@ -119,6 +134,7 @@ describe("gamesMatching", () => {
   it("offers every game before anything is typed, in column order", () => {
     expect(gamesMatching(games, "").map((it) => it.label)).toEqual([
       "C1",
+      "C2",
       "P1",
     ]);
   });
@@ -176,6 +192,29 @@ describe("GameStatusDialog", () => {
       screen.getByRole("progressbar", { name: "Fetching the game" }),
     ).toHaveAttribute("aria-busy", "true");
 
+    // Every mark the week could draw, asked for before any game is opened, so a
+    // scoreline never comes up and then fills in.
+    expect(
+      [
+        ...document.head.querySelectorAll('link[rel="preload"][as="image"]'),
+      ].map((link) => link.getAttribute("href")),
+    ).toEqual([
+      "https://espn.com/OSU.png",
+      "https://espn.com/MICH.png",
+      "https://espn.com/BUF.png",
+      "https://espn.com/KC.png",
+    ]);
+
+    // The game, not the column the cell that opened it was in, and a wireframe
+    // rather than the score the week was scored at.
+    expect(screen.getByRole("combobox", { name: "Game" })).toHaveValue(
+      "KC @ BUF",
+    );
+    expect(screen.getByRole("status")).toHaveTextContent("Loading the game");
+    expect(
+      screen.getByRole("img", { name: "Live, refreshing" }),
+    ).toBeInTheDocument();
+
     // The score the fetch came back with, not the one the week was scored at.
     expect(await screen.findByText("8:42 - 3rd Quarter")).toBeInTheDocument();
     expect(screen.getByText("BUF Team")).toBeInTheDocument();
@@ -202,7 +241,19 @@ describe("GameStatusDialog", () => {
     const pending = deferred();
     getGameResultMock.mockReturnValue(pending.promise);
     await user.click(screen.getByRole("combobox", { name: "Game" }));
-    await user.click(await screen.findByRole("option", { name: /MICH @ OSU/ }));
+
+    // Every entry says where its game stands: the live game a dot, the one that is
+    // over a tick, and the column ESPN has no game for a warning.
+    await screen.findByRole("option", { name: /KC @ BUF/ });
+    expect(
+      screen.getAllByRole("option").map((option) =>
+        within(option)
+          .getAllByRole("img")
+          .map((mark) => mark.getAttribute("aria-label")),
+      ),
+    ).toEqual([["Final"], ["Not listed by ESPN"], ["Live"]]);
+
+    await user.click(screen.getByRole("option", { name: /MICH @ OSU/ }));
 
     expect(getGameResultMock).toHaveBeenLastCalledWith(
       League.COLLEGE,
@@ -213,12 +264,14 @@ describe("GameStatusDialog", () => {
     expect(
       screen.getByRole("progressbar", { name: "Fetching the game" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("BUF Team")).toBeInTheDocument();
+    expect(screen.queryByText("BUF Team")).toBeNull();
 
     pending.settle(collegeGame);
     expect(await screen.findByText("OSU Team")).toBeInTheDocument();
-    expect(screen.queryByText("BUF Team")).toBeNull();
     expect(screen.queryByRole("progressbar")).toBeNull();
+    // Over, so the search says so rather than that there is something to watch.
+    expect(screen.queryByRole("img", { name: /Live/ })).toBeNull();
+    expect(screen.getByRole("img", { name: "Final" })).toBeInTheDocument();
 
     // Final, so there is nothing left to ask about.
     const askedByFinal = getGameResultMock.mock.calls.length;

@@ -3,6 +3,8 @@ import { GameStatus, HomeAway } from "./ESPN";
 type Team = {
   name: string;
   abbreviation: string;
+  /** Absent for a team ESPN has no mark for, which the college groups have. */
+  logoUrl?: string;
 };
 
 export type Possession = {
@@ -33,11 +35,13 @@ export type LeagueResult = {
   date: Date;
   status: GameStatus;
   detailMessage: string;
+  /** The quarter the game is in, counting past four into overtime. */
+  period?: number;
+  /** The clock as ESPN writes it, like `8:42`. */
+  clock?: string;
   home: GameSide;
   away: GameSide;
   venue?: GameVenue;
-  /** ESPN's page for the game, for the play by play the app does not fetch. */
-  gamecastUrl?: string;
   possession: Possession;
   winner: {
     team: Team | null;

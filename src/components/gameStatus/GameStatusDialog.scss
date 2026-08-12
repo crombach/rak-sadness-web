@@ -1,11 +1,16 @@
-// An entry reads as its column then its game, the column held to one width so the
-// game names below it line up.
+// An entry reads as its column then its game. Both in the one monospace face at the
+// one size, so the column is held to a width the game names line up past whatever
+// letters either holds.
+.dialog__option .game-status__option-label,
+.dialog__option .game-status__option-name {
+  font-family: var(--rak-font-mono);
+  font-size: var(--rak-text-sm);
+}
+
 .dialog__option .game-status__option-label {
   flex: 0 0 auto;
   min-width: 2.5ch;
   color: var(--rak-text-tertiary);
-  font-family: var(--rak-font-mono);
-  font-size: var(--rak-text-sm);
 }
 
 .dialog__option .game-status__option-name {
@@ -15,4 +20,63 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: left;
+}
+
+// What there is to watch about a game, on the end of the search and on the end of
+// its entry, which is where the player analysis puts a player's status icon.
+//
+// Under the box it is centered in, since a filled circle reads heavier than an icon
+// drawn to the same width.
+$dot-size: 12px;
+
+// One box whatever is in it, so the marks line up down the list and the search does
+// not shift as the game it names goes from one state to the next.
+.game-status__mark {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--rak-icon-sm);
+  height: var(--rak-icon-sm);
+
+  &.--dot::after {
+    content: "";
+    width: $dot-size;
+    height: $dot-size;
+    border-radius: 50%;
+    // A game yet to kick off, which is a clock that is not running.
+    background-color: var(--rak-text-tertiary);
+  }
+
+  &.--dot.--live::after {
+    background-color: var(--rak-danger-500);
+  }
+
+  // Only on the game being watched, and slow, so the pulse reads as that game being
+  // asked about again rather than as something gone wrong with it. Never settles
+  // anywhere but at rest, so a reader who asked for less movement, whom
+  // `index.scss` answers by cutting every animation short, is left the dot itself.
+  &.--dot.--polling::after {
+    animation: game-status-pulse 2.4s ease-in-out infinite;
+  }
+
+  > svg {
+    width: var(--rak-icon-sm);
+    height: var(--rak-icon-sm);
+  }
+
+  &.--final > svg {
+    fill: var(--rak-success-500);
+  }
+
+  &.--invalid > svg {
+    fill: var(--rak-warning-500);
+  }
+}
+
+@keyframes game-status-pulse {
+  50% {
+    opacity: 0.25;
+    transform: scale(0.7);
+  }
 }
