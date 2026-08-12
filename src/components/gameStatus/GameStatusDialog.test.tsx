@@ -281,6 +281,13 @@ describe("GameStatusDialog", () => {
         "EventIcon",
       ),
     ).toBeInTheDocument();
+    // The two worth acting on say so in a word, the other two in a shape alone.
+    expect(screen.getAllByRole("img").map((mark) => mark.textContent)).toEqual([
+      "",
+      "WARN",
+      "LIVE",
+      "",
+    ]);
 
     await user.click(screen.getByRole("option", { name: /MICH @ OSU/ }));
 

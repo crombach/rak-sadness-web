@@ -9,7 +9,7 @@ import { WeekGame } from "../../types/WeekGame";
 import getClasses from "../../utils/getClasses";
 import DialogCombobox from "../dialog/DialogCombobox";
 import DialogShell from "../dialog/DialogShell";
-import { CheckCircleIcon, EventIcon, WarningIcon } from "../icon/Icon";
+import { CheckBoxIcon, EventIcon, WarningIcon } from "../icon/Icon";
 import GameStatusSummary from "./GameStatusSummary";
 import "./GameStatusDialog.scss";
 
@@ -38,11 +38,12 @@ export function gamesMatching(
 /**
  * Where a game stands, in one mark, on every game the search offers.
  *
- * A game being played says LIVE beside a red dot, since a red dot on its own reads as
- * a decoration next to a game's name. A calendar for a game yet to kick off, a tick for
- * one that is over, and a warning for a column ESPN lists no game for, which is the one
- * game the dialog can say nothing else about. The dot on the game being watched pulses,
- * since that game is asked about again every ten seconds.
+ * The two states worth acting on say so in words as well: LIVE beside a red dot for a
+ * game being played, and WARN beside a warning for a column ESPN lists no game for,
+ * which is the one game the dialog can say nothing else about. A shape alone carries
+ * the two that are not: a calendar before kickoff and a tick once the game is over.
+ * The dot on the game being watched pulses, since that game is asked about again every
+ * ten seconds.
  */
 function GameMark({
   game,
@@ -62,13 +63,14 @@ function GameMark({
         aria-label="Not listed by ESPN"
       >
         <WarningIcon />
+        WARN
       </span>
     );
   }
   if (status === GameStatus.FINAL) {
     return (
       <span className="game-status__mark --final" role="img" aria-label="Final">
-        <CheckCircleIcon />
+        <CheckBoxIcon />
       </span>
     );
   }
