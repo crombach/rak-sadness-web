@@ -30,27 +30,41 @@ async function show(header: string) {
 }
 
 describe("Toaster", () => {
-  it("renders no alerts until a toast is shown", () => {
+  it("renders nothing until a toast is shown", () => {
     mountToaster(new Toast("neutral", "Alice", "Winner!"));
+    expect(screen.queryByRole("status")).toBeNull();
     expect(screen.queryByRole("alert")).toBeNull();
   });
 
   it("renders a toast's header and message", async () => {
     mountToaster(new Toast("neutral", "Alice", "Winner!"));
     await show("Alice");
-    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
     expect(screen.getByText("Alice")).toBeInTheDocument();
     expect(screen.getByText("Winner!")).toBeInTheDocument();
   });
 
-  it("renders one alert per queued toast", async () => {
+  it("renders one live region per queued toast", async () => {
     mountToaster(
       new Toast("neutral", "Alice", "Winner!"),
       new Toast("neutral", "Bob", "Knocked out."),
     );
     await show("Alice");
     await show("Bob");
-    expect(screen.getAllByRole("alert")).toHaveLength(2);
+    expect(screen.getAllByRole("status")).toHaveLength(2);
+  });
+
+  it("interrupts for a toast that waits to be dismissed, and not otherwise", async () => {
+    mountToaster(
+      new Toast("neutral", "Alice", "Winner!"),
+      new Toast("danger", "Bob", "Scoring failed."),
+    );
+
+    await show("Alice");
+    expect(screen.queryByRole("alert")).toBeNull();
+
+    await show("Bob");
+    expect(screen.getByRole("alert")).toHaveTextContent("Scoring failed.");
   });
 
   it("dismisses a toast when its close button is clicked", async () => {

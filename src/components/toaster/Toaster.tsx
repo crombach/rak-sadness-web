@@ -6,7 +6,12 @@ import {
   WarningIcon,
 } from "../icon/Icon";
 import Button from "../button/Button";
-import { Toast, useToastActions, useToasts } from "../../context/ToastContext";
+import {
+  Toast,
+  isPersistent,
+  useToastActions,
+  useToasts,
+} from "../../context/ToastContext";
 import "./Toaster.scss";
 
 function startIconFor(type: Toast["type"]) {
@@ -24,13 +29,30 @@ function startIconFor(type: Toast["type"]) {
 
 export default function Toaster() {
   const toasts = useToasts();
-  const { removeToast } = useToastActions();
+  const { removeToast, pauseToasts, resumeToasts } = useToastActions();
 
   return (
-    <div className="toaster">
+    // Named and present before any toast is, because a live region created in the
+    // same tick as its content is one iOS VoiceOver can miss.
+    <div
+      className="toaster"
+      role="region"
+      aria-label="Notifications"
+      onPointerEnter={pauseToasts}
+      onPointerLeave={resumeToasts}
+      onFocus={pauseToasts}
+      onBlur={resumeToasts}
+    >
       {toasts.map((toast: Toast) => {
         return (
-          <div key={toast.id} className={`toast --${toast.type}`} role="alert">
+          <div
+            key={toast.id}
+            className={`toast --${toast.type}`}
+            // Only a failure interrupts. Tapping a pick raises a toast about it,
+            // and that should wait its turn rather than cut off whatever is being
+            // read.
+            role={isPersistent(toast) ? "alert" : "status"}
+          >
             <span className="toast__icon">{startIconFor(toast.type)}</span>
             <div className="toast__body">
               <div className="toast__header">{toast.header}</div>
