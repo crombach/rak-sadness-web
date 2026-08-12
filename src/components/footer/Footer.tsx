@@ -1,22 +1,27 @@
+import { EmojiEventsIcon, GitHubIcon } from "../icon/Icon";
 import "./Footer.scss";
 
 export default function Footer() {
   return (
     <div className="footer">
       <a
+        className="footer__link"
         href="https://rakmadness.net/standings-pickem"
         target="_blank"
         rel="noreferrer"
       >
-        🏆 Standings
+        <EmojiEventsIcon />
+        Standings
       </a>
       |
       <a
+        className="footer__link"
         href="https://github.com/crombach/rak-madness-calculator"
         target="_blank"
         rel="noreferrer"
       >
-        🖥️ GitHub
+        <GitHubIcon />
+        GitHub
       </a>
     </div>
   );

@@ -8,6 +8,7 @@ components drag `@mui/material` and emotion in behind them. `Icon.scss` holds th
 Each icon carries the `data-testid` its MUI counterpart had, which is how the
 toaster suite finds them.
 
-`SkullIcon` comes from Material Symbols, which `@mui/icons-material` does not
-carry. Same icon family and licence, drawn on a `0 -960 960 960` box, which is why
-`Icon` takes a `viewBox`.
+`SkullIcon` comes from Material Symbols (filled style), which `@mui/icons-material`
+does not carry. Same licence, its path data rescaled from Symbols' `0 -960 960 960`
+box onto the standard 24px one so it sits on the same grid as every other icon
+here.

@@ -16,4 +16,25 @@ describe("LogoButton", () => {
     expect(logo).toHaveAttribute("src", "/logo192.png");
     expect(logo).toHaveAttribute("alt", "");
   });
+
+  it("gives two logos on the same page their own outline filter", () => {
+    render(
+      <>
+        <LogoButton onClick={() => undefined} />
+        <LogoButton onClick={() => undefined} />
+      </>,
+    );
+
+    const buttons = screen.getAllByRole("button");
+    const filterIds = buttons.map(
+      (button) => button.querySelector("filter")!.id,
+    );
+    expect(new Set(filterIds)).toHaveProperty("size", 2);
+
+    buttons.forEach((button, index) => {
+      const logo =
+        button.querySelector<HTMLImageElement>(".logo-button__logo")!;
+      expect(logo.style.filter).toContain(filterIds[index]);
+    });
+  });
 });
