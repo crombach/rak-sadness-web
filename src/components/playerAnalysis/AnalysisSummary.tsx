@@ -127,25 +127,24 @@ function mondayNightSentence(outlook: DecidingOutlook): string {
 /**
  * The total a route of its own asks for, set out the way its picks are: what to do
  * in the ink they use, and the words holding it together in the ink their labels
- * use. The two halves wrap as wholes, so a narrow screen breaks between them.
+ * use. The total and the players it beats wrap as wholes, so a screen too narrow
+ * for the line breaks between them rather than inside either.
  */
 function RouteMondayNight({ outlook }: { outlook: MondayNightRange }) {
   return (
     <p className="analysis__line analysis__route-mnf">
       <span className="analysis__pick-label">AND</span>
-      <span className="analysis__route-mnf-terms">
-        <span>{mondayNightPoints(outlook)}</span>
-        <span>
-          {/* A list rather than a sentence, since the line around it is one too,
+      <span>{mondayNightPoints(outlook)}</span>
+      <span>
+        {/* A list rather than a sentence, since the line around it is one too,
               and what holds it together is grey the way the rest of it is. */}
-          <span className="analysis__term">TO BEAT</span>{" "}
-          {outlook.contenders.map((name, index) => (
-            <Fragment key={name}>
-              {index > 0 && <span className="analysis__term">, </span>}
-              {name}
-            </Fragment>
-          ))}
-        </span>
+        <span className="analysis__term">TO BEAT</span>{" "}
+        {outlook.contenders.map((name, index) => (
+          <Fragment key={name}>
+            {index > 0 && <span className="analysis__term">, </span>}
+            {name}
+          </Fragment>
+        ))}
       </span>
     </p>
   );

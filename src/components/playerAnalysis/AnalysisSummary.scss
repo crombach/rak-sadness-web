@@ -161,22 +161,18 @@
 
 // Reads as part of the route it closes, so it is set like the picks above it, in
 // under their text and labelled the way they are.
+// Each half stays whole, so a screen too narrow for the line breaks between the
+// total and the players it beats, and the half carried down starts where the label
+// above it does rather than under the total.
 .analysis__route-mnf {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--rak-pick-gap);
+  gap: 0 var(--rak-pick-gap);
   padding-inline-start: var(--rak-pick-inset);
   color: var(--rak-text);
   font-family: monospace;
   font-weight: 600;
-}
-
-// Each half stays whole, so a screen too narrow for the line breaks between the
-// total and the players it beats rather than inside either.
-.analysis__route-mnf-terms {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 var(--rak-pick-gap);
 }
 
 .analysis__message {
