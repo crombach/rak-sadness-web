@@ -181,7 +181,7 @@ describe("getLeagueInfo, calendar mapping", () => {
     vi.setSystemTime(new Date("2025-05-01T00:00Z"));
     const info = await infoFor(League.COLLEGE);
     expect(info.activeCalendar.seasonType).toBe(SeasonType.REGULAR);
-    expect(info.activeWeek.value).toBe(18);
+    expect(info.activeWeek?.value).toBe(18);
   });
 
   it("falls back to the last college calendar outside every date range", async () => {
@@ -196,14 +196,28 @@ describe("getLeagueInfo, active week", () => {
   it("picks the week containing today", async () => {
     mockFetch(scoreboard(League.PRO));
     const info = await infoFor(League.PRO);
-    expect(info.activeWeek.value).toBe(5);
+    expect(info.activeWeek?.value).toBe(5);
   });
 
-  it("falls back to the last week when today is outside every week", async () => {
+  it("holds the last week that has begun between two weeks", async () => {
     vi.setSystemTime(new Date("2024-11-15T00:00Z"));
     mockFetch(scoreboard(League.PRO));
     const info = await infoFor(League.PRO);
-    expect(info.activeWeek.value).toBe(18);
+    expect(info.activeWeek?.value).toBe(5);
+  });
+
+  it("holds the last week of the season once it is over", async () => {
+    vi.setSystemTime(new Date("2025-06-01T00:00Z"));
+    mockFetch(scoreboard(League.PRO));
+    const info = await infoFor(League.PRO);
+    expect(info.activeWeek?.value).toBe(18);
+  });
+
+  it("has no active week before the season's opener", async () => {
+    vi.setSystemTime(new Date("2024-08-01T00:00Z"));
+    mockFetch(scoreboard(League.PRO));
+    const info = await infoFor(League.PRO);
+    expect(info.activeWeek).toBeUndefined();
   });
 });
 

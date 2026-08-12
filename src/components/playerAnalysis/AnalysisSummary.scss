@@ -1,5 +1,3 @@
-// Whatever the answer turns out to be, it plays in under a dialog already growing
-// to hold it.
 .analysis {
   // What a pick chip sets its text in by, which a line under one indents by to
   // stand under that text rather than under the chip.
@@ -11,18 +9,15 @@
 
   display: flex;
   flex-direction: column;
-  gap: 16px;
-
-  @media (prefers-reduced-motion: no-preference) {
-    animation: analysis-in 220ms ease both;
-  }
+  // The standing above reads as a title over the body, so it sits the same distance
+  // from it as a section title sits from its own contents.
+  gap: 8px;
 }
 
-@keyframes analysis-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
+.analysis__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .analysis__note {
@@ -41,6 +36,18 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+// A win and a knockout, in the hues the tables and the search already mark those
+// players with.
+.analysis__headline {
+  &.--won {
+    color: var(--rak-in-contention-on-light);
+  }
+
+  &.--knocked-out {
+    color: var(--rak-knocked-out-on-light);
+  }
 }
 
 .analysis__standing,

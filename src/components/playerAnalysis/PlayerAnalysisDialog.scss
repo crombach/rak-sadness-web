@@ -132,7 +132,6 @@
 .player-analysis__positioner {
   // Above the dialog it opens inside of, which the backdrop already sits under.
   z-index: calc(var(--rak-z-modal) + 2);
-  max-height: var(--available-height);
 }
 
 .player-analysis__list {
@@ -141,7 +140,6 @@
   // Held to the width of the search above it, so a long name is cut short rather
   // than widening the popup past the input it hangs off.
   max-width: var(--anchor-width);
-  max-height: min(240px, var(--available-height));
 }
 
 // An entry carries the status icon the tables give the same player, in the hue
@@ -198,14 +196,6 @@
   // The room a scrollbar needs, held whether or not there is one, so an answer
   // long enough to scroll does not narrow the one that was on screen before it.
   scrollbar-gutter: stable;
-}
-
-// The standing reads as a title over what follows, so it sits the same distance
-// from it as a section title sits from its own contents.
-.player-analysis__content {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
 // A bar on the rule above it while the next answer is worked out, in place of
@@ -274,10 +264,12 @@ $bar-height: 2px;
     border-radius: var(--rak-radius-lg);
     transform: translate(-50%, -50%);
 
+    // The fade alone, at the transform it rests at, so the window opens where it
+    // will stand rather than travelling into place.
     &[data-starting-style],
     &[data-ending-style] {
       opacity: 0;
-      transform: translate(-50%, -46%);
+      transform: translate(-50%, -50%);
     }
   }
 }

@@ -63,26 +63,32 @@ function headline(
   isOver: boolean,
   chosen: PlayerScore,
   isClinched: boolean,
-): string {
-  if (!hasKickedOff(players)) return "No finished games";
+): { text: string; tone?: "--won" | "--knocked-out" } {
+  if (!hasKickedOff(players)) return { text: "No finished games" };
   const [leader] = players;
-  if (chosen.status.isKnockedOut) return "Knocked out";
+  if (chosen.status.isKnockedOut)
+    return { text: "Knocked out", tone: "--knocked-out" };
   const behind = leader.score.total - chosen.score.total;
-  if (behind > 0) return `${plural(behind, "point")} behind ${leader.name}`;
-  if (!isOver && !isClinched) return "Tied for the lead";
+  if (behind > 0)
+    return { text: `${plural(behind, "point")} behind ${leader.name}` };
+  if (!isOver && !isClinched) return { text: "Tied for the lead" };
   const won = winners(players);
   // Level on points and still beaten, which only the tiebreakers can do.
-  if (!won.includes(chosen)) return `Loses the tiebreaker to ${leader.name}`;
-  return won.length > 1 ? "Tied for the win" : "Winner";
+  if (!won.includes(chosen))
+    return { text: `Loses the tiebreaker to ${leader.name}` };
+  return {
+    text: won.length > 1 ? "Tied for the win" : "Winner",
+    tone: "--won",
+  };
 }
 
 /**
  * Where the player picked stands, which the scores already say. Read straight off
  * them, so it is on screen while their routes are still being worked out.
  *
- * `result` is the analysis once it lands, read only for the "clinched" word: the
- * header and the answer below it are worked out from the same fact this way, so
- * neither has to guess what the other already said. Trusted only where it answers
+ * `result` is the analysis once it lands, read only for the "clinched" word: this
+ * standing and the answer below it are worked out from the same fact, so neither
+ * has to guess what the other already said. Trusted only where it answers
  * for the same player named here, since the dialog keeps the last answer on
  * screen while the next one is worked out.
  */
@@ -106,9 +112,13 @@ export function Standing({
   const unscoreable = unscoreableGames(players).length;
   const isClinched = result?.kind === "clinched" && result.player === player;
   const isOver = isWeekOver(players);
+  const { text, tone } = headline(players, isOver, chosen, isClinched);
   return (
     <p className="analysis__standing">
-      {headline(players, isOver, chosen, isClinched)}
+      {/* Held apart from the tail, which says how much of the week is behind the
+          standing rather than what the standing is, so only the standing is
+          colored by it. */}
+      <span className={`analysis__headline ${tone ?? ""}`}>{text}</span>
       {" · "}
       {remaining > 0
         ? `${plural(remaining, "game")} still to play`
@@ -117,11 +127,6 @@ export function Standing({
           : "Week complete"}
     </p>
   );
-}
-
-/** Whatever the answer turns out to be, it plays in under the same wrapper. */
-function Answer({ children }: { children: ReactNode }) {
-  return <div className="analysis">{children}</div>;
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -330,54 +335,42 @@ function Message({ lines }: { lines: Array<string | undefined> }) {
 }
 
 /** What the player has to do, or why there is nothing left to do about it. */
-export default function AnalysisSummary({
+function Body({
   result,
   isOver,
   week,
 }: {
-  result?: PlayerAnalysis;
-  /** Whether the week itself is done, which is what the "clinched" case needs. */
+  result: PlayerAnalysis;
   isOver?: boolean;
-  /** Which week this is, named by the one line that congratulates a winner. */
   week?: number;
 }) {
-  // Nothing under the search until a name is picked, which the placeholder in it
-  // already asks for.
-  if (result == null) return null;
-
   if (result.kind === "eliminated") {
+    // The explanation names who knocked them out and by how much, so it says they
+    // cannot win on its own. Only a player without one needs telling.
     return (
-      <Answer>
-        {/* The explanation names who knocked them out and by how much, so it says
-            they cannot win on its own. Only a player without one needs telling. */}
-        <Message
-          lines={[
-            result.explanation ?? `${result.player} cannot win this week.`,
-          ]}
-        />
-      </Answer>
+      <Message
+        lines={[result.explanation ?? `${result.player} cannot win this week.`]}
+      />
     );
   }
 
   if (result.kind === "clinched") {
+    // The standing calls a clinched player the winner without saying of what, so
+    // this names the week. Only a week still running needs the line under it,
+    // since a week with nothing left to play cannot be undone.
     return (
-      <Answer>
-        {/* The header calls a clinched player the winner without saying of what,
-            so this names the week. Only a week still running needs the line
-            under it, since a week with nothing left to play cannot be undone. */}
-        <Message
-          lines={[
-            `${result.player} has won ${week != null ? `week ${week}` : "the week"}.`,
-            isOver ? undefined : "Nothing still to be played can take it away.",
-          ]}
-        />
-      </Answer>
+      <Message
+        lines={[
+          `${result.player} has won ${week != null ? `week ${week}` : "the week"}.`,
+          isOver ? undefined : "Nothing still to be played can take it away.",
+        ]}
+      />
     );
   }
 
   if (result.kind === "headline") {
     return (
-      <Answer>
+      <>
         <Message
           lines={[
             `${result.player} needs at least ${result.minimumWins} of their ${result.remainingPickCount} remaining picks.`,
@@ -390,12 +383,12 @@ export default function AnalysisSummary({
         <p className="analysis__note">
           Detailed paths are worked out once ten games are left.
         </p>
-      </Answer>
+      </>
     );
   }
 
   return (
-    <Answer>
+    <>
       <Lead result={result} />
 
       {result.mustWin.length > 0 && (
@@ -431,6 +424,45 @@ export default function AnalysisSummary({
 
       <NeedsHelp games={result.needsHelp} />
       <MondayNight outlook={result.mondayNight} />
-    </Answer>
+    </>
+  );
+}
+
+/**
+ * The whole answer to a player: where they stand, then what that leaves them.
+ *
+ * The standing belongs to this component rather than to the dialog around it,
+ * because there is one headline slot and two components rendering it can put two
+ * headlines on screen at once.
+ */
+export default function AnalysisSummary({
+  scores,
+  player,
+  result,
+  isOver,
+  week,
+}: {
+  scores?: RakMadnessScores;
+  /** The player picked, whose standing heads the answer. */
+  player?: string;
+  result?: PlayerAnalysis;
+  /** Whether the week itself is done, which is what the "clinched" case needs. */
+  isOver?: boolean;
+  /** Which week this is, named by the one line that congratulates a winner. */
+  week?: number;
+}) {
+  // Nothing under the search until a name is picked, which the placeholder in it
+  // already asks for.
+  if (player == null && result == null) return null;
+
+  return (
+    <div className="analysis">
+      <Standing scores={scores} player={player} result={result} />
+      {result != null && (
+        <div className="analysis__body">
+          <Body result={result} isOver={isOver} week={week} />
+        </div>
+      )}
+    </div>
   );
 }

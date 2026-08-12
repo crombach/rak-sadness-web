@@ -91,9 +91,9 @@ export function AppDataContextProvider({
 
   const picksSeasons = usePicksSeasons();
   const currentSeason = useCurrentSeason();
-  // The newest season with picks, unless the URL or the picker named one. ESPN
-  // moves on to the season about to start as soon as the last one ends, and that
-  // season has nothing to show, so it is offered below rather than opened on.
+  // The newest season with picks, unless the URL or the picker named one. Never
+  // the season ESPN calls current between the Super Bowl and the opener: nothing
+  // of it has been played, so `useCurrentSeason` withholds it too.
   const requestedSeason = selectedSeason ?? picksSeasons.seasons?.[0];
   const leagueWeeks = useLeagueWeeks(
     route.week,
@@ -121,18 +121,19 @@ export function AppDataContextProvider({
   // That season's weeks are scored from a spreadsheet the user uploads until its
   // picks reach the database, and leaving it out puts the week they are holding
   // out of reach. Falling back to the season the week list describes keeps the
-  // picker usable where neither could be fetched, which is every `make run`.
-  const { seasonYear } = leagueWeeks;
+  // picker usable where neither could be fetched, which is every `make run`, so
+  // long as that season has a week behind it to score.
+  const { seasonYear, currentWeek } = leagueWeeks;
   const selectableSeasons = useMemo(() => {
     const offered = new Set(picksSeasons.seasons ?? []);
     if (currentSeason != null) {
       offered.add(currentSeason);
     }
-    if (offered.size === 0 && seasonYear != null) {
+    if (offered.size === 0 && seasonYear != null && currentWeek != null) {
       offered.add(seasonYear);
     }
     return [...offered].sort((a, b) => b - a);
-  }, [picksSeasons.seasons, currentSeason, seasonYear]);
+  }, [picksSeasons.seasons, currentSeason, seasonYear, currentWeek]);
 
   const value = useMemo(
     () => ({

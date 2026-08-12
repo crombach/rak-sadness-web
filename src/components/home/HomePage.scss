@@ -16,6 +16,8 @@
 }
 
 .select__popup {
+  @include listbox-popup;
+
   color: var(--rak-text-secondary);
 }
 
@@ -25,14 +27,6 @@
 
 .select__positioner {
   z-index: var(--rak-z-overlay);
-  // Keeps a long week list from running past the viewport.
-  max-height: var(--available-height);
-}
-
-.select__popup {
-  @include listbox-popup;
-
-  max-height: var(--available-height);
 }
 
 .select__item {
