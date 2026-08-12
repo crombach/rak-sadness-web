@@ -7,6 +7,7 @@ import {
   VictoryRoute,
 } from "../../types/PlayerAnalysis";
 import { PlayerScore, RakMadnessScores } from "../../types/RakMadnessScores";
+import plural from "../../utils/plural";
 import { comparePlayerScoresOnMerit } from "../../utils/scoring/comparePlayerScores";
 import isWeekOver from "../../utils/scoring/isWeekOver";
 import remainingGames from "../../utils/scoring/remainingGames";
@@ -26,10 +27,6 @@ type DecidingOutlook = Exclude<MondayNightOutlook, { kind: "notNeeded" }>;
 type MondayNightRange = Extract<MondayNightOutlook, { kind: "range" }>;
 
 const NAMES = new Intl.ListFormat("en-US");
-
-function plural(count: number, noun: string): string {
-  return `${count} ${noun}${count === 1 ? "" : "s"}`;
-}
 
 /**
  * Everyone the tiers leave tied at the top, which is everyone who won the week.

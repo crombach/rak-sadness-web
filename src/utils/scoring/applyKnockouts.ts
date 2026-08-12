@@ -1,12 +1,9 @@
 import { PlayerScore } from "../../types/RakMadnessScores";
+import plural from "../plural";
 import remainingGames, {
   pickDifference,
   RemainingGame,
 } from "./remainingGames";
-
-function ifNotOne(num: number, otherwise: string): string {
-  return num !== 1 ? otherwise : "";
-}
 
 function knockedOut(score: PlayerScore, explanation: string): PlayerScore {
   return {
@@ -101,7 +98,7 @@ export default function applyKnockouts(
           return knockedOut(
             activeScore,
             `Knocked out on Total Score by ${oppScore.name}. ` +
-              `Behind by ${totalScoreDiff} with ${totalDifferentPicks} different pick${ifNotOne(totalDifferentPicks, "s")} remaining.`,
+              `Behind by ${totalScoreDiff} with ${plural(totalDifferentPicks, "different pick")} remaining.`,
           );
         } else if (totalDifferentPicks === totalScoreDiff) {
           // Either distance is absent when that player left the Monday night
@@ -124,7 +121,7 @@ export default function applyKnockouts(
               return knockedOut(
                 activeScore,
                 `Knocked out on College Score tiebreaker by ${oppScore.name}. ` +
-                  `Behind by ${collegeScoreDiff} with ${differentCollegePicks} different college pick${ifNotOne(differentCollegePicks, "s")} remaining.`,
+                  `Behind by ${collegeScoreDiff} with ${plural(differentCollegePicks, "different college pick")} remaining.`,
               );
             }
             // If college games are done and players are tied, check pro against the spread tiebreaker.
@@ -139,7 +136,7 @@ export default function applyKnockouts(
                 return knockedOut(
                   activeScore,
                   `Knocked out on Pro Score Against the Spread tiebreaker by ${oppScore.name}. ` +
-                    `Behind by ${proAgainstTheSpreadScoreDiff} with ${differentProPicksWithSpreads} different pick${ifNotOne(differentProPicksWithSpreads, "s")} remaining ` +
+                    `Behind by ${proAgainstTheSpreadScoreDiff} with ${plural(differentProPicksWithSpreads, "different pick")} remaining ` +
                     `for pro games with spreads.`,
                 );
               }
@@ -155,8 +152,8 @@ export default function applyKnockouts(
             return knockedOut(
               activeScore,
               `Knocked out on MNF Points tiebreaker by ${oppScore.name}. ` +
-                `${activeScore.name} is ${activeDistance} point${ifNotOne(activeDistance, "s")} off, and ${oppScore.name} is ` +
-                `${oppDistance} point${ifNotOne(oppDistance, "s")} off.`,
+                `${activeScore.name} is ${plural(activeDistance, "point")} off, and ${oppScore.name} is ` +
+                `${plural(oppDistance, "point")} off.`,
             );
           }
         }

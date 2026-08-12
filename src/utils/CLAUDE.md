@@ -7,6 +7,7 @@
 - `picksCache`: localStorage cache of an uploaded workbook, per season and week
 - `debugLog`: scoring traces, silent outside a dev server
 - `getClasses`: conditional className join
+- `plural`: a count and its noun, pluralized
 - `rangeWithPrefix`: labeled index arrays (C1, C2…)
 - `readFileToBuffer`: an uploaded spreadsheet's bytes
 - `leagueResultFixtures`: `finalGame`/`upcomingGame` builders for the tests here
