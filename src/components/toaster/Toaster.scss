@@ -11,8 +11,9 @@ $toasterWidth: min(calc(100% - 48px), 400px);
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
+  // The gap either side is in the width, so a margin on top of it would push the
+  // stack off center rather than inset it.
   width: $toasterWidth;
-  margin: var(--rak-space-6);
   // `Toaster` is mounted beside the app rather than inside it, so it is outside
   // the wrapper that holds the page back from the unsafe areas and has to keep
   // itself off the home indicator on its own.

@@ -9,7 +9,7 @@ under an opening dialog. No theme provider: Base UI is unstyled, so tokens plus 
 
 - [`components/`](components/CLAUDE.md) — React UI, layout, routes
 - [`context/`](context/CLAUDE.md) — app data, toast, and analysis providers
-- [`hooks/`](hooks/CLAUDE.md) — picks, scoring, export, route guard
+- [`hooks/`](hooks/CLAUDE.md) — picks, scoring, export, guard, measurement
 - [`styles/`](styles/CLAUDE.md) — Sass mixins: breakpoints, listbox shape
 - [`types/`](types/CLAUDE.md) — ESPN, league, and scoring types
 - [`utils/`](utils/CLAUDE.md) — scoring, ESPN, export, picks cache
