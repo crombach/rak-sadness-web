@@ -37,12 +37,10 @@
   --rak-danger-600: #a51818;
   --rak-danger-700: #7d1212;
   --rak-warning-500: #9a5b13;
-  // The trophy button's accent. Its own hue rather than a step on any scale above,
-  // so the one affordance that is neither a view switch nor a result reads as
-  // neither. Light enough that text on it is `--rak-primary-800`, not
-  // `--rak-on-solid`.
+  // The player analysis routes' accent, on the line each one carries and on the
+  // button that unfolds the rest. Its own hue rather than a step on any scale
+  // above, so a way to win the week reads as neither a warning nor a result.
   --rak-gold-500: #d9a02b;
-  --rak-gold-600: #bd8a20;
   --rak-gold-700: #9a7018;
 
   // Soft fills, used by the toasts.
@@ -75,12 +73,20 @@
   --rak-pick-no-dark: #de7c7c;
   --rak-pick-error: #edfaa0;
   --rak-pick-error-dark: #cfde7c;
-  // A player who can no longer win, wherever they are named. The -dark value
-  // stripes the even rows of the tables. The -text value is the same hue taken
-  // far enough down to read on white, which the fill itself cannot.
+  // A player, by whether they can still win. The tables fill a name cell with
+  // these, and the -dark value stripes their even rows. The -text value is the
+  // same hue taken far enough down to read on white, which the fill itself
+  // cannot: it is what the player analysis search draws a status icon in.
   --rak-knocked-out: #fac99e;
   --rak-knocked-out-dark: #deaa7c;
   --rak-knocked-out-text: #8a4a12;
+  --rak-in-contention: #9edbfa;
+  --rak-in-contention-dark: #7cbede;
+  --rak-in-contention-text: #126287;
+  // The status icon beside a player's name, drawn the same size wherever the
+  // name is. The wireframe leaves this much room without drawing one.
+  --rak-player-icon-size: 16px;
+  --rak-player-icon-gap: 8px;
 
   --rak-disabled-bg: #f0f4f8;
   --rak-disabled-text: #9fa6ad;

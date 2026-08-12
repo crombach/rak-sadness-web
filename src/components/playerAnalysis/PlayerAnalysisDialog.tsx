@@ -1,14 +1,15 @@
 import { Combobox } from "@base-ui-components/react/combobox";
 import { Dialog } from "@base-ui-components/react/dialog";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { PathsToVictory } from "../../types/PathsToVictory";
+import { PlayerAnalysis } from "../../types/PlayerAnalysis";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import getClasses from "../../utils/getClasses";
-import getPathsToVictory from "../../utils/scoring/getPathsToVictory";
+import getPlayerAnalysis from "../../utils/scoring/getPlayerAnalysis";
 import Button from "../button/Button";
-import { CloseRoundedIcon, SkullIcon, UnfoldMoreIcon } from "../icon/Icon";
-import VictorySummary, { Standing } from "./VictorySummary";
-import "./PathToVictoryDialog.scss";
+import { CloseRoundedIcon, UnfoldMoreIcon } from "../icon/Icon";
+import PlayerStatusIcon from "../table/playerName/PlayerStatusIcon";
+import AnalysisSummary, { Standing } from "./AnalysisSummary";
+import "./PlayerAnalysisDialog.scss";
 
 export type PlayerOption = { name: string; isKnockedOut: boolean };
 
@@ -21,37 +22,33 @@ export function playerOptions(scores?: RakMadnessScores): Array<PlayerOption> {
   );
 }
 
-/**
- * The players a query offers. A knocked out one is named only where the letters
- * typed reach nobody still standing, since their only answer is "no".
- */
+/** The players a query offers, in the order the tables rank them. */
 export function playersMatching(
   options: Array<PlayerOption>,
   query: string,
 ): Array<PlayerOption> {
   const needle = query.trim().toLowerCase();
-  const matches = options.filter((option) =>
-    option.name.toLowerCase().includes(needle),
-  );
-  const standing = matches.filter((option) => !option.isKnockedOut);
-  if (needle.length === 0 || standing.length > 0) return standing;
-  return matches;
+  return options.filter((option) => option.name.toLowerCase().includes(needle));
 }
 
 /**
- * What a player still has to do to win the week on screen.
+ * Where a player stands in the week on screen, and what they still have to do to
+ * win it.
  *
  * A centered modal by default and a sheet up from the bottom edge on a phone. Both
  * are the one Base UI dialog, told apart in the stylesheet, because that is where
  * the rest of the app draws the same line.
  */
-export default function PathToVictoryDialog({
+export default function PlayerAnalysisDialog({
   open,
   onOpenChange,
+  player: named,
   scores,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Set where the dialog was opened on one player, by clicking their name. */
+  player?: string;
   scores?: RakMadnessScores;
 }) {
   const [player, setPlayer] = useState<PlayerOption>();
@@ -59,16 +56,24 @@ export default function PathToVictoryDialog({
   const [found, setFound] = useState<{
     scores: RakMadnessScores;
     name: string;
-    paths?: PathsToVictory;
+    paths?: PlayerAnalysis;
   }>();
 
   // Held still between renders, since the combobox reads the chosen player back
   // off this list by identity.
   const options = useMemo(() => playerOptions(scores), [scores]);
-  const standing = useMemo(() => playersMatching(options, ""), [options]);
+
+  // A name arriving from outside stands in for a choice made in the search. Taken
+  // during the render that brings it, so the answer is worked out in the same pass
+  // rather than a beat behind it.
+  const [lastNamed, setLastNamed] = useState(named);
+  if (named !== lastNamed) {
+    setLastNamed(named);
+    setPlayer(options.find((option) => option.name === named));
+  }
 
   // The search is thousands of scenarios and holds the thread while it runs, so
-  // it waits for the spinner beside it to paint first.
+  // it waits for the bar that says so to paint first.
   useEffect(() => {
     if (scores == null || player == null) return;
     let timer = 0;
@@ -77,7 +82,7 @@ export default function PathToVictoryDialog({
         setFound({
           scores,
           name: player.name,
-          paths: getPathsToVictory(scores, player.name),
+          paths: getPlayerAnalysis(scores, player.name),
         }),
       );
     });
@@ -87,9 +92,11 @@ export default function PathToVictoryDialog({
     };
   }, [scores, player]);
 
-  const isCurrent = found?.scores === scores && found?.name === player?.name;
-  const isSearching = player != null && !isCurrent;
-  const result = isCurrent ? found?.paths : undefined;
+  // The answer already on screen stays there while the next one is worked out, so
+  // moving between players reads as one answer replacing another rather than as the
+  // dialog emptying and filling again. Only a rescore takes it away.
+  const shown = found?.scores === scores ? found : undefined;
+  const isSearching = player != null && shown?.name !== player.name;
 
   const body = useRef<HTMLDivElement>(null);
   // The dialog grows to what the answer measures rather than jumping to it. Only
@@ -107,11 +114,11 @@ export default function PathToVictoryDialog({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Backdrop className="path-to-victory__backdrop" />
-        <Dialog.Popup className="path-to-victory__popup">
-          <header className="path-to-victory__header">
-            <Dialog.Title className="path-to-victory__title">
-              Path to Victory
+        <Dialog.Backdrop className="player-analysis__backdrop" />
+        <Dialog.Popup className="player-analysis__popup">
+          <header className="player-analysis__header">
+            <Dialog.Title className="player-analysis__title">
+              Player Analysis
             </Dialog.Title>
             <Button
               ariaLabel="Close"
@@ -124,15 +131,15 @@ export default function PathToVictoryDialog({
           </header>
 
           <Combobox.Root
-            // Only the players still standing, since the combobox falls back to
-            // this list whole once a name has been chosen, rather than to the
-            // filtered one below.
-            items={standing}
+            // Remounted on a name arriving from outside, which is what puts that
+            // name in the input. The combobox keeps the choice itself, and handing
+            // it a value it started without reads as a controlled input arriving
+            // late, so a fresh one starts on the right player instead.
+            key={named ?? ""}
+            defaultValue={player}
+            items={options}
             filteredItems={playersMatching(options, query)}
             itemToStringLabel={(option: PlayerOption) => option.name}
-            // The combobox keeps the choice itself. Naming it here as well would
-            // hand it a value it started without, which it reads as a controlled
-            // input arriving late.
             onValueChange={(chosen: PlayerOption | null) =>
               setPlayer(chosen ?? undefined)
             }
@@ -141,23 +148,23 @@ export default function PathToVictoryDialog({
             // highlighted saves an arrow key before Enter.
             autoHighlight
           >
-            <div className="path-to-victory__search">
+            <div className="player-analysis__search">
               <Combobox.Input
                 placeholder="Search players..."
                 aria-label="Player"
-                className="path-to-victory__input"
+                className="player-analysis__input"
               />
-              <Combobox.Icon className="path-to-victory__input-icon">
+              <Combobox.Icon className="player-analysis__input-icon">
                 <UnfoldMoreIcon />
               </Combobox.Icon>
             </div>
             <Combobox.Portal>
               <Combobox.Positioner
-                className="path-to-victory__positioner"
+                className="player-analysis__positioner"
                 sideOffset={4}
               >
-                <Combobox.Popup className="path-to-victory__list">
-                  <Combobox.Empty className="path-to-victory__empty">
+                <Combobox.Popup className="player-analysis__list">
+                  <Combobox.Empty className="player-analysis__empty">
                     No matching players
                   </Combobox.Empty>
                   <Combobox.List>
@@ -165,13 +172,14 @@ export default function PathToVictoryDialog({
                       <Combobox.Item
                         key={option.name}
                         value={option}
-                        disabled={option.isKnockedOut}
-                        className={`path-to-victory__option ${getClasses({
+                        className={`player-analysis__option ${getClasses({
                           "--knocked-out": option.isKnockedOut,
                         })}`}
                       >
-                        {option.name}
-                        {option.isKnockedOut && <SkullIcon />}
+                        <span className="player-analysis__option-name">
+                          {option.name}
+                        </span>
+                        <PlayerStatusIcon isKnockedOut={option.isKnockedOut} />
                       </Combobox.Item>
                     )}
                   </Combobox.List>
@@ -180,22 +188,21 @@ export default function PathToVictoryDialog({
             </Combobox.Portal>
           </Combobox.Root>
 
-          <div className="path-to-victory__body" ref={body}>
-            <div className="path-to-victory__content" ref={measure}>
+          <div className="player-analysis__body" ref={body}>
+            {isSearching && (
+              <span
+                className="player-analysis__progress"
+                role="status"
+                aria-label="Working out the paths"
+              />
+            )}
+            <div className="player-analysis__content" ref={measure}>
+              {/* Read off the scores, so it answers for the player picked before
+                  their routes have been worked out. */}
               <Standing scores={scores} player={player?.name} />
-              {isSearching ? (
-                <div
-                  className="path-to-victory__searching"
-                  role="status"
-                  aria-label="Working out the paths"
-                >
-                  <span className="path-to-victory__spinner" />
-                </div>
-              ) : (
-                // Keyed on the player, so the answer to a new one plays in rather
-                // than replacing the last one in place.
-                <VictorySummary key={player?.name} result={result} />
-              )}
+              {/* Keyed on the player, so the answer to a new one plays in rather
+                  than replacing the last one in place. */}
+              <AnalysisSummary key={shown?.name} result={shown?.paths} />
             </div>
           </div>
         </Dialog.Popup>

@@ -11,7 +11,7 @@ Route components live in `home/` and `results/`; the routes themselves are in
 - [`home/`](home/CLAUDE.md) — home route: pickers, upload, export
 - [`icon/`](icon/CLAUDE.md) — SVG icons inlined from Material Design
 - [`navbar/`](navbar/CLAUDE.md) — top nav bar and view switch
-- [`pathToVictory/`](pathToVictory/CLAUDE.md) — what a player still has to win
+- [`playerAnalysis/`](playerAnalysis/CLAUDE.md) — where a player stands, and why
 - [`results/`](results/CLAUDE.md) — results routes, layout, redirect
 - [`table/`](table/CLAUDE.md) — shared frame and the results tables
 - [`toaster/`](toaster/CLAUDE.md) — toast notification renderer

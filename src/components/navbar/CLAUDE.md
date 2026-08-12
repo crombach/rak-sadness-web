@@ -3,17 +3,15 @@
 `Navbar`: `<header>` with `left`/`right` `ReactNode` slots, solid primary fill.
 Owns the padding and the phone-sized touch target of every button it contains,
 trading its own padding for theirs on a narrow screen.
-`ScoresNavbar`: the scoreboard/picks switch plus the buttons a week still being
+`ScoresNavbar`: the scoreboard/picks switch plus the refresh a week still being
 played gets, for the results routes. Clearing `isWeekLive` collapses the refresh
-button, the gold path to victory button, and the divider before them, since
-rescoring cannot change a finished week and nobody has a route left to work out.
+button and the divider before it, since rescoring cannot change a finished week.
 They share one collapsing wrapper, fade and narrow out over
 `COLLAPSE_DURATION_MS`, then unmount, and cancel `Navbar`'s `--navbar-gap` with a
 negative margin so no gap is left where they were.
 
-The path button carries `EmojiEventsIcon`, the same trophy `PlayerName` crowns a
-winner with. They never share a screen except during that collapse, since one is
-for a week still being played and the other for a week that is over.
+Nothing here opens the player analysis. A player's name does, in either table, on
+a finished week as well as a live one.
 
 ## Subdirectories
 

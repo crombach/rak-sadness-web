@@ -1,0 +1,14 @@
+.player-status-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  > svg {
+    // Black on the tables' own fills, where the icon carries the same weight as
+    // the name beside it. Somewhere with no fill behind it to say which status
+    // this is, the caller sets `--rak-player-icon-fill` to say it in the icon.
+    fill: var(--rak-player-icon-fill, black);
+    width: var(--rak-player-icon-size);
+    height: var(--rak-player-icon-size);
+  }
+}

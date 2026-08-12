@@ -5,10 +5,10 @@ import {
   PlayerScore,
   RakMadnessScores,
 } from "../../types/RakMadnessScores";
-import PathToVictoryDialog, {
+import PlayerAnalysisDialog, {
   playerOptions,
   playersMatching,
-} from "./PathToVictoryDialog";
+} from "./PlayerAnalysisDialog";
 
 function proPick(pick: string): PickResult {
   return {
@@ -22,7 +22,7 @@ function player(
   name: string,
   total: number,
   pick: string,
-  isKnockedOut = false,
+  explanation?: string,
 ): PlayerScore {
   return {
     name,
@@ -30,7 +30,11 @@ function player(
     tiebreaker: {},
     college: [],
     pro: [proPick(pick)],
-    status: { hasNoPicks: false, isKnockedOut },
+    status: {
+      hasNoPicks: false,
+      isKnockedOut: explanation != null,
+      explanation,
+    },
   };
 }
 
@@ -42,16 +46,17 @@ const scores: RakMadnessScores = {
   scores: [
     player("Alice", 3, "KC -3"),
     player("Bob", 3, "DEN +3"),
-    player("Bobby", 0, "DEN +3", true),
+    player("Bobby", 0, "DEN +3", "Knocked out on Total Score by Alice."),
   ],
 };
 
 describe("playersMatching", () => {
   const options = playerOptions(scores);
 
-  it("holds a knocked out player back while anyone standing matches", () => {
+  it("offers a knocked out player alongside anyone standing", () => {
     expect(playersMatching(options, "Bob")).toEqual([
       { name: "Bob", isKnockedOut: false },
+      { name: "Bobby", isKnockedOut: true },
     ]);
   });
 
@@ -61,18 +66,12 @@ describe("playersMatching", () => {
     ]);
   });
 
-  it("offers everyone still standing before anything is typed", () => {
+  it("offers everyone before anything is typed, in the order ranked", () => {
     expect(playersMatching(options, "").map((it) => it.name)).toEqual([
       "Alice",
       "Bob",
+      "Bobby",
     ]);
-  });
-
-  it("names nobody knocked out before anything is typed", () => {
-    const allOut = playerOptions({
-      scores: [player("Bobby", 0, "DEN +3", true)],
-    });
-    expect(playersMatching(allOut, "")).toEqual([]);
   });
 
   it("has nobody to offer before a week is scored", () => {
@@ -90,13 +89,13 @@ describe("playersMatching", () => {
  * one dialog and toggles `open` on it.
  *
  * So this covers the wiring once, and what each result reads like is covered
- * against `VictorySummary` instead.
+ * against `AnalysisSummary` instead.
  */
-describe("PathToVictoryDialog", () => {
-  it("works out the route of the player picked from the search", async () => {
+describe("PlayerAnalysisDialog", () => {
+  it("answers for the player picked from the search, and for one named", async () => {
     const user = userEvent.setup();
-    render(
-      <PathToVictoryDialog
+    const { rerender } = render(
+      <PlayerAnalysisDialog
         open
         onOpenChange={() => undefined}
         scores={scores}
@@ -111,12 +110,32 @@ describe("PathToVictoryDialog", () => {
     await user.type(search, "Ali");
     await user.click(await screen.findByRole("option", { name: "Alice" }));
 
-    // The search runs a frame after the spinner it replaces.
+    // The search runs a frame after the bar that says it is under way.
     const mustWin = await screen.findByRole("heading", { name: "Must win" });
     const pick = within(mustWin.parentElement as HTMLElement).getByRole(
       "listitem",
     );
     expect(pick).toHaveTextContent("P1");
     expect(pick).toHaveTextContent("KC -3");
+
+    // A name from outside stands in for the same choice, knocked out or not.
+    rerender(
+      <PlayerAnalysisDialog
+        open
+        onOpenChange={() => undefined}
+        player="Bobby"
+        scores={scores}
+      />,
+    );
+
+    expect(
+      await screen.findByText("Bobby cannot win this week."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Knocked out on Total Score by Alice."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Player" })).toHaveValue(
+      "Bobby",
+    );
   });
 });

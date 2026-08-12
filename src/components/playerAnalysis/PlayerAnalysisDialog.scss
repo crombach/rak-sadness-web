@@ -4,7 +4,7 @@
 // Base UI ships the dialog and the combobox unstyled, so these rules carry the
 // whole look of both. State comes off the data attributes they set, the same way
 // the select on the home page reads `[data-highlighted]`.
-.path-to-victory__backdrop {
+.player-analysis__backdrop {
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -17,7 +17,7 @@
   }
 }
 
-.path-to-victory__popup {
+.player-analysis__popup {
   position: fixed;
   z-index: 1001;
   display: flex;
@@ -49,21 +49,21 @@
   }
 }
 
-.path-to-victory__header {
+.player-analysis__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
 
-.path-to-victory__title {
+.player-analysis__title {
   margin: 0;
   color: var(--rak-primary-700);
   font-size: 1.25rem;
   font-weight: 700;
 }
 
-.path-to-victory__search {
+.player-analysis__search {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -79,7 +79,7 @@
   }
 }
 
-.path-to-victory__input {
+.player-analysis__input {
   flex: 1;
   min-width: 0;
   padding: 3px 0;
@@ -95,47 +95,52 @@
   }
 }
 
-.path-to-victory__input-icon {
+.player-analysis__input-icon {
   display: flex;
   align-items: center;
   color: var(--rak-text-tertiary);
 }
 
-.path-to-victory__positioner {
+.player-analysis__positioner {
   // Above the dialog it opens inside of, which the backdrop already sits under.
   z-index: 1002;
   max-height: var(--available-height);
 }
 
-.path-to-victory__list {
+.player-analysis__list {
   @include listbox-popup;
 
+  // Held to the width of the search above it, so a long name is cut short rather
+  // than widening the popup past the input it hangs off.
+  max-width: var(--anchor-width);
   max-height: min(240px, var(--available-height));
 }
 
-.path-to-victory__option {
+// An entry carries the status icon the tables give the same player, in the hue
+// they fill that player's cell with. The icon rather than the entry, so the
+// highlight the list draws as it is walked is still the only fill in the popup.
+.player-analysis__option {
   @include listbox-item;
 
-  gap: 8px;
+  justify-content: space-between;
+  gap: var(--rak-player-icon-gap);
+  --rak-player-icon-fill: var(--rak-in-contention-text);
 
-  // Only ever offered where nobody still standing shares the letters typed. Named
-  // in the color the tables fill the same player's cell with, so it reads as the
-  // answer rather than as a choice.
-  &.--knocked-out,
-  &.--knocked-out[data-highlighted] {
-    background-color: transparent;
-    color: var(--rak-knocked-out-text);
-    cursor: default;
+  &.--knocked-out {
+    --rak-player-icon-fill: var(--rak-knocked-out-text);
   }
 
-  // As tall as the name beside it, which is the proportion the tables draw the
-  // same skull at.
-  > svg {
-    font-size: 1em;
+  // One line however long the name is. The popup is not monospace, so it is cut
+  // to the room left beside the icon rather than to a count of characters.
+  .player-analysis__option-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
-.path-to-victory__empty {
+.player-analysis__empty {
   padding: 8px 12px;
   color: var(--rak-text-tertiary);
   font-size: 0.875rem;
@@ -145,11 +150,15 @@
 // and shrinks with the answer. Shrinking is what makes it scroll, once the popup
 // has no more room to give. Measured without the padding and the rule, which
 // `content-box` keeps outside the height set on it.
-.path-to-victory__body {
+.player-analysis__body {
+  // How far the answer stands off the rule above it, which the progress bar reads
+  // back to sit on that rule without moving the answer.
+  --rak-analysis-inset: 16px;
+
   box-sizing: content-box;
   flex: 0 1 auto;
   min-height: 0;
-  padding-top: 16px;
+  padding-top: var(--rak-analysis-inset);
   // Everything under here scrolls. Only the search above it holds still.
   border-top: 1px solid var(--rak-border);
   overflow-y: auto;
@@ -161,30 +170,57 @@
 
 // The standing reads as a title over what follows, so it sits the same distance
 // from it as a section title sits from its own contents.
-.path-to-victory__content {
+.player-analysis__content {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.path-to-victory__searching {
-  display: flex;
-  justify-content: center;
-  padding: 24px 0;
+// A bar on the rule above it while the next answer is worked out, in place of
+// anything that would move the answer still on screen. Stuck to the rule so
+// scrolling cannot carry it off, and pulled back out of the flow by its own height,
+// so what the body measures is the answer alone.
+$bar-height: 2px;
+
+.player-analysis__progress {
+  position: sticky;
+  // Measured from where the answer starts, which is the inset below the rule.
+  top: calc(-1 * var(--rak-analysis-inset));
+  z-index: 1;
+  display: block;
+  height: $bar-height;
+  // Pulled up onto the rule, and the room it took given back underneath, so the
+  // answer sits where it would with no bar there at all.
+  margin-top: calc(-1 * var(--rak-analysis-inset));
+  margin-bottom: calc(var(--rak-analysis-inset) - #{$bar-height});
+  overflow: hidden;
+  background-color: var(--rak-neutral-200);
+
+  &::after {
+    content: "";
+    display: block;
+    width: 40%;
+    height: 100%;
+    background-color: var(--rak-primary-500);
+    animation: player-analysis-sweep 900ms ease-in-out infinite;
+  }
+
+  // Still says work is under way, without a thing crossing the screen to say it.
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      width: 100%;
+      animation: none;
+    }
+  }
 }
 
-.path-to-victory__spinner {
-  width: 24px;
-  height: 24px;
-  border: 3px solid var(--rak-neutral-200);
-  border-top-color: var(--rak-primary-500);
-  border-radius: 50%;
-  animation: path-to-victory-spin 700ms linear infinite;
-}
+@keyframes player-analysis-sweep {
+  from {
+    transform: translateX(-100%);
+  }
 
-@keyframes path-to-victory-spin {
   to {
-    transform: rotate(1turn);
+    transform: translateX(250%);
   }
 }
 
@@ -192,7 +228,7 @@
   // A sheet on the bottom edge, where a centered window would leave no margin
   // either side of it. The same dialog, told apart here rather than in the
   // component, because every other screen split in the app is drawn this way.
-  .path-to-victory__popup {
+  .player-analysis__popup {
     top: auto;
     left: 0;
     right: 0;

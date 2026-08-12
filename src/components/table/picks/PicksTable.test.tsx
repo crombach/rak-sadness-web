@@ -8,6 +8,7 @@ import {
   Status,
 } from "../../../types/RakMadnessScores";
 import { Toast, useToastActions } from "../../../context/ToastContext";
+import { PlayerAnalysisContextProvider } from "../../../context/PlayerAnalysisContext";
 import PicksTable from "./PicksTable";
 
 const showToast = vi.fn();
@@ -213,12 +214,16 @@ describe("PlayerName, rendered through the table", () => {
     );
   });
 
-  it("explains a player's status on click", async () => {
+  it("opens the player analysis on click", async () => {
     const user = userEvent.setup();
-    render(<PicksTable scores={scores} />);
+    const showPlayerAnalysis = vi.fn();
+    render(
+      <PlayerAnalysisContextProvider showPlayerAnalysis={showPlayerAnalysis}>
+        <PicksTable scores={scores} />
+      </PlayerAnalysisContextProvider>,
+    );
     await user.click(screen.getByText("Bob"));
-    expect(clearToasts).toHaveBeenCalledTimes(1);
-    expect(showToast.mock.calls[0][0].header).toBe("Bob");
-    expect(showToast.mock.calls[0][0].message).toBe("Bob is out");
+    expect(showPlayerAnalysis).toHaveBeenCalledWith("Bob");
+    expect(showToast).not.toHaveBeenCalled();
   });
 });

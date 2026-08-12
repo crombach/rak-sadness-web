@@ -6,7 +6,6 @@ const props = {
   view: "Scoreboard" as const,
   onViewChange: () => undefined,
   onRefresh: () => undefined,
-  onShowPaths: () => undefined,
   isRefreshing: false,
 };
 
@@ -23,13 +22,10 @@ describe("ScoresNavbar", () => {
     vi.useRealTimers();
   });
 
-  it("offers refresh and a path to victory for a week that is still open", () => {
+  it("offers refresh for a week that is still open", () => {
     render(<ScoresNavbar {...props} isWeekLive />);
 
     expect(screen.getByRole("button", { name: "Refresh" })).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Path to Victory" }),
-    ).toBeInTheDocument();
     expect(liveWrapper()).not.toHaveClass("--collapsed");
   });
 
@@ -67,7 +63,7 @@ describe("ScoresNavbar", () => {
 
     expect(liveWrapper()).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Path to Victory" }),
+      screen.queryByRole("button", { name: "Refresh" }),
     ).not.toBeInTheDocument();
   });
 });

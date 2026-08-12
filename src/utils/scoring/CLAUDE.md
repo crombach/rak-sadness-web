@@ -2,7 +2,7 @@
 
 The picks-to-scoreboard pipeline, one concern per file. `getPlayerScores` is the only
 entry point the app calls for a week's results; everything else is a step it
-sequences. `getPathsToVictory` is a second entry point, reading those results back.
+sequences. `getPlayerAnalysis` is a second entry point, reading those results back.
 
 - `parsePicksWorkbook`: xlsx buffer to rows, column keys, and per-game matchups.
   Async because it imports `xlsx-js-style` on demand, which is over half the bundle.
@@ -24,10 +24,13 @@ sequences. `getPathsToVictory` is a second entry point, reading those results ba
   so one row alone would drop a game that row's player skipped. Both halves of the
   question below read it
 - `applyKnockouts`: who can still win, and why not
-- `getPathsToVictory`: the other half of `applyKnockouts`, for a player still
-  standing, once ten or fewer games are left. Walks every way the contested ones
-  can fall, and reduces the winning ones to the games that must go right, the pool
-  the rest come from, and the Monday night totals that settle a dead heat on
-  points. Where they do not reduce to a pool it lists the ten routes asking least
-  of the player and counts the rest. Above ten games it gives a floor from a closed
-  form instead, since the search doubles per game
+- `getPlayerAnalysis`: the other half of `applyKnockouts`, for any player named. One
+  already knocked out reads back the reason they carry, and a decided week is
+  answered from `isWeekDecided` rather than searched, since the knockouts have
+  already settled it and the search reads the lower tiers in an order of its own.
+  For a player still standing in a live week, once ten or fewer games are left, it
+  walks every way the contested ones can fall, and reduces the winning ones to the
+  games that must go right, the pool the rest come from, and the Monday night totals
+  that settle a dead heat on points. Where they do not reduce to a pool it lists the
+  eight routes asking least of the player and counts the rest. Above ten games it gives
+  a floor from a closed form instead, since the search doubles per game

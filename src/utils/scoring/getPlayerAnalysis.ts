@@ -1,12 +1,13 @@
 import {
   MondayNightOutlook,
-  PathsToVictory,
+  PlayerAnalysis,
   RemainingPick,
   UncontrolledGame,
   VictoryRoute,
-} from "../../types/PathsToVictory";
+} from "../../types/PlayerAnalysis";
 import { PlayerScore, RakMadnessScores } from "../../types/RakMadnessScores";
 import { comparePlayerScoresOnMerit } from "./comparePlayerScores";
+import isWeekDecided from "./isWeekDecided";
 import remainingGames, {
   pickDifference,
   RemainingGame,
@@ -19,7 +20,7 @@ import remainingGames, {
 const MAX_SEARCHED_GAMES = 10;
 
 /** How many routes are carried before the rest are only counted. */
-const MAX_LISTED_ROUTES = 10;
+const MAX_LISTED_ROUTES = 8;
 
 /**
  * Where a player takes a point, as one bit per open game.
@@ -297,7 +298,7 @@ function picksIn(
 }
 
 /** Carries the reason `applyKnockouts` already wrote, rather than writing another. */
-function eliminated(player: PlayerScore): PathsToVictory {
+function eliminated(player: PlayerScore): PlayerAnalysis {
   return {
     kind: "eliminated",
     player: player.name,
@@ -342,7 +343,7 @@ function headline(
   playerIndex: number,
   rivals: Array<{ player: PlayerScore; index: number }>,
   games: Array<RemainingGame>,
-): PathsToVictory {
+): PlayerAnalysis {
   const counts = rivals.map((rival) => {
     const gap = rival.player.score.total - player.score.total;
     const at = (clear: boolean) =>
@@ -351,7 +352,7 @@ function headline(
   });
 
   // `toLevel` is only absent where `applyKnockouts` has already knocked the player
-  // out on total score, which `getPathsToVictory` answers before reaching here.
+  // out on total score, which `getPlayerAnalysis` answers before reaching here.
   const minimumWins = Math.max(
     0,
     ...counts.map((count) => count.toLevel).filter((count) => count != null),
@@ -439,7 +440,7 @@ function uncontrolledGames(
 }
 
 type RouteShape = Pick<
-  Extract<PathsToVictory, { kind: "paths" }>,
+  Extract<PlayerAnalysis, { kind: "paths" }>,
   "mustWin" | "pool" | "routes" | "hiddenRouteCount" | "mondayNight"
 >;
 
@@ -503,15 +504,16 @@ function reduceRoutes(
 }
 
 /**
- * What a player still has to do to win a week that is being played.
+ * Where a player stands in a week, and what they still have to do to win it.
  *
- * Undefined where the sheet holds nobody by that name, which is the only way the
- * question has no answer at all.
+ * Answers for every player, knocked out or not, and for a week already decided as
+ * well as one being played. Undefined where the sheet holds nobody by that name,
+ * which is the only way the question has no answer at all.
  */
-export default function getPathsToVictory(
+export default function getPlayerAnalysis(
   scores: RakMadnessScores,
   playerName: string,
-): PathsToVictory | undefined {
+): PlayerAnalysis | undefined {
   const players = scores.scores;
   const playerIndex = players.findIndex((it) => it.name === playerName);
   if (playerIndex < 0) return undefined;
@@ -519,6 +521,14 @@ export default function getPathsToVictory(
   const player = players[playerIndex];
   if (player.status.isKnockedOut) {
     return eliminated(player);
+  }
+
+  // Nothing is left to play, so the knockouts have already settled the week and
+  // whoever they left standing has won it. Said here rather than searched for,
+  // because the search reads the lower tiers in an order of its own, and on a
+  // week nobody can change it would sometimes disagree with the standings.
+  if (isWeekDecided(scores)) {
+    return { kind: "clinched", player: player.name };
   }
 
   // A knocked out player cannot take the week off anyone, so they are not measured

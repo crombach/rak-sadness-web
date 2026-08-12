@@ -1,37 +1,50 @@
 // Whatever the answer turns out to be, it plays in under a dialog already growing
 // to hold it.
-.victory {
+.analysis {
+  // What a pick chip sets its text in by, which a line under one indents by to
+  // stand under that text rather than under the chip.
+  --rak-pick-inset: 8px;
+  --rak-pick-gap: 6px;
+  // A game label is a league letter and at most two digits. Monospace, so that is a
+  // width rather than a guess.
+  --rak-pick-label-width: 3ch;
+
   display: flex;
   flex-direction: column;
   gap: 16px;
 
   @media (prefers-reduced-motion: no-preference) {
-    animation: victory-in 220ms ease both;
+    animation: analysis-in 220ms ease both;
   }
 }
 
-@keyframes victory-in {
+@keyframes analysis-in {
   from {
     opacity: 0;
     transform: translateY(6px);
   }
 }
 
-.victory__note {
+.analysis__note {
   margin: 0;
   color: var(--rak-text-tertiary);
   font-size: 0.875rem;
   font-style: italic;
+
+  // Reads as the end of the routes above it rather than as an aside about them.
+  &.--upright {
+    font-style: normal;
+  }
 }
 
-.victory__section {
+.analysis__section {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.victory__standing,
-.victory__section-title {
+.analysis__standing,
+.analysis__section-title {
   margin: 0;
   color: var(--rak-text-tertiary);
   font-size: 0.75rem;
@@ -42,40 +55,58 @@
 
 // Columns rather than a wrapping row, so the same game sits at the same x down
 // every route. Each list is the same width, so each divides the same way.
-.victory__picks {
+.analysis__picks {
   display: grid;
-  // The floor is what the longest pick a sheet can hold measures, so a column
-  // never has to cut one short or wrap it.
-  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
-  gap: 6px;
+  // A column is only ever as wide as the widest chip it can hold: a label, a team
+  // abbreviation of at most five characters, a space, a spread of at most three
+  // counting its sign, and the gap and padding around them.
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(
+      calc(
+        var(--rak-pick-label-width) + 9ch + var(--rak-pick-gap) +
+          var(--rak-pick-inset) * 2
+      ),
+      1fr
+    )
+  );
+  gap: var(--rak-pick-gap);
   margin: 0;
   padding: 0;
   list-style: none;
+  font-family: monospace;
+  font-size: 0.875rem;
 }
 
 // One pick reads as a chip of two halves: which game, then what to back in it.
-.victory__pick {
+.analysis__pick {
   display: flex;
   align-items: baseline;
-  gap: 6px;
-  padding: 4px 8px;
+  gap: var(--rak-pick-gap);
+  padding: 4px var(--rak-pick-inset);
   border-radius: var(--rak-radius-sm);
   background-color: var(--rak-level1);
-  font-size: 0.875rem;
   font-weight: 600;
   white-space: nowrap;
 }
 
-.victory__pick-label {
+// A word naming what follows it rather than saying anything itself.
+.analysis__pick-label,
+.analysis__term {
   color: var(--rak-text-tertiary);
   font-weight: 700;
 }
 
-.victory__pick-team {
+.analysis__pick-label {
+  // Held to its widest, so the teams line up down a column whatever the labels do.
+  flex: 0 0 var(--rak-pick-label-width);
+}
+
+.analysis__pick-team {
   color: var(--rak-text);
 }
 
-.victory__routes {
+.analysis__routes {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -84,8 +115,8 @@
   list-style: none;
 }
 
-.victory__route,
-.victory__must-win {
+.analysis__route,
+.analysis__must-win {
   padding: 8px 10px;
   // Drawn on the left alone, so a stack of routes reads as a list of alternatives
   // rather than as a stack of boxes.
@@ -93,7 +124,7 @@
   background-color: var(--rak-level1);
 }
 
-.victory__route {
+.analysis__route {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -101,19 +132,19 @@
 
 // Red against the routes' gold, since these games are what has to happen rather
 // than one way among several of getting there.
-.victory__must-win {
+.analysis__must-win {
   border-inline-start-color: var(--rak-danger-500);
 }
 
 // A soft button takes the color around it, so the gold is set here rather than by
 // the color prop, which only paints a solid fill.
-.victory__more {
+.analysis__more {
   align-self: flex-start;
   color: var(--rak-gold-700);
   font-weight: 700;
 }
 
-.victory__help {
+.analysis__help {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -122,13 +153,27 @@
   list-style: none;
 }
 
-.victory__line {
+.analysis__line {
   margin: 0;
   color: var(--rak-text-secondary);
   font-size: 0.875rem;
 }
 
-.victory__message {
+// Set like the picks above it, in under their text. A screen too narrow for the
+// line breaks after the total rather than inside it, and what is carried down
+// starts where the label above it does.
+.analysis__route-mnf {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--rak-pick-gap);
+  padding-inline-start: var(--rak-pick-inset);
+  color: var(--rak-text);
+  font-family: monospace;
+  font-weight: 600;
+}
+
+.analysis__message {
   display: flex;
   flex-direction: column;
   gap: 8px;

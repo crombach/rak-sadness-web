@@ -22,10 +22,6 @@
   // `currentColor`: Dark Reader forces a zero-width border visible, and white is
   // what it would then draw between the rank and the player.
   --rak-table-no-border: 0 solid var(--rak-primary-800);
-  // The status icon beside a player's name, in `PlayerName.scss`. Sized here
-  // because the wireframe has to leave the same room without drawing one.
-  --rak-player-icon-size: 16px;
-  --rak-player-icon-gap: 8px;
 
   .table__header {
     z-index: 20;
@@ -109,7 +105,7 @@
       }
 
       &:not(.--knocked-out) {
-        background-color: #9edbfa;
+        background-color: var(--rak-in-contention);
       }
     }
 
@@ -119,7 +115,7 @@
       }
 
       &:not(.--knocked-out) {
-        background-color: #7cbede;
+        background-color: var(--rak-in-contention-dark);
       }
     }
 
