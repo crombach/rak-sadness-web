@@ -21,6 +21,12 @@
 // A sheet on the bottom edge, which is what a screen too narrow to leave a margin
 // either side of a centered window gets. Told apart here rather than in the
 // component, because every other screen split in the app is drawn this way.
+//
+// The three custom properties below are `useViewportInsets`, held only while the
+// dialog is open. A keyboard opened by the search covers the bottom of the screen
+// without shrinking `dvh`, so the sheet stands on top of the keyboard rather than
+// running on behind it, and is capped by what is left rather than by the screen.
+// Every one falls back to the whole screen, which is where they started.
 .player-analysis__popup {
   position: fixed;
   z-index: calc(var(--rak-z-modal) + 1);
@@ -29,11 +35,16 @@
   gap: 16px;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: var(--rak-keyboard-inset, 0px);
   width: 100%;
-  max-height: 85dvh;
+  max-height: min(85dvh, var(--rak-viewport-height, 85dvh));
   padding: 20px;
-  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  // Room for the home indicator, given back once the sheet is standing on a
+  // keyboard rather than on the bottom edge the indicator is drawn over.
+  padding-bottom: calc(
+    20px +
+      max(0px, env(safe-area-inset-bottom) - var(--rak-keyboard-inset, 0px))
+  );
   border-radius: var(--rak-radius-lg) var(--rak-radius-lg) 0 0;
   background-color: var(--rak-surface);
   box-shadow: var(--rak-shadow-modal);
@@ -249,12 +260,16 @@ $bar-height: 2px;
 // and centers itself.
 @include wide-screen {
   .player-analysis__popup {
-    top: 50%;
+    // Centered on what is on screen rather than on the screen, so a keyboard
+    // pushes the window up instead of leaving its lower half behind one.
+    top: calc(
+      var(--rak-viewport-offset, 0px) + var(--rak-viewport-height, 100dvh) / 2
+    );
     left: 50%;
     right: auto;
     bottom: auto;
     width: min(640px, calc(100vw - 32px));
-    max-height: min(680px, calc(100dvh - 64px));
+    max-height: min(680px, calc(var(--rak-viewport-height, 100dvh) - 64px));
     padding-bottom: 20px;
     border-radius: var(--rak-radius-lg);
     transform: translate(-50%, -50%);

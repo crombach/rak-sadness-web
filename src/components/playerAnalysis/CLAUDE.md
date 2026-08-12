@@ -8,6 +8,7 @@ from a player's name in either table.
   letters reach, and both the entries and the input carry `PlayerStatusIcon`.
 - `PlayerAnalysisDialog.scss`: a bottom sheet, stood up as a centered modal at
   `wide-screen`. Popup list from `styles/_listbox.scss`, focus ring from
-  `styles/_focus.scss`.
+  `styles/_focus.scss`. Sized and stood against `useViewportInsets`, so the
+  keyboard the search opens does not cover it.
 - `AnalysisSummary`: renders `PlayerAnalysis`. Holds `Standing`, the pick grid, the
   routes, and the `MNF Points` section.

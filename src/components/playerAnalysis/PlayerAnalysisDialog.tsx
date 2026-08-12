@@ -1,6 +1,7 @@
 import { Combobox } from "@base-ui-components/react/combobox";
 import { Dialog } from "@base-ui-components/react/dialog";
 import { useEffect, useMemo, useState } from "react";
+import useViewportInsets from "../../hooks/useViewportInsets";
 import { PlayerAnalysis } from "../../types/PlayerAnalysis";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import getClasses from "../../utils/getClasses";
@@ -66,6 +67,11 @@ export default function PlayerAnalysisDialog({
   // Held still between renders, since the combobox reads the chosen player back
   // off this list by identity.
   const options = useMemo(() => playerOptions(scores), [scores]);
+
+  // Tapping the search opens a keyboard over the bottom of the screen, which the
+  // sheet is sized and stood against. Only while the dialog is up, since nothing
+  // else on any page has an input to open one.
+  useViewportInsets(open);
 
   // A name arriving from outside stands in for a choice made in the search. Taken
   // during the render that brings it, so the answer is worked out in the same pass
