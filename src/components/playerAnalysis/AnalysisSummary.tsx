@@ -215,7 +215,7 @@ function Routes({
           >
             <Picks games={route.games} />
             {showMondayNight && route.mondayNight.kind === "range" && (
-              <p className="analysis__line">
+              <p className="analysis__line analysis__route-mnf">
                 {mondayNightSentence(route.mondayNight)}
               </p>
             )}

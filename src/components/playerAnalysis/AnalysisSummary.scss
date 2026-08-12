@@ -1,6 +1,10 @@
 // Whatever the answer turns out to be, it plays in under a dialog already growing
 // to hold it.
 .analysis {
+  // What a pick chip sets its text in by, which a line under one indents by to
+  // stand under that text rather than under the chip.
+  --rak-pick-inset: 8px;
+
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -58,7 +62,7 @@
   display: flex;
   align-items: baseline;
   gap: 6px;
-  padding: 4px 8px;
+  padding: 4px var(--rak-pick-inset);
   border-radius: var(--rak-radius-sm);
   background-color: var(--rak-level1);
   font-size: 0.875rem;
@@ -126,6 +130,13 @@
   margin: 0;
   color: var(--rak-text-secondary);
   font-size: 0.875rem;
+}
+
+// Reads as part of the route it closes, so it takes the picks' ink and lines up
+// with their text. Left unbolded, since it is a condition rather than a pick.
+.analysis__route-mnf {
+  padding-inline-start: var(--rak-pick-inset);
+  color: var(--rak-text);
 }
 
 .analysis__message {
