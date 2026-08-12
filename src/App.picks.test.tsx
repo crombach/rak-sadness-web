@@ -272,19 +272,12 @@ describe("the app, automatic picks fetch", () => {
     expect(screen.getByText("View Results")).toBeEnabled();
   });
 
-  it("does not score anything when no picks were fetched", async () => {
+  it("scores nothing and offers nothing when no picks were fetched", async () => {
     await mountLoadedApp();
     await waitFor(() => {
       expect(screen.getByText("Missing Picks")).toBeInTheDocument();
     });
     expect(getPlayerScoresMock).not.toHaveBeenCalled();
-  });
-
-  it("leaves the results buttons disabled with no scores", async () => {
-    await mountLoadedApp();
-    await waitFor(() => {
-      expect(screen.getByText("Missing Picks")).toBeInTheDocument();
-    });
     expect(screen.getByText("View Results")).toBeDisabled();
     expect(screen.getByText("Export Results")).toBeDisabled();
   });
