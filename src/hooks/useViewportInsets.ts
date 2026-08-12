@@ -55,10 +55,8 @@ export default function useViewportInsets(enabled: boolean): void {
     if (!enabled || viewport == null) return;
 
     const root = document.documentElement;
-    let frame = 0;
 
     const measure = () => {
-      frame = 0;
       const { height, offset, keyboardInset } = viewportInsets({
         layoutHeight: window.innerHeight,
         viewportHeight: viewport.height,
@@ -70,19 +68,12 @@ export default function useViewportInsets(enabled: boolean): void {
       root.style.setProperty(KEYBOARD_INSET_VAR, `${keyboardInset}px`);
     };
 
-    // A keyboard opening fires both events several times as it slides in, and
-    // each one would otherwise write to the root mid-frame.
-    const schedule = () => {
-      if (frame === 0) frame = requestAnimationFrame(measure);
-    };
-
     measure();
-    viewport.addEventListener("resize", schedule);
-    viewport.addEventListener("scroll", schedule);
+    viewport.addEventListener("resize", measure);
+    viewport.addEventListener("scroll", measure);
     return () => {
-      if (frame !== 0) cancelAnimationFrame(frame);
-      viewport.removeEventListener("resize", schedule);
-      viewport.removeEventListener("scroll", schedule);
+      viewport.removeEventListener("resize", measure);
+      viewport.removeEventListener("scroll", measure);
       root.style.removeProperty(VIEWPORT_HEIGHT_VAR);
       root.style.removeProperty(VIEWPORT_OFFSET_VAR);
       root.style.removeProperty(KEYBOARD_INSET_VAR);
