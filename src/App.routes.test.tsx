@@ -1,6 +1,5 @@
 import { MockedFunction } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
-import { League } from "./types/League";
 
 vi.mock("./utils/getLeagueInfo");
 vi.mock("./utils/readFileToBuffer");
@@ -10,14 +9,11 @@ vi.mock("./utils/buildSpreadsheetBuffer");
 import {
   CURRENT_WEEK,
   SEASON,
-  leagueInfo,
-  getLeagueInfoMock,
   getPlayerScoresMock,
   mountApp,
   mountLoadedApp,
   scoresHeaderButtons,
   spreadsheetResponse,
-  routedFetch,
   setUpAppTest,
   week,
 } from "./appTestFixtures";
@@ -32,7 +28,10 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("the app, week routes", () => {
+// The guard's own branches are `hooks/useWeekRouteGuard.test.tsx`, the wireframe's
+// shape is `table/SkeletonTable.test.tsx`, and the bare-URL redirect is
+// `results/CurrentWeekRedirect.test.tsx`. What is left is the wiring between them.
+describe("the app: the URL decides which week is fetched, and what shows while it is", () => {
   it("opens a week's scoreboard from its URL", async () => {
     fetchMock.mockResolvedValue(spreadsheetResponse());
     await mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
@@ -114,54 +113,6 @@ describe("the app, week routes", () => {
         `/api/picks/${SEASON}/${CURRENT_WEEK}`,
       );
     });
-  });
-
-  it("sends /scoreboard to the current week of the newest season with picks", async () => {
-    // ESPN answers with whichever season was asked for, which is what tells the
-    // app the schedule on hand is the one the redirect is waiting for.
-    getLeagueInfoMock.mockImplementation(async (_league, season) => ({
-      ...leagueInfo,
-      season: season ?? SEASON,
-    }));
-    global.fetch = routedFetch(spreadsheetResponse, [SEASON - 1]);
-    await mountApp("/scoreboard");
-
-    await waitFor(() => {
-      expect(getLeagueInfoMock).toHaveBeenCalledWith(League.PRO, SEASON - 1);
-    });
-    await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        `/api/picks/${SEASON - 1}/${CURRENT_WEEK}`,
-      );
-    });
-  });
-
-  it("sends /picks to the picks view of that week", async () => {
-    global.fetch = routedFetch(spreadsheetResponse, [SEASON]);
-    await mountApp("/picks");
-
-    expect(await screen.findByText("College Score")).toBeInTheDocument();
-    expect(screen.queryByText("MNF Points Pick")).not.toBeInTheDocument();
-  });
-
-  it("sends /scoreboard home when the schedule cannot be loaded", async () => {
-    getLeagueInfoMock.mockResolvedValue(null);
-    global.fetch = routedFetch(spreadsheetResponse, [SEASON]);
-    mountApp("/scoreboard");
-
-    // Home, rather than the wireframe it shows while it works out where to go.
-    expect(await screen.findByText("Select a week...")).toBeInTheDocument();
-  });
-
-  it("sends /scoreboard home when the season has no week behind it", async () => {
-    getLeagueInfoMock.mockResolvedValue({
-      ...leagueInfo,
-      activeWeek: undefined,
-    });
-    global.fetch = routedFetch(spreadsheetResponse, [SEASON]);
-    mountApp("/scoreboard");
-
-    expect(await screen.findByText("Select a week...")).toBeInTheDocument();
   });
 
   it("shows the scoreboard for a bare week URL", async () => {
