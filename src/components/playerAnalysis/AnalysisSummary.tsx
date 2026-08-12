@@ -227,7 +227,7 @@ function Routes({
       {/* Worked out, then left off, so the count is what the reader is missing.
           Held back until they have asked for the rest and reached the end of them. */}
       {isExpanded && hiddenCount > 0 && (
-        <p className="analysis__note">
+        <p className="analysis__note --upright">
           {plural(hiddenCount, "other path")} found but not shown.
         </p>
       )}

@@ -27,6 +27,11 @@
   color: var(--rak-text-tertiary);
   font-size: 0.875rem;
   font-style: italic;
+
+  // Reads as the end of the routes above it rather than as an aside about them.
+  &.--upright {
+    font-style: normal;
+  }
 }
 
 .analysis__section {
