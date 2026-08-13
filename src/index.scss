@@ -58,14 +58,13 @@
   // rather than sitting beside a word.
   --rak-icon-lg: 40px;
 
-  // An icon set against the words beside it rather than at a size of its own.
-  // Material draws its glyph in the middle 20 of a 24 box, so a box of 1em comes out
-  // as 0.83em of ink against a cap height of about 0.71em. Taken down by that ratio,
-  // the icon and the capital letter next to it are the same height. Left in `em`, so
-  // it is read against whatever text it is set beside.
-  --rak-icon-cap: 0.85em;
-  // The same height, as a shape drawn to its own edges rather than inside a box.
-  --rak-cap-height: 0.71em;
+  // How tall text stands as ink, as a share of its own size, for an icon set beside it
+  // to be drawn to. Measured in a browser, where the body face and the mono face come
+  // out the same: a line of mixed-case text runs from its ascender to its descender,
+  // and a word set in capitals is its cap height alone. Left in `em`, so either is read
+  // against whatever text it is set beside.
+  --rak-text-ink: 0.944em;
+  --rak-caps-ink: 0.728em;
 
   // Motion. Three durations cover every transition and the one loop.
   --rak-duration-fast: 120ms;

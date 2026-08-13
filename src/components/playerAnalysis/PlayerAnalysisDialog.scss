@@ -1,12 +1,14 @@
-// The status hues the search wears, over the shared dialog and combobox rules the
-// rest of this dialog's look comes from.
+@use "../../styles/ink" as *;
+
+// The status hues the search wears, and the size the icon carrying them is drawn at,
+// over the shared dialog and combobox rules the rest of this dialog's look comes from.
 
 // The status of the player named in the input, in the hue the list marks them
 // with, so the search reads the same way whether it is open or closed.
 .player-analysis__input-status {
   display: flex;
   align-items: center;
-  --rak-player-icon-size: var(--rak-icon-cap);
+  --rak-player-icon-size: calc(var(--rak-text-ink) / #{$ink-share-player});
   --rak-player-icon-fill: var(--rak-in-contention-on-light);
 
   &.--knocked-out {
@@ -19,7 +21,7 @@
 // wins over the one every dialog option gets however the sheets are ordered.
 .dialog__option.player-analysis__option {
   gap: var(--rak-player-icon-gap);
-  --rak-player-icon-size: var(--rak-icon-cap);
+  --rak-player-icon-size: calc(var(--rak-text-ink) / #{$ink-share-player});
   --rak-player-icon-fill: var(--rak-in-contention-on-light);
 
   &.--knocked-out {

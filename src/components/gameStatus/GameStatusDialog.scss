@@ -1,9 +1,10 @@
-// An entry reads as its column then its game. Both in the one monospace face at the
-// one size, so the column is held to a width the game names line up past whatever
-// letters either holds.
+@use "../../styles/ink" as *;
+
+// An entry reads as its column then its game. Both at the one size, in the monospace
+// face every entry is set in, so the column is held to a width the game names line up
+// past whatever letters either holds.
 .dialog__option .game-status__option-label,
 .dialog__option .game-status__option-name {
-  font-family: var(--rak-font-mono);
   font-size: var(--rak-text-sm);
 }
 
@@ -54,12 +55,16 @@
 // their state in a word are pills, and wider: every mark sits against the same edge,
 // so what changes as a game kicks off is the width behind that edge.
 .game-status__mark {
+  // Room for the tallest of the glyphs below, which is the one drawn to the least of
+  // its own box, so an icon-only mark takes the same room in either of its two states.
+  --rak-mark-box: calc(var(--rak-text-ink) / #{$ink-share-check-box});
+
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--rak-icon-sm);
-  height: var(--rak-icon-sm);
+  width: var(--rak-mark-box);
+  height: var(--rak-mark-box);
 
   &.--live {
     @include mark-pill(var(--rak-danger-100), var(--rak-danger-600));
@@ -71,20 +76,16 @@
     @include mark-pill(var(--rak-warning-300), var(--rak-warning-700));
   }
 
-  // Drawn to its own edges rather than inside a box, so the cap height is the whole
-  // of it. As tall as the word beside it, which is what the icons come out at too, so
-  // the two pills read as the same size whichever of them a row carries.
+  // Every shape below stands as tall as the ink of the text beside it, which is a whole
+  // line of it in the two that carry no word, and the capitals of the word itself in
+  // the pills. Each glyph is drawn to its own share of its box, so each says which.
+
+  // Drawn to its own edges, so its height is all ink and there is no box to divide.
   .game-status__live-dot {
-    width: var(--rak-cap-height);
-    height: var(--rak-cap-height);
+    width: var(--rak-caps-ink);
+    height: var(--rak-caps-ink);
     border-radius: 50%;
     background-color: var(--rak-danger-500);
-  }
-
-  // As tall as the text it stands beside, rather than at a size of its own.
-  > svg {
-    width: var(--rak-icon-cap);
-    height: var(--rak-icon-cap);
   }
 
   // Quiet, neither a game yet to kick off nor one that is over being anything to act
@@ -94,7 +95,17 @@
     fill: var(--rak-text-tertiary);
   }
 
+  &.--final > svg {
+    @include ink-height(var(--rak-text-ink), $ink-share-check-box);
+  }
+
+  &.--upcoming > svg {
+    @include ink-height(var(--rak-text-ink), $ink-share-event);
+  }
+
   &.--invalid > svg {
+    @include ink-height(var(--rak-caps-ink), $ink-share-warning);
+
     fill: currentColor;
   }
 }
