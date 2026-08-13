@@ -27,10 +27,21 @@
   );
 }
 
+// How big the scores, the dash between them and the possession marks are set. Named
+// once here because the four have to grow and shrink together: they sit in one row,
+// and the room a phone has left over after them is what the two names get.
 .game-status {
+  --rak-score-size: 1.75rem;
+  --rak-marker-size: 1.75rem;
+
   display: flex;
   flex-direction: column;
   gap: var(--rak-space-4);
+
+  @include roomy-screen {
+    --rak-score-size: 2.5rem;
+    --rak-marker-size: 2.25rem;
+  }
 }
 
 // One sheen over the whole wireframe rather than one per bar, which is how the
@@ -65,7 +76,7 @@
 
   // Thicker, standing in for the one line here set big enough to carry its own weight.
   .game-status__points {
-    @include wireframe-bar(1.75rem);
+    @include wireframe-bar(1.5rem);
 
     @include roomy-screen {
       @include wireframe-bar(2.25rem);
@@ -148,11 +159,20 @@
 //
 // As big as the three lines of text beside it are tall, which is as much as either
 // can take without the name it stands over having to wrap sooner.
+// Left off the narrowest screens: what it takes out of the name and record beside it
+// breaks both across lines there, and a game reads better without it than with them
+// broken. The wireframe draws its circle by the same rule, so a wait is still the
+// size of the answer.
 .game-status__logo {
+  display: none;
   align-self: center;
   object-fit: contain;
   width: 32px;
   height: 32px;
+
+  @include marks-screen {
+    display: block;
+  }
 
   @include roomy-screen {
     width: 44px;
@@ -238,12 +258,8 @@
 // Held to the scores it joins, so it grows with them.
 .game-status__dash {
   color: var(--rak-primary-700);
-  font-size: 2rem;
+  font-size: var(--rak-score-size);
   line-height: 1.1;
-
-  @include roomy-screen {
-    font-size: 2.5rem;
-  }
 }
 
 .game-status__side-label {
@@ -299,14 +315,9 @@
   gap: var(--rak-space-1);
   margin: 0;
   color: var(--rak-primary-700);
-  font-size: 2rem;
+  font-size: var(--rak-score-size);
   font-weight: var(--rak-weight-bold);
   line-height: 1.1;
-
-  // The one thing a reader came for, so it takes the room a wider screen has.
-  @include roomy-screen {
-    font-size: 2.5rem;
-  }
 
   // Home only, since the marker is written after the score. Either way it lands on
   // the far side from the middle, so it never crowds the dash between the two.
@@ -327,16 +338,12 @@
 // triangle fills little of its em box, so it reads smaller than a letter set as big.
 .game-status__marker {
   color: var(--rak-brand-light);
-  font-size: 2rem;
+  font-size: var(--rak-marker-size);
   line-height: 1;
   // A triangle is drawn on the middle of the em box and a digit stands on the
   // baseline, so lining the two boxes up leaves the triangle low. Measured at a
-  // tenth of its own size, at both of the sizes below.
+  // tenth of its own size, at both of the sizes it is set at.
   transform: translateY(-0.1em);
-
-  @include roomy-screen {
-    font-size: 2.25rem;
-  }
 
   // Both sides carry a marker whatever the game is doing, and every side without the
   // ball wears an invisible one. It holds the room the visible one takes, so the
@@ -355,10 +362,15 @@
   display: contents;
 }
 
+// The dash is the middle of the dialog, so it is laid in a track of its own with a
+// track either side of it. Two equal shares rather than two boxes of whatever each
+// side happens to need: a marker one side is wearing, a record the other has none of,
+// or a score of two digits against one, would otherwise each move the dash.
 .game-status__scores {
   grid-row: 2;
   grid-column: 3;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   justify-self: center;
   gap: var(--rak-space-2);

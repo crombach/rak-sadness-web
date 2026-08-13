@@ -1,5 +1,5 @@
 import { Combobox } from "@base-ui-components/react/combobox";
-import { ReactNode } from "react";
+import { ReactNode, useRef } from "react";
 import { UnfoldMoreIcon } from "../icon/Icon";
 import "./DialogCombobox.scss";
 
@@ -43,6 +43,23 @@ export default function DialogCombobox<T>({
   adornment?: ReactNode;
   renderOption: (item: T) => ReactNode;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  /**
+   * Choosing is the end of the search, so the input gives the focus up.
+   *
+   * A phone's keyboard covers the bottom of the screen while the input holds it,
+   * which is where the answer that was just chosen reads. The dialog itself takes
+   * the focus rather than nothing, so it is still what Escape and a screen reader
+   * are working in.
+   */
+  function releaseFocus() {
+    const input = inputRef.current;
+    const popup = input?.closest<HTMLElement>(".dialog__popup");
+    if (popup != null) popup.focus();
+    else input?.blur();
+  }
+
   return (
     /*
       Typed on `T | null` rather than on `T`, because nothing is chosen until a
@@ -60,7 +77,9 @@ export default function DialogCombobox<T>({
       // opened on a subject and answers for one from then on, so that clears the
       // search rather than the answer under it.
       onValueChange={(chosen: T | null) => {
-        if (chosen != null) onValueChange(chosen);
+        if (chosen == null) return;
+        onValueChange(chosen);
+        releaseFocus();
       }}
       // Base UI writes the chosen label back through this on the way out, so
       // dismissing without picking anything restores it.
@@ -79,6 +98,7 @@ export default function DialogCombobox<T>({
     >
       <div className="dialog__search">
         <Combobox.Input
+          ref={inputRef}
           placeholder={placeholder}
           aria-label={ariaLabel}
           className="dialog__input"
@@ -89,7 +109,20 @@ export default function DialogCombobox<T>({
         </Combobox.Icon>
       </div>
       <Combobox.Portal>
-        <Combobox.Positioner className="dialog__positioner" sideOffset={4}>
+        {/* Under the input and nowhere else. Flipped over it, the list would cover
+            the answer the dialog is open on, and on a phone it would come up under
+            the search only to be sat on by the keyboard. Squeezed for room it gives
+            up height instead, which the list scrolls. */}
+        <Combobox.Positioner
+          className="dialog__positioner"
+          side="bottom"
+          sideOffset={4}
+          collisionAvoidance={{
+            side: "none",
+            align: "shift",
+            fallbackAxisSide: "none",
+          }}
+        >
           <Combobox.Popup className="dialog__list">
             <Combobox.Empty className="dialog__empty">
               {emptyMessage}
