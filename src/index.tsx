@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router";
 import App from "./App";
 import "@fontsource-variable/inter";
+import "@fontsource/dseg14-classic/700.css";
 import { AppDataContextProvider } from "./context/AppDataContext";
 import { ToastContextProvider } from "./context/ToastContext";
 import Toaster from "./components/toaster/Toaster";

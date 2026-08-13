@@ -185,11 +185,13 @@ describe("the app, first load", () => {
     await mountLoadedApp();
     // The heading is visually hidden, so this is what a screen reader is told
     // the page is, not a second copy of the wordmark on screen.
+    // Matched whole rather than by substring, so the unlit segments drawn over
+    // the name have to stay out of the button's accessible name to pass.
     expect(
-      screen.getByRole("button", { name: /The Rakulator/ }),
+      screen.getByRole("button", { name: "Rakulator" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { level: 1, name: "The Rakulator" }),
+      screen.getByRole("heading", { level: 1, name: "Rakulator" }),
     ).toBeInTheDocument();
   });
 

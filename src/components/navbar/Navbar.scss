@@ -39,8 +39,8 @@
   align-items: center;
   gap: var(--rak-space-3);
   font-weight: var(--rak-weight-bold);
-  // The app name does not wrap, so without this the name pushes the buttons off
-  // a 320px screen rather than giving up its own room.
+  // The app name does not wrap, so without this it pushes the buttons off the end
+  // of a bar too narrow to hold both rather than giving up its own room.
   min-width: 0;
   overflow: hidden;
 }

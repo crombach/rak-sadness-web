@@ -20,6 +20,14 @@
   // advance width is narrow enough to change how many columns fit.
   --rak-font-mono:
     ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  // The app name alone, in the 14-segment display face a calculator reads out
+  // through. It has no lowercase and draws every letter as a capital, so the
+  // name stays ordinary mixed-case text in the DOM. `src/index.tsx` loads its
+  // bold cut, and only that one, so anything set in this has to ask for bold.
+  // The fallback is the mono stack rather than the body one: the name is drawn
+  // over a row of all-segments-on characters, and only a fixed advance keeps the
+  // two layers on top of each other while the face is still downloading.
+  --rak-font-display: "DSEG14 Classic", var(--rak-font-mono);
 
   --rak-text-xs: 0.75rem;
   --rak-text-sm: 0.875rem;
