@@ -46,9 +46,12 @@
 // How big the scores, the dash between them and the possession marks are set. Named
 // once here because the four have to grow and shrink together: they sit in one row,
 // and the room a phone has left over after them is what the two names get.
+// A phone sets them a step over those names and no further down: the scores are what
+// the row is about, and a pair set as big as the two names stops reading as the answer
+// to it.
 .game-status {
-  --rak-score-size: 1.75rem;
-  --rak-marker-size: 1.75rem;
+  --rak-score-size: 1.5rem;
+  --rak-marker-size: 1.5rem;
 
   display: flex;
   flex-direction: column;
@@ -92,7 +95,7 @@
 
   // Thicker, standing in for the one line here set big enough to carry its own weight.
   .game-status__points {
-    @include wireframe-bar(1.5rem);
+    @include wireframe-bar(1.25rem);
 
     @include roomy-screen {
       @include wireframe-bar(2.25rem);
@@ -183,20 +186,17 @@
 //
 // As big as the three lines of text beside it are tall, which is as much as either
 // can take without the name it stands over having to wrap sooner.
-// Left off the narrowest screens: what it takes out of the name and record beside it
-// breaks both across lines there, and a game reads better without it than with them
-// broken. The wireframe draws its circle by the same rule, so a wait is still the
-// size of the answer.
+//
+// Whether there is room for it at all is `useScorelineFit`'s to say, since what it costs
+// the name beside it is what that name is. The last thing that hook gives up, and only
+// where cutting the name to its abbreviation left the two still short. The wireframe
+// draws its circle by the same answer, so a wait is still the size of the answer.
 .game-status__logo {
-  display: none;
+  display: block;
   align-self: center;
   object-fit: contain;
   width: 32px;
   height: 32px;
-
-  @include marks-screen {
-    display: block;
-  }
 
   @include roomy-screen {
     width: 44px;
@@ -330,6 +330,20 @@
   }
 }
 
+// Back to the abbreviation, whatever the width says, because `useScorelineFit` measured
+// a name running over its column. The first thing it gives up, so the marks are still
+// there. Only bites above `$breakpoint-roomy`, since that is the only place the full
+// name is shown at all, and the width gained there is spent on a bigger score row too.
+.game-status__scoreline.--short-names {
+  .game-status__name-full {
+    display: none;
+  }
+
+  .game-status__name-short {
+    display: inline;
+  }
+}
+
 .game-status__record {
   color: var(--rak-text-tertiary);
   font-size: var(--rak-text-sm);
@@ -401,10 +415,17 @@
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   justify-self: center;
-  gap: var(--rak-space-2);
+  // Tight around the dash on a phone, where the room either side of it is room the
+  // names have not got. A dash reads as joining the two scores at either gap, and the
+  // wider one is only worth having where there is width to spend on it.
+  gap: var(--rak-space-1);
   // Room either side of the pair, past the marker each of them already holds, so the
   // scores are never read as running into the names beside them.
   padding-inline: var(--rak-space-2);
+
+  @include roomy-screen {
+    gap: var(--rak-space-2);
+  }
 }
 
 .game-status__detail,

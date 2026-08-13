@@ -7,14 +7,6 @@
 // floor a finger needs would be the exception rather than the default.
 
 /**
- * Above the narrowest screen a team's mark is worth the room it takes. Measured in
- * the game status dialog, where the two marks stand beside the two names: at 330px
- * and under, a record as short as `4-1` is broken across two lines by them, and at
- * 340px it holds.
- */
-$breakpoint-marks: 340px;
-
-/**
  * Above the widest phone held in portrait. Below it the tables and the navbar
  * tighten up and every target is a full `--rak-touch-target`. Measured against
  * the flagships, whose logical widths run to 440px.
@@ -35,13 +27,6 @@ $breakpoint-labelled-navbar: 561px;
  * rather than about what fits in one bar.
  */
 $breakpoint-wide: 601px;
-
-/** Room enough beside a team's mark for the name and record it stands by. */
-@mixin marks-screen {
-  @media (min-width: $breakpoint-marks) {
-    @content;
-  }
-}
 
 /** Room enough for the tables and the navbar to loosen up. */
 @mixin roomy-screen {
