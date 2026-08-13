@@ -65,10 +65,10 @@
  * whichever column is on screen. Left in flow it rides off the side with the
  * columns, because the frame is as wide as the week is long.
  *
- * Only the text sticks. The bar and the border under it stay in flow at the
- * frame's full width, so the line runs the whole way across rather than stopping
- * at the window's edge. That also keeps the sticky area to a few words, which is
- * the smallest hole this can leave in the rasterized layer. See SCROLL-FLASH.md.
+ * Only the text sticks. The bar stays in flow at the frame's full width, so its
+ * fill runs the whole way across rather than stopping at the window's edge. That
+ * also keeps the sticky area to a few words, which is the smallest hole this can
+ * leave in the rasterized layer. See SCROLL-FLASH.md.
  */
 .results-caption__text {
   position: sticky;
