@@ -12,6 +12,7 @@ import {
   getPlayerScoresMock,
   mountApp,
   mountLoadedApp,
+  resultsCaption,
   scoresHeaderButtons,
   spreadsheetResponse,
   setUpAppTest,
@@ -120,6 +121,55 @@ describe("the app: the URL decides which week is fetched, and what shows while i
     await mountApp(`/${SEASON}/${CURRENT_WEEK}`);
 
     expect(await screen.findByText("MNF Points Pick")).toBeInTheDocument();
+  });
+
+  it("names the season and week over each table", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
+    await screen.findByText("MNF Points Pick");
+
+    expect(resultsCaption()).toHaveTextContent(
+      `Rak Madness · ${SEASON} Season · Week ${CURRENT_WEEK}`,
+    );
+  });
+
+  it("names the same week over the picks table", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountApp(`/${SEASON}/${CURRENT_WEEK}/picks`);
+    await screen.findByText("College Score");
+
+    expect(resultsCaption()).toHaveTextContent(
+      `Rak Madness · ${SEASON} Season · Week ${CURRENT_WEEK}`,
+    );
+  });
+
+  // The week is in the URL before the scores are worked out, so the caption the
+  // wireframe wears is the one the table keeps. Nothing under it moves.
+  it("names the week over the wireframe, and does not change when the scores land", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
+
+    const expected = `Rak Madness · ${SEASON} Season · Week ${CURRENT_WEEK}`;
+    expect(resultsCaption()).toHaveTextContent(expected);
+
+    await screen.findByText("MNF Points Pick");
+    expect(resultsCaption()).toHaveTextContent(expected);
+  });
+
+  // `getByText` reads a hidden node, so the attribute is what has to be asserted.
+  it("says the week on screen without saying it twice", async () => {
+    fetchMock.mockResolvedValue(spreadsheetResponse());
+    await mountApp(`/${SEASON}/${CURRENT_WEEK}/scoreboard`);
+    await screen.findByText("MNF Points Pick");
+
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: `${SEASON} Week ${CURRENT_WEEK} Scoreboard`,
+      }),
+    ).toBeInTheDocument();
+    expect(resultsCaption()).toHaveAttribute("aria-hidden", "true");
   });
 
   it("sends an unknown path home", async () => {

@@ -77,4 +77,14 @@ describe("CurrentWeekRedirect", () => {
       "true",
     );
   });
+
+  // This route knows no week to name yet, so the caption holds its room instead
+  // of naming one. Filled in, the table below it would move when the week landed.
+  it("holds the caption's room while the week is unknown", () => {
+    mount("Scoreboard", { isWeekInfoLoading: true });
+    const caption = document.querySelector(".results-caption");
+    expect(caption).toBeInTheDocument();
+    expect(caption).toHaveClass("--loading");
+    expect(caption).toBeEmptyDOMElement();
+  });
 });

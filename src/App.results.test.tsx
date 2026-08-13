@@ -14,6 +14,7 @@ import {
   buildSpreadsheetBufferMock,
   mountLoadedApp,
   uploadSpreadsheet,
+  resultsCaption,
   scoresHeaderButtons,
   setUpAppTest,
 } from "./appTestFixtures";
@@ -62,6 +63,20 @@ describe("the app, results views", () => {
     await user.click(scoreboard);
     expect(screen.getByText("MNF Points Pick")).toBeInTheDocument();
     expect(scoreboard).toHaveAttribute("aria-pressed", "true");
+  });
+
+  // The navbar already marks which view you are on, so the caption names the week
+  // and nothing else. Switching views must not change a word of it.
+  it("names the same week across both views", async () => {
+    const user = await mountWithScores();
+    await user.click(screen.getByText("View Results"));
+
+    const expected = `Rak Madness · ${SEASON} Season · Week ${CURRENT_WEEK}`;
+    expect(resultsCaption()).toHaveTextContent(expected);
+
+    const [, picks] = scoresHeaderButtons();
+    await user.click(picks);
+    expect(resultsCaption()).toHaveTextContent(expected);
   });
 
   it("returns home from the logo button", async () => {

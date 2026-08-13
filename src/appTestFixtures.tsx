@@ -148,6 +148,11 @@ export function scoresHeaderButtons(): Array<HTMLElement> {
   );
 }
 
+/** The line over the table naming the week, which carries no role of its own. */
+export function resultsCaption(): HTMLElement | null {
+  return document.querySelector<HTMLElement>(".results-caption");
+}
+
 export function notFoundResponse(): Response {
   return new Response(null, { status: 404 });
 }
