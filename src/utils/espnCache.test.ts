@@ -37,9 +37,8 @@ describe("matchupKey", () => {
     expect(matchupKey(new Set(["buf", "Kc"]))).toBe(BUF_KC);
   });
 
-  it("names a column with one team, and one with none", () => {
+  it("names a column every player picked the same side of", () => {
     expect(matchupKey(new Set(["BUF"]))).toBe("BUF");
-    expect(matchupKey(new Set())).toBe("");
   });
 });
 
@@ -98,10 +97,27 @@ describe("espnCache, results", () => {
   it("treats an entry an older version wrote as a miss", () => {
     localStorage.setItem(
       `rak-madness:espn:results:${SEASON}:3:nfl`,
-      JSON.stringify({ version: 0, games: { [BUF_KC]: game() } }),
+      JSON.stringify({ version: 0, value: { [BUF_KC]: game() } }),
     );
 
     expect(readCachedResults(SEASON, 3, League.PRO)).toEqual({});
+  });
+
+  it("treats an entry of this version with no games in it as a miss", () => {
+    // Anything at all can be written to storage this shares with the rest of the
+    // origin, so a version match is not on its own a promise about the shape.
+    [
+      { version: 1 },
+      { version: 1, value: null },
+      { version: 1, value: 3 },
+    ].forEach((entry) => {
+      localStorage.setItem(
+        `rak-madness:espn:results:${SEASON}:3:nfl`,
+        JSON.stringify(entry),
+      );
+
+      expect(readCachedResults(SEASON, 3, League.PRO)).toEqual({});
+    });
   });
 
   it("caps how many weeks it holds, keeping the one just written", () => {
@@ -132,6 +148,15 @@ describe("espnCache, calendars", () => {
 
     expect(readCachedCalendar(League.COLLEGE, 2022)).toBeUndefined();
     expect(readCachedCalendar(League.PRO, 2023)).toBeUndefined();
+  });
+
+  it("treats a calendar an older version wrote as a miss", () => {
+    localStorage.setItem(
+      "rak-madness:espn:calendar:nfl:2022",
+      JSON.stringify({ version: 0, value: { leagues: [{ slug: "nfl" }] } }),
+    );
+
+    expect(readCachedCalendar(League.PRO, 2022)).toBeUndefined();
   });
 });
 

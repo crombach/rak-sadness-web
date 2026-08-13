@@ -273,24 +273,28 @@ export function toLeagueResult(event: EspnEvent): LeagueResult | null {
 }
 
 /**
- * The order the fetch puts a league's games in.
+ * A league's games in date order, college latest first and pro earliest first.
  *
- * College is latest first, because its postseason arrives as one bowl week spanning a
+ * College runs backwards because its postseason arrives as one bowl week spanning a
  * month and a team can appear twice, the later game being the one the week is about.
  * Whichever game of the two comes first is the one every lookup by team answers with.
+ *
+ * Sorted here rather than left in the order ESPN sent, because a game this browser
+ * remembered and the ones just fetched are answered with together.
  */
-function inFetchOrder(
+function inDateOrder(
   league: League,
   results: Array<LeagueResult>,
 ): Array<LeagueResult> {
-  if (league !== League.COLLEGE) {
-    return results;
-  }
-  return [...results].sort((a, b) => b.date.valueOf() - a.date.valueOf());
+  const earliestFirst = league !== League.COLLEGE;
+  return [...results].sort((a, b) => {
+    const gap = a.date.valueOf() - b.date.valueOf();
+    return earliestFirst ? gap : -gap;
+  });
 }
 
 /**
- * Get the results for a given league in a given week, in `inFetchOrder`.
+ * Get the results for a given league in a given week, in `inDateOrder`.
  *
  * Nothing is fetched where this browser already has an answer for every matchup that
  * ESPN cannot answer differently later: a game that has been played, or a matchup it
@@ -321,7 +325,7 @@ export async function getLeagueResults(
       .map((key) => held[key])
       .filter((game) => game != null);
     debugLog(`${league} games, every one of them already held`, settled);
-    return inFetchOrder(league, settled);
+    return inDateOrder(league, settled);
   }
 
   const events = await getLeagueEvents(league, week, season);
@@ -365,7 +369,7 @@ export async function getLeagueResults(
     writeCachedResults(season, week.value, league, games);
   }
 
-  return inFetchOrder(league, [...results, ...kept]);
+  return inDateOrder(league, [...results, ...kept]);
 }
 
 /**

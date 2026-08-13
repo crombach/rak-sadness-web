@@ -12,8 +12,8 @@
 import { GameStatus } from "../types/ESPN";
 import { League } from "../types/League";
 import { LeagueResult } from "../types/LeagueResult";
+import localStorageCache from "./localStorageCache";
 
-const KEY_PREFIX = "rak-madness:espn:";
 /** A size guard, not a history. A week of both leagues is tens of KB. */
 const MAX_CACHED_WEEKS = 6;
 /** Bumped where a stored shape changes, which makes every older entry a miss. */
@@ -22,85 +22,41 @@ const VERSION = 1;
 /** A game as it was stored, whose date has been through JSON and is text again. */
 type StoredGame = (Omit<LeagueResult, "date"> & { date: string }) | null;
 
-type StoredWeek = {
-  version: number;
-  /** Keyed by matchup. Null is a matchup ESPN listed no game for. */
-  games: Record<string, StoredGame>;
-};
+/** Keyed by matchup. Null is a matchup ESPN listed no game for. */
+type StoredGames = Record<string, StoredGame>;
+
+type Versioned<T> = { version: number; value: T };
 
 /** A game ESPN has finished with, or null for a matchup it never listed. */
 export type CachedGame = LeagueResult | null;
 
-function resultsKey(season: number, week: number, league: League): string {
-  return `${KEY_PREFIX}results:${season}:${week}:${league}`;
-}
+const results = localStorageCache<Versioned<StoredGames>>({
+  prefix: "rak-madness:espn:results:",
+  cap: MAX_CACHED_WEEKS,
+  label: "ESPN results",
+  encode: (value) => JSON.stringify(value),
+  decode: (text) => JSON.parse(text),
+});
 
-function calendarKey(league: League, season: number): string {
-  return `${KEY_PREFIX}calendar:${league}:${season}`;
-}
-
-function cachedKeys(prefix: string): Array<string> {
-  const keys: Array<string> = [];
-  for (let index = 0; index < localStorage.length; index++) {
-    const key = localStorage.key(index);
-    if (key?.startsWith(prefix)) {
-      keys.push(key);
-    }
-  }
-  return keys;
-}
-
-function clearCache(): void {
-  try {
-    cachedKeys(KEY_PREFIX).forEach((key) => localStorage.removeItem(key));
-  } catch (error) {
-    // Called from catch blocks that turn a storage failure into a cache miss. If
-    // storage is blocked outright, this must not throw past them.
-    console.warn("Could not clear the ESPN cache", error);
-  }
-}
-
-/** Writes a value, having made room for it, and never throws. */
-function store(key: string, prefix: string, cap: number, value: unknown): void {
-  try {
-    // Pruned before writing, so the entry being written is never the one dropped.
-    // localStorage does not report insertion order, so which others go is arbitrary.
-    // The cap is only here to bound how much space this takes.
-    const keys = cachedKeys(prefix).filter((it) => it !== key);
-    keys
-      .slice(0, Math.max(keys.length - (cap - 1), 0))
-      .forEach((it) => localStorage.removeItem(it));
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch (error) {
-    console.warn("Could not cache an ESPN answer", error);
-    clearCache();
-  }
-}
-
-/** Reads a value back, and counts a corrupt or unreadable one as a miss. */
-function read<T>(key: string): T | undefined {
-  try {
-    const text = localStorage.getItem(key);
-    return text != null ? (JSON.parse(text) as T) : undefined;
-  } catch (error) {
-    // A cache is never allowed to break scoring.
-    console.warn("Could not read a cached ESPN answer", error);
-    clearCache();
-    return undefined;
-  }
-}
+const calendars = localStorageCache<Versioned<unknown>>({
+  prefix: "rak-madness:espn:calendar:",
+  cap: MAX_CACHED_WEEKS,
+  label: "ESPN calendar",
+  encode: (value) => JSON.stringify(value),
+  decode: (text) => JSON.parse(text),
+});
 
 /**
  * What a matchup is filed under.
  *
  * Folded and sorted, because the workbook could name the same two teams either way
  * around and in any case at all, while a result carries them already uppercased. A
- * column names one team where every player picked the same side, and none at all
- * where nobody filled it in, both of which are matchups in their own right.
+ * column names one team where every player picked the same side, which is a matchup in
+ * its own right.
  */
 export function matchupKey(teams: Set<string>): string {
   return [...teams]
-    .map((team) => team?.toUpperCase())
+    .map((team) => team.toUpperCase())
     .sort()
     .join("|");
 }
@@ -111,12 +67,14 @@ export function readCachedResults(
   week: number,
   league: League,
 ): Record<string, CachedGame> {
-  const stored = read<StoredWeek>(resultsKey(season, week, league));
-  if (stored?.version !== VERSION) {
+  const stored = results.read(`${season}:${week}:${league}`);
+  // An entry of the version in hand can still be nonsense, since anything at all can
+  // be written to storage this shares with the rest of the origin.
+  if (stored?.version !== VERSION || typeof stored.value !== "object") {
     return {};
   }
   const games: Record<string, CachedGame> = {};
-  Object.entries(stored.games).forEach(([key, game]) => {
+  Object.entries(stored.value ?? {}).forEach(([key, game]) => {
     games[key] = game == null ? null : { ...game, date: new Date(game.date) };
   });
   return games;
@@ -134,16 +92,15 @@ export function writeCachedResults(
   league: League,
   games: Record<string, CachedGame>,
 ): void {
-  const entry: StoredWeek = {
+  const stored: StoredGames = {};
+  Object.entries(games).forEach(([key, game]) => {
+    stored[key] =
+      game == null ? null : { ...game, date: game.date.toISOString() };
+  });
+  results.write(`${season}:${week}:${league}`, {
     version: VERSION,
-    games: games as StoredWeek["games"],
-  };
-  store(
-    resultsKey(season, week, league),
-    `${KEY_PREFIX}results:`,
-    MAX_CACHED_WEEKS,
-    entry,
-  );
+    value: stored,
+  });
 }
 
 /** Whether an answer is one this browser can hold on to for good. */
@@ -161,7 +118,8 @@ export function readCachedCalendar<T>(
   league: League,
   season: number,
 ): T | undefined {
-  return read<T>(calendarKey(league, season));
+  const stored = calendars.read(`${league}:${season}`);
+  return stored?.version === VERSION ? (stored.value as T) : undefined;
 }
 
 export function writeCachedCalendar(
@@ -169,10 +127,8 @@ export function writeCachedCalendar(
   season: number,
   scoreboard: unknown,
 ): void {
-  store(
-    calendarKey(league, season),
-    `${KEY_PREFIX}calendar:`,
-    MAX_CACHED_WEEKS,
-    scoreboard,
-  );
+  calendars.write(`${league}:${season}`, {
+    version: VERSION,
+    value: scoreboard,
+  });
 }

@@ -358,6 +358,26 @@ describe("GameStatusDialog", () => {
     await vi.advanceTimersByTimeAsync(POLL_MS * 3);
     expect(getGameResultMock).toHaveBeenCalledTimes(askedBeforeFinal);
 
+    // The same switch made with the last game's fetch still outstanding. The answer
+    // lands after the switch, and the finished game stays where it is.
+    const stray = deferred();
+    getGameResultMock.mockReturnValue(stray.promise);
+    await user.click(screen.getByRole("combobox", { name: "Game" }));
+    await user.click(await screen.findByRole("option", { name: /KC @ BUF/ }));
+    expect(
+      screen.getByRole("progressbar", { name: "Fetching the game" }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("combobox", { name: "Game" }));
+    await user.click(await screen.findByRole("option", { name: /MICH @ OSU/ }));
+    expect(screen.getByText("OSU Team")).toBeInTheDocument();
+    expect(screen.queryByRole("progressbar")).toBeNull();
+
+    stray.settle(proGame);
+    await vi.advanceTimersByTimeAsync(POLL_MS);
+    expect(screen.getByText("OSU Team")).toBeInTheDocument();
+    expect(screen.queryByText("BUF Team")).toBeNull();
+
     // Back on the live game, which is asked about again on the way in.
     getGameResultMock.mockResolvedValue(proGame);
     await user.click(screen.getByRole("combobox", { name: "Game" }));
