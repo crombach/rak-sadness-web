@@ -102,10 +102,6 @@
     }
   }
 
-  .table__center {
-    text-align: center;
-  }
-
   // The clickable surface inside a tappable cell. The cell keeps the fill and the
   // padding it always had; this resets both away and fills the cell edge to edge,
   // so the whole cell, padding included, is inside the button's own hit area.
@@ -190,6 +186,10 @@
 
     .table__player-col {
       border-left: var(--rak-table-border);
+      // A name is read, not compared down the column, and it is the one cell cut
+      // short with an ellipsis. Centering would move where it starts from row to
+      // row and put the cut at both ends.
+      text-align: left;
       --rak-cell-base: var(--rak-in-contention-300);
 
       &.--knocked-out {
@@ -199,6 +199,10 @@
 
     td {
       color: black;
+      // Every cell holds a number or a short pick, which reads as a column when
+      // it is centered under a centered heading. The name is the exception, and
+      // sets itself back below.
+      text-align: center;
       // Every cell names the color its column carries and reads the fill back
       // here, so an even row is one rule rather than one per column. A column
       // with a color of its own says so by setting the base, and its stripe
