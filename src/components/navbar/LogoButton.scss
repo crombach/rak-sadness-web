@@ -1,4 +1,8 @@
 .logo-button {
+  // A flex item will not shrink below what it holds unless it is told it may, and
+  // the name cannot give up its room until the button it sits in can.
+  min-width: 0;
+
   &__filter {
     position: absolute;
     width: 0;
@@ -8,6 +12,8 @@
   &__logo {
     width: 20px;
     height: 20px;
+    // The name gives up the room, not the mark beside it.
+    flex-shrink: 0;
     // The matching `<filter>` id is unique per instance, set inline in
     // `LogoButton.tsx` rather than here, where it would have to be static.
   }
@@ -21,5 +27,11 @@
     // One line at every width. The navbar is sized for it, and a wrapped app name
     // pushed the bar taller than the buttons standing next to it.
     white-space: nowrap;
+    // Where the buttons leave too little room, the name gives up its end to an
+    // ellipsis. Clipped instead it stopped mid-letter, which reads as the bar
+    // being broken rather than as a name too long for the screen.
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
