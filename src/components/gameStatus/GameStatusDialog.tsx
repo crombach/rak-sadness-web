@@ -19,7 +19,7 @@ import "./GameStatusDialog.scss";
  * column is how a reader who came from a cell knows which game they clicked, so it
  * is worth typing even where it is not worth keeping on screen.
  */
-export function gameSearchText(game: WeekGame): string {
+function gameSearchText(game: WeekGame): string {
   return `${game.label}  ${game.name}`;
 }
 
