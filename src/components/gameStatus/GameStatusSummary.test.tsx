@@ -342,22 +342,24 @@ describe("GameStatusSummary, which side took the point", () => {
     expect(missed).toEqual(["KC"]);
   });
 
-  it("marks neither side on a game that landed on the number", () => {
+  // A push and a tie with no line are a point for everybody, so every pick was on a
+  // side that scored and neither side is marked against.
+  it("marks both sides on a game that landed on the number", () => {
     expect(marked({ team: "BUF", points: -10 })).toEqual({
-      scored: [],
+      scored: ["KC", "BUF"],
       missed: [],
-      scores: [],
+      scores: ["20", "30"],
     });
   });
 
-  it("marks neither side on a game that finished level", () => {
+  it("marks both sides on a game that finished level", () => {
     const drawn = {
       away: { ...result().away, score: 30 },
       winner: { team: null, homeAway: null, by: 0 },
       loser: { team: null, homeAway: null, by: 0 },
     };
     const { scored, missed } = marked(undefined, drawn);
-    expect(scored).toEqual([]);
+    expect(scored).toEqual(["KC", "BUF"]);
     expect(missed).toEqual([]);
   });
 

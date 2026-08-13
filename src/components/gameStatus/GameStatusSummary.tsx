@@ -451,18 +451,16 @@ function Game({
   const venue = venueParts(result);
   // Only once the game is over, which is when the sentence under the scores says the
   // same thing. A side ahead at half time has won nothing yet.
-  const scored =
-    result.status === GameStatus.FINAL
-      ? scoringTeam(result, spread)
-      : undefined;
-  // Nothing on either side where nobody scored, since a tie and a push are a point
-  // for everybody and marking both sides green would say the same thing twice.
-  const outcomeOf = (side: GameSide): SideOutcome | undefined =>
-    scored == null
-      ? undefined
-      : side.team.abbreviation === scored
-        ? "scored"
-        : "missed";
+  const isOver = result.status === GameStatus.FINAL;
+  const scored = isOver ? scoringTeam(result, spread) : undefined;
+  // Both sides where the game is over and nobody scored, which is a push or a tie
+  // with no line to push against. The pool gives everybody the point there, so
+  // whichever side a pick was on, it was on a side that scored.
+  const outcomeOf = (side: GameSide): SideOutcome | undefined => {
+    if (!isOver) return undefined;
+    if (scored == null) return "scored";
+    return side.team.abbreviation === scored ? "scored" : "missed";
+  };
   return (
     <>
       <p className="game-status__spread">
