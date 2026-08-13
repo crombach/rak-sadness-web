@@ -9,7 +9,11 @@
   // fill below reaches the whole table now, so what shows in the gap is the
   // frame's own color.
   min-width: max-content;
-  height: 100%;
+  // Tall enough to reach the bottom of the box on a short week, and as tall as the
+  // table on a long one. Fixed at the box's own height it stopped one screenful
+  // down, and every row past that had the page's surface behind it instead of the
+  // frame. Same reasoning as the width above, on the other axis.
+  min-height: 100%;
   margin: 0;
   // The trailing row's own fill, behind the column rather than only in that row.
   // Filler rows come whole, so what is left under the last of them is under a row
