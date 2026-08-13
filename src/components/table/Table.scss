@@ -143,6 +143,13 @@
     z-index: var(--rak-z-sticky-cell);
     position: sticky;
     left: 0;
+    // Gecko repaints a sticky element's whole box on every scroll frame rather
+    // than moving what it already drew, so a fast sideways flick outruns it and
+    // the ordinary cells underneath show through. Promoted, the compositor
+    // shifts the column instead of the main thread redrawing it. A hint, not a
+    // promise: over Firefox's budget it is dropped, which is only today's
+    // behavior back.
+    will-change: transform;
   }
 
   tbody {
