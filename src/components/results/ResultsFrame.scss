@@ -40,15 +40,13 @@
   // so a caption centered in it starts off the side of a phone and only arrives
   // once the table has been panned across.
   text-align: left;
-  // The line the header cells are divided by, which is the one edge that shows
-  // against this fill. `--rak-table-border` is the frame's own color, drawn where
-  // a cell is white; here it would be invisible. Both are named on `.table`, so
-  // the value is written out rather than read from a property out of reach.
-  border-bottom: var(--rak-border-width) solid var(--rak-primary-600);
-  // No fill of its own: it stands on the frame's, so it reads as the top of the
-  // table's own head rather than a band above it, and Firefox gets no second
-  // surface to hold. No `z-index` either, so the sticky header passes over it on
-  // the way up. See SCROLL-FLASH.md.
+  // Between the navbar above and the header below, so the three step down into
+  // the table. No border under it: the step off this fill is what divides the
+  // caption from the header, and a rule drawn in either neighbour's color would
+  // be a line one of them could not show.
+  background-color: var(--rak-primary-600);
+  // No `z-index`, so the sticky header passes over it on the way up.
+  // See SCROLL-FLASH.md.
   color: var(--rak-on-solid);
   // The header row's own type, so the two read as one head with a line drawn
   // through it rather than as two bands set differently. Both values are
