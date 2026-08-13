@@ -1,15 +1,15 @@
 # src/utils
 
-- `getLeagueInfo` / `getLeagueResults`: ESPN API fetch, calendar and week mapping,
+- `getLeagueInfo` / `getLeagueResults`: ESPN fetch, calendar and week mapping,
   plus `getGameResult`, one game by event id
-- `getRegularSeasonWeekCount`: a season's week count, cached per league and season
+- `getRegularSeasonWeekCount`: a season's week count, cached per league
 - `buildSpreadsheetBuffer`: the xlsx-js-style workbook export and its content type
 - `pickStatusFill`: pick colors for the export
 - `picksCache`: localStorage cache of an uploaded workbook, per season and week
 - `loadStoredPicks`: a week's workbook from the API, falling back to that cache
 - `debugLog`: scoring traces, silent outside a dev server
 - `latestOnly`: drops an async result its effect has outlived
-- `getClasses`: conditional className join
+- `getClasses`: className join, fixed and conditional names together
 - `plural`: a count and its noun, pluralized
 - `rangeWithPrefix`: labeled index arrays (C1, C2…)
 - `readFileToBuffer`: an uploaded spreadsheet's bytes

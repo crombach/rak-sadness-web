@@ -79,7 +79,7 @@ export default function PageLayout({
 
   return (
     <div
-      className={`page ${getClasses({ "--tiles-loaded": areTilesLoaded })}`}
+      className={getClasses("page", { "--tiles-loaded": areTilesLoaded })}
       style={BACKGROUND_STYLE}
     >
       <a className="page__skip-link" href="#main">
@@ -88,10 +88,10 @@ export default function PageLayout({
       <Navbar left={navbarLeft} right={navbarRight} />
       <main
         id="main"
-        className={`page__content ${getClasses({
+        className={getClasses("page__content", {
           "--scores": showingScores,
           "--frozen": !scrollable,
-        })}`}
+        })}
       >
         <h1 className="page__title">{title}</h1>
         {children}
