@@ -1,6 +1,11 @@
+@use "../../styles/breakpoints" as *;
+
 .results-scores {
   display: flex;
   flex-direction: column;
+  // The whole box on a phone, where a table narrower than the screen would leave
+  // a band of page beside a frame that stops short. A roomier screen hugs the
+  // table instead, at the foot of this file.
   width: 100%;
   // As wide as the table, not as wide as the window. Left at the window's width
   // this stopped at the first screenful, and every column past it had nothing
@@ -20,4 +25,17 @@
   // height; painted the same, it reads as that row being the taller for it rather
   // than as the page running out before the table does.
   background-color: var(--rak-primary-800);
+}
+
+// Room enough that the table does not fill the width, so the frame is cut to the
+// table and what is left either side is the page's own tiled blue, the same
+// background the home page stands on.
+@include roomy-screen {
+  .results-scores {
+    width: max-content;
+    // The panel the page carries on every other route, handed to the table now
+    // that it is the thing standing on the blue. `PageLayout.scss` gives this up
+    // at the same width.
+    box-shadow: var(--rak-shadow-overlay);
+  }
 }

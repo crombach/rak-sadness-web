@@ -76,8 +76,14 @@
     // header, so the surface every other page carries goes back below.
     background-color: var(--rak-primary-800);
 
+    // Nothing of its own, so the tiled blue behind the page shows either side of
+    // the table, which is what every other page stands on. The shadow goes with
+    // it: it is what lifts a panel off that blue, and with the fill gone there is
+    // no panel here to lift. `ResultsFrame.scss` puts it on the table, which is
+    // what stands on the blue instead.
     @include roomy-screen {
-      background-color: var(--rak-surface);
+      background-color: transparent;
+      box-shadow: none;
     }
   }
 
