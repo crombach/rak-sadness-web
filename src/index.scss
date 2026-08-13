@@ -157,11 +157,17 @@
 
   // How far an even row is taken from the fill its cells already carry. One value
   // for every column, so a striped name cell, a striped pick, and a striped score
-  // are all the same step apart from their odd-row neighbours. The hover and
-  // active steps in `Table.scss` are set past this one, so a cell darkened by the
-  // pointer is never read as a striped row.
+  // are all the same step apart from their odd-row neighbours.
   --rak-stripe-strength: 86%;
   --rak-stripe-with: var(--rak-primary-800);
+
+  // How far a cell under the pointer is taken from the fill it carries, striped
+  // or not. Both are set well past the stripe above, so a cell darkened by the
+  // pointer is never read as the striped row below it. The pressed step is as
+  // dark as a cell goes: black text on a striped knocked-out cell still clears
+  // 5:1 there.
+  --rak-hover-strength: 75%;
+  --rak-press-strength: 68%;
 
   // The status icon beside a player's name, drawn the same size wherever the
   // name is. The wireframe leaves this much room without drawing one.

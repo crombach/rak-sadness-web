@@ -118,6 +118,12 @@ describe("PlayerAnalysisDialog", () => {
     await user.type(search, "Ali");
     await user.click(await screen.findByRole("option", { name: "Alice" }));
 
+    // Picking puts the mark back beside the input, in the same pass the name
+    // lands in it.
+    expect(
+      document.querySelector(".player-analysis__input-status"),
+    ).toBeInTheDocument();
+
     // Announced as busy while the search runs, on the region a screen reader
     // reads politely once the answer replaces it.
     expect(

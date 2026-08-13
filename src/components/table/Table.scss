@@ -161,19 +161,23 @@
       // is the same arithmetic but puts the cell on a rendering surface of its
       // own. A finger landing on a cell is the moment before a fling, so on a
       // phone that surface is built and torn down exactly as the scroll starts.
-
-      // A step of its own, well past the one between an odd row and an even one,
-      // so a hovered odd row is never mistaken for the striped row below it.
+      // Both steps are named in `index.scss`, beside the stripe they clear.
       @include can-hover {
         &:hover {
-          background-color: color-mix(in srgb, var(--rak-cell-fill) 75%, black);
+          background-color: color-mix(
+            in srgb,
+            var(--rak-cell-fill) var(--rak-hover-strength),
+            black
+          );
         }
       }
 
-      // As dark as a cell goes. Black text on a striped knocked-out cell still
-      // clears 5:1 here.
       &:active {
-        background-color: color-mix(in srgb, var(--rak-cell-fill) 68%, black);
+        background-color: color-mix(
+          in srgb,
+          var(--rak-cell-fill) var(--rak-press-strength),
+          black
+        );
       }
     }
 
