@@ -78,6 +78,9 @@
   --rak-z-below: -1;
   --rak-z-sticky-cell: 10;
   --rak-z-sticky-header: 20;
+  // The header cell of the column that also sticks left. Above the header cells
+  // after it in the table, which pass under it as the table scrolls sideways.
+  --rak-z-sticky-corner: 25;
   --rak-z-skeleton: 30;
   --rak-z-navbar: 100;
   --rak-z-overlay: 200;

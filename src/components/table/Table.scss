@@ -50,12 +50,17 @@
   }
 
   .table__header {
-    z-index: var(--rak-z-sticky-header);
-    position: sticky;
-    top: 0;
     background-color: var(--rak-primary-800);
 
     th {
+      // Each cell sticks on its own rather than the row's section doing it for
+      // them. The player column sticks left, and a cell sticking inside a
+      // sticky <thead> is a case Firefox on Android hands back to the main
+      // thread, which lands it a frame or two behind a fling. What shows in the
+      // gap is the white underneath.
+      z-index: var(--rak-z-sticky-header);
+      position: sticky;
+      top: 0;
       color: var(--rak-on-solid);
       background-color: var(--rak-primary-800);
       // The header row is what a fixed layout reads its columns off, so the widths
@@ -83,7 +88,11 @@
         border-left: var(--rak-table-header-border);
       }
 
+      // The corner, stuck to the top and the left at once. Above its neighbours
+      // rather than level with them: they come after it in the table, so at the
+      // same step they would draw over it on the way past.
       &.table__player-col {
+        z-index: var(--rak-z-sticky-corner);
         width: var(--rak-table-player-width);
       }
 
@@ -146,38 +155,47 @@
       // its hit area.
       padding: 0;
       cursor: pointer;
-      transition: filter 150ms;
+      transition: background-color 150ms;
+
+      // Mixed toward black rather than run through `filter: brightness()`, which
+      // is the same arithmetic but puts the cell on a rendering surface of its
+      // own. A finger landing on a cell is the moment before a fling, so on a
+      // phone that surface is built and torn down exactly as the scroll starts.
 
       // A step of its own, well past the one between an odd row and an even one,
       // so a hovered odd row is never mistaken for the striped row below it.
       @include can-hover {
         &:hover {
-          filter: brightness(0.75);
+          background-color: color-mix(in srgb, var(--rak-cell-fill) 75%, black);
         }
       }
 
       // As dark as a cell goes. Black text on a striped knocked-out cell still
       // clears 5:1 here.
       &:active {
-        filter: brightness(0.68);
+        background-color: color-mix(in srgb, var(--rak-cell-fill) 68%, black);
       }
     }
 
     .table__player-col {
       border-left: var(--rak-table-border);
-      --rak-cell-fill: var(--rak-in-contention-300);
+      --rak-cell-base: var(--rak-in-contention-300);
 
       &.--knocked-out {
-        --rak-cell-fill: var(--rak-knocked-out-300);
+        --rak-cell-base: var(--rak-knocked-out-300);
       }
     }
 
     td {
       color: black;
-      // Every cell names the fill it carries and reads it back here, so an even row
-      // is one rule rather than one per column. A column with a fill of its own
-      // says so by setting this, and its stripe follows.
-      --rak-cell-fill: var(--rak-surface);
+      // Every cell names the color its column carries and reads the fill back
+      // here, so an even row is one rule rather than one per column. A column
+      // with a color of its own says so by setting the base, and its stripe
+      // follows. Two properties rather than one because the fill is what a
+      // pressed cell mixes from, and it has to be the striped color on a striped
+      // row.
+      --rak-cell-base: var(--rak-surface);
+      --rak-cell-fill: var(--rak-cell-base);
       background-color: var(--rak-cell-fill);
       font-family: var(--rak-font-mono);
       // A column is the width it was declared, so the rare value too long for one is
@@ -197,9 +215,9 @@
     }
 
     tr:nth-child(even) td {
-      background-color: color-mix(
+      --rak-cell-fill: color-mix(
         in srgb,
-        var(--rak-cell-fill) var(--rak-stripe-strength),
+        var(--rak-cell-base) var(--rak-stripe-strength),
         var(--rak-stripe-with)
       );
     }
