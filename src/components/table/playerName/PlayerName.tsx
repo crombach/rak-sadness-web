@@ -10,9 +10,9 @@ function PlayerName({ player }: { player: PlayerScore }) {
 
   return (
     <td
-      className={`table__player-col ${getClasses({
+      className={getClasses("table__player-col", {
         "--knocked-out": player.status.isKnockedOut,
-      })}`}
+      })}
     >
       <button
         type="button"

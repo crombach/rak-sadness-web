@@ -3,6 +3,7 @@ import { GameScore } from "../../types/GameScore";
 import { LeagueResult } from "../../types/LeagueResult";
 import { Status } from "../../types/RakMadnessScores";
 import debugLog from "../debugLog";
+import marginAgainstSpread from "./marginAgainstSpread";
 import parsePick from "./parsePick";
 
 export function getStatus(score: GameScore): Status {
@@ -108,25 +109,17 @@ export function getPickResults(
       );
     }
 
-    // A tie counts as picking the winner, and so does an unfinished game, which
-    // has no winner either. The unfinished case is harmless because nothing reads
-    // `pointValue` until `isCompleted`.
-    const pickedWinner =
-      gameResult.winner.team === null ||
-      gameResult.winner.team.abbreviation === selectedTeam;
-
-    // How far ahead the picked team finished once the spread is applied. A push
-    // counts as a win, which is why this is >= rather than >.
-    // `winner.by` is only signed from the picked team's side once the game is
-    // final, so this value means nothing until `isCompleted`.
-    const marginAgainstSpread =
-      (pickedWinner ? gameResult.winner.by : -gameResult.winner.by) + spread;
-    const pointValue = marginAgainstSpread >= 0 ? 1 : 0;
+    // From the picked team's side, since that is the side the cell's spread is
+    // written from. A push counts as a win, which is why this is >= rather than >.
+    // Nothing reads `pointValue` until `isCompleted`, which is when the margin
+    // means anything.
+    const margin = marginAgainstSpread(gameResult, selectedTeam, spread);
+    const pointValue = margin >= 0 ? 1 : 0;
     debugLog("scored pick", {
       selectedTeam,
       spread,
       winnerBy: gameResult.winner.by,
-      marginAgainstSpread,
+      marginAgainstSpread: margin,
       pointValue,
     });
 

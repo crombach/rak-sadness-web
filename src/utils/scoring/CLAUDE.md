@@ -1,11 +1,12 @@
 # scoring
 
-The picks-to-scoreboard pipeline, a file per concern, sequenced by `getPlayerScores`.
+The picks-to-scoreboard pipeline, sequenced by `getPlayerScores`.
 
 - `parsePicksWorkbook`: xlsx buffer to rows, keys, matchups
 - `parsePick`: one cell to a team and a spread
 - `validateSpreads`: rows disagreeing on a spread
-- `getPickResults`: picks scored, and `getStatus`
+- `marginAgainstSpread`: a side's margin, line applied
+- `getPickResults`: picks scored, plus `getStatus`
 - `gameColumns`: `LEAGUES`, `LEAGUE_PREFIX`, `gameLabels`
 - `weekGames`: each column, its game, its line
 - `getTiebreakerScore`: the Monday night total
@@ -14,7 +15,7 @@ The picks-to-scoreboard pipeline, a file per concern, sequenced by `getPlayerSco
 - `isWeekDecided`: whether knockouts settled it
 - `remainingGames`: the open games
 - `unscoreableGames`: games nobody scores on
-- `isWeekOver`: whether the week has a result
+- `isWeekOver`: whether the week has finished
 - `applyKnockouts`: who can still win, why not
 - `getPlayerAnalysis`: what a player must do
-- `leagueResultFixtures`: game builders for the tests
+- `leagueResultFixtures`: test game builders

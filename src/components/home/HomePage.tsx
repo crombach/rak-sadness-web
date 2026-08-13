@@ -168,9 +168,9 @@ export default function HomePage() {
               onChange={handleFileUpload}
             />
             <Button
-              className={`home__button ${getClasses({
+              className={getClasses("home__button", {
                 "--hide": isBusy || !!scores,
-              })}`}
+              })}
               onClick={clickFileInput}
               disabled={!selectedWeek || isBusy}
             >

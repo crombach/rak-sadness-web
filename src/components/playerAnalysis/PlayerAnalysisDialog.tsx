@@ -114,9 +114,9 @@ export default function PlayerAnalysisDialog({
           itemToStringLabel={(option) => option.name}
           itemKey={(option) => option.name}
           optionClassName={(option) =>
-            `player-analysis__option ${getClasses({
+            getClasses("player-analysis__option", {
               "--knocked-out": option.isKnockedOut,
-            })}`
+            })
           }
           // The player named in the input is marked the way the tables mark them,
           // so the search says where they stand before the answer below it has
@@ -124,9 +124,9 @@ export default function PlayerAnalysisDialog({
           adornment={
             player != null && (
               <span
-                className={`player-analysis__input-status ${getClasses({
+                className={getClasses("player-analysis__input-status", {
                   "--knocked-out": player.isKnockedOut,
-                })}`}
+                })}
               >
                 <PlayerStatusIcon isKnockedOut={player.isKnockedOut} />
               </span>

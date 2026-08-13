@@ -46,15 +46,19 @@ export default function Button({
   /** Set where the button opens and closes something below it. */
   ariaExpanded?: boolean;
 }) {
-  const modifiers = getClasses({
-    [`--${variant}`]: true,
-    [`--${color}`]: true,
-    "--sm": size === "sm",
-    "--icon": iconOnly,
-    "--compact": compact,
-    "--selected": !!selected,
-    "--busy": busy,
-  });
+  const classes = getClasses(
+    "button",
+    {
+      [`--${variant}`]: true,
+      [`--${color}`]: true,
+      "--sm": size === "sm",
+      "--icon": iconOnly,
+      "--compact": compact,
+      "--selected": !!selected,
+      "--busy": busy,
+    },
+    className,
+  );
   return (
     <BaseButton
       type="button"
@@ -63,7 +67,7 @@ export default function Button({
       aria-pressed={selected}
       aria-disabled={ariaDisabled || undefined}
       aria-busy={busy || undefined}
-      className={`button ${modifiers} ${className}`}
+      className={classes}
       disabled={disabled}
       onClick={ariaDisabled ? () => {} : onClick}
     >

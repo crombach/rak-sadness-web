@@ -3,6 +3,7 @@ import { GameStatus, HomeAway } from "../../types/ESPN";
 import { GameSide, LeagueResult } from "../../types/LeagueResult";
 import { GameSpread, WeekGame } from "../../types/WeekGame";
 import getClasses from "../../utils/getClasses";
+import marginAgainstSpread from "../../utils/scoring/marginAgainstSpread";
 import "./GameStatusSummary.scss";
 
 /** Regulation is four quarters, and anything past them is overtime. */
@@ -155,29 +156,22 @@ type SideOutcome = "scored" | "missed";
  * on, and on the game itself where they did not. Nobody on a tie or a push, which the
  * pool scores for everybody either way.
  *
- * The same question `getPickResults` asks, from the favored side rather than from the
- * side a player picked.
+ * The same question `getPickResults` asks of a player's own pick, over the same
+ * `marginAgainstSpread`, read from the favored side rather than the picked one.
  */
 function scoringTeam(
   result: LeagueResult,
   spread?: GameSpread,
 ): string | undefined {
-  const winner = result.winner.team;
   if (spread == null) {
-    return winner?.abbreviation;
+    return result.winner.team?.abbreviation;
   }
-  // How far the favored side finished ahead, which is a negative number where it lost.
-  const margin =
-    winner == null
-      ? 0
-      : winner.abbreviation === spread.team
-        ? result.winner.by
-        : -result.winner.by;
-  const against = margin + spread.points;
-  if (against === 0) {
+  // Read from the favored side, which is the side `weekGames` writes the line from.
+  const margin = marginAgainstSpread(result, spread.team, spread.points);
+  if (margin === 0) {
     return undefined;
   }
-  return against > 0 ? spread.team : opponentOf(result, spread.team);
+  return margin > 0 ? spread.team : opponentOf(result, spread.team);
 }
 
 /**
@@ -281,10 +275,10 @@ function Score({
   const padded = isPadded(side.score, opponent.score);
   return (
     <p
-      className={`game-status__score --${homeAway}${getClasses({
+      className={getClasses("game-status__score", `--${homeAway}`, {
         "--scored": outcome === "scored",
         "--missed": outcome === "missed",
-      })}`}
+      })}
     >
       {/* Held apart from the marker beside it so the wireframe can draw a bar over
           the number alone, and so a number of one digit takes the room two do. */}
@@ -389,10 +383,10 @@ function Side({
           {homeAway === HomeAway.HOME ? "Home" : "Away"}
         </span>
         <span
-          className={`game-status__team-name${getClasses({
+          className={getClasses("game-status__team-name", {
             "--scored": outcome === "scored",
             "--missed": outcome === "missed",
-          })}`}
+          })}
         >
           {/* The abbreviation on a phone and the name once there is width for it.
               Both are in the page, so neither costs a measurement to choose
