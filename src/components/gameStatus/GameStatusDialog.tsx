@@ -96,9 +96,9 @@ function GameMark({
  * How a game in the week on screen is going, opened from a pick cell in the picks
  * table.
  *
- * The game is fetched again on the way in and every twenty seconds after that until it
- * is final, so a live game on screen is the game as it stands rather than as the
- * week was last scored.
+ * A game that has not finished is fetched again on the way in and every twenty seconds
+ * after that, so a live game on screen is the game as it stands rather than as the
+ * week was last scored. One already final is shown as the week scored it.
  */
 export default function GameStatusDialog({
   open,

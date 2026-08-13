@@ -14,8 +14,8 @@ export const POLL_MS = 20_000;
  *
  * The week's scores carry the game as it stood when they were worked out, which is
  * stale the moment a live game moves, so a game is fetched again before it is
- * shown and then on `POLL_MS` until it is final. A final game is fetched once and
- * left alone.
+ * shown and then on `POLL_MS` until it is final. A game already final when it is
+ * opened is shown as the scoring pass left it, because nothing about it can differ.
  *
  * The game already on screen stays there while the next one is fetched, the way the
  * player analysis holds the last answer up behind its progress bar. `games` is the
@@ -47,10 +47,15 @@ export default function useLiveGame({
   const label = game?.label;
   const league = game?.league;
   const eventId = game?.result?.id;
+  // A game the week was scored on after it finished cannot come back any other way,
+  // so it is shown as the scoring pass left it rather than asked about again.
+  const settled =
+    game?.result?.status === GameStatus.FINAL ? game.result : undefined;
 
   useEffect(() => {
     if (!open || games == null || week == null) return;
     if (label == null || league == null || eventId == null) return;
+    if (settled != null) return;
     let timer = 0;
     const stop = latestOnly(async (isCurrent) => {
       const poll = async () => {
@@ -83,13 +88,15 @@ export default function useLiveGame({
       // outstanding whatever it comes back with.
       setFetching(false);
     };
-  }, [open, games, label, league, eventId, week, season]);
+  }, [open, games, label, league, eventId, settled, week, season]);
 
   const shown =
-    found != null && found.games === games ? found.result : undefined;
+    settled ??
+    (found != null && found.games === games ? found.result : undefined);
   const isLoading =
     game != null &&
     eventId != null &&
+    settled == null &&
     (shown == null || found?.label !== label);
   // `isLoading` is the wait with nothing to show behind it, and `isFetching` every
   // wait, a poll of a game already on screen included.

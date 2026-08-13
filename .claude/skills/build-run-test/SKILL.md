@@ -40,7 +40,8 @@ Writing a test here:
 - Reading an exported workbook back flattens the fill onto `cell.s`, so assert `cell.s.fgColor.rgb`, not `cell.s.fill.fgColor.rgb`.
 - jsdom reports no layout: every rect is zero and `window.innerHeight` is 768. Anything that measures the page has its arithmetic tested apart from the hook that feeds it.
 - Mount `App` the way `index.tsx` does: inside `MemoryRouter`, `ToastContextProvider`, and `AppDataContextProvider`, with `Toaster` beside it. Toasts render in `Toaster`, so without it no toast assertion can pass.
-- Clear `localStorage` in `beforeEach` for anything that uploads. An upload caches its workbook per week, and jsdom keeps storage between cases, so a later case would find picks an earlier one left behind.
+- Clear `localStorage` in `beforeEach` for anything that uploads or scores. An upload caches its workbook per week, and `espnCache` holds the games of a week that is over plus a finished season's calendar, and jsdom keeps storage between cases. Without the clear a later case finds an answer an earlier one left behind, and asserting on `fetch` calls is what breaks.
+- `getLeagueInfo` also caches week counts in a module-level `Map` that no reset clears, so a case that counts calendar requests needs a season number no other case in the file uses. The existing ones use 3001 upward.
 - `mountLoadedApp` waits for the home controls, so it only works for URLs that land on `/`. Deep-link cases use `mountApp` and await something on the results route.
 - The week `Select` compares option values by reference, so a fixture's `activeWeek` must be the same object as its entry in `weeks`.
 - Don't name a helper `render*` unless it returns the render result — `testing-library/render-result-naming-convention` is an error, not a warning.
@@ -84,4 +85,4 @@ The scoring path logs through `src/utils/debugLog.ts`, which is silent when the 
 
 ## Offline
 
-`make setup` needs network (`npm ci`). `make build`, `make check`, `make test`, `make run` work offline once `node_modules` exists. `make run` fetches live ESPN endpoints at runtime (`src/utils/getLeagueInfo.ts`, `getLeagueResults.ts`), so scoring needs network even though the dev server does not.
+`make setup` needs network (`npm ci`). `make build`, `make check`, `make test`, `make run` work offline once `node_modules` exists. `make run` fetches live ESPN endpoints at runtime (`src/utils/getLeagueInfo.ts`, `getLeagueResults.ts`), so scoring needs network even though the dev server does not. A week `espnCache` has every answer for is the exception: it scores from `localStorage` and asks ESPN nothing.

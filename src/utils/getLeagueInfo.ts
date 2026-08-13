@@ -1,4 +1,5 @@
 import { League, LeagueInfo, SeasonType } from "../types/League";
+import { readCachedCalendar, writeCachedCalendar } from "./espnCache";
 
 type WeekEntry = {
   label: string;
@@ -96,6 +97,16 @@ async function fetchLeagueInfo(
   league: League,
   season?: number,
 ): Promise<LeagueInfo | null> {
+  // A season this browser has already seen the end of. Its schedule cannot gain
+  // another week, so it is read rather than asked for.
+  if (season != null) {
+    const held = readCachedCalendar<Scoreboard>(league, season);
+    const info = held != null ? toLeagueInfo(league, held) : null;
+    if (info != null) {
+      return info;
+    }
+  }
+
   // Get the ESPN league data.
   const response = await fetch(
     `https://site.api.espn.com/apis/site/v2/sports/football/${league}/scoreboard${
@@ -110,7 +121,38 @@ async function fetchLeagueInfo(
     return null;
   }
   const scoreboard: Scoreboard = await response.json();
+  const info = toLeagueInfo(league, scoreboard);
+  if (info != null && season != null && isSeasonOver(info)) {
+    // Only the calendar, not the whole answer, which carries a week of games with it.
+    writeCachedCalendar(league, season, {
+      leagues: scoreboard.leagues.filter(
+        (it) => it.slug === (league as string),
+      ),
+    });
+  }
+  return info;
+}
 
+/**
+ * Whether every week a season has is behind us.
+ *
+ * Read from the calendars that have weeks, because ESPN's Off Season calendar runs to
+ * the following August and would have a season looking unfinished for half a year
+ * after its last game.
+ */
+function isSeasonOver(info: LeagueInfo): boolean {
+  const now = new Date();
+  const dated = info.calendars.filter((calendar) => calendar.weeks.length > 0);
+  return (
+    dated.length > 0 &&
+    dated.every((calendar) => calendar.endDate.valueOf() < now.valueOf())
+  );
+}
+
+function toLeagueInfo(
+  league: League,
+  scoreboard: Scoreboard,
+): LeagueInfo | null {
   // Find the requested league. Should always be index 0, but we are being safe.
   const leagueMetadata = scoreboard.leagues.find(
     (it) => it.slug === (league as string),
