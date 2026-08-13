@@ -190,14 +190,15 @@ function outcomeText(result: LeagueResult, spread?: GameSpread): string {
 }
 
 /**
- * A one-digit score written `07` where the other side is into double figures.
+ * Whether a score is written with a leading zero, which is where it is in single
+ * figures and the other side is not.
  *
  * The pair reads as one number either side of the dash, and a lone digit beside a
  * two-digit number reads as the smaller of the two by its width before it is read at
  * all. Both sides in single figures are left alone: there is nothing to line up with.
  */
-function scoreText(score: number, opponentScore: number): string {
-  return score < 10 && opponentScore >= 10 ? `0${score}` : `${score}`;
+function isPadded(score: number, opponentScore: number): boolean {
+  return score < 10 && opponentScore >= 10;
 }
 
 /** Where the game is up to, over the scores. */
@@ -270,7 +271,7 @@ function Score({
   hasBall: boolean;
   covers: boolean;
 }) {
-  const text = scoreText(side.score, opponent.score);
+  const padded = isPadded(side.score, opponent.score);
   return (
     <p
       className={`game-status__score --${homeAway}${getClasses({
@@ -282,10 +283,10 @@ function Score({
       <span
         className="game-status__points"
         // A padded number is read out as two of them, so the score itself is what
-        // is announced wherever the two differ.
-        aria-label={text === `${side.score}` ? undefined : `${side.score}`}
+        // is announced instead.
+        aria-label={padded ? `${side.score}` : undefined}
       >
-        {text}
+        {padded ? `0${side.score}` : side.score}
       </span>
       <Marker homeAway={homeAway} hasBall={hasBall} />
     </p>
@@ -302,12 +303,11 @@ function Score({
 function Center({
   result,
   spread,
-  covered,
+  covers,
 }: {
   result: LeagueResult;
   spread?: GameSpread;
-  /** Which side beat the line, where the game is over and one of them did. */
-  covered?: string;
+  covers: (side: GameSide) => boolean;
 }) {
   // Who has the ball is nobody's before kickoff, and a marker left on the winner
   // reads as a game still going.
@@ -322,7 +322,7 @@ function Center({
           opponent={result.away}
           homeAway={HomeAway.HOME}
           hasBall={hasBall(HomeAway.HOME)}
-          covers={result.home.team.abbreviation === covered}
+          covers={covers(result.home)}
         />
         <span aria-hidden="true" className="game-status__dash">
           {SCORE_DASH}
@@ -332,7 +332,7 @@ function Center({
           opponent={result.home}
           homeAway={HomeAway.AWAY}
           hasBall={hasBall(HomeAway.AWAY)}
-          covers={result.away.team.abbreviation === covered}
+          covers={covers(result.away)}
         />
       </div>
       <Note result={result} spread={spread} />
@@ -433,6 +433,8 @@ function Game({
     result.status === GameStatus.FINAL
       ? coveringTeam(result, spread)
       : undefined;
+  const covers = (side: GameSide) =>
+    covered != null && side.team.abbreviation === covered;
   return (
     <>
       <p className="game-status__spread">
@@ -444,14 +446,14 @@ function Game({
           side={result.home}
           homeAway={HomeAway.HOME}
           logo={logo?.(result.home)}
-          covers={result.home.team.abbreviation === covered}
+          covers={covers(result.home)}
         />
-        <Center result={result} spread={spread} covered={covered} />
+        <Center result={result} spread={spread} covers={covers} />
         <Side
           side={result.away}
           homeAway={HomeAway.AWAY}
           logo={logo?.(result.away)}
-          covers={result.away.team.abbreviation === covered}
+          covers={covers(result.away)}
         />
       </div>
       {/* Under the scoreline rather than over it: the game is what the dialog was

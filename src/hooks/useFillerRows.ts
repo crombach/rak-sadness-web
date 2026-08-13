@@ -16,13 +16,14 @@ const DEFAULT_ROW_HEIGHT = 32;
  * every time it ran.
  */
 export function fillerRowCount({
-  viewportHeight,
+  fillToBottom,
   tableTop,
   tableHeight,
   rowHeight,
   fillerHeight,
 }: {
-  viewportHeight: number;
+  /** The line in client coordinates the rows are carried down to. */
+  fillToBottom: number;
   tableTop: number;
   tableHeight: number;
   rowHeight: number;
@@ -32,7 +33,7 @@ export function fillerRowCount({
     return 0;
   }
   const contentHeight = tableHeight - fillerHeight;
-  const spare = viewportHeight - tableTop - contentHeight;
+  const spare = fillToBottom - tableTop - contentHeight;
   return Math.max(Math.floor(spare / rowHeight), 0);
 }
 
@@ -81,7 +82,7 @@ export default function useFillerRows(
     ).reduce((sum, row) => sum + row.getBoundingClientRect().height, 0);
     setCount(
       fillerRowCount({
-        viewportHeight: fillToY(scrollBoxOf(table)),
+        fillToBottom: fillToY(scrollBoxOf(table)),
         tableTop: top,
         tableHeight: height,
         rowHeight: readRowHeight(table),

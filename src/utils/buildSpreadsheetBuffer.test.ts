@@ -63,7 +63,7 @@ async function readBack(
   week = WEEK,
   season = SEASON,
 ): Promise<XLSX.WorkBook> {
-  const buffer = await buildSpreadsheetBuffer(scoresObject, week, season);
+  const buffer = await buildSpreadsheetBuffer(scoresObject, { season, week });
   return XLSX.read(buffer, { type: "array", cellStyles: true });
 }
 
@@ -93,7 +93,10 @@ describe("buildSpreadsheetBuffer, workbook shape", () => {
   });
 
   it("produces a buffer that parses as a workbook", async () => {
-    const buffer = await buildSpreadsheetBuffer(scores, WEEK, SEASON);
+    const buffer = await buildSpreadsheetBuffer(scores, {
+      season: SEASON,
+      week: WEEK,
+    });
     expect(buffer.byteLength).toBeGreaterThan(0);
   });
 });

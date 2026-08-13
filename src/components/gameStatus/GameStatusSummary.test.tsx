@@ -289,32 +289,35 @@ describe("GameStatusSummary, the two scores as a pair", () => {
 });
 
 describe("GameStatusSummary, the side that beat the line", () => {
-  function coveringNames(
+  function marked(
     spread: WeekGame["spread"],
     over: Partial<LeagueResult> = {},
-  ): Array<string> {
+  ): { names: Array<string>; scores: Array<string> } {
     // Buffalo won by ten, at home.
     const played = result(over);
     render(<GameStatusSummary game={game(played, spread)} result={played} />);
-    return [
-      ...document.querySelectorAll(
+    const textOf = (selector: string) =>
+      [...document.querySelectorAll(selector)].map(
+        (el) => el.textContent ?? "",
+      );
+    return {
+      names: textOf(
         ".game-status__team-name.--covers .game-status__name-short",
       ),
-    ].map((name) => name.textContent ?? "");
+      scores: textOf(".game-status__score.--covers .game-status__points"),
+    };
   }
 
-  /** Read off whatever `coveringNames` last rendered. */
-  function coveringScores(): Array<string> {
-    return [
-      ...document.querySelectorAll(
-        ".game-status__score.--covers .game-status__points",
-      ),
-    ].map((span) => span.textContent ?? "");
-  }
+  const coveringNames = (
+    spread: WeekGame["spread"],
+    over: Partial<LeagueResult> = {},
+  ) => marked(spread, over).names;
 
   it("marks the name and the score of the side that covered, and only that side", () => {
-    expect(coveringNames({ team: "BUF", points: -3 })).toEqual(["BUF"]);
-    expect(coveringScores()).toEqual(["30"]);
+    expect(marked({ team: "BUF", points: -3 })).toEqual({
+      names: ["BUF"],
+      scores: ["30"],
+    });
   });
 
   it("marks the underdog where the favorite won by less than it gave", () => {

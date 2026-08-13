@@ -20,11 +20,10 @@ export default function useExportScores(
     const exportResultsAsync = async () => {
       setExportLoading(true);
       try {
-        const spreadsheetBuffer = await buildSpreadsheetBuffer(
-          scores,
-          week.value,
+        const spreadsheetBuffer = await buildSpreadsheetBuffer(scores, {
           season,
-        );
+          week: week.value,
+        });
 
         const blob = new Blob([spreadsheetBuffer], {
           type: XLSX_CONTENT_TYPE,

@@ -128,8 +128,9 @@ function sheetName(season: number, week: number, view: string): string {
  */
 export default async function buildSpreadsheetBuffer(
   scoresObject: RakMadnessScores,
-  week: number,
-  season: number,
+  // Named rather than positional: two numbers side by side, and a call with them
+  // the wrong way round would come out as a workbook for week 2025.
+  { season, week }: { season: number; week: number },
 ): Promise<ArrayBuffer> {
   const XLSX = await import("xlsx-js-style");
   // Create a new Excel workbook.
