@@ -50,13 +50,9 @@ describe("SkeletonTable", () => {
         ".table.--skeleton tbody tr:not(.table__last-row):not(.table__filler-row)",
       ),
     ).toHaveLength(0);
-    // More rows than the window has room for either way, so the wireframe scrolls
-    // the way the table it stands in for will and the scrollbar is already there
-    // when the week lands. jsdom reports no layout, so what the rows are measured
-    // to fill is the whole window and the floor is what shows above it here.
-    // `useFillerRows` covers the measuring on its own.
-    expect(
-      document.querySelectorAll(".table__filler-row").length,
-    ).toBeGreaterThan(Math.floor(window.innerHeight / 32));
+    // `PLAYER_COUNT`, the usual field the wireframe stands in for, which is more
+    // than a screen shows at once up to 4K. jsdom measures nothing, so the floor is
+    // the whole count here and the measuring is `useFillerRows`'s own test.
+    expect(document.querySelectorAll(".table__filler-row")).toHaveLength(60);
   });
 });
