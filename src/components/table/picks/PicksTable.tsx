@@ -100,7 +100,7 @@ function PicksTable({ scores }: { scores?: RakMadnessScores | null }) {
             {player.college.map((result, index) => (
               <td
                 key={`${player.name}-${collegeLabels[index]}`}
-                className={`table__center table__pick --${result.status}`}
+                className={`table__pick --${result.status}`}
               >
                 <PickCell
                   result={result}
@@ -109,11 +109,11 @@ function PicksTable({ scores }: { scores?: RakMadnessScores | null }) {
                 />
               </td>
             ))}
-            <td className="table__center">{player.score.college}</td>
+            <td>{player.score.college}</td>
             {player.pro.map((result, index) => (
               <td
                 key={`${player.name}-${proLabels[index]}`}
-                className={`table__center table__pick --${result.status}`}
+                className={`table__pick --${result.status}`}
               >
                 <PickCell
                   result={result}
@@ -122,8 +122,8 @@ function PicksTable({ scores }: { scores?: RakMadnessScores | null }) {
                 />
               </td>
             ))}
-            <td className="table__center">{player.score.pro}</td>
-            <td className="table__center">
+            <td>{player.score.pro}</td>
+            <td>
               <b>{player.score.total}</b>
             </td>
           </tr>

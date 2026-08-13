@@ -118,6 +118,12 @@ describe("PlayerAnalysisDialog", () => {
     await user.type(search, "Ali");
     await user.click(await screen.findByRole("option", { name: "Alice" }));
 
+    // Picking puts the mark back beside the input, in the same pass the name
+    // lands in it.
+    expect(
+      document.querySelector(".player-analysis__input-status"),
+    ).toBeInTheDocument();
+
     // Announced as busy while the search runs, on the region a screen reader
     // reads politely once the answer replaces it.
     expect(
@@ -208,6 +214,9 @@ describe("PlayerAnalysisDialog", () => {
     expect(
       screen.getByText("Knocked out on Total Score by Alice."),
     ).toBeInTheDocument();
+    // The mark beside the input speaks for the name that was in it, so it goes
+    // with the name rather than standing over an empty search.
+    expect(document.querySelector(".player-analysis__input-status")).toBeNull();
 
     // Dismissing puts the chosen name back, since the answer below is still that
     // player's.
@@ -215,6 +224,9 @@ describe("PlayerAnalysisDialog", () => {
     expect(screen.getByRole("combobox", { name: "Player" })).toHaveValue(
       "Bobby",
     );
+    expect(
+      document.querySelector(".player-analysis__input-status"),
+    ).toBeInTheDocument();
 
     // Only a press empties the search. A letter typed into it opens the list too,
     // and wiping on that would take the letter that opened it. Typed straight at
@@ -224,5 +236,8 @@ describe("PlayerAnalysisDialog", () => {
     expect(screen.getByRole("combobox", { name: "Player" })).toHaveValue(
       "Bobbyx",
     );
+    // Half a name reaches nobody yet, so there is nobody for the mark to speak
+    // for until the next one is picked.
+    expect(document.querySelector(".player-analysis__input-status")).toBeNull();
   });
 });

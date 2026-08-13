@@ -7,12 +7,19 @@
   // it never draws.
   gap: var(--rak-player-icon-gap);
 
-  // The cell's font is monospace, so 18ch is exactly 18 characters. A longer name
-  // is cut short rather than wrapped, because a wrapped name would make its row
-  // taller than every other row in the table. The whole name is in the player
-  // analysis the cell opens.
+  // The icon keeps its size whatever the name is. Left to shrink it would be the
+  // one thing in the row that gets smaller as a name gets longer.
+  > .player-status-icon {
+    flex-shrink: 0;
+  }
+
+  // The room the column leaves a name, worked out in `Table.scss` beside the
+  // width it comes out of. Cut short rather than wrapped, because a wrapped name
+  // would make its row taller than every other row in the table. The whole name
+  // is in the player analysis the cell opens.
   .player-name__name {
-    max-width: 18ch;
+    min-width: 0;
+    max-width: var(--rak-table-player-name-width);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

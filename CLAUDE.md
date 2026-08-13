@@ -13,6 +13,8 @@ worth showing. Deployed to Cloudflare Pages (`wrangler`);
 absolute path: `manifest.json`, the `favicon.ico` and `logo*.png` icons, and
 `robots.txt`. The HTML shell is `index.html` at the repo root.
 
+[`SCROLL-FLASH.md`](SCROLL-FLASH.md): an open bug, read before changing sticky.
+
 ## Subdirectories
 
 - [`src/`](src/CLAUDE.md) — application source

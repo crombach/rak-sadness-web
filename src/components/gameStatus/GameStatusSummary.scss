@@ -136,9 +136,9 @@
 // What is the same about the game however it is going: when it starts and where it
 // is being played. Under the scoreline, as a footnote to it.
 //
-// One line where the dialog is wide enough to hold both, wrapping back to two where
-// a long venue name needs it. Set apart by the space between them rather than by a
-// glyph, since each half already reads with a `·` inside it.
+// One line where the dialog is wide enough to hold both halves, wrapping back to two
+// where it is not. Set apart by the space between them rather than by a glyph, since
+// each half already reads with a `·` inside it.
 .game-status__meta {
   display: flex;
   flex-direction: column;
@@ -167,6 +167,14 @@
       @include meta-dot;
     }
   }
+}
+
+// The one part of the strip that goes anywhere. Underlined rather than colored, so
+// it reads as a link without pulling the eye off the scoreline the dialog was opened
+// for.
+.game-status__gamecast {
+  color: inherit;
+  text-decoration: underline;
 }
 
 // Held to a square whatever shape the mark is, so a wide logo and a tall one take

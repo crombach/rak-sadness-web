@@ -15,12 +15,6 @@ export type Possession = {
   downDistanceText?: string;
 };
 
-export type GameVenue = {
-  name: string;
-  city?: string;
-  state?: string;
-};
-
 export type GameSide = {
   team: Team;
   score: number;
@@ -51,7 +45,11 @@ export type LeagueResult = {
    * against it, so the two sides are only ever said to be home and away where they are.
    */
   isNeutralSite: boolean;
-  venue?: GameVenue;
+  /**
+   * The town the game is played in, like `Orchard Park, NY`. Absent where ESPN sent
+   * no address for the ground, which the smaller college venues have.
+   */
+  venue?: string;
   possession: Possession;
   winner: {
     team: Team | null;

@@ -47,8 +47,12 @@
   width: min(1024px, 100%);
   max-width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  // Centered while what is inside fits, aligned to the start once it does not.
+  // Plain centering splits the overflow across both edges, and the half that
+  // goes off the near side cannot be scrolled back to: a table wider than the
+  // window would lose its first columns for good.
+  align-items: safe center;
+  justify-content: safe center;
   box-shadow: var(--rak-shadow-overlay);
   overflow: auto;
   // The room a scrollbar needs, held whether or not there is one, so a week long
@@ -63,6 +67,30 @@
   // inside this instead, and a wide one scrolls.
   &.--scores {
     width: 100%;
+    // The scrolling box's own fill, which is what Firefox paints into a region it
+    // has not rasterized yet. It reads this element rather than whatever is drawn
+    // inside it, so the frame's fill on `.results-scores` never reached it and a
+    // fast fling filled the gap with the white above. A phone's table is as wide as
+    // the box, so nothing but that gap ever shows this. A roomier screen leaves
+    // room beside the table, where it would show as a second dark band against the
+    // header, so the surface every other page carries goes back below.
+    background-color: var(--rak-primary-800);
+
+    // Nothing of its own, so the tiled blue behind the page shows either side of
+    // the table, which is what every other page stands on. The shadow goes with
+    // it: it is what lifts a panel off that blue, and with the fill gone there is
+    // no panel here to lift. `ResultsFrame.scss` puts it on the table, which is
+    // what stands on the blue instead.
+    @include roomy-screen {
+      background-color: transparent;
+      box-shadow: none;
+      // The room held for a scrollbar above goes with the fill. Held, it is a
+      // strip of the box the frame cannot reach, which used to be the same white
+      // as the box and is now the page showing through. It bought nothing here
+      // either: the table is `max-content` at this width, so a box narrower by a
+      // scrollbar moves where the table is centered rather than how wide it is.
+      scrollbar-gutter: auto;
+    }
   }
 
   // The wireframe is the size of the table it stands in for, so the surest way to
@@ -72,6 +100,15 @@
   // its band out of the page. Refusing the pointer is what keeps this unscrollable.
   &.--frozen {
     pointer-events: none;
+
+    // Except across, where there is room to spare. A bar under a wireframe that
+    // refuses the pointer offers a scroll nothing can take, and at this width the
+    // wireframe is the only thing that would draw one. The band it held is given
+    // up with it, so a week wide enough to need a bar takes that height when it
+    // lands rather than before.
+    @include roomy-screen {
+      overflow-x: hidden;
+    }
   }
 }
 

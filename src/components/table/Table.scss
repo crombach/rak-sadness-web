@@ -1,6 +1,15 @@
 @use "../../styles/breakpoints" as *;
 @use "../../styles/a11y" as *;
 
+// A cell taken the given distance toward black, from whatever fill it carries,
+// striped or not. Mixed rather than run through `filter: brightness()`, which is
+// the same arithmetic but puts the cell on a rendering surface of its own. A
+// finger landing on a cell is the moment before a fling, so on a phone that
+// surface is built and torn down exactly as the scroll starts.
+@mixin cell-darkened($strength) {
+  background-color: color-mix(in srgb, var(--rak-cell-fill) $strength, black);
+}
+
 .table {
   // Centered across, and flush to the top, which is where the wireframe stands. The
   // rows below carry the table to the bottom of the window, and what is left under
@@ -22,7 +31,9 @@
   // and a score are two digits, a pick is a team and its spread, and a name runs to
   // whatever a player calls themselves.
   --rak-table-rank-width: 3.5em;
-  --rak-table-player-width: 11em;
+  // Room for about seventeen characters of a name, plus the status icon and the
+  // gap before it.
+  --rak-table-player-width: 13.5em;
   --rak-table-pick-width: 6.5em;
   --rak-table-score-width: 8em;
   // Read back by useFillerRows, which needs a row height to work out how many
@@ -35,6 +46,20 @@
   --rak-table-cell-padding-x: 6px;
   --rak-table-cell-padding-y: 2px;
   --rak-table-header-padding-x: 8px;
+  // What is left of the player column for the name itself, once the status icon
+  // beside it, the gap between them, and the cell's own padding and edges have
+  // taken theirs. `PlayerName.scss` cuts the name off here rather than at a count
+  // of characters, because a name long enough to widen the column is a name the
+  // wireframe did not have when it drew that column at the width above. Derived
+  // from the same value, the two cannot disagree. The edges come out of it
+  // because `box-sizing` is `border-box`, so the width above is the whole cell
+  // rather than the room inside it.
+  --rak-table-player-name-width: calc(
+    var(--rak-table-player-width) - var(--rak-player-icon-size) - var(
+        --rak-player-icon-gap
+      ) -
+      2 * var(--rak-table-cell-padding-x) - 2 * var(--rak-border-width)
+  );
   --rak-table-border: var(--rak-border-width) solid var(--rak-primary-800);
   --rak-table-header-border: var(--rak-border-width) solid
     var(--rak-primary-600);
@@ -50,12 +75,17 @@
   }
 
   .table__header {
-    z-index: var(--rak-z-sticky-header);
-    position: sticky;
-    top: 0;
     background-color: var(--rak-primary-800);
 
     th {
+      // Each cell sticks on its own rather than the row's section doing it for
+      // them. The player column sticks left, and a cell sticking inside a
+      // sticky <thead> is a case Firefox on Android hands back to the main
+      // thread, which lands it a frame or two behind a fling. What shows in the
+      // gap is the white underneath.
+      z-index: var(--rak-z-sticky-header);
+      position: sticky;
+      top: 0;
       color: var(--rak-on-solid);
       background-color: var(--rak-primary-800);
       // The header row is what a fixed layout reads its columns off, so the widths
@@ -83,7 +113,11 @@
         border-left: var(--rak-table-header-border);
       }
 
+      // The corner, stuck to the top and the left at once. Above its neighbours
+      // rather than level with them: they come after it in the table, so at the
+      // same step they would draw over it on the way past.
       &.table__player-col {
+        z-index: var(--rak-z-sticky-corner);
         width: var(--rak-table-player-width);
       }
 
@@ -91,10 +125,6 @@
         width: var(--rak-table-pick-width);
       }
     }
-  }
-
-  .table__center {
-    text-align: center;
   }
 
   // The clickable surface inside a tappable cell. The cell keeps the fill and the
@@ -129,9 +159,13 @@
     white-space: nowrap;
   }
 
-  // Stick the player column to the left side of the screen.
+  // Stick the player column to the left side of the screen. No `z-index`, which
+  // would make each of these cells a stacking context and take it out of the layer
+  // Firefox rasterizes the scrolled content into. What is left where it was taken
+  // from is filled with the scrolling box's own color, which is the flash. A
+  // positioned cell already draws over the static ones beside it, and the header
+  // sets a `z-index` of its own to stay over this on the way past.
   .table__player-col {
-    z-index: var(--rak-z-sticky-cell);
     position: sticky;
     left: 0;
   }
@@ -146,38 +180,47 @@
       // its hit area.
       padding: 0;
       cursor: pointer;
-      transition: filter 150ms;
+      transition: background-color 150ms;
 
-      // A step of its own, well past the one between an odd row and an even one,
-      // so a hovered odd row is never mistaken for the striped row below it.
+      // Both steps are named in `index.scss`, beside the stripe they clear.
       @include can-hover {
         &:hover {
-          filter: brightness(0.75);
+          @include cell-darkened(var(--rak-hover-strength));
         }
       }
 
-      // As dark as a cell goes. Black text on a striped knocked-out cell still
-      // clears 5:1 here.
       &:active {
-        filter: brightness(0.68);
+        @include cell-darkened(var(--rak-press-strength));
       }
     }
 
     .table__player-col {
       border-left: var(--rak-table-border);
-      --rak-cell-fill: var(--rak-in-contention-300);
+      // A name is read, not compared down the column, and it is the one cell cut
+      // short with an ellipsis. Centering would move where it starts from row to
+      // row and put the cut at both ends.
+      text-align: left;
+      --rak-cell-base: var(--rak-in-contention-300);
 
       &.--knocked-out {
-        --rak-cell-fill: var(--rak-knocked-out-300);
+        --rak-cell-base: var(--rak-knocked-out-300);
       }
     }
 
     td {
       color: black;
-      // Every cell names the fill it carries and reads it back here, so an even row
-      // is one rule rather than one per column. A column with a fill of its own
-      // says so by setting this, and its stripe follows.
-      --rak-cell-fill: var(--rak-surface);
+      // Every cell holds a number or a short pick, which reads as a column when
+      // it is centered under a centered heading. The name is the exception, and
+      // sets itself back below.
+      text-align: center;
+      // Every cell names the color its column carries and reads the fill back
+      // here, so an even row is one rule rather than one per column. A column
+      // with a color of its own says so by setting the base, and its stripe
+      // follows. Two properties rather than one because the fill is what a
+      // pressed cell mixes from, and it has to be the striped color on a striped
+      // row.
+      --rak-cell-base: var(--rak-surface);
+      --rak-cell-fill: var(--rak-cell-base);
       background-color: var(--rak-cell-fill);
       font-family: var(--rak-font-mono);
       // A column is the width it was declared, so the rare value too long for one is
@@ -197,9 +240,9 @@
     }
 
     tr:nth-child(even) td {
-      background-color: color-mix(
+      --rak-cell-fill: color-mix(
         in srgb,
-        var(--rak-cell-fill) var(--rak-stripe-strength),
+        var(--rak-cell-base) var(--rak-stripe-strength),
         var(--rak-stripe-with)
       );
     }
@@ -221,10 +264,14 @@
 }
 
 // A phone reads the tighter table, set on `.table` itself above. Room enough, and
-// both go back up.
+// these go back up.
 @include roomy-screen {
   .table {
     font-size: var(--rak-text-md);
     --rak-table-row-height: 32px;
+    // About twenty-four characters of a name here, against seventeen on a phone.
+    // The larger text alone would have bought only a wider letter, not more of
+    // them, since the width above grows with it.
+    --rak-table-player-width: 17em;
   }
 }

@@ -15,6 +15,15 @@ import "./SkeletonTable.scss";
 const COLLEGE_COUNT = 6;
 const PRO_COUNT = 13;
 
+/**
+ * The field a week is usually played by, which runs past sixty. More than most
+ * screens show, so the wireframe scrolls the way the table it stands in for will
+ * and the bar is already there when the week lands. `TableShell` carries it one row
+ * past the bottom of the box on top of this, for the screen tall enough to show
+ * sixty rows at once.
+ */
+const PLAYER_COUNT = 60;
+
 type Column = {
   header: string;
   /** A game's column, which the real table sizes and centers by its own class. */
@@ -84,24 +93,28 @@ function SkeletonTable({ view }: { view: ScoresView }) {
       <span className="skeleton__status" role="status">
         Loading {view.toLowerCase()} results
       </span>
-      <TableShell
-        className="--skeleton"
-        columnCount={columns.length}
-        ariaBusy
-        ariaHidden
-        header={columns.map((column, index) => (
-          // The heading itself, hidden, so a header that wraps to two lines is two
-          // lines tall here as well.
-          <th
-            key={index}
-            className={headerClass(column)}
-            scope="col"
-            data-skeleton-text={column.header}
-          >
-            <span className="skeleton__bar" />
-          </th>
-        ))}
-      />
+      {/* The box the sheen sweeps inside, cut to the table by `SkeletonTable.scss`. */}
+      <div className="skeleton__sheen">
+        <TableShell
+          className="--skeleton"
+          columnCount={columns.length}
+          standInRows={PLAYER_COUNT}
+          ariaBusy
+          ariaHidden
+          header={columns.map((column, index) => (
+            // The heading itself, hidden, so a header that wraps to two lines is two
+            // lines tall here as well.
+            <th
+              key={index}
+              className={headerClass(column)}
+              scope="col"
+              data-skeleton-text={column.header}
+            >
+              <span className="skeleton__bar" />
+            </th>
+          ))}
+        />
+      </div>
     </>
   );
 }

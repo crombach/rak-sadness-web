@@ -6,12 +6,7 @@ import {
   HomeAway,
 } from "../types/ESPN";
 import { League, SeasonType, WeekInfo } from "../types/League";
-import {
-  GameSide,
-  GameVenue,
-  LeagueResult,
-  Possession,
-} from "../types/LeagueResult";
+import { GameSide, LeagueResult, Possession } from "../types/LeagueResult";
 import debugLog from "./debugLog";
 import {
   CachedGame,
@@ -147,14 +142,18 @@ function gameSide(competitor: EspnCompetitor): GameSide {
   };
 }
 
-function gameVenue(venue?: EspnVenue): GameVenue | undefined {
-  return venue?.fullName != null
-    ? {
-        name: venue.fullName,
-        city: venue.address?.city,
-        state: venue.address?.state,
-      }
-    : undefined;
+/**
+ * Where the game is played, as the town and nothing more.
+ *
+ * The ground's own name is left out: a reader who wants it has the Gamecast link the
+ * dialog carries, and the name is stored in this browser for every game of every week
+ * cached otherwise.
+ */
+function gameVenue(venue?: EspnVenue): string | undefined {
+  const place = [venue?.address?.city, venue?.address?.state]
+    .filter((it) => it != null)
+    .join(", ");
+  return place !== "" ? place : undefined;
 }
 
 /**

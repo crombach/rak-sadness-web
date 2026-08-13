@@ -17,7 +17,7 @@ import localStorageCache from "./localStorageCache";
 /** A size guard, not a history. A week of both leagues is tens of KB. */
 const MAX_CACHED_WEEKS = 6;
 /** Bumped where a stored shape changes, which makes every older entry a miss. */
-const VERSION = 1;
+const VERSION = 2;
 
 /** A game as it was stored, whose date has been through JSON and is text again. */
 type StoredGame = (Omit<LeagueResult, "date"> & { date: string }) | null;

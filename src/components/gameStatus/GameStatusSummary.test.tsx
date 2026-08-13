@@ -46,7 +46,7 @@ function result(over: Partial<LeagueResult> = {}): LeagueResult {
       record: "3-2",
       linescores: [7, 3, 10, 0],
     },
-    venue: { name: "Highmark Stadium", city: "Orchard Park", state: "NY" },
+    venue: "Orchard Park, NY",
     possession: {},
     winner: {
       team: { name: "Buffalo Bills", abbreviation: "BUF" },
@@ -168,9 +168,7 @@ describe("GameStatusSummary, what the pool made of a finished game", () => {
   });
 
   it("says a game that landed on the number scored for everybody", () => {
-    expect(covered({ team: "BUF", points: -10 })).toBe(
-      "Push, both sides scored",
-    );
+    expect(covered({ team: "BUF", points: -10 })).toBe("Push");
   });
 
   it("declares the winner where the picks carried no line", () => {
@@ -185,7 +183,7 @@ describe("GameStatusSummary, what the pool made of a finished game", () => {
     });
     render(<GameStatusSummary game={game(drawn)} result={drawn} />);
     expect(document.querySelector(".game-status__outcome")).toHaveTextContent(
-      "Tied, both sides scored",
+      "Tied",
     );
   });
 });
@@ -213,11 +211,16 @@ describe("GameStatusSummary, a game that is over", () => {
     expect(screen.queryByText("Away")).toBeNull();
   });
 
-  it("heads the scoreline with the venue", () => {
+  it("ends the strip with where it was played and the link out, in that order", () => {
     renderFinal();
     // Each part on its own, since a dot between two of them is the stylesheet's.
-    expect(screen.getByText("Highmark Stadium")).toBeInTheDocument();
-    expect(screen.getByText("Orchard Park, NY")).toBeInTheDocument();
+    expect(
+      [
+        ...document.querySelectorAll(
+          ".game-status__meta-group:last-child span",
+        ),
+      ].map((part) => part.textContent),
+    ).toEqual(["Orchard Park, NY", "Gamecast"]);
   });
 
   it("says FT/OT, and nothing about how the quarters went", () => {
@@ -342,22 +345,24 @@ describe("GameStatusSummary, which side took the point", () => {
     expect(missed).toEqual(["KC"]);
   });
 
-  it("marks neither side on a game that landed on the number", () => {
+  // A push and a tie with no line are a point for everybody, so every pick was on a
+  // side that scored and neither side is marked against.
+  it("marks both sides on a game that landed on the number", () => {
     expect(marked({ team: "BUF", points: -10 })).toEqual({
-      scored: [],
+      scored: ["KC", "BUF"],
       missed: [],
-      scores: [],
+      scores: ["20", "30"],
     });
   });
 
-  it("marks neither side on a game that finished level", () => {
+  it("marks both sides on a game that finished level", () => {
     const drawn = {
       away: { ...result().away, score: 30 },
       winner: { team: null, homeAway: null, by: 0 },
       loser: { team: null, homeAway: null, by: 0 },
     };
     const { scored, missed } = marked(undefined, drawn);
-    expect(scored).toEqual([]);
+    expect(scored).toEqual(["KC", "BUF"]);
     expect(missed).toEqual([]);
   });
 
@@ -475,9 +480,27 @@ describe("GameStatusSummary, a game still being played", () => {
     ]);
   });
 
-  it("sends a reader nowhere else: the dialog is the whole of it", () => {
+  it("sends a reader on to ESPN's own page for the game", () => {
     renderLive();
-    expect(screen.queryByRole("link")).toBeNull();
+    expect(screen.getByRole("link", { name: "Gamecast" })).toHaveAttribute(
+      "href",
+      "https://www.espn.com/nfl/game/_/gameId/401",
+    );
+  });
+
+  it("sends a college reader to the college section of the same site", () => {
+    // The league names itself in the path, so the two land on different sections
+    // rather than both on the one the pro games use.
+    render(
+      <GameStatusSummary
+        game={{ ...game(live), league: League.COLLEGE }}
+        result={live}
+      />,
+    );
+    expect(screen.getByRole("link", { name: "Gamecast" })).toHaveAttribute(
+      "href",
+      "https://www.espn.com/college-football/game/_/gameId/401",
+    );
   });
 
   it("holds the down's line with a word where there is no down to say", () => {

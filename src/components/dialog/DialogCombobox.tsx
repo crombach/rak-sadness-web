@@ -39,11 +39,24 @@ export default function DialogCombobox<T>({
   itemToStringLabel: (item: T) => string;
   itemKey: (item: T) => string;
   optionClassName?: (item: T) => string;
-  /** Held at the end of the input, saying something about what is chosen. */
+  /**
+   * Held at the end of the input, saying something about what is chosen. Drawn
+   * only while the input still names it, so a cleared search clears this too.
+   */
   adornment?: ReactNode;
   renderOption: (item: T) => ReactNode;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+
+  /**
+   * Whether the input still reads as the choice the adornment speaks for.
+   *
+   * A press wipes the query below without touching the choice, so between that
+   * and the next selection the adornment would be marking a subject the input no
+   * longer names. Base UI writes the chosen label back on the way out of a list
+   * dismissed without a pick, so that restores this along with the text.
+   */
+  const showsChoice = value != null && query === itemToStringLabel(value);
 
   /**
    * Choosing is the end of the search, so the input gives the focus up.
@@ -103,7 +116,7 @@ export default function DialogCombobox<T>({
           aria-label={ariaLabel}
           className="dialog__input"
         />
-        {adornment}
+        {showsChoice && adornment}
         <Combobox.Icon className="dialog__input-icon">
           <UnfoldMoreIcon />
         </Combobox.Icon>
