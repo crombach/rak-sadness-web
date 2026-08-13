@@ -84,6 +84,12 @@
     @include roomy-screen {
       background-color: transparent;
       box-shadow: none;
+      // The room held for a scrollbar above goes with the fill. Held, it is a
+      // strip of the box the frame cannot reach, which used to be the same white
+      // as the box and is now the page showing through. It bought nothing here
+      // either: the table is `max-content` at this width, so a box narrower by a
+      // scrollbar moves where the table is centered rather than how wide it is.
+      scrollbar-gutter: auto;
     }
   }
 
