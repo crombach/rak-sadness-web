@@ -35,7 +35,10 @@
  */
 .results-caption {
   margin: 0;
-  padding: var(--rak-space-2) var(--rak-space-3);
+  // Across, the header cells' own padding, which is where the Rank heading lands
+  // too: that column is centered, but it comes out within half a pixel of this at
+  // both table sizes, so one value lines the caption up with it on every screen.
+  padding: var(--rak-space-2);
   // Read from the near edge, never centered. The frame is as wide as the table,
   // so a caption centered in it starts off the side of a phone and only arrives
   // once the table has been panned across.
@@ -70,8 +73,9 @@
 .results-caption__text {
   position: sticky;
   // The padding the bar would have given it, now that it is placed rather than
-  // laid out.
-  left: var(--rak-space-3);
+  // laid out. Held level with the Rank heading below on the way across, not only
+  // at rest.
+  left: var(--rak-space-2);
   // Sticky offsets are ignored on an inline box.
   display: inline-block;
 }
@@ -87,7 +91,7 @@
     content: "";
     position: absolute;
     top: 50%;
-    left: var(--rak-space-3);
+    left: var(--rak-space-2);
     width: 14em;
     height: 0.7rem;
     transform: translateY(-50%);
