@@ -150,9 +150,13 @@
     white-space: nowrap;
   }
 
-  // Stick the player column to the left side of the screen.
+  // Stick the player column to the left side of the screen. No `z-index`, which
+  // would make each of these cells a stacking context and take it out of the layer
+  // Firefox rasterizes the scrolled content into. What is left where it was taken
+  // from is filled with the scrolling box's own color, which is the flash. A
+  // positioned cell already draws over the static ones beside it, and the header
+  // sets a `z-index` of its own to stay over this on the way past.
   .table__player-col {
-    z-index: var(--rak-z-sticky-cell);
     position: sticky;
     left: 0;
   }
