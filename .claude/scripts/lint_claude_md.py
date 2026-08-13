@@ -14,6 +14,9 @@ Subcommands:
   dupes      <root>   Findings where a parent link restates its child's summary.
   length     <root>   Findings where a file's own prose exceeds the word ceiling.
   check      <root>   structure, dupes, length, all three always run.
+  count      <path>.. Words, headroom and the heaviest blocks. Takes files,
+                      directories, or `-` to measure a draft on stdin before it
+                      is written. Exit 1 when anything is over.
 
 `<root>` defaults to ".". Exit 0 = clean, 1 = findings, 2 = could not run.
 
@@ -389,23 +392,73 @@ EXEMPT_HEADINGS = {"subdirectories", "maintaining this tree"}
 
 HEADING_RE = re.compile(r"^(#+)\s+(.*\S)\s*$")
 
+LIST_ITEM = re.compile(r"^\s*(?:[-*+]|\d+\.)\s+")
 
-def body_words(path):
-    """Word count of a CLAUDE.md outside the exempt sections.
+
+def counted_lines(text):
+    """The lines that count toward the ceiling, in order.
 
     A heading at level 1 or 2 opens or closes an exemption; deeper headings stay
     inside whatever section they belong to.
     """
-    count = 0
+    kept = []
     exempt = False
+    for line in text.splitlines():
+        m = HEADING_RE.match(line.strip())
+        if m and len(m.group(1)) <= 2:
+            exempt = m.group(2).lower() in EXEMPT_HEADINGS
+        if not exempt:
+            kept.append(line)
+    return kept
+
+
+def text_words(text):
+    """Word count of a CLAUDE.md's own prose."""
+    return sum(len(line.split()) for line in counted_lines(text))
+
+
+def body_words(path):
+    """Word count of the CLAUDE.md at `path`, outside the exempt sections."""
     with open(path, encoding="utf-8") as fh:
-        for line in fh:
-            m = HEADING_RE.match(line.strip())
-            if m and len(m.group(1)) <= 2:
-                exempt = m.group(2).lower() in EXEMPT_HEADINGS
-            if not exempt:
-                count += len(line.split())
-    return count
+        return text_words(fh.read())
+
+
+def blocks(text):
+    """Counting prose as [(words, first line)], heaviest first.
+
+    A ceiling reports how far over a file is, which says nothing about where the
+    weight sits, so a writer shaves a word at a time and re-runs. This says which
+    block to cut, and one edit lands.
+    """
+    found, current = [], []
+
+    def flush():
+        if current:
+            found.append((sum(len(l.split()) for l in current), current[0].strip()))
+            del current[:]
+
+    for line in counted_lines(text) + [""]:
+        # A list item is its own block. Without this every bullet in a run merges
+        # into one, and the report says the list is heavy rather than which bullet.
+        if LIST_ITEM.match(line):
+            flush()
+        elif not line.strip():
+            flush()
+            continue
+        current.append(line)
+    flush()
+    return sorted(found, reverse=True)
+
+
+def report_blocks(text, indent="    ", show=3):
+    """Print the heaviest blocks, so one cut is enough."""
+    heavy = [b for b in blocks(text) if b[0] > 1][:show]
+    if not heavy:
+        return
+    print("%sheaviest blocks:" % indent)
+    for words, first in heavy:
+        snippet = first if len(first) <= 64 else first[:61] + "..."
+        print("%s  %3d  %s" % (indent, words, snippet))
 
 
 def length_findings(root):
@@ -430,8 +483,12 @@ def report_length(root):
         print("  %s" % path)
         print("    %d words, %d over (Subdirectories and the root's maintenance "
               "note excluded)" % (count, count - BODY_WORD_LIMIT))
+        with open(path, encoding="utf-8") as fh:
+            report_blocks(fh.read())
         print("    fix: cut prose, or move what is read only during one kind of "
-              "work into a repo skill under .claude/skills/.\n")
+              "work into a repo skill under .claude/skills/.")
+        print("    draft first: `lint_claude_md.py count -` reads a draft on "
+              "stdin, so a rewrite is measured before it lands.\n")
     return 1
 
 
@@ -449,6 +506,49 @@ def report_check(root):
     return 1 if any(codes) else 0
 
 
+# A file this close to the ceiling has no room for the next edit, so it gets the
+# same block breakdown a failure does. Landing at exactly the limit is what makes
+# the next writer repeat the shave.
+TIGHT = 10
+
+
+def report_count(targets):
+    """Words, headroom and the heaviest blocks, for a draft or for files on disk.
+
+    Exists so a rewrite is measured before it lands. Writing a file, running the
+    linter, and shaving a word at a time is the loop this removes.
+    """
+    items = []
+    for target in targets or ["."]:
+        if target == "-":
+            items.append(("(stdin)", sys.stdin.read()))
+        elif os.path.isdir(target):
+            for rel in sorted(claude_md_dirs(target)):
+                path = os.path.join(target, rel, CLAUDE_MD)
+                with open(path, encoding="utf-8") as fh:
+                    items.append((path, fh.read()))
+        elif os.path.isfile(target):
+            with open(target, encoding="utf-8") as fh:
+                items.append((target, fh.read()))
+        else:
+            print("error: no such file or directory: %s" % target, file=sys.stderr)
+            return 2
+
+    over = 0
+    print("%6s %6s  %s" % ("words", "left", "file"))
+    for path, text in items:
+        count = text_words(text)
+        left = BODY_WORD_LIMIT - count
+        print("%6d %6d  %s" % (count, left, path))
+        if left < 0:
+            over += 1
+        if left <= TIGHT:
+            report_blocks(text, indent="        ")
+    if over:
+        print("\n%d file(s) over the %d-word ceiling." % (over, BODY_WORD_LIMIT))
+    return 1 if over else 0
+
+
 COMMANDS = {
     "plan": report_plan,
     "structure": report_structure,
@@ -462,9 +562,13 @@ def main(argv):
     if len(argv) > 1 and argv[1] in ("-h", "--help"):
         print(__doc__.strip())
         return 0
+    # count takes files, directories or `-`, where every other subcommand takes one
+    # root, so it parses its own arguments.
+    if len(argv) > 1 and argv[1] == "count":
+        return report_count(argv[2:])
     if len(argv) < 2 or argv[1] not in COMMANDS:
-        print("error: expected one of %s (try --help)" % ", ".join(COMMANDS),
-              file=sys.stderr)
+        print("error: expected one of count, %s (try --help)"
+              % ", ".join(COMMANDS), file=sys.stderr)
         return 2
     root = argv[2] if len(argv) > 2 else "."
     if not os.path.isdir(root):

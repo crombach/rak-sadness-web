@@ -187,6 +187,40 @@ def prose_words(body):
                 if not MEDIA_TOKEN.match(word)])
 
 
+LIST_ITEM = re.compile(r"^\s*(?:[-*+]|\d+\.)\s+")
+HEADING_LINE = re.compile(r"^#{1,6}\s+")
+
+
+def heaviest_blocks(body, show=3):
+    """The costliest prose blocks, as ["  42  first line", ...], heaviest first.
+
+    A budget that reports only the overage sends a writer shaving a word at a time.
+    Naming the heavy block means one cut lands. A list item is its own block, or a
+    run of bullets reads as one heavy list rather than one heavy bullet.
+    """
+    text = MEDIA.sub("", COMMENTS.sub("", FENCE.sub("", body)))
+    found, current = [], []
+
+    def flush():
+        if current:
+            words = prose_words("\n".join(current))
+            if words > 1:
+                first = current[0].strip()
+                found.append((words, first if len(first) <= 60
+                              else first[:57] + "..."))
+            del current[:]
+
+    for line in text.splitlines() + [""]:
+        if LIST_ITEM.match(line) or HEADING_LINE.match(line.strip()):
+            flush()
+        elif not line.strip():
+            flush()
+            continue
+        current.append(line)
+    flush()
+    return ["  %3d  %s" % pair for pair in sorted(found, reverse=True)[:show]]
+
+
 def empty_sections(body):
     """Headings with nothing under them."""
     parts = re.split(r"(?m)^(#{2,3}\s+.+?)\s*$", body)
@@ -234,8 +268,11 @@ def body_problems(body, template, branch=""):
             problems.append(
                 "the body is %d words, the budget is %d. Cut what the reviewer "
                 "gets from the diff or the ticket: a retelling of the ticket, "
-                "history, counts, a per-file walkthrough, self-assessment"
-                % (words, limit))
+                "history, counts, a per-file walkthrough, self-assessment.\n"
+                "    Heaviest blocks, cut one of these rather than shaving "
+                "words:\n%s"
+                % (words, limit, "\n".join("    " + row
+                                           for row in heaviest_blocks(body))))
     if PUNCTUATION_RULE in template:
         found = sorted({name for mark, name in BANNED.items()
                         if mark in prose(body)})
