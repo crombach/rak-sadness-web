@@ -4,13 +4,24 @@
     <meta charset="utf-8" />
     <link rel="icon" href="/favicon.ico" />
     <!-- viewport-fit=cover is what makes the safe-area insets non-zero, which
-         Table.scss uses to size the row below the scores. No interactive-widget:
-         handing a keyboard's height back to the layout viewport can leave a small
-         phone wider than it is tall, which reads as landscape and raises the
-         rotate overlay. src/hooks/useViewportInsets.ts measures it instead. -->
+         Table.scss uses to size the row below the scores.
+
+         interactive-widget=resizes-content hands a keyboard's height back to the
+         layout viewport, so the dialog sheet's `bottom: 0`, every `dvh`, and Base
+         UI's own idea of the room a popup has are all the screen the reader can
+         see. Measuring that instead left the search behind the keyboard wherever
+         the measurement was wrong, which on Firefox for Android is always: it
+         shrinks the layout viewport, so `window.innerHeight` drops with the visual
+         viewport and the two report no keyboard at all.
+
+         It costs the rotate overlay a guard. A small phone with a keyboard up is
+         wider than it is tall, which reads as landscape; `phone-landscape` in
+         src/styles/_breakpoints.scss holds it off with an aspect ratio.
+
+         src/hooks/useViewportInsets.ts stays for iOS Safari, which ignores this. -->
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
     />
     <!-- Matches --rak-primary-500 in src/index.scss, the navbar's own fill. -->
     <meta name="theme-color" content="#375267" />

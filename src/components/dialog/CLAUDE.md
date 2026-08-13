@@ -9,5 +9,5 @@ is pointed with.
   `useViewportInsets` so a keyboard covers nothing and the sheet still reaches the
   bottom edge. `--rak-dialog-inset` stands the bar on the rule.
 - `DialogCombobox`: the controlled combobox, generic over its option, the caller holding
-  the choice and the query. Its list opens under the search, never over it. Choosing
-  hands the focus to the dialog, which drops a phone's keyboard.
+  the choice and the query. Its list opens wherever Base UI finds room. Choosing hands
+  the focus to the dialog, which drops a phone's keyboard.

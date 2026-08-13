@@ -69,11 +69,16 @@ $breakpoint-wide: 601px;
  * a window: every phone in landscape is under 500px tall, and the shortest tablet
  * is well over it.
  *
+ * The ratio is what tells it apart from a phone held upright with a keyboard up,
+ * which `index.html` asks the browser to take out of the layout viewport. A 360px
+ * phone left 300px tall is landscape by width against height, and 1.2 wide; a
+ * phone actually on its side is past 2.
+ *
  * The app is portrait only. A week of picks is a wide table under a bar of
  * controls, and a phone on its side has no room for either.
  */
 @mixin phone-landscape {
-  @media (orientation: landscape) and (max-height: 500px) {
+  @media (orientation: landscape) and (max-height: 500px) and (min-aspect-ratio: 3/2) {
     @content;
   }
 }

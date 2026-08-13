@@ -8,8 +8,12 @@ import {
 import buildSpreadsheetBuffer from "./buildSpreadsheetBuffer";
 
 const WEEK = 5;
-const RESULTS_SHEET = `Rak Madness Week ${WEEK} Results`;
-const PICKS_SHEET = `Rak Madness Week ${WEEK} Picks`;
+const SEASON = 2025;
+const RESULTS_SHEET = `${SEASON} Week ${WEEK} Results`;
+const PICKS_SHEET = `${SEASON} Week ${WEEK} Picks`;
+
+/** What Excel refuses a sheet name past. */
+const SHEET_NAME_LIMIT = 31;
 
 // Fill colors that pickCell assigns per pick status.
 const FILL_BY_STATUS = {
@@ -57,8 +61,9 @@ const scores: RakMadnessScores = {
 async function readBack(
   scoresObject: RakMadnessScores = scores,
   week = WEEK,
+  season = SEASON,
 ): Promise<XLSX.WorkBook> {
-  const buffer = await buildSpreadsheetBuffer(scoresObject, week);
+  const buffer = await buildSpreadsheetBuffer(scoresObject, week, season);
   return XLSX.read(buffer, { type: "array", cellStyles: true });
 }
 
@@ -67,21 +72,28 @@ function rowsOf(workbook: XLSX.WorkBook, sheetName: string): Array<Array<any>> {
 }
 
 describe("buildSpreadsheetBuffer, workbook shape", () => {
-  it("writes a results sheet and a picks sheet named after the week", async () => {
+  it("writes a results sheet and a picks sheet named after the season and week", async () => {
     const workbook = await readBack();
     expect(workbook.SheetNames).toEqual([RESULTS_SHEET, PICKS_SHEET]);
   });
 
-  it("names both sheets after whichever week it was given", async () => {
-    const workbook = await readBack(scores, 12);
+  it("names both sheets after whichever season and week it was given", async () => {
+    const workbook = await readBack(scores, 12, 2024);
     expect(workbook.SheetNames).toEqual([
-      "Rak Madness Week 12 Results",
-      "Rak Madness Week 12 Picks",
+      "2024 Week 12 Results",
+      "2024 Week 12 Picks",
     ]);
   });
 
+  it("keeps both names inside the length Excel allows, at the longest week", async () => {
+    const workbook = await readBack(scores, 18, 2025);
+    for (const name of workbook.SheetNames) {
+      expect(name.length).toBeLessThanOrEqual(SHEET_NAME_LIMIT);
+    }
+  });
+
   it("produces a buffer that parses as a workbook", async () => {
-    const buffer = await buildSpreadsheetBuffer(scores, WEEK);
+    const buffer = await buildSpreadsheetBuffer(scores, WEEK, SEASON);
     expect(buffer.byteLength).toBeGreaterThan(0);
   });
 });

@@ -43,6 +43,25 @@ function readRowHeight(table: HTMLElement): number {
   return Number.parseFloat(declared) || DEFAULT_ROW_HEIGHT;
 }
 
+/** The box the table scrolls inside, which is not the window. */
+function scrollBoxOf(table: HTMLElement): HTMLElement | undefined {
+  for (let box = table.parentElement; box != null; box = box.parentElement) {
+    const { overflowY } = getComputedStyle(box);
+    if (overflowY === "auto" || overflowY === "scroll") return box;
+  }
+  return undefined;
+}
+
+/**
+ * How far down the rows are carried: the bottom of that box's client area rather
+ * than of the window. A table wide enough to need a horizontal scrollbar has that
+ * bar between the two, and filling to the window would leave a strip of it bare.
+ */
+function fillToY(box: HTMLElement | undefined): number {
+  if (box == null) return window.innerHeight;
+  return box.getBoundingClientRect().top + box.clientHeight;
+}
+
 /**
  * Pads a table out to the bottom of the viewport, so a short one does not leave
  * the page half empty. Measured in a layout effect, so the rows are there before
@@ -62,7 +81,7 @@ export default function useFillerRows(
     ).reduce((sum, row) => sum + row.getBoundingClientRect().height, 0);
     setCount(
       fillerRowCount({
-        viewportHeight: window.innerHeight,
+        viewportHeight: fillToY(scrollBoxOf(table)),
         tableTop: top,
         tableHeight: height,
         rowHeight: readRowHeight(table),
@@ -80,7 +99,13 @@ export default function useFillerRows(
       table != null && typeof ResizeObserver !== "undefined"
         ? new ResizeObserver(measure)
         : undefined;
-    if (table != null) observer?.observe(table);
+    if (table != null) {
+      observer?.observe(table);
+      // A horizontal scrollbar appearing takes height off the box without the
+      // window or the table changing size.
+      const box = scrollBoxOf(table);
+      if (box != null) observer?.observe(box);
+    }
     window.addEventListener("resize", measure);
     return () => {
       observer?.disconnect();

@@ -39,6 +39,12 @@ describe("fillerRowCount", () => {
     expect(count({ tableHeight: 2000 })).toBe(0);
   });
 
+  it("stops at the bottom of the box, which a scrollbar takes height off", () => {
+    // The same 800px window with a 17px horizontal scrollbar under the table:
+    // 383px spare rather than 400, which is one row fewer.
+    expect(count({ tableHeight: 300, viewportHeight: 783 })).toBe(11);
+  });
+
   it("counts the rows it already added as filler, not content", () => {
     // The same table, once padded: 300px of content plus 12 filler rows.
     const padded = 300 + 12 * ROW_HEIGHT;

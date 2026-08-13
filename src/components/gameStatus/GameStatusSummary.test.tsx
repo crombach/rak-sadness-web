@@ -254,6 +254,92 @@ describe("GameStatusSummary, a game that is over", () => {
   });
 });
 
+describe("GameStatusSummary, the two scores as a pair", () => {
+  function points(scores: { home: number; away: number }): Array<string> {
+    const scored = result({
+      home: { ...result().home, score: scores.home },
+      away: { ...result().away, score: scores.away },
+    });
+    render(<GameStatusSummary game={game(scored)} result={scored} />);
+    return [...document.querySelectorAll(".game-status__points")].map(
+      (span) => span.textContent ?? "",
+    );
+  }
+
+  it("pads the side in single figures where the other is not", () => {
+    expect(points({ home: 7, away: 14 })).toEqual(["07", "14"]);
+  });
+
+  it("pads whichever side is the short one", () => {
+    expect(points({ home: 21, away: 3 })).toEqual(["21", "03"]);
+  });
+
+  it("leaves two single figures alone, having nothing to line them up with", () => {
+    expect(points({ home: 7, away: 3 })).toEqual(["7", "3"]);
+  });
+
+  it("leaves two double figures alone", () => {
+    expect(points({ home: 30, away: 20 })).toEqual(["30", "20"]);
+  });
+
+  it("reads a padded score out as the number it is", () => {
+    points({ home: 7, away: 14 });
+    expect(screen.getByLabelText("7")).toHaveTextContent("07");
+  });
+});
+
+describe("GameStatusSummary, the side that beat the line", () => {
+  function coveringNames(
+    spread: WeekGame["spread"],
+    over: Partial<LeagueResult> = {},
+  ): Array<string> {
+    // Buffalo won by ten, at home.
+    const played = result(over);
+    render(<GameStatusSummary game={game(played, spread)} result={played} />);
+    return [
+      ...document.querySelectorAll(
+        ".game-status__team-name.--covers .game-status__name-short",
+      ),
+    ].map((name) => name.textContent ?? "");
+  }
+
+  /** Read off whatever `coveringNames` last rendered. */
+  function coveringScores(): Array<string> {
+    return [
+      ...document.querySelectorAll(
+        ".game-status__score.--covers .game-status__points",
+      ),
+    ].map((span) => span.textContent ?? "");
+  }
+
+  it("marks the name and the score of the side that covered, and only that side", () => {
+    expect(coveringNames({ team: "BUF", points: -3 })).toEqual(["BUF"]);
+    expect(coveringScores()).toEqual(["30"]);
+  });
+
+  it("marks the underdog where the favorite won by less than it gave", () => {
+    expect(coveringNames({ team: "BUF", points: -14 })).toEqual(["KC"]);
+  });
+
+  it("marks neither side on a game that landed on the number", () => {
+    expect(coveringNames({ team: "BUF", points: -10 })).toEqual([]);
+  });
+
+  it("marks neither side where the picks carried no line", () => {
+    expect(coveringNames(undefined)).toEqual([]);
+  });
+
+  it("marks neither side while the game is still being played", () => {
+    // A line a side is ahead of at half time is not one it has beaten.
+    expect(
+      coveringNames(
+        { team: "BUF", points: -3 },
+        { status: GameStatus.LIVE, period: 2, clock: "8:42" },
+      ),
+    ).toEqual([]);
+  });
+});
+
 /*
  * `TZ` is what `toLocaleDateString` reads the zone from, and Node picks a change to it
  * up on the next call. Set here so the kickoff asserted is the same wherever the suite
@@ -273,10 +359,10 @@ describe("GameStatusSummary, the kickoff", () => {
     ].map((part) => part.textContent);
   }
 
-  it("says the day and the time in the reader's own zone, and names it", () => {
+  it("says the day, the year and the time in the reader's own zone, and names it", () => {
     // 17:00 UTC, which is the morning where this reader is.
     expect(kickoff("America/Los_Angeles")).toEqual([
-      "Sun, Oct 6",
+      "Sun, Oct 6, 2024",
       "10:00 AM PDT",
     ]);
   });
@@ -284,7 +370,7 @@ describe("GameStatusSummary, the kickoff", () => {
   it("moves the day with the zone, not only the time", () => {
     // The same instant, on which this reader is already into Monday.
     expect(kickoff("Australia/Sydney")).toEqual([
-      "Mon, Oct 7",
+      "Mon, Oct 7, 2024",
       "4:00 AM GMT+11",
     ]);
   });

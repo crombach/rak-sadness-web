@@ -4,4 +4,9 @@
   width: 100%;
   height: 100%;
   margin: 0;
+  // The trailing row's own fill, behind the column rather than only in that row.
+  // Filler rows come whole, so what is left under the last of them is under a row
+  // height; painted the same, it reads as that row being the taller for it rather
+  // than as the page running out before the table does.
+  background-color: var(--rak-primary-800);
 }
