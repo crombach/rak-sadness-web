@@ -168,9 +168,7 @@ describe("GameStatusSummary, what the pool made of a finished game", () => {
   });
 
   it("says a game that landed on the number scored for everybody", () => {
-    expect(covered({ team: "BUF", points: -10 })).toBe(
-      "Push, both sides scored",
-    );
+    expect(covered({ team: "BUF", points: -10 })).toBe("Push");
   });
 
   it("declares the winner where the picks carried no line", () => {
@@ -185,7 +183,7 @@ describe("GameStatusSummary, what the pool made of a finished game", () => {
     });
     render(<GameStatusSummary game={game(drawn)} result={drawn} />);
     expect(document.querySelector(".game-status__outcome")).toHaveTextContent(
-      "Tied, both sides scored",
+      "Tied",
     );
   });
 });

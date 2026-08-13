@@ -61,10 +61,11 @@ const NO_SPREAD = "None";
 /**
  * How a game that finished level, or on its number, was scored. Both are a point for
  * everybody: the pool counts a tie as picking the winner, and a margin that lands on
- * the spread as covering it.
+ * the spread as covering it. Said in the word alone, because the scoreline above
+ * marks both sides as having scored and would only be repeating itself here.
  */
-const TIED = "Tied, both sides scored";
-const PUSH = "Push, both sides scored";
+const TIED = "Tied";
+const PUSH = "Push";
 
 /**
  * When the game starts, as its own parts.
