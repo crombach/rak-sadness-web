@@ -70,9 +70,15 @@
     // The scrolling box's own fill, which is what Firefox paints into a region it
     // has not rasterized yet. It reads this element rather than whatever is drawn
     // inside it, so the frame's fill on `.results-scores` never reached it and a
-    // fast fling filled the gap with the white above. The table covers this
-    // whenever there is a frame to see, so it shows only in that gap.
+    // fast fling filled the gap with the white above. A phone's table is as wide as
+    // the box, so nothing but that gap ever shows this. A roomier screen leaves
+    // room beside the table, where it would show as a second dark band against the
+    // header, so the surface every other page carries goes back below.
     background-color: var(--rak-primary-800);
+
+    @include roomy-screen {
+      background-color: var(--rak-surface);
+    }
   }
 
   // The wireframe is the size of the table it stands in for, so the surest way to
