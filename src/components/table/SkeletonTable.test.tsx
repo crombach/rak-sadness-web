@@ -41,23 +41,22 @@ describe("SkeletonTable", () => {
     ).toHaveLength(24);
   });
 
-  it("guesses at no row count of its own", () => {
+  it("stands in for a field the window cannot show at once", () => {
     render(<SkeletonTable view="Picks" />);
-    // How many players played is a thing the wireframe cannot know, and the rows
-    // below carry it to the bottom of the window whatever the answer is.
+    // Which players played is a thing the wireframe cannot know, so it holds no
+    // rows of its own and the filler carries the whole table.
     expect(
       document.querySelectorAll(
         ".table.--skeleton tbody tr:not(.table__last-row):not(.table__filler-row)",
       ),
     ).toHaveLength(0);
-  });
-
-  it("fills the wireframe with rows down to the bottom of the viewport", () => {
-    // jsdom reports no layout, so every measurement is zero and the whole
-    // viewport counts as spare. That still exercises the row count for real.
-    render(<SkeletonTable view="Scoreboard" />);
-    expect(document.querySelectorAll(".table__filler-row")).toHaveLength(
-      Math.floor(window.innerHeight / 32),
-    );
+    // More rows than the window has room for either way, so the wireframe scrolls
+    // the way the table it stands in for will and the scrollbar is already there
+    // when the week lands. jsdom reports no layout, so what the rows are measured
+    // to fill is the whole window and the floor is what shows above it here.
+    // `useFillerRows` covers the measuring on its own.
+    expect(
+      document.querySelectorAll(".table__filler-row").length,
+    ).toBeGreaterThan(Math.floor(window.innerHeight / 32));
   });
 });

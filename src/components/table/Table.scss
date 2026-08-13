@@ -1,6 +1,15 @@
 @use "../../styles/breakpoints" as *;
 @use "../../styles/a11y" as *;
 
+// A cell taken the given distance toward black, from whatever fill it carries,
+// striped or not. Mixed rather than run through `filter: brightness()`, which is
+// the same arithmetic but puts the cell on a rendering surface of its own. A
+// finger landing on a cell is the moment before a fling, so on a phone that
+// surface is built and torn down exactly as the scroll starts.
+@mixin cell-darkened($strength) {
+  background-color: color-mix(in srgb, var(--rak-cell-fill) $strength, black);
+}
+
 .table {
   // Centered across, and flush to the top, which is where the wireframe stands. The
   // rows below carry the table to the bottom of the window, and what is left under
@@ -173,27 +182,15 @@
       cursor: pointer;
       transition: background-color 150ms;
 
-      // Mixed toward black rather than run through `filter: brightness()`, which
-      // is the same arithmetic but puts the cell on a rendering surface of its
-      // own. A finger landing on a cell is the moment before a fling, so on a
-      // phone that surface is built and torn down exactly as the scroll starts.
       // Both steps are named in `index.scss`, beside the stripe they clear.
       @include can-hover {
         &:hover {
-          background-color: color-mix(
-            in srgb,
-            var(--rak-cell-fill) var(--rak-hover-strength),
-            black
-          );
+          @include cell-darkened(var(--rak-hover-strength));
         }
       }
 
       &:active {
-        background-color: color-mix(
-          in srgb,
-          var(--rak-cell-fill) var(--rak-press-strength),
-          black
-        );
+        @include cell-darkened(var(--rak-press-strength));
       }
     }
 

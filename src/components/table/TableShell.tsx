@@ -18,6 +18,7 @@ export default function TableShell({
   className = "",
   ariaBusy = false,
   ariaHidden = false,
+  standInRows = 0,
   children,
 }: {
   /** What the table shows, read by a screen reader alone: visually hidden. */
@@ -32,10 +33,24 @@ export default function TableShell({
    * cost a screen reader ~1500 empty cells.
    */
   ariaHidden?: boolean;
+  /**
+   * The field a table with no real rows of its own stands in for.
+   *
+   * Set, the filler runs to whichever is the more of this and one row past the
+   * bottom of the box. Filling to the bottom alone leaves a table exactly as tall
+   * as the box, which is one row short of scrolling, so on a tall enough screen a
+   * stand-in for a table that scrolls would not. The count matters as well as the
+   * overflow: it is what sets how far the bar thinks it has to go.
+   *
+   * Left unset, the filler only makes up what the real rows do not reach.
+   */
+  standInRows?: number;
   children?: ReactNode;
 }) {
   const tableRef = useRef<HTMLTableElement>(null);
-  const fillerRows = useFillerRows(tableRef);
+  const measuredRows = useFillerRows(tableRef);
+  const fillerRows =
+    standInRows > 0 ? Math.max(measuredRows + 1, standInRows) : measuredRows;
 
   return (
     <table

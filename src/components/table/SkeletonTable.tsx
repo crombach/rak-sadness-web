@@ -15,6 +15,15 @@ import "./SkeletonTable.scss";
 const COLLEGE_COUNT = 6;
 const PRO_COUNT = 13;
 
+/**
+ * The field a week is usually played by, which runs past sixty. More than most
+ * screens show, so the wireframe scrolls the way the table it stands in for will
+ * and the bar is already there when the week lands. `TableShell` carries it one row
+ * past the bottom of the box on top of this, for the screen tall enough to show
+ * sixty rows at once.
+ */
+const PLAYER_COUNT = 60;
+
 type Column = {
   header: string;
   /** A game's column, which the real table sizes and centers by its own class. */
@@ -89,6 +98,7 @@ function SkeletonTable({ view }: { view: ScoresView }) {
         <TableShell
           className="--skeleton"
           columnCount={columns.length}
+          standInRows={PLAYER_COUNT}
           ariaBusy
           ariaHidden
           header={columns.map((column, index) => (

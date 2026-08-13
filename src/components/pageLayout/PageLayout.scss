@@ -100,6 +100,15 @@
   // its band out of the page. Refusing the pointer is what keeps this unscrollable.
   &.--frozen {
     pointer-events: none;
+
+    // Except across, where there is room to spare. A bar under a wireframe that
+    // refuses the pointer offers a scroll nothing can take, and at this width the
+    // wireframe is the only thing that would draw one. The band it held is given
+    // up with it, so a week wide enough to need a bar takes that height when it
+    // lands rather than before.
+    @include roomy-screen {
+      overflow-x: hidden;
+    }
   }
 }
 
