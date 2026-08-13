@@ -28,6 +28,18 @@ const MARKER: Record<HomeAway, string> = {
 };
 
 /**
+ * What each side is called over its name.
+ *
+ * A game at neither side's ground is said by where the two stand instead, counted from
+ * the left the way the scoreline reads. ESPN names a home side for one of them anyway,
+ * and the pool scores the line against it, but neither side is hosting anybody.
+ */
+const SIDE_LABEL: Record<"hosted" | "neutral", Record<HomeAway, string>> = {
+  hosted: { [HomeAway.AWAY]: "Away", [HomeAway.HOME]: "Home" },
+  neutral: { [HomeAway.AWAY]: "Team 1", [HomeAway.HOME]: "Team 2" },
+};
+
+/**
  * Said in place of the down and distance while a game being played has none, which is
  * every ball that is not yet dead and every break in the game.
  *
@@ -366,11 +378,14 @@ function TeamName({ team }: { team: GameSide["team"] }) {
 function Side({
   side,
   homeAway,
+  isNeutralSite,
   logo,
   outcome,
 }: {
   side: GameSide;
   homeAway: HomeAway;
+  /** Says the sides by where they stand instead of by whose ground it is. */
+  isNeutralSite: boolean;
   /** Left out where either side has no mark to draw, so neither draws one. */
   logo?: ReactNode;
   outcome?: SideOutcome;
@@ -380,7 +395,7 @@ function Side({
       {logo}
       <div className="game-status__team">
         <span className="game-status__side-label">
-          {homeAway === HomeAway.HOME ? "Home" : "Away"}
+          {SIDE_LABEL[isNeutralSite ? "neutral" : "hosted"][homeAway]}
         </span>
         <span
           className={getClasses("game-status__team-name", {
@@ -455,6 +470,7 @@ function Game({
         <Side
           side={result.away}
           homeAway={HomeAway.AWAY}
+          isNeutralSite={result.isNeutralSite}
           logo={logo?.(result.away)}
           outcome={outcomeOf(result.away)}
         />
@@ -462,6 +478,7 @@ function Game({
         <Side
           side={result.home}
           homeAway={HomeAway.HOME}
+          isNeutralSite={result.isNeutralSite}
           logo={logo?.(result.home)}
           outcome={outcomeOf(result.home)}
         />

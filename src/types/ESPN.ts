@@ -34,6 +34,8 @@ export type EspnCompetition = {
   situation?: EspnSituation;
   date: string;
   venue?: EspnVenue;
+  /** Set for a game played at neither team's own ground, which bowl games are. */
+  neutralSite?: boolean;
 };
 
 export type EspnVenue = {

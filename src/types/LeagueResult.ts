@@ -44,6 +44,13 @@ export type LeagueResult = {
   clock?: string;
   home: GameSide;
   away: GameSide;
+  /**
+   * Whether the game is played at neither side's own ground, which every bowl game is.
+   *
+   * ESPN still names a home side for one of them, and the pool still scores the line
+   * against it, so the two sides are only ever said to be home and away where they are.
+   */
+  isNeutralSite: boolean;
   venue?: GameVenue;
   possession: Possession;
   winner: {

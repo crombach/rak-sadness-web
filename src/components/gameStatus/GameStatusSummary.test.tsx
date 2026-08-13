@@ -25,6 +25,7 @@ function result(over: Partial<LeagueResult> = {}): LeagueResult {
     date: KICKOFF,
     status: GameStatus.FINAL,
     detailMessage: "Final",
+    isNeutralSite: false,
     home: {
       team: {
         name: "Buffalo Bills",
@@ -201,6 +202,16 @@ describe("GameStatusSummary, a game that is over", () => {
     expect(screen.getByText("Home")).toBeInTheDocument();
     expect(screen.getByText("3-2")).toBeInTheDocument();
     expect(screen.getByText("4-1")).toBeInTheDocument();
+  });
+
+  it("counts the sides off instead where neither of them is hosting", () => {
+    const bowl = result({ isNeutralSite: true });
+    render(<GameStatusSummary game={game(bowl)} result={bowl} />);
+    // Counted from the left, which is where the away side stands.
+    expect(screen.getByText("Team 1")).toBeInTheDocument();
+    expect(screen.getByText("Team 2")).toBeInTheDocument();
+    expect(screen.queryByText("Home")).toBeNull();
+    expect(screen.queryByText("Away")).toBeNull();
   });
 
   it("heads the scoreline with the venue", () => {
