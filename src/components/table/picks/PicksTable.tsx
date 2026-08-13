@@ -27,8 +27,10 @@ const PICK_STATUS_LABEL: Partial<Record<Status, string>> = {
 
 function leagueHeaders(labels: Array<string>) {
   return labels.map((header) => (
-    <th key={header} scope="col">
-      <span className="table__pick-header">{header}</span>
+    // The class is what gives a game's column its width, which the wireframe gives
+    // the same column before there is a game in it.
+    <th key={header} className="table__pick-col" scope="col">
+      {header}
     </th>
   ));
 }

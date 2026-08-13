@@ -1,6 +1,21 @@
 @use "../../styles/a11y" as *;
 @use "../../styles/skeleton" as *;
 
+// A bar across the cell it is drawn in, on the line a real value would sit on.
+@mixin bar {
+  @include skeleton-surface;
+
+  content: "";
+  position: absolute;
+  top: 50%;
+  // Absolute insets run from the padding box, so the cell's own padding is what
+  // lands a bar on the content a real cell would hold.
+  left: var(--rak-table-cell-padding-x);
+  right: var(--rak-table-cell-padding-x);
+  height: 0.7rem;
+  transform: translateY(-50%);
+}
+
 .skeleton__status {
   @include visually-hidden;
 }
@@ -11,37 +26,23 @@
   // week arrives, so there is no sticky header to lose to the mixin's clip.
   @include skeleton-sheen;
 
-  // `.table` centers itself vertically, which would split the leftover space into
-  // a band above and below. Flush to the top instead, so the whole remainder is at
-  // the bottom and the row count can claim it.
-  margin-block: 0;
-
-  th,
-  td {
+  th {
     @include skeleton-reserve;
   }
 
-  // No value in a real table wraps, so no stand-in for one does either, and every
-  // body row comes out a single line tall. A header still wraps on its own, the
-  // way the real one does.
-  td::before {
-    white-space: nowrap;
+  // The rows the frame carries the table to the bottom of the window with. They are
+  // empty in a real table, and are what the wireframe is made of here.
+  .table__filler-row td {
+    position: relative;
+
+    &::after {
+      @include bar;
+    }
   }
 
   .skeleton__bar {
-    @include skeleton-surface;
+    @include bar;
 
-    position: absolute;
-    top: 50%;
-    // Absolute insets run from the padding box, so the cell's own padding is what
-    // lands a bar on the content a real cell would hold.
-    left: var(--rak-table-cell-padding-x);
-    right: var(--rak-table-cell-padding-x);
-    height: 0.7rem;
-    transform: translateY(-50%);
-  }
-
-  .table__header .skeleton__bar {
     // The header is already dark, so the bars read as light gaps in it.
     background-color: var(--rak-loading-fill-on-solid);
   }
@@ -50,14 +51,5 @@
   // wireframe has no stand-in for, so the rank column would run into the next one.
   td:nth-child(2) {
     border-left: var(--rak-table-border);
-
-    // Room for the status icon that sits beside a real name, which this column has
-    // no stand-in for. Without it the column comes out narrower than the one it
-    // stands in for.
-    &::before {
-      padding-right: calc(
-        var(--rak-player-icon-size) + var(--rak-player-icon-gap)
-      );
-    }
   }
 }

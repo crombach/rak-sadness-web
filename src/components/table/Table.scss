@@ -2,9 +2,29 @@
 @use "../../styles/a11y" as *;
 
 .table {
-  margin: auto;
+  // Centered across, and flush to the top, which is where the wireframe stands. The
+  // rows below carry the table to the bottom of the window, and what is left under
+  // the last of them is the frame's own dark band either way.
+  margin-inline: auto;
+  margin-block: 0;
+  // Every column is the width named below rather than the width of what happens to
+  // be in it. A wireframe knows how wide a column will be without knowing the week,
+  // so the table it stands in for lands on top of it rather than beside it.
+  table-layout: fixed;
+  // As wide as those columns come to, rather than as wide as the page. Left to the
+  // page, a table with more columns than fit would have every one of them squeezed,
+  // and the width of a column would be back to depending on how many there are.
+  width: max-content;
   // A phone's size, which a roomier screen puts back up at the foot of this file.
   font-size: 0.8rem;
+  // The columns, in the table's own font, so they hold the same number of characters
+  // at either size. Wide enough for what a cell of that kind usually holds: a rank
+  // and a score are two digits, a pick is a team and its spread, and a name runs to
+  // whatever a player calls themselves.
+  --rak-table-rank-width: 3.5em;
+  --rak-table-player-width: 11em;
+  --rak-table-pick-width: 6.5em;
+  --rak-table-score-width: 8em;
   // Read back by useFillerRows, which needs a row height to work out how many
   // rows fit below the real ones.
   --rak-table-row-height: 28px;
@@ -38,7 +58,9 @@
     th {
       color: var(--rak-on-solid);
       background-color: var(--rak-primary-800);
-      min-width: max-content;
+      // The header row is what a fixed layout reads its columns off, so the widths
+      // are named here and every cell under one follows.
+      width: var(--rak-table-score-width);
       // Two lines tall even where the headings fit on one. `height` on a table
       // cell is a minimum, so a narrow screen still stacks them higher, and
       // `border-box` counts the cell's own padding into this. The wireframe holds
@@ -53,21 +75,22 @@
         border-right: var(--rak-table-header-border);
       }
       &:first-child {
+        width: var(--rak-table-rank-width);
         // The rank and the player read as one block, so nothing divides them.
         border-right: var(--rak-table-no-border);
       }
       &:nth-child(2) {
         border-left: var(--rak-table-header-border);
       }
-    }
-  }
 
-  // These three size a game's column, so the wireframe needs them as much as the
-  // picks table does. The pick colors stay in `PicksTable.scss`, which the
-  // wireframe has no use for.
-  .table__pick-header {
-    display: inline-block;
-    min-width: 64px;
+      &.table__player-col {
+        width: var(--rak-table-player-width);
+      }
+
+      &.table__pick-col {
+        width: var(--rak-table-pick-width);
+      }
+    }
   }
 
   .table__center {
@@ -81,6 +104,10 @@
     display: block;
     width: 100%;
     height: 100%;
+    // The cell's own rule reaches the text it holds directly. Said again here for
+    // the two columns that wrap theirs in a button.
+    overflow: hidden;
+    text-overflow: ellipsis;
     padding: var(--rak-table-cell-padding-y) var(--rak-table-cell-padding-x);
     // Not `none`, for the same reason the cells around it say so: it would take
     // `currentColor`.
@@ -153,7 +180,11 @@
       --rak-cell-fill: var(--rak-surface);
       background-color: var(--rak-cell-fill);
       font-family: var(--rak-font-mono);
-      min-width: max-content;
+      // A column is the width it was declared, so the rare value too long for one is
+      // cut short here rather than laid over the column beside it. The cell opens the
+      // game, which says the same thing in full.
+      overflow: hidden;
+      text-overflow: ellipsis;
       height: var(--rak-table-row-height);
       padding: var(--rak-table-cell-padding-y) var(--rak-table-cell-padding-x);
       border-bottom: var(--rak-table-border);

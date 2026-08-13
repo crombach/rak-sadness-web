@@ -1,14 +1,14 @@
 # table
 
 - `TableShell`: the frame both results tables share, the filler rows carrying a
-  short table to the bottom of the viewport, and the trailing row keeping the last
-  real row clear of a phone's rounded corners. Takes `caption`, `ariaBusy` and
-  `ariaHidden`.
+  table to the bottom of the viewport, and the trailing row keeping the last real
+  row clear of a phone's rounded corners. Takes `caption`, `ariaBusy`, `ariaHidden`.
 - `Table.scss`: the shared `.table` styles, sticky header and player column, touch
   feedback, striped rows, the trailing row, the `.table__cell-button` a clickable
-  cell holds, and the custom properties the wireframe measures against.
-- `SkeletonTable`: the wireframe shown while a week's results are worked out,
-  shaped like the view it stands in for, drawn from `styles/_skeleton.scss`.
+  cell holds, and the width a column of each kind is laid out at. Fixed, so a long
+  value is cut short rather than widening it.
+- `SkeletonTable`: the wireframe shown while a week is worked out. Its columns are
+  the real ones' width and its rows are the frame's, so it guesses at no row count.
 
 ## Subdirectories
 

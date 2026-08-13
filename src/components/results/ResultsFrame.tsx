@@ -5,7 +5,6 @@ import { GameStatusContextProvider } from "../../context/GameStatusContext";
 import { PlayerAnalysisContextProvider } from "../../context/PlayerAnalysisContext";
 import { WeekInfo } from "../../types/League";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
-import getClasses from "../../utils/getClasses";
 import GameStatusDialog from "../gameStatus/GameStatusDialog";
 import LogoButton, { APP_NAME } from "../navbar/LogoButton";
 import ScoresNavbar, { ScoresView } from "../navbar/ScoresNavbar";
@@ -108,9 +107,7 @@ export default function ResultsFrame({
         />
       }
     >
-      <div
-        className={`results-scores ${getClasses({ "--loading": !isReady })}`}
-      >
+      <div className="results-scores">
         <PlayerAnalysisContextProvider showPlayerAnalysis={showPlayerAnalysis}>
           <GameStatusContextProvider showGameStatus={showGameStatus}>
             {isReady ? children : <SkeletonTable view={view} />}
