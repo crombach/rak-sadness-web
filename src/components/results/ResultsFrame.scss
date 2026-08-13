@@ -1,4 +1,5 @@
 @use "../../styles/breakpoints" as *;
+@use "../../styles/skeleton" as *;
 
 .results-scores {
   display: flex;
@@ -27,6 +28,79 @@
   background-color: var(--rak-primary-800);
 }
 
+/**
+ * Which week the table below is. Inside the frame rather than above it, so it
+ * scrolls away with the first rows and stands on a phone's screen no longer than
+ * the reader needs it.
+ */
+.results-caption {
+  margin: 0;
+  // Across, the header cells' own padding, which is where the Rank heading lands
+  // too: that column is centered, but it comes out within half a pixel of this at
+  // both table sizes, so one value lines the caption up with it on every screen.
+  padding: var(--rak-space-2);
+  // Read from the near edge, never centered. The frame is as wide as the table,
+  // so a caption centered in it starts off the side of a phone and only arrives
+  // once the table has been panned across.
+  text-align: left;
+  // Between the navbar above and the header below, so the three step down into
+  // the table. No border under it: the step off this fill is what divides the
+  // caption from the header, and a rule drawn in either neighbour's color would
+  // be a line one of them could not show.
+  background-color: var(--rak-primary-600);
+  // No `z-index`, so the sticky header passes over it on the way up.
+  // See SCROLL-FLASH.md.
+  color: var(--rak-on-solid);
+  // The header row's own type, so the two read as one head with a line drawn
+  // through it rather than as two bands set differently. Both values are
+  // `Table.scss`'s: the size it puts on `.table` and the weight a `<th>` carries
+  // by default. Written out because they are the table's, and this stands
+  // outside it.
+  font-size: 0.8rem;
+  font-weight: var(--rak-weight-bold);
+}
+
+/**
+ * Held at the near edge while the table pans under it, so the week is readable
+ * whichever column is on screen. Left in flow it rides off the side with the
+ * columns, because the frame is as wide as the week is long.
+ *
+ * Only the text sticks. The bar stays in flow at the frame's full width, so its
+ * fill runs the whole way across rather than stopping at the window's edge. That
+ * also keeps the sticky area to a few words, which is the smallest hole this can
+ * leave in the rasterized layer. See SCROLL-FLASH.md.
+ */
+.results-caption__text {
+  position: sticky;
+  // The padding the bar would have given it, now that it is placed rather than
+  // laid out. Held level with the Rank heading below on the way across, not only
+  // at rest.
+  left: var(--rak-space-2);
+  // Sticky offsets are ignored on an inline box.
+  display: inline-block;
+}
+
+// A route that has not worked out which week it is headed for yet. Its room is
+// held all the same, so nothing moves when the week lands.
+.results-caption.--loading {
+  @include skeleton-reserve;
+
+  &::after {
+    @include skeleton-surface;
+
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: var(--rak-space-2);
+    width: 14em;
+    height: 0.7rem;
+    transform: translateY(-50%);
+    // The frame is already dark, so the bar reads as a light gap in it, the same
+    // way the wireframe's header bars do.
+    background-color: var(--rak-loading-fill-on-solid);
+  }
+}
+
 // Room enough that the table does not fill the width, so the frame is cut to the
 // table and what is left either side is the page's own tiled blue, the same
 // background the home page stands on.
@@ -37,5 +111,11 @@
     // that it is the thing standing on the blue. `PageLayout.scss` gives this up
     // at the same width.
     box-shadow: var(--rak-shadow-overlay);
+  }
+
+  // The table goes up to its roomier size at this width, so the caption goes with
+  // it. `Table.scss` makes the same move at the same breakpoint.
+  .results-caption {
+    font-size: var(--rak-text-md);
   }
 }

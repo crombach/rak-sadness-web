@@ -11,4 +11,5 @@ and `/picks` by redirecting to the latest week worth showing.
   `GameStatusDialog` and both providers around the tables, and reads
   `useIsWeekDecided` for `ScoresNavbar`'s `isWeekLive`. What the tables opened is one
   piece of state, so two dialogs cannot both be up claiming the viewport insets.
-- `ResultsFrame.scss`: the column the table and the wireframe are laid in.
+- `ResultsFrame.scss`: the column the table and the wireframe are laid in, and the
+  caption naming the week over both.

@@ -5,6 +5,7 @@ import { GameStatusContextProvider } from "../../context/GameStatusContext";
 import { PlayerAnalysisContextProvider } from "../../context/PlayerAnalysisContext";
 import { WeekInfo } from "../../types/League";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
+import getClasses from "../../utils/getClasses";
 import GameStatusDialog from "../gameStatus/GameStatusDialog";
 import LogoButton, { APP_NAME } from "../navbar/LogoButton";
 import ScoresNavbar, { ScoresView } from "../navbar/ScoresNavbar";
@@ -14,6 +15,12 @@ import SkeletonTable from "../table/SkeletonTable";
 import "./ResultsFrame.scss";
 
 const doNothing = () => undefined;
+
+/** The pool the app scores, which is not the app's own name. */
+const POOL_NAME = "Rak Madness";
+
+/** What the caption is sized from on a route that does not know the week yet. */
+const CAPTION_STAND_IN = `${POOL_NAME} · 0000 Season · Week 00`;
 
 /**
  * What the tables have opened, which is one thing at a time.
@@ -61,6 +68,7 @@ export default function ResultsFrame({
   // Absent on the redirect routes, which render this frame before they know which
   // week they are headed for.
   const { season: seasonParam, week } = useParams();
+  const hasWeek = Boolean(seasonParam && week);
   // Once every game is final there is nothing left to fetch, so the refresh button
   // and the divider beside it go rather than sit there doing nothing.
   const isWeekDecided = useIsWeekDecided();
@@ -84,9 +92,7 @@ export default function ResultsFrame({
   return (
     <PageLayout
       title={
-        seasonParam && week
-          ? `${seasonParam} Week ${week} ${view}`
-          : `${APP_NAME} ${view}`
+        hasWeek ? `${seasonParam} Week ${week} ${view}` : `${APP_NAME} ${view}`
       }
       // True while loading too: the wireframe is shaped like the table it stands
       // in for, so it wants the same content area.
@@ -108,6 +114,26 @@ export default function ResultsFrame({
       }
     >
       <div className="results-scores">
+        {/*
+          Which week this is, for everyone who cannot hear the `<h1>` above. Hidden
+          from a screen reader because that heading already says it, and says the
+          view too.
+
+          Not held back until the scores land: the week is in the URL before they
+          are, so the wireframe wears the caption the table will and nothing under
+          it moves when the week arrives.
+        */}
+        <p
+          className={getClasses("results-caption", { "--loading": !hasWeek })}
+          data-skeleton-text={hasWeek ? undefined : CAPTION_STAND_IN}
+          aria-hidden="true"
+        >
+          {hasWeek && (
+            <span className="results-caption__text">
+              {`${POOL_NAME} · ${seasonParam} Season · Week ${week}`}
+            </span>
+          )}
+        </p>
         <PlayerAnalysisContextProvider showPlayerAnalysis={showPlayerAnalysis}>
           <GameStatusContextProvider showGameStatus={showGameStatus}>
             {isReady ? children : <SkeletonTable view={view} />}

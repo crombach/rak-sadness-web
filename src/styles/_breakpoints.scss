@@ -65,9 +65,17 @@ $breakpoint-wide: 601px;
 }
 
 /**
- * A phone turned on its side. The height is what tells it apart from a tablet or
- * a window: every phone in landscape is under 500px tall, and the shortest tablet
- * is well over it.
+ * A phone turned on its side. Three things have to agree, because the overlay
+ * takes the whole screen and there is no way past it.
+ *
+ * The pointer is what tells a phone from a desktop. A window dragged short and
+ * wide answers every measurement below, and used to raise the overlay on a
+ * machine that cannot be turned at all. A mouse reports `hover` and a fine
+ * pointer, so asking for neither leaves only touch.
+ *
+ * The height is what tells a phone from a tablet, which is also touch and also
+ * turns: every phone in landscape is under 500px tall, and the shortest tablet is
+ * well over it.
  *
  * The ratio is what tells it apart from a phone held upright with a keyboard up,
  * which `index.html` asks the browser to take out of the layout viewport. A 360px
@@ -78,7 +86,7 @@ $breakpoint-wide: 601px;
  * controls, and a phone on its side has no room for either.
  */
 @mixin phone-landscape {
-  @media (orientation: landscape) and (max-height: 500px) and (min-aspect-ratio: 3/2) {
+  @media (orientation: landscape) and (max-height: 500px) and (min-aspect-ratio: 3/2) and (hover: none) and (pointer: coarse) {
     @content;
   }
 }
