@@ -23,8 +23,23 @@ const PREGAME_DETAIL = "Pregame";
 
 /** Points at the score of the side with the ball, from whichever side that is. */
 const MARKER: Record<HomeAway, string> = {
-  [HomeAway.HOME]: "▸",
-  [HomeAway.AWAY]: "◂",
+  [HomeAway.HOME]: "◂",
+  [HomeAway.AWAY]: "▸",
+};
+
+/**
+ * What each side is called over its name.
+ *
+ * Neither side of a game played at neither of their grounds is hosting anybody, so
+ * both are said to be a team and nothing more. ESPN names a home side for one of them
+ * anyway, and the pool scores the line against it, but the label would be wrong.
+ *
+ * One word, where a label of two would wrap in the room a phone leaves beside a score
+ * and take the name below it down a line.
+ */
+const SIDE_LABEL: Record<"hosted" | "neutral", Record<HomeAway, string>> = {
+  hosted: { [HomeAway.AWAY]: "Away", [HomeAway.HOME]: "Home" },
+  neutral: { [HomeAway.AWAY]: "Team", [HomeAway.HOME]: "Team" },
 };
 
 /**
@@ -321,21 +336,21 @@ function Center({
       <Detail result={result} />
       <div className="game-status__scores">
         <Score
-          side={result.home}
-          opponent={result.away}
-          homeAway={HomeAway.HOME}
-          hasBall={hasBall(HomeAway.HOME)}
-          outcome={outcomeOf(result.home)}
-        />
-        <span aria-hidden="true" className="game-status__dash">
-          {SCORE_DASH}
-        </span>
-        <Score
           side={result.away}
           opponent={result.home}
           homeAway={HomeAway.AWAY}
           hasBall={hasBall(HomeAway.AWAY)}
           outcome={outcomeOf(result.away)}
+        />
+        <span aria-hidden="true" className="game-status__dash">
+          {SCORE_DASH}
+        </span>
+        <Score
+          side={result.home}
+          opponent={result.away}
+          homeAway={HomeAway.HOME}
+          hasBall={hasBall(HomeAway.HOME)}
+          outcome={outcomeOf(result.home)}
         />
       </div>
       <Note result={result} spread={spread} />
@@ -366,11 +381,14 @@ function TeamName({ team }: { team: GameSide["team"] }) {
 function Side({
   side,
   homeAway,
+  isNeutralSite,
   logo,
   outcome,
 }: {
   side: GameSide;
   homeAway: HomeAway;
+  /** Says the sides by where they stand instead of by whose ground it is. */
+  isNeutralSite: boolean;
   /** Left out where either side has no mark to draw, so neither draws one. */
   logo?: ReactNode;
   outcome?: SideOutcome;
@@ -380,7 +398,7 @@ function Side({
       {logo}
       <div className="game-status__team">
         <span className="game-status__side-label">
-          {homeAway === HomeAway.HOME ? "Home" : "Away"}
+          {SIDE_LABEL[isNeutralSite ? "neutral" : "hosted"][homeAway]}
         </span>
         <span
           className={getClasses("game-status__team-name", {
@@ -453,17 +471,19 @@ function Game({
       </p>
       <div className="game-status__scoreline">
         <Side
-          side={result.home}
-          homeAway={HomeAway.HOME}
-          logo={logo?.(result.home)}
-          outcome={outcomeOf(result.home)}
+          side={result.away}
+          homeAway={HomeAway.AWAY}
+          isNeutralSite={result.isNeutralSite}
+          logo={logo?.(result.away)}
+          outcome={outcomeOf(result.away)}
         />
         <Center result={result} spread={spread} outcomeOf={outcomeOf} />
         <Side
-          side={result.away}
-          homeAway={HomeAway.AWAY}
-          logo={logo?.(result.away)}
-          outcome={outcomeOf(result.away)}
+          side={result.home}
+          homeAway={HomeAway.HOME}
+          isNeutralSite={result.isNeutralSite}
+          logo={logo?.(result.home)}
+          outcome={outcomeOf(result.home)}
         />
       </div>
       {/* Under the scoreline rather than over it: the game is what the dialog was

@@ -25,7 +25,9 @@
   border: 0 solid var(--rak-border);
   background-color: transparent;
   color: var(--rak-text-secondary);
-  font-family: inherit;
+  // The face the tables are set in, since what is typed here and what the list offers
+  // are the names and the columns those tables carry.
+  font-family: var(--rak-font-mono);
   font-size: var(--rak-text-md);
   line-height: 1.5;
 
@@ -58,6 +60,8 @@
 
   justify-content: space-between;
   gap: var(--rak-space-2);
+  // The input's face, and the tables' behind it.
+  font-family: var(--rak-font-mono);
 }
 
 .dialog__empty {

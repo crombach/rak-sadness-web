@@ -58,6 +58,14 @@
   // rather than sitting beside a word.
   --rak-icon-lg: 40px;
 
+  // How tall text stands as ink, as a share of its own size, for an icon set beside it
+  // to be drawn to. Measured in a browser, where the body face and the mono face come
+  // out the same: a line of mixed-case text runs from its ascender to its descender,
+  // and a word set in capitals is its cap height alone. Left in `em`, so either is read
+  // against whatever text it is set beside.
+  --rak-text-ink: 0.944em;
+  --rak-caps-ink: 0.728em;
+
   // Motion. Three durations cover every transition and the one loop.
   --rak-duration-fast: 120ms;
   --rak-duration-slow: 300ms;

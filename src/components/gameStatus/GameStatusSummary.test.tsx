@@ -25,6 +25,7 @@ function result(over: Partial<LeagueResult> = {}): LeagueResult {
     date: KICKOFF,
     status: GameStatus.FINAL,
     detailMessage: "Final",
+    isNeutralSite: false,
     home: {
       team: {
         name: "Buffalo Bills",
@@ -203,6 +204,15 @@ describe("GameStatusSummary, a game that is over", () => {
     expect(screen.getByText("4-1")).toBeInTheDocument();
   });
 
+  it("calls both sides a team where neither of them is hosting", () => {
+    const bowl = result({ isNeutralSite: true });
+    render(<GameStatusSummary game={game(bowl)} result={bowl} />);
+    // One word each, which is what keeps the label off a second line on a phone.
+    expect(screen.getAllByText("Team")).toHaveLength(2);
+    expect(screen.queryByText("Home")).toBeNull();
+    expect(screen.queryByText("Away")).toBeNull();
+  });
+
   it("heads the scoreline with the venue", () => {
     renderFinal();
     // Each part on its own, since a dot between two of them is the stylesheet's.
@@ -228,28 +238,28 @@ describe("GameStatusSummary, a game that is over", () => {
     expect(document.querySelector(".game-status__down")).toBeNull();
   });
 
-  it("stands the home side on the left", () => {
+  it("stands the away side on the left, the way the search names the game", () => {
     renderFinal();
     expect(
       [...document.querySelectorAll(".game-status__side")].map(
         (side) => side.className,
       ),
-    ).toEqual(["game-status__side --home", "game-status__side --away"]);
+    ).toEqual(["game-status__side --away", "game-status__side --home"]);
   });
 
   it("carries each side's abbreviation, which is what a phone shows", () => {
     renderFinal();
     const short = [...document.querySelectorAll(".game-status__name-short")];
-    expect(short.map((it) => it.textContent)).toEqual(["BUF", "KC"]);
+    expect(short.map((it) => it.textContent)).toEqual(["KC", "BUF"]);
     // The name is the one read out, so the abbreviation beside it is not heard twice.
     short.forEach((it) => expect(it).toHaveAttribute("aria-hidden", "true"));
   });
 
-  it("wears both teams' marks, home first", () => {
+  it("wears both teams' marks, away first", () => {
     renderFinal();
     expect(logos()).toEqual([
-      "https://espn.com/buf.png",
       "https://espn.com/kc.png",
+      "https://espn.com/buf.png",
     ]);
   });
 });
@@ -267,19 +277,19 @@ describe("GameStatusSummary, the two scores as a pair", () => {
   }
 
   it("pads the side in single figures where the other is not", () => {
-    expect(points({ home: 7, away: 14 })).toEqual(["07", "14"]);
+    expect(points({ home: 7, away: 14 })).toEqual(["14", "07"]);
   });
 
   it("pads whichever side is the short one", () => {
-    expect(points({ home: 21, away: 3 })).toEqual(["21", "03"]);
+    expect(points({ home: 21, away: 3 })).toEqual(["03", "21"]);
   });
 
   it("leaves two single figures alone, having nothing to line them up with", () => {
-    expect(points({ home: 7, away: 3 })).toEqual(["7", "3"]);
+    expect(points({ home: 7, away: 3 })).toEqual(["3", "7"]);
   });
 
   it("leaves two double figures alone", () => {
-    expect(points({ home: 30, away: 20 })).toEqual(["30", "20"]);
+    expect(points({ home: 30, away: 20 })).toEqual(["20", "30"]);
   });
 
   it("reads a padded score out as the number it is", () => {
@@ -450,9 +460,9 @@ describe("GameStatusSummary, a game still being played", () => {
         (it) => it.className,
       ),
     ).toEqual([
-      "game-status__side --home",
-      "game-status__center",
       "game-status__side --away",
+      "game-status__center",
+      "game-status__side --home",
     ]);
     expect(
       [...document.querySelectorAll(".game-status__center > *")].map(

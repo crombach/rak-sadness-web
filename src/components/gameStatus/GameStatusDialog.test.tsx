@@ -51,6 +51,7 @@ function result({
     date: new Date("2024-10-06T17:00:00Z"),
     status,
     detailMessage: isFinal ? "Final" : "8:42 - 3rd Quarter",
+    isNeutralSite: false,
     home: {
       team: {
         name: `${home} Team`,

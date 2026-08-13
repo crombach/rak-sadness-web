@@ -242,6 +242,7 @@ export function toLeagueResult(event: EspnEvent): LeagueResult | null {
     clock: event.status.displayClock,
     home: homeSide,
     away: awaySide,
+    isNeutralSite: competition.neutralSite ?? false,
     venue: gameVenue(competition.venue),
     possession,
     winner: {

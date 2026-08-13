@@ -223,7 +223,7 @@
 
 // Each side's text reads off the edge it sits on, and the two mirror each other, so
 // both scores end up against the middle and both names against an outside edge.
-.game-status__side.--home {
+.game-status__side.--away {
   text-align: left;
 
   .game-status__logo {
@@ -247,7 +247,7 @@
   }
 }
 
-.game-status__side.--away {
+.game-status__side.--home {
   text-align: right;
 
   .game-status__logo {
@@ -337,9 +337,9 @@
   font-weight: var(--rak-weight-bold);
   line-height: 1.1;
 
-  // Home only, since the marker is written after the score. Either way it lands on
+  // Away only, since the marker is written after the score. Either way it lands on
   // the far side from the middle, so it never crowds the dash between the two.
-  &.--home {
+  &.--away {
     flex-direction: row-reverse;
   }
 

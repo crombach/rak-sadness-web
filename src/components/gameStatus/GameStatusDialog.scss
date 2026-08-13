@@ -1,9 +1,10 @@
-// An entry reads as its column then its game. Both in the one monospace face at the
-// one size, so the column is held to a width the game names line up past whatever
-// letters either holds.
+@use "../../styles/ink" as *;
+
+// An entry reads as its column then its game. Both at the one size, in the monospace
+// face every entry is set in, so the column is held to a width the game names line up
+// past whatever letters either holds.
 .dialog__option .game-status__option-label,
 .dialog__option .game-status__option-name {
-  font-family: var(--rak-font-mono);
   font-size: var(--rak-text-sm);
 }
 
@@ -22,12 +23,13 @@
   text-align: left;
 }
 
-// What there is to watch about a game, on the end of the search and on the end of
-// its entry, which is where the player analysis puts a player's status icon.
-//
-// The dot in the live pill is under the icons beside it, a filled circle reading
-// heavier than an icon drawn to the same width.
-$dot-size: 12px;
+// A mark is set against the text it stands beside, and an entry's two lines are set
+// smaller than the popup they sit in, so the size is said again here rather than left
+// at the one the search's own mark reads. Above the pills below, which say their own
+// size: two classes each, so the later of the two is the one that lands.
+.dialog__option .game-status__mark {
+  font-size: var(--rak-text-sm);
+}
 
 // What a mark that says its state in a word is shaped like. The word is what makes it
 // wider than the box below, so the two that carry one share everything but their hue.
@@ -53,12 +55,16 @@ $dot-size: 12px;
 // their state in a word are pills, and wider: every mark sits against the same edge,
 // so what changes as a game kicks off is the width behind that edge.
 .game-status__mark {
+  // Room for the tallest of the glyphs below, which is the one drawn to the least of
+  // its own box, so an icon-only mark takes the same room in either of its two states.
+  --rak-mark-box: calc(var(--rak-text-ink) / #{$ink-share-check-box});
+
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--rak-icon-sm);
-  height: var(--rak-icon-sm);
+  width: var(--rak-mark-box);
+  height: var(--rak-mark-box);
 
   &.--live {
     @include mark-pill(var(--rak-danger-100), var(--rak-danger-600));
@@ -70,16 +76,16 @@ $dot-size: 12px;
     @include mark-pill(var(--rak-warning-300), var(--rak-warning-700));
   }
 
+  // Every shape below stands as tall as the ink of the text beside it, which is a whole
+  // line of it in the two that carry no word, and the capitals of the word itself in
+  // the pills. Each glyph is drawn to its own share of its box, so each says which.
+
+  // Drawn to its own edges, so its height is all ink and there is no box to divide.
   .game-status__live-dot {
-    width: $dot-size;
-    height: $dot-size;
+    width: var(--rak-caps-ink);
+    height: var(--rak-caps-ink);
     border-radius: 50%;
     background-color: var(--rak-danger-500);
-  }
-
-  > svg {
-    width: var(--rak-icon-sm);
-    height: var(--rak-icon-sm);
   }
 
   // Quiet, neither a game yet to kick off nor one that is over being anything to act
@@ -89,11 +95,17 @@ $dot-size: 12px;
     fill: var(--rak-text-tertiary);
   }
 
-  // Held to the dot the live pill wears, so the two pills read as the same size
-  // whichever of them a row carries.
+  &.--final > svg {
+    @include ink-height(var(--rak-text-ink), $ink-share-check-box);
+  }
+
+  &.--upcoming > svg {
+    @include ink-height(var(--rak-text-ink), $ink-share-event);
+  }
+
   &.--invalid > svg {
-    width: $dot-size;
-    height: $dot-size;
+    @include ink-height(var(--rak-caps-ink), $ink-share-warning);
+
     fill: currentColor;
   }
 }

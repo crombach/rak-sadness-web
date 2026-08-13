@@ -1,0 +1,28 @@
+// How big an icon is drawn to come out as tall as the text beside it. Mixins and
+// variables only, so this emits no CSS of its own however many files `@use` it. The
+// two heights it is drawn to, `--rak-text-ink` and `--rak-caps-ink`, are tokens in
+// `src/index.scss`.
+
+// Material draws every glyph on a 24-unit box but not out to its edges, and how much of
+// that box the ink fills is not the same glyph to glyph. Read off the path data in
+// `components/icon/Icon.tsx` and confirmed in a browser.
+$ink-share-check-box: 0.75;
+$ink-share-event: 0.833;
+$ink-share-warning: 0.792;
+// The three a player's status is drawn with. The trophy fills 0.75 and the skull and
+// the face 0.833, and which of them shows is decided in the component rather than in a
+// class, so one share covers all three and splits them.
+$ink-share-player: 0.79;
+
+/**
+ * A glyph's box, set so the ink inside it stands as tall as `$ink`.
+ *
+ * `$share` is how much of its own box this glyph's ink fills, from the list above.
+ */
+@mixin ink-height($ink, $share) {
+  // `.icon` sets a font size of its own, which the `em` below would otherwise be read
+  // against instead of against the text this icon stands beside.
+  font-size: inherit;
+  width: calc(#{$ink} / #{$share});
+  height: calc(#{$ink} / #{$share});
+}
