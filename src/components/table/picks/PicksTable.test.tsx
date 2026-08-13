@@ -1,4 +1,3 @@
-import { Mock } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import {
@@ -7,18 +6,9 @@ import {
   RakMadnessScores,
   Status,
 } from "../../../types/RakMadnessScores";
-import { Toast, useToastActions } from "../../../context/ToastContext";
+import { GameStatusContextProvider } from "../../../context/GameStatusContext";
 import { PlayerAnalysisContextProvider } from "../../../context/PlayerAnalysisContext";
 import PicksTable from "./PicksTable";
-
-const showToast = vi.fn();
-const clearToasts = vi.fn();
-
-vi.mock("../../../context/ToastContext", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("../../../context/ToastContext")>();
-  return { ...actual, useToastActions: vi.fn() };
-});
 
 function pick(
   label: string,
@@ -65,15 +55,16 @@ const scores: RakMadnessScores = {
   ],
 };
 
-beforeEach(() => {
-  showToast.mockClear();
-  clearToasts.mockClear();
-  (useToastActions as Mock).mockReturnValue({
-    showToast,
-    removeToast: vi.fn(),
-    clearToasts,
-  });
-});
+/** The table with the game status callback it reports clicks through. */
+function renderPicks(showGameStatus = vi.fn()) {
+  const user = userEvent.setup();
+  render(
+    <GameStatusContextProvider showGameStatus={showGameStatus}>
+      <PicksTable scores={scores} />
+    </GameStatusContextProvider>,
+  );
+  return { user, showGameStatus };
+}
 
 describe("PicksTable, empty states", () => {
   it("renders nothing without scores", () => {
@@ -206,38 +197,34 @@ describe("PicksTable, rows", () => {
   });
 });
 
-describe("PicksTable, pick explanations", () => {
-  it("clears existing toasts before showing a new one", async () => {
-    const user = userEvent.setup();
-    render(<PicksTable scores={scores} />);
-    await user.click(screen.getByText("MICH"));
-    expect(clearToasts).toHaveBeenCalledTimes(1);
-    expect(showToast).toHaveBeenCalledTimes(1);
-  });
-
-  it("uses the clicked pick's explanation header", async () => {
-    const user = userEvent.setup();
-    render(<PicksTable scores={scores} />);
+describe("PicksTable, game status", () => {
+  it("opens the game status on the column the cell sits in", async () => {
+    const { user, showGameStatus } = renderPicks();
     await user.click(screen.getByText("OSU"));
-    const toast: Toast = showToast.mock.calls[0][0];
-    expect(toast.header).toBe("OSU header");
-    expect(toast.type).toBe("neutral");
+    expect(showGameStatus).toHaveBeenCalledWith("C2");
   });
 
-  it("shows an explanation for a pro pick too", async () => {
-    const user = userEvent.setup();
-    render(<PicksTable scores={scores} />);
-    await user.click(screen.getByText("BUF"));
-    expect(showToast.mock.calls[0][0].header).toBe("BUF header");
+  it("counts the pro columns from one, not on from the college ones", async () => {
+    const { user, showGameStatus } = renderPicks();
+    await user.click(screen.getByText("KC"));
+    expect(showGameStatus).toHaveBeenCalledWith("P2");
+  });
+
+  it("reports the same column from any player's row", async () => {
+    const { user, showGameStatus } = renderPicks();
+    // Alice's first college pick and Bob's, which are the same game.
+    await user.click(screen.getByText("MICH"));
+    await user.click(screen.getByText("C1 pick"));
+    expect(showGameStatus).toHaveBeenNthCalledWith(1, "C1");
+    expect(showGameStatus).toHaveBeenNthCalledWith(2, "C1");
   });
 
   it("reports the newest click, not the first", async () => {
-    const user = userEvent.setup();
-    render(<PicksTable scores={scores} />);
+    const { user, showGameStatus } = renderPicks();
     await user.click(screen.getByText("MICH"));
-    await user.click(screen.getByText("KC"));
-    expect(showToast).toHaveBeenCalledTimes(2);
-    expect(showToast.mock.calls[1][0].header).toBe("KC header");
+    await user.click(screen.getByText("MIA"));
+    expect(showGameStatus).toHaveBeenCalledTimes(2);
+    expect(showGameStatus).toHaveBeenLastCalledWith("P3");
   });
 });
 
@@ -260,6 +247,5 @@ describe("PlayerName, rendered through the table", () => {
     );
     await user.click(screen.getByText("Bob"));
     expect(showPlayerAnalysis).toHaveBeenCalledWith("Bob");
-    expect(showToast).not.toHaveBeenCalled();
   });
 });

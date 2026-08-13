@@ -1,0 +1,194 @@
+@use "../../styles/breakpoints" as *;
+
+// Base UI ships the dialog unstyled, so these rules carry its whole look. State
+// comes off the data attributes it sets, the same way the select on the home page
+// reads `[data-highlighted]`.
+.dialog__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--rak-z-modal);
+  background-color: var(--rak-scrim);
+  transition: opacity 200ms ease;
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+  }
+}
+
+// A sheet on the bottom edge, which is what a screen too narrow to leave a margin
+// either side of a centered window gets. Told apart here rather than in the
+// component, because every other screen split in the app is drawn this way.
+//
+// The three custom properties below are `useViewportInsets`, held only while the
+// dialog is open. A keyboard opened by the search covers the bottom of the screen
+// without shrinking `dvh`, so the sheet stands on top of the keyboard rather than
+// running on behind it, and is capped by what is left rather than by the screen.
+// Every one falls back to the whole screen, which is where they started.
+
+// How far the lowest thing in the sheet stands off the keyboard. The body gives up
+// its room before the search does, so with a long body squeezed out this is what
+// keeps the rule under the search off the keyboard's top edge.
+$keyboard-gap: 12px;
+
+.dialog__popup {
+  position: fixed;
+  z-index: calc(var(--rak-z-modal) + 1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--rak-space-4);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  // What is on screen, and then the keyboard's own room on top, which the padding
+  // below gives back.
+  max-height: calc(
+    min(85dvh, var(--rak-viewport-height, 85dvh)) +
+      var(--rak-keyboard-inset, 0px)
+  );
+  padding: 20px;
+  // The keyboard's room, so everything in the sheet stands above it while the sheet
+  // itself runs on to the bottom edge of the screen behind it. Held there rather than
+  // stood on top of the keyboard, so dismissing one never shows the sheet's lower edge
+  // and the shadow under it on the way down.
+  //
+  // Room for the home indicator on top of that, given back once the sheet is standing
+  // on a keyboard rather than on the bottom edge the indicator is drawn over, which
+  // takes the gap above the keyboard in its place.
+  padding-bottom: calc(
+    20px + var(--rak-keyboard-inset, 0px) +
+      max(0px, env(safe-area-inset-bottom) - var(--rak-keyboard-inset, 0px)) +
+      min(var(--rak-keyboard-inset, 0px), #{$keyboard-gap})
+  );
+  border-radius: var(--rak-radius-lg) var(--rak-radius-lg) 0 0;
+  background-color: var(--rak-surface);
+  box-shadow: var(--rak-shadow-modal);
+  transition:
+    opacity 200ms ease,
+    transform 200ms ease;
+
+  &:focus-visible {
+    outline: none;
+  }
+
+  // Held apart from the resting rule above, so the window below can replace both
+  // ends of the transition rather than inherit a slide.
+  &[data-starting-style],
+  &[data-ending-style] {
+    // Only the slide, so a sheet on its way in is not also faded. The travel reads
+    // as the whole animation at this size.
+    opacity: 1;
+    transform: translateY(100%);
+  }
+}
+
+.dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rak-space-2);
+}
+
+.dialog__title {
+  margin: 0;
+  color: var(--rak-primary-700);
+  font-size: var(--rak-text-lg);
+  font-weight: 700;
+}
+
+// Sized to the answer, and capped by the popup above it. A tall floor would
+// leave a two-line answer sitting over an empty half-screen, and the answers
+// that need the room scroll instead.
+.dialog__body {
+  // How far the answer stands off the rule above it, which the progress bar reads
+  // back to sit on that rule without moving the answer.
+  --rak-dialog-inset: 16px;
+
+  box-sizing: border-box;
+  flex: 0 1 auto;
+  min-height: 0;
+  padding-top: var(--rak-dialog-inset);
+  // Everything under here scrolls. Only the search above it holds still.
+  border-top: var(--rak-border-width-hairline) solid var(--rak-divider);
+  overflow-y: auto;
+  // The room a scrollbar needs, held whether or not there is one, so an answer
+  // long enough to scroll does not narrow the one that was on screen before it.
+  scrollbar-gutter: stable;
+}
+
+// A bar on the rule above it while the next answer is worked out, in place of
+// anything that would move the answer still on screen. Stuck to the rule so
+// scrolling cannot carry it off, and pulled back out of the flow by its own
+// height, so it does not push the answer below it down the page.
+$bar-height: 2px;
+
+.dialog__progress {
+  position: sticky;
+  // Measured from where the answer starts, which is the inset below the rule.
+  top: calc(-1 * var(--rak-dialog-inset));
+  z-index: 1;
+  display: block;
+  height: $bar-height;
+  // Pulled up onto the rule, and the room it took given back underneath, so the
+  // answer sits where it would with no bar there at all.
+  margin-top: calc(-1 * var(--rak-dialog-inset));
+  margin-bottom: calc(var(--rak-dialog-inset) - #{$bar-height});
+  overflow: hidden;
+  background-color: var(--rak-fill-subtle);
+
+  &::after {
+    content: "";
+    display: block;
+    width: 40%;
+    height: 100%;
+    background-color: var(--rak-primary-500);
+    animation: dialog-sweep 900ms ease-in-out infinite;
+  }
+
+  // Still says work is under way, without a thing crossing the screen to say it.
+  @include reduced-motion {
+    &::after {
+      width: 100%;
+      animation: none;
+    }
+  }
+}
+
+@keyframes dialog-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(250%);
+  }
+}
+
+// Room enough either side of it to read as a window, so the sheet above stands up
+// and centers itself.
+@include wide-screen {
+  .dialog__popup {
+    // Centered on what is on screen rather than on the screen, so a keyboard
+    // pushes the window up instead of leaving its lower half behind one.
+    top: calc(
+      var(--rak-viewport-offset, 0px) + var(--rak-viewport-height, 100dvh) / 2
+    );
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    width: min(640px, calc(100vw - 32px));
+    max-height: min(680px, calc(var(--rak-viewport-height, 100dvh) - 64px));
+    padding-bottom: 20px;
+    border-radius: var(--rak-radius-lg);
+    transform: translate(-50%, -50%);
+
+    // The fade alone, at the transform it rests at, so the window opens where it
+    // will stand rather than travelling into place.
+    &[data-starting-style],
+    &[data-ending-style] {
+      opacity: 0;
+      transform: translate(-50%, -50%);
+    }
+  }
+}

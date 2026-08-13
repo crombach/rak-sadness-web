@@ -1,9 +1,11 @@
-import { PropsWithChildren, useState } from "react";
+import { PropsWithChildren, useCallback, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useIsWeekDecided } from "../../context/AppDataContext";
+import { GameStatusContextProvider } from "../../context/GameStatusContext";
 import { PlayerAnalysisContextProvider } from "../../context/PlayerAnalysisContext";
+import { WeekInfo } from "../../types/League";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
-import getClasses from "../../utils/getClasses";
+import GameStatusDialog from "../gameStatus/GameStatusDialog";
 import LogoButton, { APP_NAME } from "../navbar/LogoButton";
 import ScoresNavbar, { ScoresView } from "../navbar/ScoresNavbar";
 import PageLayout from "../pageLayout/PageLayout";
@@ -12,6 +14,16 @@ import SkeletonTable from "../table/SkeletonTable";
 import "./ResultsFrame.scss";
 
 const doNothing = () => undefined;
+
+/**
+ * What the tables have opened, which is one thing at a time.
+ *
+ * Held as one piece of state rather than one per dialog, because two open dialogs
+ * would mean two backdrops, two scroll locks, and two claims on the viewport
+ * insets, with whichever closed last taking them out from under the other.
+ */
+type Opened =
+  { kind: "player"; name: string } | { kind: "game"; label: string };
 
 /**
  * The page a week's results are shown on, and the wireframe that stands in for
@@ -28,6 +40,8 @@ export default function ResultsFrame({
   onRefresh = doNothing,
   isRefreshing = false,
   scores,
+  weekInfo,
+  season,
   children,
 }: PropsWithChildren<{
   view: ScoresView;
@@ -38,22 +52,40 @@ export default function ResultsFrame({
   isRefreshing?: boolean;
   /** What the player analysis is worked out from. Absent while a week loads. */
   scores?: RakMadnessScores;
+  /** The week the scores are for, which fetching one of its games again needs. */
+  weekInfo?: WeekInfo;
+  /** The year that week's season started in. */
+  season?: number;
 }>) {
   const navigate = useNavigate();
   // Absent on the redirect routes, which render this frame before they know which
   // week they are headed for.
-  const { season, week } = useParams();
+  const { season: seasonParam, week } = useParams();
   // Once every game is final there is nothing left to fetch, so the refresh button
   // and the divider beside it go rather than sit there doing nothing.
   const isWeekDecided = useIsWeekDecided();
-  // A name is the only way in, so the dialog is open exactly while one is held.
-  const [analysisPlayer, setAnalysisPlayer] = useState<string>();
+  const [opened, setOpened] = useState<Opened>();
+
+  // Stable, so the memoized tables below do not re-render for a dialog opening.
+  const showPlayerAnalysis = useCallback(
+    (name: string) => setOpened({ kind: "player", name }),
+    [],
+  );
+  const showGameStatus = useCallback(
+    (label: string) => setOpened({ kind: "game", label }),
+    [],
+  );
+  // Cleared on the way out, so opening on the same subject again is a change the
+  // dialog can see.
+  const close = useCallback((isOpen: boolean) => {
+    if (!isOpen) setOpened(undefined);
+  }, []);
 
   return (
     <PageLayout
       title={
-        season && week
-          ? `${season} Week ${week} ${view}`
+        seasonParam && week
+          ? `${seasonParam} Week ${week} ${view}`
           : `${APP_NAME} ${view}`
       }
       // True while loading too: the wireframe is shaped like the table it stands
@@ -75,23 +107,27 @@ export default function ResultsFrame({
         />
       }
     >
-      <div
-        className={`results-scores ${getClasses({ "--loading": !isReady })}`}
-      >
-        <PlayerAnalysisContextProvider showPlayerAnalysis={setAnalysisPlayer}>
-          {isReady ? children : <SkeletonTable view={view} />}
+      <div className="results-scores">
+        <PlayerAnalysisContextProvider showPlayerAnalysis={showPlayerAnalysis}>
+          <GameStatusContextProvider showGameStatus={showGameStatus}>
+            {isReady ? children : <SkeletonTable view={view} />}
+          </GameStatusContextProvider>
         </PlayerAnalysisContextProvider>
       </div>
       <PlayerAnalysisDialog
-        open={analysisPlayer != null}
-        // Cleared on the way out, so naming the same player again is a change the
-        // dialog can see.
-        onOpenChange={(open) => {
-          if (!open) setAnalysisPlayer(undefined);
-        }}
-        player={analysisPlayer}
+        open={opened?.kind === "player"}
+        onOpenChange={close}
+        player={opened?.kind === "player" ? opened.name : undefined}
         scores={scores}
         week={week != null ? Number(week) : undefined}
+      />
+      <GameStatusDialog
+        open={opened?.kind === "game"}
+        onOpenChange={close}
+        gameLabel={opened?.kind === "game" ? opened.label : undefined}
+        scores={scores}
+        week={weekInfo}
+        season={season}
       />
     </PageLayout>
   );

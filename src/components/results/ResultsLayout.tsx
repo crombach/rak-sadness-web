@@ -14,7 +14,8 @@ import ResultsFrame from "./ResultsFrame";
 export default function ResultsLayout() {
   const { season: rawSeason, week: rawWeek } = useParams();
   const navigate = useNavigate();
-  const { refresh, isRefreshing, scores } = useAppData();
+  const { refresh, isRefreshing, scores, selectedWeek, seasonYear } =
+    useAppData();
   const guard = useWeekRouteGuard(rawSeason, rawWeek);
 
   // The route decides which view is showing, not component state.
@@ -34,6 +35,8 @@ export default function ResultsLayout() {
       onRefresh={refresh}
       isRefreshing={isRefreshing}
       scores={scores}
+      weekInfo={selectedWeek}
+      season={seasonYear}
     >
       <Outlet />
     </ResultsFrame>

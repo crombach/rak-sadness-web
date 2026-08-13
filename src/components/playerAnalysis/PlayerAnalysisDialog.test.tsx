@@ -94,6 +94,14 @@ describe("playersMatching", () => {
 describe("PlayerAnalysisDialog", () => {
   it("answers for the player picked from the search, and for one named", async () => {
     const user = userEvent.setup();
+    // The analysis waits for a frame before it runs, so the frames are held here and
+    // let go by hand. Left to the machine's own timing, whether the bar that says the
+    // search is under way is still up by the time it is looked for comes down to how
+    // long the click before it took.
+    const frames: Array<FrameRequestCallback> = [];
+    const frame = vi
+      .spyOn(window, "requestAnimationFrame")
+      .mockImplementation((run) => frames.push(run));
     const { rerender } = render(
       <PlayerAnalysisDialog
         open
@@ -115,11 +123,14 @@ describe("PlayerAnalysisDialog", () => {
     expect(
       screen.getByRole("progressbar", { name: "Working out the paths" }),
     ).toHaveAttribute("aria-busy", "true");
-    expect(
-      document.querySelector(".player-analysis__body [aria-live]"),
-    ).toHaveAttribute("aria-live", "polite");
+    expect(document.querySelector(".dialog__body [aria-live]")).toHaveAttribute(
+      "aria-live",
+      "polite",
+    );
 
     // The search runs a frame after the bar that says it is under way.
+    frames.forEach((run) => run(0));
+    frame.mockRestore();
     const mustWin = await screen.findByRole("heading", { name: "Must win" });
     // The bar goes with the answer arriving, rather than sitting over it.
     expect(screen.queryByRole("progressbar")).toBeNull();

@@ -4,12 +4,4 @@
   width: 100%;
   height: 100%;
   margin: 0;
-
-  // Filler rows come whole, so the wireframe stops up to a row short of the
-  // bottom. Carrying the header color down through the gap continues the table
-  // rather than showing the page behind it, and joins up with the safe area row
-  // on a phone, which is the same color.
-  &.--loading {
-    background-color: var(--rak-primary-800);
-  }
 }

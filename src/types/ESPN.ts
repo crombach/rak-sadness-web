@@ -10,6 +10,7 @@ export enum GameStatus {
 }
 
 export type EspnEvent = {
+  id: string;
   name: string;
   shortName: string;
   date: string;
@@ -18,6 +19,10 @@ export type EspnEvent = {
 };
 
 export type EspnStatus = {
+  /** Which quarter the game is in, counting on past four into overtime. */
+  period?: number;
+  /** The clock as ESPN writes it, like `8:42`. */
+  displayClock?: string;
   type: {
     id: GameStatus;
     shortDetail: string;
@@ -28,6 +33,15 @@ export type EspnCompetition = {
   competitors: Array<EspnCompetitor>;
   situation?: EspnSituation;
   date: string;
+  venue?: EspnVenue;
+};
+
+export type EspnVenue = {
+  fullName?: string;
+  address?: {
+    city?: string;
+    state?: string;
+  };
 };
 
 export type EspnCompetitor = {
@@ -35,6 +49,19 @@ export type EspnCompetitor = {
   homeAway: HomeAway;
   team: EspnTeam;
   score: string;
+  records?: Array<EspnRecord>;
+  /** One entry per period played, in order. Absent before kickoff. */
+  linescores?: Array<EspnLinescore>;
+};
+
+/** `type` tells the season record ("total") from the home and road splits. */
+export type EspnRecord = {
+  type?: string;
+  summary?: string;
+};
+
+export type EspnLinescore = {
+  value?: number;
 };
 
 export type EspnSituation = {
@@ -43,7 +70,13 @@ export type EspnSituation = {
 };
 
 export type EspnTeam = {
+  /** Where the team plays: a city for the pros, a school for the colleges. */
+  location?: string;
+  /** What they are called there: `Bills`, `Buckeyes`. */
+  name?: string;
   displayName: string;
   shortDisplayName: string;
   abbreviation: string;
+  /** The team's mark, which ESPN leaves off the smaller college programs. */
+  logo?: string;
 };

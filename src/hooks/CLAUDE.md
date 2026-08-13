@@ -1,15 +1,16 @@
 # hooks
 
-The app's data layer, and the two hooks that measure the page. The first four mount
-once, in `AppDataContext`, above the routes.
+The data layer, plus the two page measurements. The first four mount once in
+`AppDataContext`, above the routes.
 
-- `usePicksSeasons`: the seasons that have picks, from `/api/picks`, newest first
+- `usePicksSeasons`: the seasons with picks, from `/api/picks`, newest first
 - `useCurrentSeason`: the season running now, once it starts
-- `useLeagueWeeks`: the season's weeks from ESPN, and which one is selected
-- `usePlayerScores`: a week's scores from the API, cache, or an uploaded file.
-  Owns the refresh throttle
-- `useExportScores`: downloads the current scores as a workbook
-- `useWeekRouteGuard`: whether a `/:season/:week` URL has anything to show, and
-  the redirect home
-- `useFillerRows`: the empty rows a table needs to reach the viewport's bottom
-- `useViewportInsets`: what a virtual keyboard covers, as root `--rak-*` properties
+- `useLeagueWeeks`: the season's ESPN weeks, and which is selected
+- `usePlayerScores`: a week's scores from the API, cache, or an upload. Owns
+  the throttle
+- `useLiveGame`: one game, refetched every twenty seconds
+- `useArrival`: an outside value, taken as it arrives
+- `useExportScores`: the scores, as a workbook
+- `useWeekRouteGuard`: whether a `/:season/:week` URL has anything to show
+- `useFillerRows`: the empty rows carrying a table to the viewport bottom
+- `useViewportInsets`: what a keyboard covers, as root properties

@@ -41,13 +41,15 @@ describe("SkeletonTable", () => {
     ).toHaveLength(24);
   });
 
-  it("gives the wireframe a row per player of a middling week", () => {
+  it("guesses at no row count of its own", () => {
     render(<SkeletonTable view="Picks" />);
+    // How many players played is a thing the wireframe cannot know, and the rows
+    // below carry it to the bottom of the window whatever the answer is.
     expect(
       document.querySelectorAll(
         ".table.--skeleton tbody tr:not(.table__last-row):not(.table__filler-row)",
       ),
-    ).toHaveLength(61);
+    ).toHaveLength(0);
   });
 
   it("fills the wireframe with rows down to the bottom of the viewport", () => {

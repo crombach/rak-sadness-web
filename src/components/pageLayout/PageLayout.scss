@@ -51,11 +51,18 @@
   justify-content: center;
   box-shadow: var(--rak-shadow-overlay);
   overflow: auto;
+  // The room a scrollbar needs, held whether or not there is one, so a week long
+  // enough to scroll is not narrower than the wireframe that stood in for it.
+  scrollbar-gutter: stable;
   background-color: var(--rak-surface);
   color: var(--rak-text-secondary);
 
+  // The whole window, rather than the table's own width. A table is as wide as the
+  // week is long, and nothing knows that until the week is scored, so a panel sized
+  // to it would move both its edges when the week landed. The table centers itself
+  // inside this instead, and a wide one scrolls.
   &.--scores {
-    width: max-content;
+    width: 100%;
   }
 
   // The wireframe is the size of the table it stands in for, so the surest way to

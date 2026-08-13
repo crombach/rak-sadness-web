@@ -1,0 +1,99 @@
+// An entry reads as its column then its game. Both in the one monospace face at the
+// one size, so the column is held to a width the game names line up past whatever
+// letters either holds.
+.dialog__option .game-status__option-label,
+.dialog__option .game-status__option-name {
+  font-family: var(--rak-font-mono);
+  font-size: var(--rak-text-sm);
+}
+
+.dialog__option .game-status__option-label {
+  flex: 0 0 auto;
+  min-width: 2.5ch;
+  color: var(--rak-text-tertiary);
+}
+
+.dialog__option .game-status__option-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+// What there is to watch about a game, on the end of the search and on the end of
+// its entry, which is where the player analysis puts a player's status icon.
+//
+// The dot in the live pill is under the icons beside it, a filled circle reading
+// heavier than an icon drawn to the same width.
+$dot-size: 12px;
+
+// What a mark that says its state in a word is shaped like. The word is what makes it
+// wider than the box below, so the two that carry one share everything but their hue.
+//
+// Monospace, and both words four letters, so the two come out the same size: set in the
+// body face, `WARN` would run wider than `LIVE` and the list's right edge would step in
+// and out as a game kicked off.
+@mixin mark-pill($background, $foreground) {
+  width: auto;
+  gap: var(--rak-space-1);
+  padding-inline: var(--rak-space-1);
+  border-radius: var(--rak-radius-sm);
+  background-color: $background;
+  color: $foreground;
+  font-family: var(--rak-font-mono);
+  font-size: var(--rak-text-xs);
+  font-weight: var(--rak-weight-bold);
+  letter-spacing: 0.06em;
+}
+
+// One box whatever is in it, so the marks line up down the list and the search does
+// not shift as the game it names goes from one state to the next. The two that say
+// their state in a word are pills, and wider: every mark sits against the same edge,
+// so what changes as a game kicks off is the width behind that edge.
+.game-status__mark {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--rak-icon-sm);
+  height: var(--rak-icon-sm);
+
+  &.--live {
+    @include mark-pill(var(--rak-danger-100), var(--rak-danger-600));
+  }
+
+  // The yellow the picks table fills a pick it cannot score with, this mark and that
+  // cell saying the same thing about the same game.
+  &.--invalid {
+    @include mark-pill(var(--rak-warning-300), var(--rak-warning-700));
+  }
+
+  .game-status__live-dot {
+    width: $dot-size;
+    height: $dot-size;
+    border-radius: 50%;
+    background-color: var(--rak-danger-500);
+  }
+
+  > svg {
+    width: var(--rak-icon-sm);
+    height: var(--rak-icon-sm);
+  }
+
+  // Quiet, neither a game yet to kick off nor one that is over being anything to act
+  // on. Told apart by their shape rather than by a hue, which is left to the pills.
+  &.--final > svg,
+  &.--upcoming > svg {
+    fill: var(--rak-text-tertiary);
+  }
+
+  // Held to the dot the live pill wears, so the two pills read as the same size
+  // whichever of them a row carries.
+  &.--invalid > svg {
+    width: $dot-size;
+    height: $dot-size;
+    fill: currentColor;
+  }
+}

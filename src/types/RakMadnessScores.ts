@@ -1,7 +1,14 @@
+import { WeekGame } from "./WeekGame";
+
 export type RakMadnessScores = {
   /** Absent until the Monday night game is final. */
   tiebreaker?: number;
   scores: Array<PlayerScore>;
+  /**
+   * The week's games, one per picks column, in table order. Optional so a table
+   * can still be rendered from scores written by hand.
+   */
+  games?: Array<WeekGame>;
 };
 
 export type PlayerScore = {

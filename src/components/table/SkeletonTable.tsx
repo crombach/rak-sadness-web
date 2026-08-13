@@ -5,54 +5,44 @@ import TableShell from "./TableShell";
 import "./SkeletonTable.scss";
 
 /**
- * A middling week's shape, week 5's: six college games, thirteen pro, sixty-one
- * players. The real numbers come from the picks, which have not been read yet.
+ * A middling week's shape, week 5's: six college games and thirteen pro. The real
+ * numbers come from the picks, which have not been read yet.
+ *
+ * Only the count is guessed at. Every column is the width `Table.scss` declares for
+ * its kind, so the columns the wireframe does draw are the width the real ones will
+ * be, and nothing under a column moves when the week lands.
  */
 const COLLEGE_COUNT = 6;
 const PRO_COUNT = 13;
-const PLAYER_COUNT = 61;
-
-/**
- * Stand-in text, each as long as the widest a real cell of that kind gets. The
- * stylesheet draws it invisibly from `data-skeleton-text`, and the table's own
- * `max-content` sizing measures it, so the wireframe comes out the size the loaded
- * table will be at any font size without a single width being written down. It
- * stays out of the DOM's text so nothing reads or matches a placeholder.
- */
-const RANK = "10";
-/** Eighteen characters, the longest a real name gets before it is cut short. */
-const PLAYER = "Why is the Runn Go";
-const PICK = "TCU -13.5";
-const SCORE = "10";
 
 type Column = {
   header: string;
-  cell: string;
-  /** A game's column, which the real table centers and never wraps. */
+  /** A game's column, which the real table sizes and centers by its own class. */
   isPick?: boolean;
+  /** The player column, which is the widest one and sticks to the left edge. */
+  isPlayer?: boolean;
 };
 
 /** Both views open on these and close on a total. */
 const RANK_AND_PLAYER: Array<Column> = [
-  { header: "Rank", cell: RANK },
-  { header: "Player", cell: PLAYER },
+  { header: "Rank" },
+  { header: "Player", isPlayer: true },
 ];
-const TOTAL_SCORE: Column = { header: "Total Score", cell: SCORE };
+const TOTAL_SCORE: Column = { header: "Total Score" };
 
 const SCOREBOARD_COLUMNS: Array<Column> = [
   ...RANK_AND_PLAYER,
-  { header: "MNF Points Pick", cell: SCORE },
-  { header: "MNF Points Distance", cell: SCORE },
-  { header: "College Score", cell: SCORE },
-  { header: "Pro Score", cell: SCORE },
-  { header: "Pro Score ATS", cell: SCORE },
+  { header: "MNF Points Pick" },
+  { header: "MNF Points Distance" },
+  { header: "College Score" },
+  { header: "Pro Score" },
+  { header: "Pro Score ATS" },
   TOTAL_SCORE,
 ];
 
 function leagueColumns(count: number, prefix: string): Array<Column> {
   return rangeWithPrefix(count, prefix).map((header) => ({
     header,
-    cell: PICK,
     isPick: true,
   }));
 }
@@ -60,17 +50,24 @@ function leagueColumns(count: number, prefix: string): Array<Column> {
 const PICKS_COLUMNS: Array<Column> = [
   ...RANK_AND_PLAYER,
   ...leagueColumns(COLLEGE_COUNT, "C"),
-  { header: "College Score", cell: SCORE },
+  { header: "College Score" },
   ...leagueColumns(PRO_COUNT, "P"),
-  { header: "Pro Score", cell: SCORE },
+  { header: "Pro Score" },
   TOTAL_SCORE,
 ];
+
+/** The class the real table's header cell of that kind carries, and its width with it. */
+function headerClass(column: Column): string | undefined {
+  if (column.isPlayer) return "table__player-col";
+  return column.isPick ? "table__pick-col" : undefined;
+}
 
 /**
  * A wireframe of a results table, for while the real one is being worked out.
  *
- * Shaped like the view it stands in for, down to the column count and the row
- * count, so the page does not rearrange itself once the week arrives.
+ * Shaped like the view it stands in for, down to the width of every column. It holds
+ * no rows of its own: `TableShell` fills the window with rows either way, so the
+ * wireframe is as tall as the table however many players turn out to have played.
  *
  * Memoized because it is well over a thousand cells and its route re-renders on
  * every flag the week's loading sets, all of them while this is on screen.
@@ -93,34 +90,18 @@ function SkeletonTable({ view }: { view: ScoresView }) {
         ariaBusy
         ariaHidden
         header={columns.map((column, index) => (
-          // A game's header is sized by `table__pick-header`'s own minimum, the way
-          // the real one is, so it needs no stand-in text.
+          // The heading itself, hidden, so a header that wraps to two lines is two
+          // lines tall here as well.
           <th
             key={index}
+            className={headerClass(column)}
             scope="col"
-            data-skeleton-text={column.isPick ? undefined : column.header}
+            data-skeleton-text={column.header}
           >
-            {column.isPick && <span className="table__pick-header" />}
             <span className="skeleton__bar" />
           </th>
         ))}
-      >
-        {Array.from({ length: PLAYER_COUNT }, (_, row) => (
-          <tr key={row}>
-            {columns.map((column, index) => (
-              <td
-                key={index}
-                className={
-                  column.isPick ? "table__center table__pick" : undefined
-                }
-                data-skeleton-text={column.cell}
-              >
-                <span className="skeleton__bar" />
-              </td>
-            ))}
-          </tr>
-        ))}
-      </TableShell>
+      />
     </>
   );
 }

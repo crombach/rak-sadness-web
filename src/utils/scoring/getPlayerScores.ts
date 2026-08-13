@@ -6,6 +6,7 @@ import applyKnockouts from "./applyKnockouts";
 import getTiebreakerScore from "./getTiebreakerScore";
 import parsePicksWorkbook from "./parsePicksWorkbook";
 import scorePlayers from "./scorePlayers";
+import weekGames from "./weekGames";
 
 /**
  * `season` is the year the week's season started in, so a week played in January
@@ -48,5 +49,9 @@ export async function getPlayerScores(
   return {
     tiebreaker: tiebreakerScore,
     scores: applyKnockouts(sortedScores, tiebreakerScore),
+    games: weekGames(parsed, {
+      college: collegeResults,
+      pro: proResults,
+    }),
   };
 }
