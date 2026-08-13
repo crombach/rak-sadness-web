@@ -62,6 +62,9 @@
     position: absolute;
     top: 0;
     left: 0;
+    // Out of any selection the user drags over the bar. Selectable, copying the
+    // name carried the row of tildes out with it.
+    user-select: none;
     // Enough to read as segments that could light, not so much that it crowds the
     // ones that are lit. Measured against the navbar's own fill at this size.
     color: rgb(255 255 255 / 18%);
