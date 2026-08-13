@@ -204,12 +204,11 @@ describe("GameStatusSummary, a game that is over", () => {
     expect(screen.getByText("4-1")).toBeInTheDocument();
   });
 
-  it("counts the sides off instead where neither of them is hosting", () => {
+  it("calls both sides a team where neither of them is hosting", () => {
     const bowl = result({ isNeutralSite: true });
     render(<GameStatusSummary game={game(bowl)} result={bowl} />);
-    // Counted from the left, which is where the away side stands.
-    expect(screen.getByText("Team 1")).toBeInTheDocument();
-    expect(screen.getByText("Team 2")).toBeInTheDocument();
+    // One word each, which is what keeps the label off a second line on a phone.
+    expect(screen.getAllByText("Team")).toHaveLength(2);
     expect(screen.queryByText("Home")).toBeNull();
     expect(screen.queryByText("Away")).toBeNull();
   });

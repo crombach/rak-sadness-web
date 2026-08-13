@@ -30,13 +30,16 @@ const MARKER: Record<HomeAway, string> = {
 /**
  * What each side is called over its name.
  *
- * A game at neither side's ground is said by where the two stand instead, counted from
- * the left the way the scoreline reads. ESPN names a home side for one of them anyway,
- * and the pool scores the line against it, but neither side is hosting anybody.
+ * Neither side of a game played at neither of their grounds is hosting anybody, so
+ * both are said to be a team and nothing more. ESPN names a home side for one of them
+ * anyway, and the pool scores the line against it, but the label would be wrong.
+ *
+ * One word, where a label of two would wrap in the room a phone leaves beside a score
+ * and take the name below it down a line.
  */
 const SIDE_LABEL: Record<"hosted" | "neutral", Record<HomeAway, string>> = {
   hosted: { [HomeAway.AWAY]: "Away", [HomeAway.HOME]: "Home" },
-  neutral: { [HomeAway.AWAY]: "Team 1", [HomeAway.HOME]: "Team 2" },
+  neutral: { [HomeAway.AWAY]: "Team", [HomeAway.HOME]: "Team" },
 };
 
 /**
