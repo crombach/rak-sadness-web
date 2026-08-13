@@ -145,21 +145,27 @@ function opponentOf(result: LeagueResult, team: string): string {
   );
 }
 
+/** How a side finished, where the game is over and the two did not finish level. */
+type SideOutcome = "scored" | "missed";
+
 /**
- * Which side beat the pool's line, or nobody where the picks carried no line or the
- * game landed on it.
+ * Which side a player had to pick to score the point, or nobody where everybody did.
+ *
+ * Against the line where the picks carried one, since that is what the week is scored
+ * on, and on the game itself where they did not. Nobody on a tie or a push, which the
+ * pool scores for everybody either way.
  *
  * The same question `getPickResults` asks, from the favored side rather than from the
  * side a player picked.
  */
-function coveringTeam(
+function scoringTeam(
   result: LeagueResult,
   spread?: GameSpread,
 ): string | undefined {
-  if (spread == null) {
-    return undefined;
-  }
   const winner = result.winner.team;
+  if (spread == null) {
+    return winner?.abbreviation;
+  }
   // How far the favored side finished ahead, which is a negative number where it lost.
   const margin =
     winner == null
@@ -181,12 +187,13 @@ function coveringTeam(
  * scored on, and on the game itself where they did not.
  */
 function outcomeText(result: LeagueResult, spread?: GameSpread): string {
-  const winner = result.winner.team;
+  const scored = scoringTeam(result, spread);
   if (spread == null) {
-    return winner != null ? `${winner.abbreviation} won` : TIED;
+    return scored != null ? `${scored} won` : TIED;
   }
-  const covered = coveringTeam(result, spread);
-  return covered != null ? `${covered} covers` : PUSH;
+  // Past tense, like `won` above it and the two lines below. The game is over by the
+  // time any of them is said.
+  return scored != null ? `${scored} covered` : PUSH;
 }
 
 /**
@@ -262,20 +269,21 @@ function Score({
   opponent,
   homeAway,
   hasBall,
-  covers,
+  outcome,
 }: {
   side: GameSide;
   /** The other side, which is what says whether this number is padded. */
   opponent: GameSide;
   homeAway: HomeAway;
   hasBall: boolean;
-  covers: boolean;
+  outcome?: SideOutcome;
 }) {
   const padded = isPadded(side.score, opponent.score);
   return (
     <p
       className={`game-status__score --${homeAway}${getClasses({
-        "--covers": covers,
+        "--scored": outcome === "scored",
+        "--missed": outcome === "missed",
       })}`}
     >
       {/* Held apart from the marker beside it so the wireframe can draw a bar over
@@ -303,11 +311,12 @@ function Score({
 function Center({
   result,
   spread,
-  covers,
+  outcomeOf,
 }: {
   result: LeagueResult;
   spread?: GameSpread;
-  covers: (side: GameSide) => boolean;
+  /** How a side finished, which is nothing until the game is over. */
+  outcomeOf: (side: GameSide) => SideOutcome | undefined;
 }) {
   // Who has the ball is nobody's before kickoff, and a marker left on the winner
   // reads as a game still going.
@@ -322,7 +331,7 @@ function Center({
           opponent={result.away}
           homeAway={HomeAway.HOME}
           hasBall={hasBall(HomeAway.HOME)}
-          covers={covers(result.home)}
+          outcome={outcomeOf(result.home)}
         />
         <span aria-hidden="true" className="game-status__dash">
           {SCORE_DASH}
@@ -332,7 +341,7 @@ function Center({
           opponent={result.home}
           homeAway={HomeAway.AWAY}
           hasBall={hasBall(HomeAway.AWAY)}
-          covers={covers(result.away)}
+          outcome={outcomeOf(result.away)}
         />
       </div>
       <Note result={result} spread={spread} />
@@ -364,13 +373,13 @@ function Side({
   side,
   homeAway,
   logo,
-  covers,
+  outcome,
 }: {
   side: GameSide;
   homeAway: HomeAway;
   /** Left out where either side has no mark to draw, so neither draws one. */
   logo?: ReactNode;
-  covers: boolean;
+  outcome?: SideOutcome;
 }) {
   return (
     <div className={`game-status__side --${homeAway}`}>
@@ -381,7 +390,8 @@ function Side({
         </span>
         <span
           className={`game-status__team-name${getClasses({
-            "--covers": covers,
+            "--scored": outcome === "scored",
+            "--missed": outcome === "missed",
           })}`}
         >
           {/* The abbreviation on a phone and the name once there is width for it.
@@ -428,13 +438,19 @@ function Game({
 }) {
   const venue = venueParts(result);
   // Only once the game is over, which is when the sentence under the scores says the
-  // same thing. A line a side is ahead of at half time is not one it has beaten.
-  const covered =
+  // same thing. A side ahead at half time has won nothing yet.
+  const scored =
     result.status === GameStatus.FINAL
-      ? coveringTeam(result, spread)
+      ? scoringTeam(result, spread)
       : undefined;
-  const covers = (side: GameSide) =>
-    covered != null && side.team.abbreviation === covered;
+  // Nothing on either side where nobody scored, since a tie and a push are a point
+  // for everybody and marking both sides green would say the same thing twice.
+  const outcomeOf = (side: GameSide): SideOutcome | undefined =>
+    scored == null
+      ? undefined
+      : side.team.abbreviation === scored
+        ? "scored"
+        : "missed";
   return (
     <>
       <p className="game-status__spread">
@@ -446,14 +462,14 @@ function Game({
           side={result.home}
           homeAway={HomeAway.HOME}
           logo={logo?.(result.home)}
-          covers={covers(result.home)}
+          outcome={outcomeOf(result.home)}
         />
-        <Center result={result} spread={spread} covers={covers} />
+        <Center result={result} spread={spread} outcomeOf={outcomeOf} />
         <Side
           side={result.away}
           homeAway={HomeAway.AWAY}
           logo={logo?.(result.away)}
-          covers={covers(result.away)}
+          outcome={outcomeOf(result.away)}
         />
       </div>
       {/* Under the scoreline rather than over it: the game is what the dialog was

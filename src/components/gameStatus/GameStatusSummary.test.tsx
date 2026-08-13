@@ -155,15 +155,15 @@ describe("GameStatusSummary, what the pool made of a finished game", () => {
   };
 
   it("names the side that covered", () => {
-    expect(covered({ team: "BUF", points: -3 })).toBe("BUF covers");
+    expect(covered({ team: "BUF", points: -3 })).toBe("BUF covered");
   });
 
   it("names the underdog where the favorite won by less than it gave", () => {
-    expect(covered({ team: "BUF", points: -14 })).toBe("KC covers");
+    expect(covered({ team: "BUF", points: -14 })).toBe("KC covered");
   });
 
   it("names the underdog where the favorite lost outright", () => {
-    expect(covered({ team: "KC", points: -3 })).toBe("BUF covers");
+    expect(covered({ team: "KC", points: -3 })).toBe("BUF covered");
   });
 
   it("says a game that landed on the number scored for everybody", () => {
@@ -288,11 +288,11 @@ describe("GameStatusSummary, the two scores as a pair", () => {
   });
 });
 
-describe("GameStatusSummary, the side that beat the line", () => {
+describe("GameStatusSummary, which side took the point", () => {
   function marked(
     spread: WeekGame["spread"],
     over: Partial<LeagueResult> = {},
-  ): { names: Array<string>; scores: Array<string> } {
+  ): { scored: Array<string>; missed: Array<string>; scores: Array<string> } {
     // Buffalo won by ten, at home.
     const played = result(over);
     render(<GameStatusSummary game={game(played, spread)} result={played} />);
@@ -301,45 +301,64 @@ describe("GameStatusSummary, the side that beat the line", () => {
         (el) => el.textContent ?? "",
       );
     return {
-      names: textOf(
-        ".game-status__team-name.--covers .game-status__name-short",
+      scored: textOf(
+        ".game-status__team-name.--scored .game-status__name-short",
       ),
-      scores: textOf(".game-status__score.--covers .game-status__points"),
+      missed: textOf(
+        ".game-status__team-name.--missed .game-status__name-short",
+      ),
+      scores: textOf(".game-status__score.--scored .game-status__points"),
     };
   }
 
-  const coveringNames = (
-    spread: WeekGame["spread"],
-    over: Partial<LeagueResult> = {},
-  ) => marked(spread, over).names;
-
-  it("marks the name and the score of the side that covered, and only that side", () => {
+  it("marks the side that covered, and the other side against it", () => {
     expect(marked({ team: "BUF", points: -3 })).toEqual({
-      names: ["BUF"],
+      scored: ["BUF"],
+      missed: ["KC"],
       scores: ["30"],
     });
   });
 
   it("marks the underdog where the favorite won by less than it gave", () => {
-    expect(coveringNames({ team: "BUF", points: -14 })).toEqual(["KC"]);
+    const { scored, missed } = marked({ team: "BUF", points: -14 });
+    expect(scored).toEqual(["KC"]);
+    expect(missed).toEqual(["BUF"]);
+  });
+
+  it("marks the outright winner where the picks carried no line", () => {
+    // The point still goes to whoever picked the winner, so the game says who that is.
+    const { scored, missed } = marked(undefined);
+    expect(scored).toEqual(["BUF"]);
+    expect(missed).toEqual(["KC"]);
   });
 
   it("marks neither side on a game that landed on the number", () => {
-    expect(coveringNames({ team: "BUF", points: -10 })).toEqual([]);
+    expect(marked({ team: "BUF", points: -10 })).toEqual({
+      scored: [],
+      missed: [],
+      scores: [],
+    });
   });
 
-  it("marks neither side where the picks carried no line", () => {
-    expect(coveringNames(undefined)).toEqual([]);
+  it("marks neither side on a game that finished level", () => {
+    const drawn = {
+      away: { ...result().away, score: 30 },
+      winner: { team: null, homeAway: null, by: 0 },
+      loser: { team: null, homeAway: null, by: 0 },
+    };
+    const { scored, missed } = marked(undefined, drawn);
+    expect(scored).toEqual([]);
+    expect(missed).toEqual([]);
   });
 
   it("marks neither side while the game is still being played", () => {
-    // A line a side is ahead of at half time is not one it has beaten.
-    expect(
-      coveringNames(
-        { team: "BUF", points: -3 },
-        { status: GameStatus.LIVE, period: 2, clock: "8:42" },
-      ),
-    ).toEqual([]);
+    // A side ahead at half time has won nothing yet.
+    const { scored, missed } = marked(
+      { team: "BUF", points: -3 },
+      { status: GameStatus.LIVE, period: 2, clock: "8:42" },
+    );
+    expect(scored).toEqual([]);
+    expect(missed).toEqual([]);
   });
 });
 

@@ -92,13 +92,23 @@ export default function useFillerRows(
   }, [tableRef]);
 
   useLayoutEffect(() => {
+    // The first pass is before the paint, so the rows are there in the frame the
+    // table first appears in. Every pass after it waits for a frame.
     measure();
+    let frame = 0;
+    // A keyboard opening resizes the window over a few hundred milliseconds, and
+    // answering every event of that redraws every filler row mid-animation. One
+    // pass a frame is as often as the answer can be seen anyway.
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
+    };
     const table = tableRef.current;
     // The table resizes without the window doing so: a view switch, or scores
     // arriving. ResizeObserver catches both.
     const observer =
       table != null && typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(measure)
+        ? new ResizeObserver(schedule)
         : undefined;
     if (table != null) {
       observer?.observe(table);
@@ -107,10 +117,11 @@ export default function useFillerRows(
       const box = scrollBoxOf(table);
       if (box != null) observer?.observe(box);
     }
-    window.addEventListener("resize", measure);
+    window.addEventListener("resize", schedule);
     return () => {
+      cancelAnimationFrame(frame);
       observer?.disconnect();
-      window.removeEventListener("resize", measure);
+      window.removeEventListener("resize", schedule);
     };
   }, [measure, tableRef]);
 

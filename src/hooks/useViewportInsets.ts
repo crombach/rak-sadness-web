@@ -16,11 +16,22 @@ export type ViewportInsets = {
 };
 
 /**
+ * The shortest a bottom inset can be and still be a keyboard.
+ *
+ * Where `interactive-widget=resizes-content` is honored the keyboard comes out of the
+ * layout viewport as well, so both heights shrink and the difference settles at zero.
+ * They do not shrink in the same frame, and mid-animation the subtraction reports a
+ * keyboard that is not there, which pads the sheet against nothing for a frame and
+ * reads as a stutter. Every keyboard worth answering is far taller than this.
+ */
+const KEYBOARD_FLOOR = 80;
+
+/**
  * What is on screen, out of what the layout is sized against.
  *
- * A virtual keyboard shrinks the visual viewport and leaves the layout viewport
- * alone, so `dvh` still measures the whole screen and anything sized in it runs
- * on under the keyboard. This is the difference, for the stylesheet to subtract.
+ * A virtual keyboard shrinks the visual viewport, and where the layout viewport is
+ * left alone `dvh` still measures the whole screen and anything sized in it runs on
+ * under the keyboard. This is the difference, for the stylesheet to subtract.
  *
  * Pinching zooms the visual viewport the same way a keyboard shrinks it, and a
  * reader who zoomed in did not ask for the dialog to be resized around them, so
@@ -40,10 +51,11 @@ export function viewportInsets({
   if (scale > 1) {
     return { height: layoutHeight, offset: 0, keyboardInset: 0 };
   }
+  const bottom = layoutHeight - viewportHeight - offsetTop;
   return {
     height: viewportHeight,
     offset: offsetTop,
-    keyboardInset: Math.max(layoutHeight - viewportHeight - offsetTop, 0),
+    keyboardInset: bottom >= KEYBOARD_FLOOR ? bottom : 0,
   };
 }
 

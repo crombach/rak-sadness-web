@@ -49,6 +49,19 @@ describe("viewportInsets", () => {
     expect(insets({ viewportHeight: 820 }).keyboardInset).toBe(0);
   });
 
+  it("ignores a gap too short to be a keyboard", () => {
+    // Where the layout viewport gives the keyboard up too, the two heights shrink a
+    // frame apart, and the difference in between is a stutter rather than a keyboard.
+    expect(insets({ viewportHeight: 760 }).keyboardInset).toBe(0);
+    expect(
+      insets({ layoutHeight: 460, viewportHeight: 455 }).keyboardInset,
+    ).toBe(0);
+  });
+
+  it("still measures a keyboard that is really there", () => {
+    expect(insets({ viewportHeight: 719 }).keyboardInset).toBe(81);
+  });
+
   it("leaves a zoomed page the way it found it", () => {
     // Pinching shrinks the visual viewport the way a keyboard does, and resizing
     // the dialog around a reader who zoomed in is not what they asked for.
