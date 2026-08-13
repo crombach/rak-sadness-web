@@ -112,12 +112,25 @@ function normalCell({
 }
 
 /**
+ * A tab's name, which Excel refuses past 31 characters.
+ *
+ * The pool's own name is left off. `Rak Madness 2025 Week 5 Results` is exactly 31
+ * and week 10 is over it, and the workbook it is a tab of is already named after
+ * the pool.
+ */
+function sheetName(season: number, week: number, view: string): string {
+  return `${season} Week ${week} ${view}`;
+}
+
+/**
  * `xlsx-js-style` is over half the bundle, and an export is a deliberate click, so
  * it is fetched at that point rather than on load.
  */
 export default async function buildSpreadsheetBuffer(
   scoresObject: RakMadnessScores,
-  week: number,
+  // Named rather than positional: two numbers side by side, and a call with them
+  // the wrong way round would come out as a workbook for week 2025.
+  { season, week }: { season: number; week: number },
 ): Promise<ArrayBuffer> {
   const XLSX = await import("xlsx-js-style");
   // Create a new Excel workbook.
@@ -168,7 +181,7 @@ export default async function buildSpreadsheetBuffer(
   XLSX.utils.book_append_sheet(
     workbook,
     resultsSheet,
-    `Rak Madness Week ${week} Results`,
+    sheetName(season, week, "Results"),
   );
 
   // Build the picks sheet data as an array of arrays.
@@ -220,7 +233,7 @@ export default async function buildSpreadsheetBuffer(
   XLSX.utils.book_append_sheet(
     workbook,
     picksSheet,
-    `Rak Madness Week ${week} Picks`,
+    sheetName(season, week, "Picks"),
   );
 
   // Write the workbook to a buffer and return that buffer.

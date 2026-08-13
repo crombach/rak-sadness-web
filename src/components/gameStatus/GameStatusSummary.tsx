@@ -2,6 +2,7 @@ import { ReactNode, useState } from "react";
 import { GameStatus, HomeAway } from "../../types/ESPN";
 import { GameSide, LeagueResult } from "../../types/LeagueResult";
 import { GameSpread, WeekGame } from "../../types/WeekGame";
+import getClasses from "../../utils/getClasses";
 import "./GameStatusSummary.scss";
 
 /** Regulation is four quarters, and anything past them is overtime. */
@@ -67,6 +68,7 @@ function kickoffParts(date: Date): Array<string> {
       weekday: "short",
       month: "short",
       day: "numeric",
+      year: "numeric",
     }),
     date.toLocaleTimeString("en-US", {
       hour: "numeric",
@@ -143,16 +145,26 @@ function opponentOf(result: LeagueResult, team: string): string {
   );
 }
 
+/** How a side finished, where the game is over and the two did not finish level. */
+type SideOutcome = "scored" | "missed";
+
 /**
- * What the pool made of the game, said once it is over.
+ * Which side a player had to pick to score the point, or nobody where everybody did.
  *
- * Against the spread where the picks carried one, since that is what the week is
- * scored on, and on the game itself where they did not.
+ * Against the line where the picks carried one, since that is what the week is scored
+ * on, and on the game itself where they did not. Nobody on a tie or a push, which the
+ * pool scores for everybody either way.
+ *
+ * The same question `getPickResults` asks, from the favored side rather than from the
+ * side a player picked.
  */
-function outcomeText(result: LeagueResult, spread?: GameSpread): string {
+function scoringTeam(
+  result: LeagueResult,
+  spread?: GameSpread,
+): string | undefined {
   const winner = result.winner.team;
   if (spread == null) {
-    return winner != null ? `${winner.abbreviation} won` : TIED;
+    return winner?.abbreviation;
   }
   // How far the favored side finished ahead, which is a negative number where it lost.
   const margin =
@@ -163,10 +175,37 @@ function outcomeText(result: LeagueResult, spread?: GameSpread): string {
         : -result.winner.by;
   const against = margin + spread.points;
   if (against === 0) {
-    return PUSH;
+    return undefined;
   }
-  const covered = against > 0 ? spread.team : opponentOf(result, spread.team);
-  return `${covered} covers`;
+  return against > 0 ? spread.team : opponentOf(result, spread.team);
+}
+
+/**
+ * What the pool made of the game, said once it is over.
+ *
+ * Against the spread where the picks carried one, since that is what the week is
+ * scored on, and on the game itself where they did not.
+ */
+function outcomeText(result: LeagueResult, spread?: GameSpread): string {
+  const scored = scoringTeam(result, spread);
+  if (spread == null) {
+    return scored != null ? `${scored} won` : TIED;
+  }
+  // Past tense, like `won` above it and the two lines below. The game is over by the
+  // time any of them is said.
+  return scored != null ? `${scored} covered` : PUSH;
+}
+
+/**
+ * Whether a score is written with a leading zero, which is where it is in single
+ * figures and the other side is not.
+ *
+ * The pair reads as one number either side of the dash, and a lone digit beside a
+ * two-digit number reads as the smaller of the two by its width before it is read at
+ * all. Both sides in single figures are left alone: there is nothing to line up with.
+ */
+function isPadded(score: number, opponentScore: number): boolean {
+  return score < 10 && opponentScore >= 10;
 }
 
 /** Where the game is up to, over the scores. */
@@ -227,18 +266,36 @@ function Marker({
 
 function Score({
   side,
+  opponent,
   homeAway,
   hasBall,
+  outcome,
 }: {
   side: GameSide;
+  /** The other side, which is what says whether this number is padded. */
+  opponent: GameSide;
   homeAway: HomeAway;
   hasBall: boolean;
+  outcome?: SideOutcome;
 }) {
+  const padded = isPadded(side.score, opponent.score);
   return (
-    <p className={`game-status__score --${homeAway}`}>
+    <p
+      className={`game-status__score --${homeAway}${getClasses({
+        "--scored": outcome === "scored",
+        "--missed": outcome === "missed",
+      })}`}
+    >
       {/* Held apart from the marker beside it so the wireframe can draw a bar over
           the number alone, and so a number of one digit takes the room two do. */}
-      <span className="game-status__points">{side.score}</span>
+      <span
+        className="game-status__points"
+        // A padded number is read out as two of them, so the score itself is what
+        // is announced instead.
+        aria-label={padded ? `${side.score}` : undefined}
+      >
+        {padded ? `0${side.score}` : side.score}
+      </span>
       <Marker homeAway={homeAway} hasBall={hasBall} />
     </p>
   );
@@ -254,9 +311,12 @@ function Score({
 function Center({
   result,
   spread,
+  outcomeOf,
 }: {
   result: LeagueResult;
   spread?: GameSpread;
+  /** How a side finished, which is nothing until the game is over. */
+  outcomeOf: (side: GameSide) => SideOutcome | undefined;
 }) {
   // Who has the ball is nobody's before kickoff, and a marker left on the winner
   // reads as a game still going.
@@ -268,16 +328,20 @@ function Center({
       <div className="game-status__scores">
         <Score
           side={result.home}
+          opponent={result.away}
           homeAway={HomeAway.HOME}
           hasBall={hasBall(HomeAway.HOME)}
+          outcome={outcomeOf(result.home)}
         />
         <span aria-hidden="true" className="game-status__dash">
           {SCORE_DASH}
         </span>
         <Score
           side={result.away}
+          opponent={result.home}
           homeAway={HomeAway.AWAY}
           hasBall={hasBall(HomeAway.AWAY)}
+          outcome={outcomeOf(result.away)}
         />
       </div>
       <Note result={result} spread={spread} />
@@ -309,11 +373,13 @@ function Side({
   side,
   homeAway,
   logo,
+  outcome,
 }: {
   side: GameSide;
   homeAway: HomeAway;
   /** Left out where either side has no mark to draw, so neither draws one. */
   logo?: ReactNode;
+  outcome?: SideOutcome;
 }) {
   return (
     <div className={`game-status__side --${homeAway}`}>
@@ -322,7 +388,12 @@ function Side({
         <span className="game-status__side-label">
           {homeAway === HomeAway.HOME ? "Home" : "Away"}
         </span>
-        <span className="game-status__team-name">
+        <span
+          className={`game-status__team-name${getClasses({
+            "--scored": outcome === "scored",
+            "--missed": outcome === "missed",
+          })}`}
+        >
           {/* The abbreviation on a phone and the name once there is width for it.
               Both are in the page, so neither costs a measurement to choose
               between, and the one read out is the name however narrow the screen. */}
@@ -366,6 +437,20 @@ function Game({
   logo?: (side: GameSide) => ReactNode;
 }) {
   const venue = venueParts(result);
+  // Only once the game is over, which is when the sentence under the scores says the
+  // same thing. A side ahead at half time has won nothing yet.
+  const scored =
+    result.status === GameStatus.FINAL
+      ? scoringTeam(result, spread)
+      : undefined;
+  // Nothing on either side where nobody scored, since a tie and a push are a point
+  // for everybody and marking both sides green would say the same thing twice.
+  const outcomeOf = (side: GameSide): SideOutcome | undefined =>
+    scored == null
+      ? undefined
+      : side.team.abbreviation === scored
+        ? "scored"
+        : "missed";
   return (
     <>
       <p className="game-status__spread">
@@ -377,12 +462,14 @@ function Game({
           side={result.home}
           homeAway={HomeAway.HOME}
           logo={logo?.(result.home)}
+          outcome={outcomeOf(result.home)}
         />
-        <Center result={result} spread={spread} />
+        <Center result={result} spread={spread} outcomeOf={outcomeOf} />
         <Side
           side={result.away}
           homeAway={HomeAway.AWAY}
           logo={logo?.(result.away)}
+          outcome={outcomeOf(result.away)}
         />
       </div>
       {/* Under the scoreline rather than over it: the game is what the dialog was

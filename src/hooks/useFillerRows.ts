@@ -16,13 +16,14 @@ const DEFAULT_ROW_HEIGHT = 32;
  * every time it ran.
  */
 export function fillerRowCount({
-  viewportHeight,
+  fillToBottom,
   tableTop,
   tableHeight,
   rowHeight,
   fillerHeight,
 }: {
-  viewportHeight: number;
+  /** The line in client coordinates the rows are carried down to. */
+  fillToBottom: number;
   tableTop: number;
   tableHeight: number;
   rowHeight: number;
@@ -32,7 +33,7 @@ export function fillerRowCount({
     return 0;
   }
   const contentHeight = tableHeight - fillerHeight;
-  const spare = viewportHeight - tableTop - contentHeight;
+  const spare = fillToBottom - tableTop - contentHeight;
   return Math.max(Math.floor(spare / rowHeight), 0);
 }
 
@@ -41,6 +42,25 @@ function readRowHeight(table: HTMLElement): number {
     "--rak-table-row-height",
   );
   return Number.parseFloat(declared) || DEFAULT_ROW_HEIGHT;
+}
+
+/** The box the table scrolls inside, which is not the window. */
+function scrollBoxOf(table: HTMLElement): HTMLElement | undefined {
+  for (let box = table.parentElement; box != null; box = box.parentElement) {
+    const { overflowY } = getComputedStyle(box);
+    if (overflowY === "auto" || overflowY === "scroll") return box;
+  }
+  return undefined;
+}
+
+/**
+ * How far down the rows are carried: the bottom of that box's client area rather
+ * than of the window. A table wide enough to need a horizontal scrollbar has that
+ * bar between the two, and filling to the window would leave a strip of it bare.
+ */
+function fillToY(box: HTMLElement | undefined): number {
+  if (box == null) return window.innerHeight;
+  return box.getBoundingClientRect().top + box.clientHeight;
 }
 
 /**
@@ -62,7 +82,7 @@ export default function useFillerRows(
     ).reduce((sum, row) => sum + row.getBoundingClientRect().height, 0);
     setCount(
       fillerRowCount({
-        viewportHeight: window.innerHeight,
+        fillToBottom: fillToY(scrollBoxOf(table)),
         tableTop: top,
         tableHeight: height,
         rowHeight: readRowHeight(table),
@@ -72,19 +92,36 @@ export default function useFillerRows(
   }, [tableRef]);
 
   useLayoutEffect(() => {
+    // The first pass is before the paint, so the rows are there in the frame the
+    // table first appears in. Every pass after it waits for a frame.
     measure();
+    let frame = 0;
+    // A keyboard opening resizes the window over a few hundred milliseconds, and
+    // answering every event of that redraws every filler row mid-animation. One
+    // pass a frame is as often as the answer can be seen anyway.
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
+    };
     const table = tableRef.current;
     // The table resizes without the window doing so: a view switch, or scores
     // arriving. ResizeObserver catches both.
     const observer =
       table != null && typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(measure)
+        ? new ResizeObserver(schedule)
         : undefined;
-    if (table != null) observer?.observe(table);
-    window.addEventListener("resize", measure);
+    if (table != null) {
+      observer?.observe(table);
+      // A horizontal scrollbar appearing takes height off the box without the
+      // window or the table changing size.
+      const box = scrollBoxOf(table);
+      if (box != null) observer?.observe(box);
+    }
+    window.addEventListener("resize", schedule);
     return () => {
+      cancelAnimationFrame(frame);
       observer?.disconnect();
-      window.removeEventListener("resize", measure);
+      window.removeEventListener("resize", schedule);
     };
   }, [measure, tableRef]);
 

@@ -20,10 +20,10 @@ export default function useExportScores(
     const exportResultsAsync = async () => {
       setExportLoading(true);
       try {
-        const spreadsheetBuffer = await buildSpreadsheetBuffer(
-          scores,
-          week.value,
-        );
+        const spreadsheetBuffer = await buildSpreadsheetBuffer(scores, {
+          season,
+          week: week.value,
+        });
 
         const blob = new Blob([spreadsheetBuffer], {
           type: XLSX_CONTENT_TYPE,
@@ -31,7 +31,7 @@ export default function useExportScores(
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `rak-madness_season-${season}_week-${week.value}_results.xlsx`;
+        link.download = `rak-madness_${season}_week-${week.value}_results.xlsx`;
         link.click();
         link.remove();
         // The blob is held until its URL is released, and every export mints

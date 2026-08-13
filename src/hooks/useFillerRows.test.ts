@@ -7,17 +7,17 @@ function count({
   tableHeight,
   fillerHeight = 0,
   tableTop = 100,
-  viewportHeight = 800,
+  fillToBottom = 800,
   rowHeight = ROW_HEIGHT,
 }: {
   tableHeight: number;
   fillerHeight?: number;
   tableTop?: number;
-  viewportHeight?: number;
+  fillToBottom?: number;
   rowHeight?: number;
 }) {
   return fillerRowCount({
-    viewportHeight,
+    fillToBottom,
     tableTop,
     tableHeight,
     rowHeight,
@@ -37,6 +37,12 @@ describe("fillerRowCount", () => {
 
   it("adds nothing to a table taller than the viewport", () => {
     expect(count({ tableHeight: 2000 })).toBe(0);
+  });
+
+  it("stops at the bottom of the box, which a scrollbar takes height off", () => {
+    // The same 800px window with a 17px horizontal scrollbar under the table:
+    // 383px spare rather than 400, which is one row fewer.
+    expect(count({ tableHeight: 300, fillToBottom: 783 })).toBe(11);
   });
 
   it("counts the rows it already added as filler, not content", () => {
@@ -75,9 +81,7 @@ describe("fillerRowCount", () => {
   });
 
   it("fills a whole empty table, which is what the wireframe is", () => {
-    expect(count({ tableHeight: 0, tableTop: 0, viewportHeight: 768 })).toBe(
-      24,
-    );
+    expect(count({ tableHeight: 0, tableTop: 0, fillToBottom: 768 })).toBe(24);
   });
 
   it("uses the narrow-screen row height when that is what was measured", () => {

@@ -109,20 +109,11 @@ export default function DialogCombobox<T>({
         </Combobox.Icon>
       </div>
       <Combobox.Portal>
-        {/* Under the input and nowhere else. Flipped over it, the list would cover
-            the answer the dialog is open on, and on a phone it would come up under
-            the search only to be sat on by the keyboard. Squeezed for room it gives
-            up height instead, which the list scrolls. */}
-        <Combobox.Positioner
-          className="dialog__positioner"
-          side="bottom"
-          sideOffset={4}
-          collisionAvoidance={{
-            side: "none",
-            align: "shift",
-            fallbackAxisSide: "none",
-          }}
-        >
+        {/* Wherever there is room for it, which is under the input in all but the
+            tightest case. Held below it and nowhere else, the list ran off the
+            bottom of a phone; `index.html` hands a keyboard's height back to the
+            layout viewport, so a list flipped over the input lands on screen. */}
+        <Combobox.Positioner className="dialog__positioner" sideOffset={4}>
           <Combobox.Popup className="dialog__list">
             <Combobox.Empty className="dialog__empty">
               {emptyMessage}

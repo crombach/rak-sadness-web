@@ -7,6 +7,7 @@ vi.mock("./utils/buildSpreadsheetBuffer");
 
 import {
   CURRENT_WEEK,
+  SEASON,
   scores,
   openWeekScores,
   getPlayerScoresMock,
@@ -119,10 +120,10 @@ describe("the app, export", () => {
     await user.click(screen.getByText("Export Results"));
 
     await waitFor(() => {
-      expect(buildSpreadsheetBufferMock).toHaveBeenCalledWith(
-        scores,
-        CURRENT_WEEK,
-      );
+      expect(buildSpreadsheetBufferMock).toHaveBeenCalledWith(scores, {
+        season: SEASON,
+        week: CURRENT_WEEK,
+      });
     });
     expect(click).toHaveBeenCalledTimes(1);
     await waitFor(() => {

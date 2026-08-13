@@ -2,6 +2,22 @@
 @use "../../styles/breakpoints" as *;
 @use "../../styles/skeleton" as *;
 
+// Which side a player had to pick to score the point, and which one cost them it,
+// in the two hues the picks table fills a cell with. The 600 rather than the 300 that
+// fill is: 300 is a wash behind black text and does not carry as ink on white.
+//
+// Neither side is marked where nobody scored, and the sentence under the scores names
+// the side in words, so nothing here rests on the hue alone.
+@mixin outcome {
+  &.--scored {
+    color: var(--rak-success-600);
+  }
+
+  &.--missed {
+    color: var(--rak-danger-600);
+  }
+}
+
 // What separates one part of the strip under the scoreline from the next.
 @mixin meta-dot {
   content: "·";
@@ -278,6 +294,8 @@
   font-size: var(--rak-text-lg);
   font-weight: var(--rak-weight-semibold);
   line-height: 1.1;
+
+  @include outcome;
 }
 
 // A phone gets the abbreviation, a name of three words wrapping to three lines in
@@ -324,6 +342,8 @@
   &.--home {
     flex-direction: row-reverse;
   }
+
+  @include outcome;
 }
 
 // Two digits wide whether the side has one or two, so a score going from 7 to 14

@@ -155,15 +155,15 @@ describe("GameStatusSummary, what the pool made of a finished game", () => {
   };
 
   it("names the side that covered", () => {
-    expect(covered({ team: "BUF", points: -3 })).toBe("BUF covers");
+    expect(covered({ team: "BUF", points: -3 })).toBe("BUF covered");
   });
 
   it("names the underdog where the favorite won by less than it gave", () => {
-    expect(covered({ team: "BUF", points: -14 })).toBe("KC covers");
+    expect(covered({ team: "BUF", points: -14 })).toBe("KC covered");
   });
 
   it("names the underdog where the favorite lost outright", () => {
-    expect(covered({ team: "KC", points: -3 })).toBe("BUF covers");
+    expect(covered({ team: "KC", points: -3 })).toBe("BUF covered");
   });
 
   it("says a game that landed on the number scored for everybody", () => {
@@ -254,6 +254,114 @@ describe("GameStatusSummary, a game that is over", () => {
   });
 });
 
+describe("GameStatusSummary, the two scores as a pair", () => {
+  function points(scores: { home: number; away: number }): Array<string> {
+    const scored = result({
+      home: { ...result().home, score: scores.home },
+      away: { ...result().away, score: scores.away },
+    });
+    render(<GameStatusSummary game={game(scored)} result={scored} />);
+    return [...document.querySelectorAll(".game-status__points")].map(
+      (span) => span.textContent ?? "",
+    );
+  }
+
+  it("pads the side in single figures where the other is not", () => {
+    expect(points({ home: 7, away: 14 })).toEqual(["07", "14"]);
+  });
+
+  it("pads whichever side is the short one", () => {
+    expect(points({ home: 21, away: 3 })).toEqual(["21", "03"]);
+  });
+
+  it("leaves two single figures alone, having nothing to line them up with", () => {
+    expect(points({ home: 7, away: 3 })).toEqual(["7", "3"]);
+  });
+
+  it("leaves two double figures alone", () => {
+    expect(points({ home: 30, away: 20 })).toEqual(["30", "20"]);
+  });
+
+  it("reads a padded score out as the number it is", () => {
+    points({ home: 7, away: 14 });
+    expect(screen.getByLabelText("7")).toHaveTextContent("07");
+  });
+});
+
+describe("GameStatusSummary, which side took the point", () => {
+  function marked(
+    spread: WeekGame["spread"],
+    over: Partial<LeagueResult> = {},
+  ): { scored: Array<string>; missed: Array<string>; scores: Array<string> } {
+    // Buffalo won by ten, at home.
+    const played = result(over);
+    render(<GameStatusSummary game={game(played, spread)} result={played} />);
+    const textOf = (selector: string) =>
+      [...document.querySelectorAll(selector)].map(
+        (el) => el.textContent ?? "",
+      );
+    return {
+      scored: textOf(
+        ".game-status__team-name.--scored .game-status__name-short",
+      ),
+      missed: textOf(
+        ".game-status__team-name.--missed .game-status__name-short",
+      ),
+      scores: textOf(".game-status__score.--scored .game-status__points"),
+    };
+  }
+
+  it("marks the side that covered, and the other side against it", () => {
+    expect(marked({ team: "BUF", points: -3 })).toEqual({
+      scored: ["BUF"],
+      missed: ["KC"],
+      scores: ["30"],
+    });
+  });
+
+  it("marks the underdog where the favorite won by less than it gave", () => {
+    const { scored, missed } = marked({ team: "BUF", points: -14 });
+    expect(scored).toEqual(["KC"]);
+    expect(missed).toEqual(["BUF"]);
+  });
+
+  it("marks the outright winner where the picks carried no line", () => {
+    // The point still goes to whoever picked the winner, so the game says who that is.
+    const { scored, missed } = marked(undefined);
+    expect(scored).toEqual(["BUF"]);
+    expect(missed).toEqual(["KC"]);
+  });
+
+  it("marks neither side on a game that landed on the number", () => {
+    expect(marked({ team: "BUF", points: -10 })).toEqual({
+      scored: [],
+      missed: [],
+      scores: [],
+    });
+  });
+
+  it("marks neither side on a game that finished level", () => {
+    const drawn = {
+      away: { ...result().away, score: 30 },
+      winner: { team: null, homeAway: null, by: 0 },
+      loser: { team: null, homeAway: null, by: 0 },
+    };
+    const { scored, missed } = marked(undefined, drawn);
+    expect(scored).toEqual([]);
+    expect(missed).toEqual([]);
+  });
+
+  it("marks neither side while the game is still being played", () => {
+    // A side ahead at half time has won nothing yet.
+    const { scored, missed } = marked(
+      { team: "BUF", points: -3 },
+      { status: GameStatus.LIVE, period: 2, clock: "8:42" },
+    );
+    expect(scored).toEqual([]);
+    expect(missed).toEqual([]);
+  });
+});
+
 /*
  * `TZ` is what `toLocaleDateString` reads the zone from, and Node picks a change to it
  * up on the next call. Set here so the kickoff asserted is the same wherever the suite
@@ -273,10 +381,10 @@ describe("GameStatusSummary, the kickoff", () => {
     ].map((part) => part.textContent);
   }
 
-  it("says the day and the time in the reader's own zone, and names it", () => {
+  it("says the day, the year and the time in the reader's own zone, and names it", () => {
     // 17:00 UTC, which is the morning where this reader is.
     expect(kickoff("America/Los_Angeles")).toEqual([
-      "Sun, Oct 6",
+      "Sun, Oct 6, 2024",
       "10:00 AM PDT",
     ]);
   });
@@ -284,7 +392,7 @@ describe("GameStatusSummary, the kickoff", () => {
   it("moves the day with the zone, not only the time", () => {
     // The same instant, on which this reader is already into Monday.
     expect(kickoff("Australia/Sydney")).toEqual([
-      "Mon, Oct 7",
+      "Mon, Oct 7, 2024",
       "4:00 AM GMT+11",
     ]);
   });
