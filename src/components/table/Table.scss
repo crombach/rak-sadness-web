@@ -22,7 +22,9 @@
   // and a score are two digits, a pick is a team and its spread, and a name runs to
   // whatever a player calls themselves.
   --rak-table-rank-width: 3.5em;
-  --rak-table-player-width: 11em;
+  // Room for about seventeen characters of a name, plus the status icon and the
+  // gap before it.
+  --rak-table-player-width: 13.5em;
   --rak-table-pick-width: 6.5em;
   --rak-table-score-width: 8em;
   // Read back by useFillerRows, which needs a row height to work out how many
@@ -35,6 +37,20 @@
   --rak-table-cell-padding-x: 6px;
   --rak-table-cell-padding-y: 2px;
   --rak-table-header-padding-x: 8px;
+  // What is left of the player column for the name itself, once the status icon
+  // beside it, the gap between them, and the cell's own padding and edges have
+  // taken theirs. `PlayerName.scss` cuts the name off here rather than at a count
+  // of characters, because a name long enough to widen the column is a name the
+  // wireframe did not have when it drew that column at the width above. Derived
+  // from the same value, the two cannot disagree. The edges come out of it
+  // because `box-sizing` is `border-box`, so the width above is the whole cell
+  // rather than the room inside it.
+  --rak-table-player-name-width: calc(
+    var(--rak-table-player-width) - var(--rak-player-icon-size) - var(
+        --rak-player-icon-gap
+      ) -
+      2 * var(--rak-table-cell-padding-x) - 2 * var(--rak-border-width)
+  );
   --rak-table-border: var(--rak-border-width) solid var(--rak-primary-800);
   --rak-table-header-border: var(--rak-border-width) solid
     var(--rak-primary-600);
@@ -139,13 +155,6 @@
     z-index: var(--rak-z-sticky-cell);
     position: sticky;
     left: 0;
-    // Gecko repaints a sticky element's whole box on every scroll frame rather
-    // than moving what it already drew, so a fast sideways flick outruns it and
-    // the ordinary cells underneath show through. Promoted, the compositor
-    // shifts the column instead of the main thread redrawing it. A hint, not a
-    // promise: over Firefox's budget it is dropped, which is only today's
-    // behavior back.
-    will-change: transform;
   }
 
   tbody {
@@ -254,10 +263,14 @@
 }
 
 // A phone reads the tighter table, set on `.table` itself above. Room enough, and
-// both go back up.
+// these go back up.
 @include roomy-screen {
   .table {
     font-size: var(--rak-text-md);
     --rak-table-row-height: 32px;
+    // About twenty-four characters of a name here, against seventeen on a phone.
+    // The larger text alone would have bought only a wider letter, not more of
+    // them, since the width above grows with it.
+    --rak-table-player-width: 17em;
   }
 }

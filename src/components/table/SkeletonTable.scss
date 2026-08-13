@@ -22,8 +22,9 @@
 
 .table.--skeleton {
   // The sheen is held to the table's own box, so it crosses the wireframe and not
-  // the page around it. Nothing here sticks, because the page holds still until the
-  // week arrives, so there is no sticky header to lose to the mixin's clip.
+  // the page around it. The clip that holds it makes this box the one the header
+  // cells stick inside, which costs the wireframe nothing: it stands still until
+  // the week arrives, so they never come off their own row.
   @include skeleton-sheen;
 
   th {
