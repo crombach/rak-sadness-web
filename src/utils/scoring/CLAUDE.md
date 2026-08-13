@@ -7,7 +7,7 @@ The picks-to-scoreboard pipeline, a file per concern, sequenced by `getPlayerSco
 - `validateSpreads`: rows disagreeing on a spread
 - `getPickResults`: picks scored, and `getStatus`
 - `gameColumns`: `LEAGUES`, `LEAGUE_PREFIX`, `gameLabels`
-- `weekGames`: each column and its game
+- `weekGames`: each column, its game, its line
 - `getTiebreakerScore`: the Monday night total
 - `scorePlayers`: per-player totals, sorted
 - `comparePlayerScores`: rank order, on merit

@@ -16,14 +16,6 @@ export type EspnEvent = {
   date: string;
   competitions: Array<EspnCompetition>;
   status: EspnStatus;
-  /** Where ESPN's own pages for the game are, one of which is its tracker. */
-  links?: Array<EspnLink>;
-};
-
-export type EspnLink = {
-  href: string;
-  /** What the link is called, like `Gamecast`. */
-  text?: string;
 };
 
 export type EspnStatus = {
@@ -78,6 +70,10 @@ export type EspnSituation = {
 };
 
 export type EspnTeam = {
+  /** Where the team plays: a city for the pros, a school for the colleges. */
+  location?: string;
+  /** What they are called there: `Bills`, `Buckeyes`. */
+  name?: string;
   displayName: string;
   shortDisplayName: string;
   abbreviation: string;

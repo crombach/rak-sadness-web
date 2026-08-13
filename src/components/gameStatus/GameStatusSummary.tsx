@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { GameStatus, HomeAway } from "../../types/ESPN";
 import { GameSide, LeagueResult } from "../../types/LeagueResult";
-import { WeekGame } from "../../types/WeekGame";
+import { GameSpread, WeekGame } from "../../types/WeekGame";
 import "./GameStatusSummary.scss";
 
 /** Regulation is four quarters, and anything past them is overtime. */
@@ -13,7 +13,7 @@ const SCORE_DASH = "–";
 /**
  * What a game yet to kick off is doing, said in place of ESPN's own wording.
  *
- * ESPN says a scheduled game as its kickoff, in Eastern time. The strip above the
+ * ESPN says a scheduled game as its kickoff, in Eastern time. The strip under the
  * scoreline already says when the game starts, in the reader's own zone, so ESPN's
  * is the same fact twice and in the wrong zone for anyone outside the east.
  */
@@ -24,6 +24,30 @@ const MARKER: Record<HomeAway, string> = {
   [HomeAway.HOME]: "▸",
   [HomeAway.AWAY]: "◂",
 };
+
+/**
+ * Said in place of the down and distance while a game being played has none, which is
+ * every ball that is not yet dead and every break in the game.
+ *
+ * A line either way, rather than one that comes and goes: the game is asked about again
+ * every `POLL_MS`, and an answer with no down in it would otherwise take the line away
+ * and move the scoreline under it.
+ */
+const NO_DOWN = "Between plays";
+
+/** The pool's own line on the game, which is not always a bookmaker's. */
+const SPREAD_LABEL = "Rak Madness Spread";
+
+/** Said in its place for a game the picks put no line on. */
+const NO_SPREAD = "None";
+
+/**
+ * How a game that finished level, or on its number, was scored. Both are a point for
+ * everybody: the pool counts a tie as picking the winner, and a margin that lands on
+ * the spread as covering it.
+ */
+const TIED = "Tied, both sides scored";
+const PUSH = "Push, both sides scored";
 
 /**
  * When the game starts, as its own parts.
@@ -59,7 +83,7 @@ function venueParts(result: LeagueResult): Array<string> | undefined {
   return place !== "" ? [venue.name, place] : [venue.name];
 }
 
-/** One half of the strip above the scoreline, its parts dotted apart. */
+/** One half of the strip under the scoreline, its parts dotted apart. */
 function MetaGroup({ parts }: { parts: Array<string> }) {
   return (
     <span className="game-status__meta-group">
@@ -110,34 +134,64 @@ function detailText(result: LeagueResult): string {
     : period;
 }
 
+/** The other team in the game, which the line is only ever written against one of. */
+function opponentOf(result: LeagueResult, team: string): string {
+  return (
+    [result.home, result.away]
+      .map((side) => side.team.abbreviation)
+      .find((abbreviation) => abbreviation !== team) ?? team
+  );
+}
+
 /**
- * Where the game is up to, over the scores.
+ * What the pool made of the game, said once it is over.
  *
- * No points by quarter: the pool is scored on the game's own result, so a quarter's
- * points are of no use to anyone reading this.
+ * Against the spread where the picks carried one, since that is what the week is
+ * scored on, and on the game itself where they did not.
  */
+function outcomeText(result: LeagueResult, spread?: GameSpread): string {
+  const winner = result.winner.team;
+  if (spread == null) {
+    return winner != null ? `${winner.abbreviation} won` : TIED;
+  }
+  // How far the favored side finished ahead, which is a negative number where it lost.
+  const margin =
+    winner == null
+      ? 0
+      : winner.abbreviation === spread.team
+        ? result.winner.by
+        : -result.winner.by;
+  const against = margin + spread.points;
+  if (against === 0) {
+    return PUSH;
+  }
+  const covered = against > 0 ? spread.team : opponentOf(result, spread.team);
+  return `${covered} covers`;
+}
+
+/** Where the game is up to, over the scores. */
 function Detail({ result }: { result: LeagueResult }) {
   return <p className="game-status__detail">{detailText(result)}</p>;
 }
 
 /**
- * Said in place of the down and distance while a game being played has none, which is
- * every ball that is not yet dead and every break in the game.
+ * Under the scores: what the offense is facing while the game is being played, and
+ * what the pool made of it once the game is over.
  *
- * A line either way, rather than one that comes and goes: the game is asked about again
- * every `POLL_MS`, and an answer with no down in it would otherwise take the line away
- * and move the scoreline under it.
+ * Who has the ball is left to the marker beside their score.
  */
-const NO_DOWN = "Between plays";
-
-/** What the link out to ESPN's own tracker for the game is called. */
-const GAMECAST_LABEL = "ESPN Gamecast";
-
-/**
- * What the offense is facing, under the scores. Who has the ball is left to the
- * marker beside their score.
- */
-function Down({ result }: { result: LeagueResult }) {
+function Note({
+  result,
+  spread,
+}: {
+  result: LeagueResult;
+  spread?: GameSpread;
+}) {
+  if (result.status === GameStatus.FINAL) {
+    return (
+      <p className="game-status__outcome">{outcomeText(result, spread)}</p>
+    );
+  }
   const { downDistanceText } = result.possession;
   if (downDistanceText == null && result.status !== GameStatus.LIVE) {
     return null;
@@ -148,9 +202,10 @@ function Down({ result }: { result: LeagueResult }) {
 /**
  * Which side has the ball, pointed at their score.
  *
- * Both sides wear one while the game is being played, and the side without the ball
- * wears an invisible one, so neither the ball changing hands nor a poll that finds
- * nobody with it moves the scores.
+ * Both sides wear one whatever the game is doing, and every side without the ball
+ * wears an invisible one. It holds the room the visible one takes, so neither the ball
+ * changing hands, nor a poll that finds nobody with it, nor a game ending moves the
+ * scores.
  */
 function Marker({
   homeAway,
@@ -177,30 +232,36 @@ function Score({
 }: {
   side: GameSide;
   homeAway: HomeAway;
-  /** Left out where the game is not being played, so neither side is marked. */
-  hasBall?: boolean;
+  hasBall: boolean;
 }) {
   return (
     <p className={`game-status__score --${homeAway}`}>
-      {side.score}
-      {hasBall != null && <Marker homeAway={homeAway} hasBall={hasBall} />}
+      {/* Held apart from the marker beside it so the wireframe can draw a bar over
+          the number alone, and so a number of one digit takes the room two do. */}
+      <span className="game-status__points">{side.score}</span>
+      <Marker homeAway={homeAway} hasBall={hasBall} />
     </p>
   );
 }
 
 /**
  * The two scores and, stacked either side of them, where the game is up to and what
- * the offense is facing.
+ * either the offense or the pool has to say about it.
  *
  * One block rather than three bands across the scoreline, so both lines are read
  * against the numbers they belong to instead of against the dialog's edges.
  */
-function Center({ result }: { result: LeagueResult }) {
-  // Marked only while the game is being played. Who has the ball is nobody's before
-  // kickoff, and a marker left on the winner reads as a game still going.
-  const marked = result.status === GameStatus.LIVE;
+function Center({
+  result,
+  spread,
+}: {
+  result: LeagueResult;
+  spread?: GameSpread;
+}) {
+  // Who has the ball is nobody's before kickoff, and a marker left on the winner
+  // reads as a game still going.
   const hasBall = (side: HomeAway) =>
-    marked ? result.possession.homeAway === side : undefined;
+    result.status === GameStatus.LIVE && result.possession.homeAway === side;
   return (
     <div className="game-status__center">
       <Detail result={result} />
@@ -219,111 +280,27 @@ function Center({ result }: { result: LeagueResult }) {
           hasBall={hasBall(HomeAway.AWAY)}
         />
       </div>
-      <Down result={result} />
-    </div>
-  );
-}
-
-/** One part of the strip above the scoreline, as a bar over the text it stands in for. */
-function WireframeMetaGroup({ parts }: { parts: Array<string> }) {
-  return (
-    <span className="game-status__meta-group">
-      {parts.map((part) => (
-        <span key={part} className="game-status__bar --text">
-          {part}
-        </span>
-      ))}
-    </span>
-  );
-}
-
-/** A side of the scoreline, at the size the week's own copy of it comes out. */
-function WireframeSide({
-  side,
-  homeAway,
-}: {
-  side: GameSide;
-  homeAway: HomeAway;
-}) {
-  return (
-    /* The classes the game's own pieces carry, so a bar is laid out where the thing
-       it stands in for will be. */
-    <div className={`game-status__side --${homeAway}`}>
-      <span className="game-status__logo game-status__bar" />
-      <div className="game-status__team">
-        <span className="game-status__side-label game-status__bar --text">
-          {homeAway === HomeAway.HOME ? "Home" : "Away"}
-        </span>
-        <span className="game-status__team-name game-status__bar --text">
-          <span className="game-status__name-full">{side.team.name}</span>
-          <span className="game-status__name-short">
-            {side.team.abbreviation}
-          </span>
-        </span>
-        <span className="game-status__record game-status__bar --text">
-          {side.record}
-        </span>
-      </div>
+      <Note result={result} spread={spread} />
     </div>
   );
 }
 
 /**
- * The scoreline before the game it holds has been fetched.
+ * A team's name in full, where it plays over what it is called there.
  *
- * Built from the game as the week was scored, with every line of it hidden and a bar
- * drawn over it. The wait is then the size the answer will be, down to a name that
- * takes two lines and a venue that takes its own, so nothing under the dialog moves
- * when the answer lands. What is on the way is the same game, so the only thing the
- * week's copy of it can be wrong about is a score or a clock.
- *
- * Crossed by the one sheen the tables' wireframe uses, so a wait looks the same
- * wherever the app is waiting.
+ * Two lines rather than one, since that is how a name of four words reads as one
+ * thing. ESPN sends both halves for every team in either league, and a team it sent
+ * only the whole name for takes the one line it can be split no further than.
  */
-function Wireframe({ result }: { result: LeagueResult }) {
-  const venue = venueParts(result);
+function TeamName({ team }: { team: GameSide["team"] }) {
+  if (team.location == null || team.mascot == null) {
+    return team.name;
+  }
   return (
-    <div className="game-status --skeleton">
-      {/* Nothing below is worth reading out, so this says what it stands in for. */}
-      <span className="game-status__sr-only" role="status">
-        Loading the game
-      </span>
-      <div aria-hidden="true" className="game-status__meta">
-        <WireframeMetaGroup parts={kickoffParts(result.date)} />
-        {venue != null && <WireframeMetaGroup parts={venue} />}
-      </div>
-      <div aria-hidden="true" className="game-status__scoreline">
-        <WireframeSide side={result.home} homeAway={HomeAway.HOME} />
-        {/* The classes the block's own lines carry as well as a bar's, so each bar is
-            laid where the line it stands in for is laid. */}
-        <div className="game-status__center">
-          <span className="game-status__detail game-status__bar --text">
-            {detailText(result)}
-          </span>
-          <div className="game-status__scores">
-            <span className="game-status__score game-status__bar --score" />
-            <span className="game-status__dash">{SCORE_DASH}</span>
-            <span className="game-status__score game-status__bar --score" />
-          </div>
-          {result.status === GameStatus.LIVE && (
-            <span className="game-status__down game-status__bar --text">
-              {result.possession.downDistanceText ?? NO_DOWN}
-            </span>
-          )}
-        </div>
-        <WireframeSide side={result.away} homeAway={HomeAway.AWAY} />
-      </div>
-      {/* Only where the game the week was scored at was being played, which is the
-          only game the fetch will come back with a link for. */}
-      {result.status === GameStatus.LIVE && (
-        <span
-          aria-hidden="true"
-          className="game-status__gamecast game-status__bar --text"
-        >
-          {GAMECAST_LABEL}
-        </span>
-      )}
-    </div>
+    <>
+      <span className="game-status__name-place">{team.location}</span>
+      <span className="game-status__name-mascot">{team.mascot}</span>
+    </>
   );
 }
 
@@ -331,27 +308,16 @@ function Wireframe({ result }: { result: LeagueResult }) {
 function Side({
   side,
   homeAway,
-  logoUrl,
-  onLogoError,
+  logo,
 }: {
   side: GameSide;
   homeAway: HomeAway;
   /** Left out where either side has no mark to draw, so neither draws one. */
-  logoUrl?: string;
-  onLogoError: () => void;
+  logo?: ReactNode;
 }) {
   return (
     <div className={`game-status__side --${homeAway}`}>
-      {logoUrl != null && (
-        <img
-          className="game-status__logo"
-          src={logoUrl}
-          // The team's name is beside it, so the mark says nothing a reader of the
-          // page in words is missing.
-          alt=""
-          onError={onLogoError}
-        />
-      )}
+      {logo}
       <div className="game-status__team">
         <span className="game-status__side-label">
           {homeAway === HomeAway.HOME ? "Home" : "Away"}
@@ -360,7 +326,9 @@ function Side({
           {/* The abbreviation on a phone and the name once there is width for it.
               Both are in the page, so neither costs a measurement to choose
               between, and the one read out is the name however narrow the screen. */}
-          <span className="game-status__name-full">{side.team.name}</span>
+          <span className="game-status__name-full">
+            <TeamName team={side.team} />
+          </span>
           <span aria-hidden="true" className="game-status__name-short">
             {side.team.abbreviation}
           </span>
@@ -373,10 +341,108 @@ function Side({
   );
 }
 
+/** Both marks or neither: one side wearing a logo and the other nothing reads as the
+ *  app having lost track of a team. */
+function hasLogos(result: LeagueResult): boolean {
+  return result.home.team.logoUrl != null && result.away.team.logoUrl != null;
+}
+
+/**
+ * The game, laid out the same way whether it is the one just fetched or the week's own
+ * copy of it standing in under a wireframe.
+ *
+ * One layout for both is what keeps a wait the size of the answer: a game the week had
+ * live carries a down and a link out, one it had finished carries neither, and the
+ * wireframe is built from the same branches rather than from a guess at them.
+ */
+function Game({
+  result,
+  spread,
+  logo,
+}: {
+  result: LeagueResult;
+  spread?: GameSpread;
+  /** What a side wears beside its name, or nothing where the marks are dropped. */
+  logo?: (side: GameSide) => ReactNode;
+}) {
+  const venue = venueParts(result);
+  return (
+    <>
+      <p className="game-status__spread">
+        {SPREAD_LABEL}:{" "}
+        {spread != null ? `${spread.team} ${spread.points}` : NO_SPREAD}
+      </p>
+      <div className="game-status__scoreline">
+        <Side
+          side={result.home}
+          homeAway={HomeAway.HOME}
+          logo={logo?.(result.home)}
+        />
+        <Center result={result} spread={spread} />
+        <Side
+          side={result.away}
+          homeAway={HomeAway.AWAY}
+          logo={logo?.(result.away)}
+        />
+      </div>
+      {/* Under the scoreline rather than over it: the game is what the dialog was
+          opened for, and when and where it is played is the footnote. */}
+      <div className="game-status__meta">
+        <MetaGroup parts={kickoffParts(result.date)} />
+        {venue != null && <MetaGroup parts={venue} />}
+      </div>
+    </>
+  );
+}
+
+/**
+ * The game before it has been fetched, drawn from the week's own copy of it.
+ *
+ * The same layout as the answer, with every word left in place and taken down to a bar
+ * over it, so the wait is the size the answer will be: the same lines, in the same
+ * rows, at the same widths, down to a name that takes two lines and a venue that takes
+ * its own. Nothing under the dialog moves when the answer lands. What is on the way is
+ * the same game, so the only thing the week's copy of it can be wrong about is a score
+ * or a clock.
+ *
+ * Crossed by the one sheen the tables' wireframe uses, so a wait looks the same
+ * wherever the app is waiting.
+ */
+function Wireframe({
+  result,
+  spread,
+}: {
+  result: LeagueResult;
+  spread?: GameSpread;
+}) {
+  return (
+    <>
+      {/* Nothing below is worth reading out, so this says what it stands in for. */}
+      <span className="game-status__sr-only" role="status">
+        Loading the game
+      </span>
+      <div aria-hidden="true" className="game-status --skeleton">
+        <Game
+          result={result}
+          spread={spread}
+          // A block of its own rather than the mark itself: an image cannot carry the
+          // bar the rest of the wireframe is drawn with, and the real one is not
+          // fetched for a game nobody is looking at yet.
+          logo={
+            hasLogos(result)
+              ? () => <span className="game-status__logo" />
+              : undefined
+          }
+        />
+      </div>
+    </>
+  );
+}
+
 /**
  * A game the way ESPN's own boxscore says it: each side out on its own edge, the two
  * scores meeting at a dash between them, with where the game is up to over those scores
- * and what the offense faces under them.
+ * and what the offense or the pool has to say under them.
  *
  * `result` is the game as it was last fetched, and `isLoading` says it is not yet the
  * game `game` names. A wireframe stands in until it is, so a live game is never shown
@@ -410,53 +476,31 @@ export default function GameStatusSummary({
   // The wireframe rather than the game before it, so what is on screen is always the
   // game the search names.
   if (isLoading || result == null) {
-    return <Wireframe result={game.result} />;
+    return <Wireframe result={game.result} spread={game.spread} />;
   }
 
-  const venue = venueParts(result);
-
-  // Both marks or neither: one side wearing its logo while the other shows a broken
-  // image, or nothing at all, reads as the app having lost track of a team.
-  const logos =
-    result.away.team.logoUrl != null &&
-    result.home.team.logoUrl != null &&
-    logolessId !== result.id;
-  const dropLogos = () => setLogolessId(result.id);
+  const logos = hasLogos(result) && logolessId !== result.id;
 
   return (
     <div className="game-status">
-      <div className="game-status__meta">
-        <MetaGroup parts={kickoffParts(result.date)} />
-        {venue != null && <MetaGroup parts={venue} />}
-      </div>
-      <div className="game-status__scoreline">
-        <Side
-          side={result.home}
-          homeAway={HomeAway.HOME}
-          logoUrl={logos ? result.home.team.logoUrl : undefined}
-          onLogoError={dropLogos}
-        />
-        <Center result={result} />
-        <Side
-          side={result.away}
-          homeAway={HomeAway.AWAY}
-          logoUrl={logos ? result.away.team.logoUrl : undefined}
-          onLogoError={dropLogos}
-        />
-      </div>
-      {/* Only while the game is being played, which is the one state the dialog
-          cannot say enough about: a play by play, a drive chart and the leaders are
-          all ESPN's. A game that is over is fully told above. */}
-      {result.status === GameStatus.LIVE && result.gamecastUrl != null && (
-        <a
-          className="game-status__gamecast"
-          href={result.gamecastUrl}
-          target="_blank"
-          rel="noreferrer"
-        >
-          {GAMECAST_LABEL}
-        </a>
-      )}
+      <Game
+        result={result}
+        spread={game.spread}
+        logo={
+          logos
+            ? (side) => (
+                <img
+                  className="game-status__logo"
+                  src={side.team.logoUrl}
+                  // The team's name is beside it, so the mark says nothing a reader
+                  // of the page in words is missing.
+                  alt=""
+                  onError={() => setLogolessId(result.id)}
+                />
+              )
+            : undefined
+        }
+      />
     </div>
   );
 }

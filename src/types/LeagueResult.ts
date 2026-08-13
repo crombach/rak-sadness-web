@@ -2,6 +2,9 @@ import { GameStatus, HomeAway } from "./ESPN";
 
 type Team = {
   name: string;
+  /** Where the team plays, and what they are called there: `Buffalo`, `Bills`. */
+  location?: string;
+  mascot?: string;
   abbreviation: string;
   /** Absent for a team ESPN has no mark for, which the college groups have. */
   logoUrl?: string;
@@ -42,8 +45,6 @@ export type LeagueResult = {
   home: GameSide;
   away: GameSide;
   venue?: GameVenue;
-  /** ESPN's own tracker for the game. Absent where ESPN listed no link to it. */
-  gamecastUrl?: string;
   possession: Possession;
   winner: {
     team: Team | null;

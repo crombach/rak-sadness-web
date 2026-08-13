@@ -7,12 +7,13 @@ import GameStatusSummary from "./GameStatusSummary";
 
 const KICKOFF = new Date("2024-10-06T17:00:00Z");
 
-function game(result?: LeagueResult): WeekGame {
+function game(result?: LeagueResult, spread?: WeekGame["spread"]): WeekGame {
   return {
     label: "P1",
     league: League.PRO,
     name: result?.shortName ?? "KC / BUF",
     result,
+    spread,
   };
 }
 
@@ -62,12 +63,17 @@ function result(over: Partial<LeagueResult> = {}): LeagueResult {
 }
 
 /*
- * The wireframe's bars and the teams' marks, neither of which any query reaches: a
- * bar has nothing in it to read, and a mark is decorative beside the name it stands
- * next to.
+ * The wireframe and the teams' marks, neither of which any query reaches: every word
+ * under a wireframe is drawn as a bar, and a mark is decorative beside the name it
+ * stands next to.
  */
-function bars(): number {
-  return document.querySelectorAll(".game-status__bar").length;
+function wireframe(): Element | null {
+  return document.querySelector(".game-status.--skeleton");
+}
+
+function scoreline(selector: string): string | undefined {
+  return document.querySelector(`${selector} .game-status__scoreline`)
+    ?.textContent;
 }
 
 function logos(): Array<string | null> {
@@ -85,50 +91,31 @@ describe("GameStatusSummary, before there is anything to show", () => {
   it("stands a wireframe in until the game has been fetched", () => {
     render(<GameStatusSummary game={game(result())} />);
     expect(screen.getByRole("status")).toHaveTextContent("Loading the game");
-    expect(bars()).toBeGreaterThan(0);
+    expect(wireframe()).not.toBeNull();
   });
 
   it("stands a wireframe in over the game before it while one is fetched", () => {
     render(
       <GameStatusSummary game={game(result())} result={result()} isLoading />,
     );
-    // The bars carry the week's own copy of the game, hidden, so they come out the
+    // The wireframe carries the week's own copy of the game, so it comes out the
     // size the answer will be. What is on screen is still only the wireframe.
     expect(document.querySelector(".game-status:not(.--skeleton)")).toBeNull();
-    expect(bars()).toBeGreaterThan(0);
+    expect(wireframe()).not.toBeNull();
   });
 
-  it("sizes the wireframe from the week's own copy of the game", () => {
-    render(<GameStatusSummary game={game(result())} />);
-    // The kickoff is left out, since what it reads is the zone the suite runs in.
-    expect(
-      [
-        ...document.querySelectorAll(
-          ".game-status__scoreline .game-status__bar.--text",
-        ),
-      ].map((bar) => bar.textContent),
-    ).toEqual([
-      "Home",
-      "Buffalo BillsBUF",
-      "4-1",
-      "FT",
-      "Away",
-      "Kansas City ChiefsKC",
-      "3-2",
-    ]);
-  });
+  it("lays the wireframe out as the game it stands in for", () => {
+    const final = result();
+    const { unmount } = render(
+      <GameStatusSummary game={game(final)} result={final} />,
+    );
+    const shown = scoreline(".game-status:not(.--skeleton)");
+    unmount();
 
-  it("holds room for the tracker's link where the week had the game live", () => {
-    const live = result({ status: GameStatus.LIVE });
-    render(<GameStatusSummary game={game(live)} />);
-    expect(document.querySelector(".game-status__gamecast")).not.toBeNull();
-  });
-
-  it("holds no room for it where the week had the game over", () => {
-    // A finished game is never linked out to, so a bar for one would only shift the
-    // scoreline when the answer landed.
-    render(<GameStatusSummary game={game(result())} />);
-    expect(document.querySelector(".game-status__gamecast")).toBeNull();
+    // The same lines, in the same places, drawn from the week's own copy of the
+    // game, so nothing under the dialog moves when the answer lands.
+    render(<GameStatusSummary game={game(final)} />);
+    expect(scoreline(".game-status.--skeleton")).toEqual(shown);
   });
 
   it("says so where ESPN listed no game for the column", () => {
@@ -136,7 +123,69 @@ describe("GameStatusSummary, before there is anything to show", () => {
     expect(screen.getByText(/No game was found for P1/)).toHaveTextContent(
       "KC / BUF",
     );
-    expect(bars()).toBe(0);
+    expect(wireframe()).toBeNull();
+  });
+});
+
+describe("GameStatusSummary, the pool's line on the game", () => {
+  it("names the favored side and what it gives", () => {
+    render(
+      <GameStatusSummary
+        game={game(result(), { team: "BUF", points: -3 })}
+        result={result()}
+      />,
+    );
+    expect(screen.getByText("Rak Madness Spread: BUF -3")).toBeInTheDocument();
+  });
+
+  it("says so where the picks put no line on the game", () => {
+    render(<GameStatusSummary game={game(result())} result={result()} />);
+    // Said either way, so a game with no line is not one the dialog forgot about.
+    expect(screen.getByText("Rak Madness Spread: None")).toBeInTheDocument();
+  });
+});
+
+describe("GameStatusSummary, what the pool made of a finished game", () => {
+  const covered = (spread: WeekGame["spread"]) => {
+    // Buffalo won by ten.
+    render(
+      <GameStatusSummary game={game(result(), spread)} result={result()} />,
+    );
+    return document.querySelector(".game-status__outcome")?.textContent;
+  };
+
+  it("names the side that covered", () => {
+    expect(covered({ team: "BUF", points: -3 })).toBe("BUF covers");
+  });
+
+  it("names the underdog where the favorite won by less than it gave", () => {
+    expect(covered({ team: "BUF", points: -14 })).toBe("KC covers");
+  });
+
+  it("names the underdog where the favorite lost outright", () => {
+    expect(covered({ team: "KC", points: -3 })).toBe("BUF covers");
+  });
+
+  it("says a game that landed on the number scored for everybody", () => {
+    expect(covered({ team: "BUF", points: -10 })).toBe(
+      "Push, both sides scored",
+    );
+  });
+
+  it("declares the winner where the picks carried no line", () => {
+    expect(covered(undefined)).toBe("BUF won");
+  });
+
+  it("says a game that finished level scored for everybody", () => {
+    const drawn = result({
+      away: { ...result().away, score: 30 },
+      winner: { team: null, homeAway: null, by: 0 },
+      loser: { team: null, homeAway: null, by: 0 },
+    });
+    render(<GameStatusSummary game={game(drawn)} result={drawn} />);
+    expect(document.querySelector(".game-status__outcome")).toHaveTextContent(
+      "Tied, both sides scored",
+    );
   });
 });
 
@@ -194,13 +243,6 @@ describe("GameStatusSummary, a game that is over", () => {
     expect(short.map((it) => it.textContent)).toEqual(["BUF", "KC"]);
     // The name is the one read out, so the abbreviation beside it is not heard twice.
     short.forEach((it) => expect(it).toHaveAttribute("aria-hidden", "true"));
-  });
-
-  it("offers no tracker for a game that is over, link or no link", () => {
-    const tracked = result({ gamecastUrl: "https://espn.com/game/401" });
-    render(<GameStatusSummary game={game(tracked)} result={tracked} />);
-    // Everything a finished game has to say is on screen already.
-    expect(screen.queryByRole("link")).toBeNull();
   });
 
   it("wears both teams' marks, home first", () => {
@@ -315,13 +357,9 @@ describe("GameStatusSummary, a game still being played", () => {
     ]);
   });
 
-  it("links out to ESPN's own tracker, in a tab of its own", () => {
-    const tracked = { ...live, gamecastUrl: "https://espn.com/game/401" };
-    render(<GameStatusSummary game={game(tracked)} result={tracked} />);
-    const link = screen.getByRole("link", { name: "ESPN Gamecast" });
-    expect(link).toHaveAttribute("href", "https://espn.com/game/401");
-    expect(link).toHaveAttribute("target", "_blank");
-    expect(link).toHaveAttribute("rel", "noreferrer");
+  it("sends a reader nowhere else: the dialog is the whole of it", () => {
+    renderLive();
+    expect(screen.queryByRole("link")).toBeNull();
   });
 
   it("holds the down's line with a word where there is no down to say", () => {

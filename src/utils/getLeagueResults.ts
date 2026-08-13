@@ -122,6 +122,11 @@ function gameSide(competitor: EspnCompetitor): GameSide {
   return {
     team: {
       name: competitor.team.displayName,
+      // The two halves of that name, which the game status sets on their own lines.
+      // Kept only where ESPN sent both: half a name on a line of its own reads as
+      // the other half having gone missing.
+      location: competitor.team.location,
+      mascot: competitor.team.name,
       abbreviation: competitor.team.abbreviation?.toUpperCase(),
       logoUrl: competitor.team.logo,
     },
@@ -133,13 +138,6 @@ function gameSide(competitor: EspnCompetitor): GameSide {
     // the period, which would slide every later quarter a column left.
     linescores: competitor.linescores?.map((line) => line.value ?? 0) ?? [],
   };
-}
-
-/** What ESPN calls the link to its tracker for a game. */
-const GAMECAST_LINK = "Gamecast";
-
-function gamecastUrl(event: EspnEvent): string | undefined {
-  return event.links?.find((link) => link.text === GAMECAST_LINK)?.href;
 }
 
 function gameVenue(venue?: EspnVenue): GameVenue | undefined {
@@ -245,7 +243,6 @@ export function toLeagueResult(event: EspnEvent): LeagueResult | null {
     home: homeSide,
     away: awaySide,
     venue: gameVenue(competition.venue),
-    gamecastUrl: gamecastUrl(event),
     possession,
     winner: {
       team: winner && {

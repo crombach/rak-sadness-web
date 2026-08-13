@@ -20,16 +20,25 @@ function parsed({
   collegeKeys = [],
   proKeys = [],
   matchups = {},
+  rows = [],
+  inconsistent = [],
 }: {
   collegeKeys?: Array<string>;
   proKeys?: Array<string>;
   matchups?: Record<string, Array<string>>;
+  /** The picks themselves, which is where a game's spread is written. */
+  rows?: Array<Record<string, string>>;
+  inconsistent?: Array<string>;
 }) {
   return {
+    rows,
     collegeKeys,
     proKeys,
     matchupsByGameKey: new Map(
       Object.entries(matchups).map(([key, teams]) => [key, new Set(teams)]),
+    ),
+    inconsistentSpreadGames: new Map(
+      inconsistent.map((key) => [key, "Picks disagree about the spread."]),
     ),
   };
 }
@@ -103,6 +112,58 @@ describe("weekGames", () => {
     );
     expect(games.map((game) => game.label)).toEqual(["C1", "C2"]);
     expect(games[1].result).toBe(bufVsKc);
+  });
+
+  it("reads the pool's line off the picks, from the favored side", () => {
+    const [game] = weekGames(
+      parsed({
+        proKeys: ["P1"],
+        matchups: { P1: ["BUF", "KC"] },
+        rows: [{ P1: "BUF -3" }, { P1: "KC +3" }],
+      }),
+      { college: [], pro: [bufVsKc] },
+    );
+    expect(game.spread).toEqual({ team: "BUF", points: -3 });
+  });
+
+  it("turns a line written from the underdog's side around", () => {
+    const [game] = weekGames(
+      parsed({
+        proKeys: ["P1"],
+        matchups: { P1: ["BUF", "KC"] },
+        rows: [{ P1: "KC +3.5" }, { P1: "BUF -3.5" }],
+      }),
+      { college: [], pro: [bufVsKc] },
+    );
+    // Named after the game ESPN listed, since the row that decided it named the
+    // other team.
+    expect(game.spread).toEqual({ team: "BUF", points: -3.5 });
+  });
+
+  it("carries no line for a game the picks put none on", () => {
+    const [game] = weekGames(
+      parsed({
+        proKeys: ["P1"],
+        matchups: { P1: ["BUF", "KC"] },
+        rows: [{ P1: "BUF" }, { P1: "KC" }],
+      }),
+      { college: [], pro: [bufVsKc] },
+    );
+    expect(game.spread).toBeUndefined();
+  });
+
+  it("carries no line for a game the picks disagree about", () => {
+    const [game] = weekGames(
+      parsed({
+        proKeys: ["P1"],
+        matchups: { P1: ["BUF", "KC"] },
+        rows: [{ P1: "BUF -3" }, { P1: "KC +7" }],
+        inconsistent: ["P1"],
+      }),
+      { college: [], pro: [bufVsKc] },
+    );
+    // Nothing can tell which of the two numbers was meant, so the game carries none.
+    expect(game.spread).toBeUndefined();
   });
 
   it("takes the first game a team playing twice appears in", () => {

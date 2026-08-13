@@ -2,10 +2,29 @@
 @use "../../styles/breakpoints" as *;
 @use "../../styles/skeleton" as *;
 
-// What separates one part of the strip above the scoreline from the next.
+// What separates one part of the strip under the scoreline from the next.
 @mixin meta-dot {
   content: "·";
   margin-inline: var(--rak-space-2);
+}
+
+// A bar over the words an element holds, one on each line of it, so a name that wraps
+// to two lines comes out as two bars rather than as one across both. The bar is as wide
+// as the box, which the scoreline's grid gives both sides equally, so the two sides of
+// a wireframe mirror each other whatever the teams are called.
+//
+// Drawn on the element itself rather than in a layer over it: a bar of its own would
+// have to be told where every line of a wrapping name is.
+@mixin wireframe-bar($height: 0.7rem) {
+  color: transparent;
+  opacity: var(--rak-loading-fill-opacity);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 calc((1lh - #{$height}) / 2),
+    var(--rak-loading-fill) calc((1lh - #{$height}) / 2)
+      calc((1lh + #{$height}) / 2),
+    transparent calc((1lh + #{$height}) / 2) 1lh
+  );
 }
 
 .game-status {
@@ -17,113 +36,82 @@
 // One sheen over the whole wireframe rather than one per bar, which is how the
 // tables' wireframe is drawn and what keeps a wait looking the same everywhere.
 //
-// Every word under here is the week's own copy of the game, kept for the room it takes
-// and hidden, down to the dots the strip above the scoreline is punctuated with. What
-// is left showing is the bars drawn over those words, and the dash the two scores meet
-// at, which is the same dash either way.
+// Every word under here is the week's own copy of the game, laid out by the rules the
+// answer will be laid out by and taken down to a bar. What is left showing is those
+// bars, the marks' own circles, and the dash the two scores meet at, which is the same
+// dash either way.
 .game-status.--skeleton {
   @include skeleton-sheen;
 
-  visibility: hidden;
+  // Every word is still there, holding the room it will take, and none of it drawn.
+  color: transparent;
 
-  .game-status__bar::after,
-  .game-status__dash,
-  .game-status__sr-only {
-    visibility: visible;
-  }
-}
-
-// The bars the wireframe is built from.
-//
-// Each carries the class of the thing it stands in for, so its font and its font size
-// are that thing's, and each is one line of that font tall. The height of the wireframe
-// is then the height of the game, and nothing moves down the dialog when the answer
-// lands. Only the widths are written down: a game with no teams in it yet has no name
-// to size a name against.
-//
-// The grey is drawn inside that line box rather than filling it, at the weight the
-// tables' wireframe uses, so a bar standing in for a line set in two rem does not read
-// as a slab.
-.game-status__bar {
-  position: relative;
-  display: block;
-  height: 1lh;
-
-  &::after {
-    @include skeleton-surface;
-
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 0.7rem;
-    transform: translateY(-50%);
-  }
-
-  // A bar over the week's own copy of the line. Its box is that line's box, to the
-  // word, so a name that takes two lines and a venue that takes its own are already
-  // the size they will be. Laid inline, since two of these sit on the one line with a
-  // dot between them in the strip above the scoreline.
-  &.--text {
+  // A box of its own, so a bar over one of these is a whole line box tall like every
+  // other bar. Inline still, so the strip reads the way the answer's does.
+  .game-status__meta-group > span {
     display: inline-block;
-    width: auto;
-    height: auto;
+  }
+
+  .game-status__meta-group > span,
+  .game-status__spread,
+  .game-status__side-label,
+  .game-status__team-name,
+  .game-status__record,
+  .game-status__detail,
+  .game-status__down,
+  .game-status__outcome {
+    @include wireframe-bar;
   }
 
   // Thicker, standing in for the one line here set big enough to carry its own weight.
-  &.--score {
-    width: 2.5rem;
+  .game-status__points {
+    @include wireframe-bar(1.75rem);
 
     @include roomy-screen {
-      width: 3rem;
-    }
-
-    &::after {
-      height: 1.75rem;
-
-      @include roomy-screen {
-        height: 2.25rem;
-      }
+      @include wireframe-bar(2.25rem);
     }
   }
-}
 
-// The mark's own square, filled, rather than a line's worth of text with a strip
-// through it. Round, because a square block reads as a blot at that size.
-.game-status__logo.game-status__bar {
-  height: 32px;
+  // The mark's own square, filled. Round, because a square block reads as a blot at
+  // that size.
+  .game-status__logo {
+    @include skeleton-surface;
 
-  @include roomy-screen {
-    height: 44px;
-  }
-
-  &::after {
-    inset: 0;
-    height: auto;
     border-radius: 50%;
-    transform: none;
   }
-}
 
-// A bar has a width of its own, so the text alignment the away side is written with
-// does not reach it. Pushed over instead, to the edge the names it stands in for sit
-// against.
-.game-status__side.--away .game-status__bar {
-  justify-self: end;
+  // Who has the ball is a thing the wireframe cannot know, so it keeps the room and
+  // says nothing. Both sides go the same way, which is what keeps the two mirrored.
+  //
+  // The strip under the scoreline names its own color as well, and the dot it puts
+  // between two halves is drawn in it.
+  .game-status__marker,
+  .game-status__meta {
+    color: transparent;
+  }
 }
 
 .game-status__sr-only {
   @include visually-hidden;
 }
 
+// The pool's own line on the game, over the scoreline it decides. Always said, `None`
+// and all, so a game with no line on it is not a game the dialog forgot to mention.
+.game-status__spread {
+  align-self: center;
+  margin: 0;
+  color: var(--rak-text-secondary);
+  font-size: var(--rak-text-sm);
+  font-weight: var(--rak-weight-semibold);
+  text-align: center;
+}
+
 // What is the same about the game however it is going: when it starts and where it
-// is being played. Centered over the scoreline the way ESPN heads its own boxscore.
+// is being played. Under the scoreline, as a footnote to it.
 //
 // One line where the dialog is wide enough to hold both, wrapping back to two where
 // a long venue name needs it. Set apart by the space between them rather than by a
-// glyph, since each half already reads with a `·` inside it. No rule under it: the
-// one under the search is close enough above to read as a pair of them.
+// glyph, since each half already reads with a `·` inside it.
 .game-status__meta {
   display: flex;
   flex-direction: column;
@@ -284,11 +272,19 @@
 
 @include roomy-screen {
   .game-status__name-full {
-    display: inline;
+    display: block;
   }
 
   .game-status__name-short {
     display: none;
+  }
+
+  // Where the team plays on one line and what it is called there on the next, so
+  // `Kansas City Chiefs` breaks where it means to rather than wherever the column
+  // runs out.
+  .game-status__name-place,
+  .game-status__name-mascot {
+    display: block;
   }
 }
 
@@ -305,7 +301,6 @@
   color: var(--rak-primary-700);
   font-size: 2rem;
   font-weight: var(--rak-weight-bold);
-  font-variant-numeric: tabular-nums;
   line-height: 1.1;
 
   // The one thing a reader came for, so it takes the room a wider screen has.
@@ -320,18 +315,31 @@
   }
 }
 
+// Two digits wide whether the side has one or two, so a score going from 7 to 14
+// between two polls moves neither the dash nor the sides either side of it.
+.game-status__points {
+  min-width: 2ch;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
 // Sized against the score it points at rather than against the text around it. A
 // triangle fills little of its em box, so it reads smaller than a letter set as big.
 .game-status__marker {
   color: var(--rak-brand-light);
   font-size: 2rem;
+  line-height: 1;
+  // A triangle is drawn on the middle of the em box and a digit stands on the
+  // baseline, so lining the two boxes up leaves the triangle low. Measured at a
+  // tenth of its own size, at both of the sizes below.
+  transform: translateY(-0.1em);
 
   @include roomy-screen {
     font-size: 2.25rem;
   }
 
-  // Both sides carry a marker while the game is being played, and the side without
-  // the ball wears an invisible one. It holds the room the visible one takes, so the
+  // Both sides carry a marker whatever the game is doing, and every side without the
+  // ball wears an invisible one. It holds the room the visible one takes, so the
   // scores stay either side of the middle as the ball changes hands.
   &.--blank {
     opacity: 0;
@@ -340,7 +348,7 @@
 
 // The three lines between the two sides, each laid in the row of the side text it
 // belongs beside: where the game is up to against the labels, the scores against the
-// names, and the down and distance against the records.
+// names, and the down or the outcome against the records.
 //
 // Carries the grouping and nothing else, so the scoreline lays out its lines itself.
 .game-status__center {
@@ -354,10 +362,14 @@
   align-items: center;
   justify-self: center;
   gap: var(--rak-space-2);
+  // Room either side of the pair, past the marker each of them already holds, so the
+  // scores are never read as running into the names beside them.
+  padding-inline: var(--rak-space-2);
 }
 
 .game-status__detail,
-.game-status__down {
+.game-status__down,
+.game-status__outcome {
   grid-column: 3;
   justify-self: center;
   min-width: 0;
@@ -375,7 +387,8 @@
 // Smaller than the line above it: a down and distance runs to `2nd & 7 at ATL 34`,
 // and the middle column is only as wide as its widest line, so every character here
 // is width taken off the names either side.
-.game-status__down {
+.game-status__down,
+.game-status__outcome {
   grid-row: 3;
   color: var(--rak-text-secondary);
   font-size: var(--rak-text-xs);
@@ -384,13 +397,5 @@
 .game-status__missing {
   margin: 0;
   color: var(--rak-text-secondary);
-  font-size: var(--rak-text-sm);
-}
-
-// Under the scoreline, and quiet: everything the dialog was opened for is above it,
-// and ESPN's own page is where a reader goes for what the dialog left out.
-.game-status__gamecast {
-  align-self: center;
-  color: var(--rak-text-tertiary);
   font-size: var(--rak-text-sm);
 }

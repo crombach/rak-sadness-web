@@ -1,15 +1,42 @@
 import { League } from "../../types/League";
 import { LeagueResult } from "../../types/LeagueResult";
-import { WeekGame } from "../../types/WeekGame";
+import { GameSpread, WeekGame } from "../../types/WeekGame";
 import { matchesMatchup } from "../getLeagueResults";
 import rangeWithPrefix from "../rangeWithPrefix";
 import { LEAGUE_PREFIX, LEAGUES, LeagueKey } from "./gameColumns";
+import parsePick from "./parsePick";
 import { ParsedPicks } from "./parsePicksWorkbook";
 
 const ESPN_LEAGUE: Record<LeagueKey, League> = {
   college: League.COLLEGE,
   pro: League.PRO,
 };
+
+/**
+ * The pool's line on the game, read off the picks and turned around where they wrote
+ * it from the underdog's side.
+ *
+ * The first row that names a team settles it. Every other row describes the same
+ * game, from one side or the other, and a sheet whose rows disagree reaches here
+ * without its game keys at all, since nothing can tell which of the two was meant.
+ */
+function gameSpread(
+  rows: Array<any>,
+  gameKey: string,
+  result: LeagueResult,
+): GameSpread | undefined {
+  for (const row of rows) {
+    const { teamAbbreviation, spread } = parsePick(row[gameKey]);
+    if (teamAbbreviation == null) continue;
+    if (spread === 0) return undefined;
+    if (spread < 0) return { team: teamAbbreviation, points: spread };
+    const favored = [result.home, result.away]
+      .map((side) => side.team.abbreviation)
+      .find((abbreviation) => abbreviation !== teamAbbreviation);
+    return favored != null ? { team: favored, points: -spread } : undefined;
+  }
+  return undefined;
+}
 
 /**
  * Every game the week's picks describe, in the order the picks table columns are.
@@ -22,7 +49,14 @@ const ESPN_LEAGUE: Record<LeagueKey, League> = {
  * The key is only how the column's teams are looked up.
  */
 export default function weekGames(
-  parsed: Pick<ParsedPicks, "collegeKeys" | "proKeys" | "matchupsByGameKey">,
+  parsed: Pick<
+    ParsedPicks,
+    | "rows"
+    | "collegeKeys"
+    | "proKeys"
+    | "matchupsByGameKey"
+    | "inconsistentSpreadGames"
+  >,
   results: Record<LeagueKey, Array<LeagueResult>>,
 ): Array<WeekGame> {
   return LEAGUES.flatMap((league) => {
@@ -45,6 +79,12 @@ export default function weekGames(
             ? [...teams].join(" / ")
             : labels[index]),
         result,
+        // Read off the game ESPN listed, which is what names the favored side where
+        // the picks wrote the line from the other one.
+        spread:
+          result != null && !parsed.inconsistentSpreadGames.has(key)
+            ? gameSpread(parsed.rows, key, result)
+            : undefined,
       };
     });
   });

@@ -52,7 +52,6 @@ function espnEvent({
   homeExtras,
   awayExtras,
   venue,
-  links,
 }: {
   home: string;
   away: string;
@@ -65,11 +64,9 @@ function espnEvent({
   homeExtras?: Partial<EspnCompetitor>;
   awayExtras?: Partial<EspnCompetitor>;
   venue?: EspnEvent["competitions"][0]["venue"];
-  links?: EspnEvent["links"];
 }): EspnEvent {
   return {
     id,
-    links,
     name: `${away} Team at ${home} Team`,
     shortName: `${away} @ ${home}`,
     date,
@@ -360,27 +357,6 @@ describe("getLeagueResults, mapping", () => {
     mockFetch([bufVsKc]);
     const [result] = await getLeagueResults(League.PRO, WEEK, [BUF_KC]);
     expect(result.venue).toBeUndefined();
-  });
-
-  it("takes the tracker out of the links ESPN sent for the game", async () => {
-    mockFetch([
-      espnEvent({
-        home: "BUF",
-        away: "KC",
-        links: [
-          { href: "https://espn.com/box", text: "Box Score" },
-          { href: "https://espn.com/game", text: "Gamecast" },
-        ],
-      }),
-    ]);
-    const [result] = await getLeagueResults(League.PRO, WEEK, [BUF_KC]);
-    expect(result.gamecastUrl).toBe("https://espn.com/game");
-  });
-
-  it("leaves the tracker out where ESPN listed no link to one", async () => {
-    mockFetch([bufVsKc]);
-    const [result] = await getLeagueResults(League.PRO, WEEK, [BUF_KC]);
-    expect(result.gamecastUrl).toBeUndefined();
   });
 });
 
