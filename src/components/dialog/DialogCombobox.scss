@@ -7,7 +7,7 @@
 .dialog__search {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--rak-space-2);
   padding: 3px 12px;
   border: 1px solid var(--rak-border);
   border-radius: var(--rak-radius-sm);
@@ -57,7 +57,7 @@
   @include listbox-item;
 
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--rak-space-2);
 }
 
 .dialog__empty {
