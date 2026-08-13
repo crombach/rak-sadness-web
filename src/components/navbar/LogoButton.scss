@@ -1,3 +1,5 @@
+@use "../../styles/breakpoints" as *;
+
 .logo-button {
   // A flex item will not shrink below what it holds unless it is told it may, and
   // the name cannot give up its room until the button it sits in can.
@@ -21,17 +23,47 @@
   // Reads as the navbar's own heading rather than as button text, which is what
   // it looked like before the two became one button.
   &__name {
-    font-size: 1rem;
-    font-weight: bold;
+    font-family: var(--rak-font-display);
+    // As large as the narrowest phone can hold, because segments spell a letter
+    // in far less ink than a drawn face does and this is hard to read below it.
+    // The bound is the results routes: a week still being played takes 170px of
+    // the bar for its own buttons, which leaves the name the screen less 250px.
+    // A 360px phone is 110px of that, and the name measures 102.8px here. One
+    // step up is 110.2px, which is why this is the step it stops at.
+    font-size: var(--rak-text-sm);
+    // The bold cut, which `src/index.tsx` is what loads. It is the only one the
+    // app asks for: the face is monospaced, so the heavier segments advance
+    // exactly as far as the light ones and cost nothing across a bar this tight.
+    font-weight: var(--rak-weight-bold);
     text-align: left;
+    // The unlit segments are laid under the name rather than beside it.
+    position: relative;
     // One line at every width. The navbar is sized for it, and a wrapped app name
     // pushed the bar taller than the buttons standing next to it.
     white-space: nowrap;
     // Where the buttons leave too little room, the name gives up its end to an
     // ellipsis. Clipped instead it stopped mid-letter, which reads as the bar
-    // being broken rather than as a name too long for the screen.
+    // being broken rather than as a name too long for the screen. The face has no
+    // ellipsis of its own, so the one drawn here comes from the fallback stack.
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    @include roomy-screen {
+      font-size: var(--rak-text-md);
+    }
+  }
+
+  // The segments the display leaves dark. Every glyph in the face advances the
+  // same width, so this sits exactly over the name without being measured. Over
+  // rather than under, because being positioned it paints last, and it makes no
+  // difference: every segment the name lights is one this lights too.
+  &__name-ghost {
+    position: absolute;
+    top: 0;
+    left: 0;
+    // Enough to read as segments that could light, not so much that it crowds the
+    // ones that are lit. Measured against the navbar's own fill at this size.
+    color: rgb(255 255 255 / 18%);
   }
 }

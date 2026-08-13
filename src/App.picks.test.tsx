@@ -186,10 +186,10 @@ describe("the app, first load", () => {
     // The heading is visually hidden, so this is what a screen reader is told
     // the page is, not a second copy of the wordmark on screen.
     expect(
-      screen.getByRole("button", { name: /The Rakulator/ }),
+      screen.getByRole("button", { name: /Rakulator/ }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { level: 1, name: "The Rakulator" }),
+      screen.getByRole("heading", { level: 1, name: "Rakulator" }),
     ).toBeInTheDocument();
   });
 

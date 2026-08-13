@@ -5,7 +5,14 @@ import "./LogoButton.scss";
 const OUTLINE_RADIUS_PX = 1;
 
 /** Shown in the navbar on every page, whichever view is open. */
-export const APP_NAME = "The Rakulator";
+export const APP_NAME = "Rakulator";
+
+/**
+ * The character DSEG14 draws with every segment lit. A row of them behind the
+ * name is the display's unlit segments, the way a real readout shows the shapes
+ * it is not currently using.
+ */
+const ALL_SEGMENTS_ON = "~";
 
 export default function LogoButton({ onClick }: { onClick: () => void }) {
   // Unique per instance, so two logos on the same page never share a filter: an
@@ -50,7 +57,17 @@ export default function LogoButton({ onClick }: { onClick: () => void }) {
         alt=""
         style={{ filter: `url(#${outlineFilterId})` }}
       />
-      <span className="logo-button__name">{APP_NAME}</span>
+      {/*
+        The name is the element's own text rather than a third span, so that
+        running out of room still ends it in an ellipsis. `text-overflow` reaches
+        in-flow inline content only, and would skip a positioned one.
+      */}
+      <span className="logo-button__name">
+        <span className="logo-button__name-ghost" aria-hidden="true">
+          {ALL_SEGMENTS_ON.repeat(APP_NAME.length)}
+        </span>
+        {APP_NAME}
+      </span>
     </Button>
   );
 }
