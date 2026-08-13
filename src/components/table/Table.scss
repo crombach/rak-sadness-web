@@ -75,7 +75,7 @@
       // thread, which lands it a frame or two behind a fling. What shows in the
       // gap is the white underneath.
       z-index: var(--rak-z-sticky-header);
-      position: sticky;
+      position: static;
       top: 0;
       color: var(--rak-on-solid);
       background-color: var(--rak-primary-800);
@@ -157,7 +157,7 @@
   // positioned cell already draws over the static ones beside it, and the header
   // sets a `z-index` of its own to stay over this on the way past.
   .table__player-col {
-    position: sticky;
+    position: static;
     left: 0;
   }
 
