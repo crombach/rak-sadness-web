@@ -1,18 +1,12 @@
 // The status hues the search wears, over the shared dialog and combobox rules the
 // rest of this dialog's look comes from.
 
-// The icon set against the name beside it rather than at the tables' fixed 16px.
-// Material draws its glyph in the middle 20 of a 24 box, so a box of 1em comes out
-// as 0.83em of ink against a cap height of about 0.71em. Taken down by that ratio,
-// the icon and the capital letter next to it are the same height.
-$icon-to-cap: 0.85em;
-
 // The status of the player named in the input, in the hue the list marks them
 // with, so the search reads the same way whether it is open or closed.
 .player-analysis__input-status {
   display: flex;
   align-items: center;
-  --rak-player-icon-size: #{$icon-to-cap};
+  --rak-player-icon-size: var(--rak-icon-cap);
   --rak-player-icon-fill: var(--rak-in-contention-on-light);
 
   &.--knocked-out {
@@ -25,7 +19,7 @@ $icon-to-cap: 0.85em;
 // wins over the one every dialog option gets however the sheets are ordered.
 .dialog__option.player-analysis__option {
   gap: var(--rak-player-icon-gap);
-  --rak-player-icon-size: #{$icon-to-cap};
+  --rak-player-icon-size: var(--rak-icon-cap);
   --rak-player-icon-fill: var(--rak-in-contention-on-light);
 
   &.--knocked-out {

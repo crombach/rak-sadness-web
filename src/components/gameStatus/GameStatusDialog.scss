@@ -22,12 +22,13 @@
   text-align: left;
 }
 
-// What there is to watch about a game, on the end of the search and on the end of
-// its entry, which is where the player analysis puts a player's status icon.
-//
-// The dot in the live pill is under the icons beside it, a filled circle reading
-// heavier than an icon drawn to the same width.
-$dot-size: 12px;
+// A mark is set against the text it stands beside, and an entry's two lines are set
+// smaller than the popup they sit in, so the size is said again here rather than left
+// at the one the search's own mark reads. Above the pills below, which say their own
+// size: two classes each, so the later of the two is the one that lands.
+.dialog__option .game-status__mark {
+  font-size: var(--rak-text-sm);
+}
 
 // What a mark that says its state in a word is shaped like. The word is what makes it
 // wider than the box below, so the two that carry one share everything but their hue.
@@ -70,16 +71,20 @@ $dot-size: 12px;
     @include mark-pill(var(--rak-warning-300), var(--rak-warning-700));
   }
 
+  // Drawn to its own edges rather than inside a box, so the cap height is the whole
+  // of it. As tall as the word beside it, which is what the icons come out at too, so
+  // the two pills read as the same size whichever of them a row carries.
   .game-status__live-dot {
-    width: $dot-size;
-    height: $dot-size;
+    width: var(--rak-cap-height);
+    height: var(--rak-cap-height);
     border-radius: 50%;
     background-color: var(--rak-danger-500);
   }
 
+  // As tall as the text it stands beside, rather than at a size of its own.
   > svg {
-    width: var(--rak-icon-sm);
-    height: var(--rak-icon-sm);
+    width: var(--rak-icon-cap);
+    height: var(--rak-icon-cap);
   }
 
   // Quiet, neither a game yet to kick off nor one that is over being anything to act
@@ -89,11 +94,7 @@ $dot-size: 12px;
     fill: var(--rak-text-tertiary);
   }
 
-  // Held to the dot the live pill wears, so the two pills read as the same size
-  // whichever of them a row carries.
   &.--invalid > svg {
-    width: $dot-size;
-    height: $dot-size;
     fill: currentColor;
   }
 }

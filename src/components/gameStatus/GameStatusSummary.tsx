@@ -23,8 +23,8 @@ const PREGAME_DETAIL = "Pregame";
 
 /** Points at the score of the side with the ball, from whichever side that is. */
 const MARKER: Record<HomeAway, string> = {
-  [HomeAway.HOME]: "▸",
-  [HomeAway.AWAY]: "◂",
+  [HomeAway.HOME]: "◂",
+  [HomeAway.AWAY]: "▸",
 };
 
 /**
@@ -321,21 +321,21 @@ function Center({
       <Detail result={result} />
       <div className="game-status__scores">
         <Score
-          side={result.home}
-          opponent={result.away}
-          homeAway={HomeAway.HOME}
-          hasBall={hasBall(HomeAway.HOME)}
-          outcome={outcomeOf(result.home)}
-        />
-        <span aria-hidden="true" className="game-status__dash">
-          {SCORE_DASH}
-        </span>
-        <Score
           side={result.away}
           opponent={result.home}
           homeAway={HomeAway.AWAY}
           hasBall={hasBall(HomeAway.AWAY)}
           outcome={outcomeOf(result.away)}
+        />
+        <span aria-hidden="true" className="game-status__dash">
+          {SCORE_DASH}
+        </span>
+        <Score
+          side={result.home}
+          opponent={result.away}
+          homeAway={HomeAway.HOME}
+          hasBall={hasBall(HomeAway.HOME)}
+          outcome={outcomeOf(result.home)}
         />
       </div>
       <Note result={result} spread={spread} />
@@ -453,17 +453,17 @@ function Game({
       </p>
       <div className="game-status__scoreline">
         <Side
-          side={result.home}
-          homeAway={HomeAway.HOME}
-          logo={logo?.(result.home)}
-          outcome={outcomeOf(result.home)}
-        />
-        <Center result={result} spread={spread} outcomeOf={outcomeOf} />
-        <Side
           side={result.away}
           homeAway={HomeAway.AWAY}
           logo={logo?.(result.away)}
           outcome={outcomeOf(result.away)}
+        />
+        <Center result={result} spread={spread} outcomeOf={outcomeOf} />
+        <Side
+          side={result.home}
+          homeAway={HomeAway.HOME}
+          logo={logo?.(result.home)}
+          outcome={outcomeOf(result.home)}
         />
       </div>
       {/* Under the scoreline rather than over it: the game is what the dialog was
