@@ -254,8 +254,11 @@ describe("GameStatusSummary, a game that is over", () => {
     renderFinal();
     const short = [...document.querySelectorAll(".game-status__name-short")];
     expect(short.map((it) => it.textContent)).toEqual(["KC", "BUF"]);
-    // The name is the one read out, so the abbreviation beside it is not heard twice.
-    short.forEach((it) => expect(it).toHaveAttribute("aria-hidden", "true"));
+    // Neither form is hidden from a reader by hand. The stylesheet draws one and
+    // sets the other `display: none`, which takes it out of the accessibility tree
+    // as well, so whichever is on screen is the one and only one read out. Hidden
+    // here, the side would have no name at all at the widths showing this form.
+    short.forEach((it) => expect(it).not.toHaveAttribute("aria-hidden"));
   });
 
   it("wears both teams' marks, away first", () => {
