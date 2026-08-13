@@ -67,6 +67,12 @@
   // inside this instead, and a wide one scrolls.
   &.--scores {
     width: 100%;
+    // The scrolling box's own fill, which is what Firefox paints into a region it
+    // has not rasterized yet. It reads this element rather than whatever is drawn
+    // inside it, so the frame's fill on `.results-scores` never reached it and a
+    // fast fling filled the gap with the white above. The table covers this
+    // whenever there is a frame to see, so it shows only in that gap.
+    background-color: var(--rak-primary-800);
   }
 
   // The wireframe is the size of the table it stands in for, so the surest way to
