@@ -47,8 +47,12 @@
   width: min(1024px, 100%);
   max-width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  // Centered while what is inside fits, aligned to the start once it does not.
+  // Plain centering splits the overflow across both edges, and the half that
+  // goes off the near side cannot be scrolled back to: a table wider than the
+  // window would lose its first columns for good.
+  align-items: safe center;
+  justify-content: safe center;
   box-shadow: var(--rak-shadow-overlay);
   overflow: auto;
   // The room a scrollbar needs, held whether or not there is one, so a week long
