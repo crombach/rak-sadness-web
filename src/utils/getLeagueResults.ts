@@ -13,6 +13,13 @@ import {
   Possession,
 } from "../types/LeagueResult";
 import debugLog from "./debugLog";
+import {
+  CachedGame,
+  isSettled,
+  matchupKey,
+  readCachedResults,
+  writeCachedResults,
+} from "./espnCache";
 import { getRegularSeasonWeekCount } from "./getLeagueInfo";
 
 /**
@@ -266,8 +273,31 @@ export function toLeagueResult(event: EspnEvent): LeagueResult | null {
 }
 
 /**
- * Get the results for a given league in a given week.
- * Output is sorted by date (earliest date first).
+ * The order the fetch puts a league's games in.
+ *
+ * College is latest first, because its postseason arrives as one bowl week spanning a
+ * month and a team can appear twice, the later game being the one the week is about.
+ * Whichever game of the two comes first is the one every lookup by team answers with.
+ */
+function inFetchOrder(
+  league: League,
+  results: Array<LeagueResult>,
+): Array<LeagueResult> {
+  if (league !== League.COLLEGE) {
+    return results;
+  }
+  return [...results].sort((a, b) => b.date.valueOf() - a.date.valueOf());
+}
+
+/**
+ * Get the results for a given league in a given week, in `inFetchOrder`.
+ *
+ * Nothing is fetched where this browser already has an answer for every matchup that
+ * ESPN cannot answer differently later: a game that has been played, or a matchup it
+ * listed no game for. That covers a whole week once its last game is over, which is
+ * every week but the one being played, and the calendar reads behind the fetch go with
+ * it. Changing the picks changes which matchups are asked about, and a matchup that
+ * moved has nothing stored under its new name, so the week is fetched again.
  *
  * @param league league for which to get results
  * @param week week in the season (week 1 is the first NFL week)
@@ -281,15 +311,61 @@ export async function getLeagueResults(
   matchups: Array<Set<string>>,
   season?: number,
 ): Promise<Array<LeagueResult>> {
+  const keys = matchups.map(matchupKey);
+  // "Whichever season is running" is not something an answer can be filed under, so a
+  // week with no season named is always fetched.
+  const held =
+    season != null ? readCachedResults(season, week.value, league) : {};
+  if (keys.every((key) => key in held)) {
+    const settled = [...new Set(keys)]
+      .map((key) => held[key])
+      .filter((game) => game != null);
+    debugLog(`${league} games, every one of them already held`, settled);
+    return inFetchOrder(league, settled);
+  }
+
   const events = await getLeagueEvents(league, week, season);
   debugLog(`${league} events`, events);
 
-  return events
+  const results = events
     .map(toLeagueResult)
     .filter((it) => it != null)
     .filter((result) =>
       matchups.some((teams) => matchesMatchup(result, teams)),
     );
+
+  // Each matchup and the one game the fetch found for it. `find` over results already
+  // in fetch order picks the same game every lookup by team will.
+  const found = new Map<string, CachedGame>();
+  matchups.forEach((teams, index) => {
+    if (found.has(keys[index])) return;
+    found.set(
+      keys[index],
+      results.find((result) => matchesMatchup(result, teams)) ?? null,
+    );
+  });
+
+  const games: Record<string, CachedGame> = {};
+  const kept: Array<LeagueResult> = [];
+  found.forEach((result, key) => {
+    // A game the fetch no longer lists keeps the outcome this browser already had.
+    // ESPN moves a game out of a week's answer now and then, and without this the
+    // column would go from scored to missing.
+    const game = result ?? held[key] ?? null;
+    if (result == null && game != null) {
+      kept.push(game);
+    }
+    if (isSettled(game)) {
+      games[key] = game;
+    }
+  });
+  // An answer with no games in it is ESPN not having published the week yet, and
+  // holding every matchup of it as a hole would leave the week empty for good.
+  if (season != null && events.length > 0) {
+    writeCachedResults(season, week.value, league, games);
+  }
+
+  return inFetchOrder(league, [...results, ...kept]);
 }
 
 /**

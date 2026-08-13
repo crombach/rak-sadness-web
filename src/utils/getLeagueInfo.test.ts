@@ -56,13 +56,28 @@ function scoreboard(
   return { leagues: [{ slug, season: { year: SEASON }, calendar }] };
 }
 
-function scoreboardForSeason(slug: string, seasonYear: number) {
-  return {
-    leagues: [
-      { slug, season: { year: seasonYear }, calendar: [REGULAR_SEASON] },
-    ],
-  };
+function scoreboardForSeason(
+  slug: string,
+  seasonYear: number,
+  calendar: Array<CalendarFixture> = [REGULAR_SEASON],
+) {
+  return { leagues: [{ slug, season: { year: seasonYear }, calendar }] };
 }
+
+/** A season every week of which is behind `NOW`. */
+const FINISHED_SEASON = {
+  value: String(SeasonType.REGULAR),
+  startDate: "2022-09-01T00:00Z",
+  endDate: "2023-01-01T00:00Z",
+  entries: [week("1", "2022-09-01T00:00Z", "2022-09-08T00:00Z")],
+};
+
+// ESPN's Off Season calendar runs to the following August, and has no weeks.
+const FINISHED_OFF_SEASON = {
+  value: String(SeasonType.OFF),
+  startDate: "2023-01-02T00:00Z",
+  endDate: "2025-08-01T00:00Z",
+};
 
 function mockFetch(body: unknown, ok = true, status = 200) {
   const fetchMock = vi.fn().mockResolvedValue({
@@ -88,6 +103,8 @@ async function infoFor(league: League) {
 }
 
 beforeEach(() => {
+  // jsdom keeps storage between cases, and a finished season's calendar is held there.
+  localStorage.clear();
   vi.useFakeTimers().setSystemTime(NOW);
 });
 
@@ -241,5 +258,49 @@ describe("getRegularSeasonWeekCount, caching", () => {
     await getRegularSeasonWeekCount(League.COLLEGE);
     await getRegularSeasonWeekCount(League.COLLEGE, 3003);
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("getLeagueInfo, what it holds on to", () => {
+  it("reads a finished season's calendar back rather than asking again", async () => {
+    const fetchMock = mockFetch(
+      scoreboardForSeason(League.PRO, 3101, [
+        FINISHED_SEASON,
+        FINISHED_OFF_SEASON,
+      ]),
+    );
+    const first = await getLeagueInfo(League.PRO, 3101);
+
+    const again = await getLeagueInfo(League.PRO, 3101);
+
+    // The Off Season calendar has yet to end, and is not what says whether a season is
+    // over: it has no weeks, and every week there is has been played.
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(again?.season).toBe(3101);
+    expect(again?.activeCalendar.weeks).toEqual(first?.activeCalendar.weeks);
+    expect(again?.activeWeek?.startDate).toBeInstanceOf(Date);
+  });
+
+  it("asks again for a season that is not over", async () => {
+    const fetchMock = mockFetch(scoreboardForSeason(League.PRO, 3102));
+
+    await getLeagueInfo(League.PRO, 3102);
+    await getLeagueInfo(League.PRO, 3102);
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("holds nothing where no season was named, that being whichever runs now", async () => {
+    const fetchMock = mockFetch(
+      scoreboardForSeason(League.PRO, 3103, [
+        FINISHED_SEASON,
+        FINISHED_OFF_SEASON,
+      ]),
+    );
+
+    await getLeagueInfo(League.PRO);
+    await getLeagueInfo(League.PRO);
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });

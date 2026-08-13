@@ -107,6 +107,9 @@ const bufVsKc = espnEvent({ home: "BUF", away: "KC" });
 const BUF_KC = new Set(["BUF", "KC"]);
 
 beforeEach(() => {
+  // jsdom keeps storage between cases, and a week whose games are over is held there,
+  // so a later case would find an answer an earlier one left behind.
+  localStorage.clear();
   vi.spyOn(console, "log").mockImplementation(() => undefined);
   // The counts the calendars carried in 2024.
   weekCountMock.mockImplementation(async (league) =>
@@ -410,5 +413,127 @@ describe("getLeagueResults, matchup filtering", () => {
       new Set<string>(),
     ]);
     expect(results).toHaveLength(0);
+  });
+});
+
+describe("getLeagueResults, what it does not ask twice", () => {
+  const SEASON = 2024;
+  const PHI_DAL = new Set(["PHI", "DAL"]);
+
+  it("asks nothing more once every game of the week is over", async () => {
+    const fetchMock = mockFetch([bufVsKc]);
+    const first = await getLeagueResults(League.PRO, WEEK, [BUF_KC], SEASON);
+
+    const again = await getLeagueResults(League.PRO, WEEK, [BUF_KC], SEASON);
+
+    expect(urlsOf(fetchMock)).toHaveLength(1);
+    expect(again).toEqual(first);
+    // Through storage and back, so a date is a date rather than the text it was kept as.
+    expect(again[0].date).toBeInstanceOf(Date);
+  });
+
+  it("asks again while a game is still being played", async () => {
+    const fetchMock = mockFetch([
+      espnEvent({ home: "BUF", away: "KC", status: GameStatus.LIVE }),
+    ]);
+
+    await getLeagueResults(League.PRO, WEEK, [BUF_KC], SEASON);
+    await getLeagueResults(League.PRO, WEEK, [BUF_KC], SEASON);
+
+    expect(urlsOf(fetchMock)).toHaveLength(2);
+  });
+
+  it("asks again when the picks name a matchup it has no answer for", async () => {
+    const fetchMock = mockFetch([bufVsKc]);
+
+    await getLeagueResults(League.PRO, WEEK, [BUF_KC], SEASON);
+    // Every player picked the same side, so the column names one team, not two.
+    await getLeagueResults(League.PRO, WEEK, [new Set(["BUF"])], SEASON);
+
+    expect(urlsOf(fetchMock)).toHaveLength(2);
+  });
+
+  it("remembers a matchup ESPN listed no game for", async () => {
+    const fetchMock = mockFetch([bufVsKc]);
+    const matchups = [BUF_KC, PHI_DAL];
+
+    const first = await getLeagueResults(League.PRO, WEEK, matchups, SEASON);
+    const again = await getLeagueResults(League.PRO, WEEK, matchups, SEASON);
+
+    expect(urlsOf(fetchMock)).toHaveLength(1);
+    expect(first).toHaveLength(1);
+    expect(again).toEqual(first);
+  });
+
+  it("keeps a finished game the next answer has stopped listing", async () => {
+    const live = espnEvent({
+      home: "PHI",
+      away: "DAL",
+      id: "2",
+      status: GameStatus.LIVE,
+    });
+    const fetchMock = mockFetch([bufVsKc, live]);
+    const matchups = [BUF_KC, PHI_DAL];
+    await getLeagueResults(League.PRO, WEEK, matchups, SEASON);
+
+    // ESPN moves a game out of a week's answer from time to time. Without the game it
+    // held, the column would go from scored to missing.
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({ events: [live] }),
+    });
+    const again = await getLeagueResults(League.PRO, WEEK, matchups, SEASON);
+
+    expect(urlsOf(fetchMock)).toHaveLength(2);
+    expect(again.map((it) => it.shortName).sort()).toEqual([
+      "DAL @ PHI",
+      "KC @ BUF",
+    ]);
+  });
+
+  it("holds nothing from a week ESPN has not published", async () => {
+    const fetchMock = mockFetch([]);
+
+    await getLeagueResults(League.PRO, WEEK, [BUF_KC], SEASON);
+    await getLeagueResults(League.PRO, WEEK, [BUF_KC], SEASON);
+
+    expect(urlsOf(fetchMock)).toHaveLength(2);
+  });
+
+  it("asks again where no season was named, which names no week to hold", async () => {
+    const fetchMock = mockFetch([bufVsKc]);
+
+    await getLeagueResults(League.PRO, WEEK, [BUF_KC]);
+    await getLeagueResults(League.PRO, WEEK, [BUF_KC]);
+
+    expect(urlsOf(fetchMock)).toHaveLength(2);
+  });
+
+  it("gives a bowl week's later game first from what it held", async () => {
+    const fetchMock = mockFetch([
+      espnEvent({ home: "OSU", away: "MICH", date: "2024-10-02T17:00Z" }),
+      espnEvent({
+        home: "PSU",
+        away: "IOWA",
+        date: "2024-10-05T17:00Z",
+        id: "2",
+      }),
+    ]);
+    const matchups = [new Set(["OSU", "MICH"]), new Set(["PSU", "IOWA"])];
+    await getLeagueResults(League.COLLEGE, WEEK, matchups, SEASON);
+
+    const again = await getLeagueResults(
+      League.COLLEGE,
+      WEEK,
+      matchups,
+      SEASON,
+    );
+
+    // Both college groups answered with both games, and one game is held per matchup.
+    expect(urlsOf(fetchMock)).toHaveLength(2);
+    expect(again.map((it) => it.shortName)).toEqual([
+      "IOWA @ PSU",
+      "MICH @ OSU",
+    ]);
   });
 });

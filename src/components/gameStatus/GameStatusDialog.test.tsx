@@ -317,7 +317,7 @@ describe("GameStatusDialog", () => {
       "",
     ]);
 
-    await user.click(screen.getByRole("option", { name: /MICH @ OSU/ }));
+    await user.click(screen.getByRole("option", { name: /DAL @ PHI/ }));
 
     // Choosing ends the search, so a phone's keyboard comes down off the game that
     // was just asked for. The dialog holds the focus rather than nothing.
@@ -325,30 +325,38 @@ describe("GameStatusDialog", () => {
     expect(document.activeElement).toHaveClass("dialog__popup");
 
     expect(getGameResultMock).toHaveBeenLastCalledWith(
-      League.COLLEGE,
+      League.PRO,
       WEEK,
-      "402",
+      "403",
       SEASON,
     );
     expect(
       screen.getByRole("progressbar", { name: "Fetching the game" }),
     ).toBeInTheDocument();
     expect(screen.queryByText("BUF Team")).toBeNull();
-    // The game being switched to, which is over, rather than the live one whose
-    // result is still the last one fetched.
-    expect(screen.getByRole("img", { name: "Final" })).toBeInTheDocument();
+    // The game being switched to, which has yet to kick off, rather than the live one
+    // whose result is still the last one fetched.
+    expect(
+      screen.getByRole("img", { name: "Yet to kick off" }),
+    ).toBeInTheDocument();
 
-    pending.settle(collegeGame);
+    pending.settle(upcomingGame);
     await waitForElementToBeRemoved(() => screen.queryByRole("progressbar"));
-    expect(screen.getByText("OSU Team")).toBeInTheDocument();
-    // Over, so the search says so rather than that there is something to watch.
+    expect(screen.getByText("PHI Team")).toBeInTheDocument();
+    // Not started, so the search says so rather than that there is something to watch.
     expect(screen.queryByRole("img", { name: /Live/ })).toBeNull();
-    expect(screen.getByRole("img", { name: "Final" })).toBeInTheDocument();
 
-    // Final, so there is nothing left to ask about.
-    const askedByFinal = getGameResultMock.mock.calls.length;
+    // A game the week was already scored on after it finished is shown as it was
+    // scored, without being asked for at all. Nothing about it can have changed, and
+    // there is nothing left to poll for either.
+    const askedBeforeFinal = getGameResultMock.mock.calls.length;
+    await user.click(screen.getByRole("combobox", { name: "Game" }));
+    await user.click(await screen.findByRole("option", { name: /MICH @ OSU/ }));
+    expect(screen.getByText("OSU Team")).toBeInTheDocument();
+    expect(screen.queryByRole("progressbar")).toBeNull();
+    expect(screen.getByRole("img", { name: "Final" })).toBeInTheDocument();
     await vi.advanceTimersByTimeAsync(POLL_MS * 3);
-    expect(getGameResultMock).toHaveBeenCalledTimes(askedByFinal);
+    expect(getGameResultMock).toHaveBeenCalledTimes(askedBeforeFinal);
 
     // Back on the live game, which is asked about again on the way in.
     getGameResultMock.mockResolvedValue(proGame);
