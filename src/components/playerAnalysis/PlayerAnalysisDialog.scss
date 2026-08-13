@@ -28,8 +28,8 @@
     --rak-player-icon-fill: var(--rak-knocked-out-on-light);
   }
 
-  // One line however long the name is. The popup is not monospace, so it is cut to
-  // the room left beside the icon rather than to a count of characters.
+  // One line however long the name is, cut to the room left beside the icon. The popup
+  // is only as wide as the search it hangs off, so that room is what there is to cut to.
   .player-analysis__option-name {
     min-width: 0;
     overflow: hidden;

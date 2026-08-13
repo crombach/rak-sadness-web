@@ -39,6 +39,17 @@ function gameSpread(
 }
 
 /**
+ * What a game is called: the visiting side, then the side hosting it.
+ *
+ * Written from the two sides rather than taken from ESPN's own `shortName`, which says
+ * a game played at neither team's ground as `A VS B`. One form for every game, in the
+ * order the scoreline stands them in, so a bowl game reads the way a Sunday game does.
+ */
+function gameName(result: LeagueResult): string {
+  return `${result.away.team.abbreviation} @ ${result.home.team.abbreviation}`;
+}
+
+/**
  * Every game the week's picks describe, in the order the picks table columns are.
  *
  * A column ESPN had no game for keeps its place, so a reader who clicked it is
@@ -74,10 +85,11 @@ export default function weekGames(
         label: labels[index],
         league: ESPN_LEAGUE[league],
         name:
-          result?.shortName ??
-          (teams != null && teams.size > 0
-            ? [...teams].join(" / ")
-            : labels[index]),
+          result != null
+            ? gameName(result)
+            : teams != null && teams.size > 0
+              ? [...teams].join(" / ")
+              : labels[index],
         result,
         // Read off the game ESPN listed, which is what names the favored side where
         // the picks wrote the line from the other one.

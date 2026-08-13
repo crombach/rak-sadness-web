@@ -69,6 +69,16 @@ describe("weekGames", () => {
     expect(game.name).toBe("MICH @ OSU");
   });
 
+  it("says a game played at neither ground the way it says every other one", () => {
+    // ESPN calls a neutral-site game `A VS B`, which a bowl week is full of.
+    const bowl: LeagueResult = { ...michVsOsu, shortName: "MICH VS OSU" };
+    const [game] = weekGames(
+      parsed({ collegeKeys: ["C1"], matchups: { C1: ["MICH", "OSU"] } }),
+      { college: [bowl], pro: [] },
+    );
+    expect(game.name).toBe("MICH @ OSU");
+  });
+
   it("resolves a column every player picked the same side of", () => {
     const [game] = weekGames(
       parsed({ proKeys: ["P1"], matchups: { P1: ["BUF"] } }),
