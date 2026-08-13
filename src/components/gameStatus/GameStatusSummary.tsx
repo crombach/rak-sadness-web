@@ -1,5 +1,6 @@
 import { ReactNode, useState } from "react";
 import { GameStatus, HomeAway } from "../../types/ESPN";
+import { League } from "../../types/League";
 import { GameSide, LeagueResult } from "../../types/LeagueResult";
 import { GameSpread, WeekGame } from "../../types/WeekGame";
 import getClasses from "../../utils/getClasses";
@@ -20,6 +21,20 @@ const SCORE_DASH = "–";
  * is the same fact twice and in the wrong zone for anyone outside the east.
  */
 const PREGAME_DETAIL = "Pregame";
+
+/** What the link out to ESPN is called, which is what ESPN calls the page. */
+const GAMECAST_LABEL = "Gamecast";
+
+/**
+ * ESPN's own page for the game, where the drive chart and the box score this dialog
+ * leaves out are.
+ *
+ * The league names itself in the path, and the enum already holds the word ESPN uses
+ * for it, since the same value addresses the API the week is read from.
+ */
+function gamecastUrl(league: League, id: string): string {
+  return `https://www.espn.com/${league}/game/_/gameId/${id}`;
+}
 
 /** Points at the score of the side with the ball, from whichever side that is. */
 const MARKER: Record<HomeAway, string> = {
@@ -102,12 +117,17 @@ function venueParts(result: LeagueResult): Array<string> | undefined {
   return place !== "" ? [venue.name, place] : [venue.name];
 }
 
-/** One half of the strip under the scoreline, its parts dotted apart. */
-function MetaGroup({ parts }: { parts: Array<string> }) {
+/**
+ * One half of the strip under the scoreline, its parts dotted apart.
+ *
+ * Keyed by where a part sits rather than by what it says, because the parts are a
+ * fixed list in a fixed order and one of them is a link rather than a word.
+ */
+function MetaGroup({ parts }: { parts: Array<ReactNode> }) {
   return (
     <span className="game-status__meta-group">
-      {parts.map((part) => (
-        <span key={part}>{part}</span>
+      {parts.map((part, index) => (
+        <span key={index}>{part}</span>
       ))}
     </span>
   );
@@ -443,11 +463,17 @@ function Game({
   result,
   spread,
   logo,
+  gamecastHref,
 }: {
   result: LeagueResult;
   spread?: GameSpread;
   /** What a side wears beside its name, or nothing where the marks are dropped. */
   logo?: (side: GameSide) => ReactNode;
+  /**
+   * ESPN's page for the game. Left off the wireframe, which is hidden from a screen
+   * reader and would otherwise hold a link that can be tabbed to but not seen.
+   */
+  gamecastHref?: string;
 }) {
   const venue = venueParts(result);
   // Only once the game is over, which is when the sentence under the scores says the
@@ -488,7 +514,23 @@ function Game({
       {/* Under the scoreline rather than over it: the game is what the dialog was
           opened for, and when and where it is played is the footnote. */}
       <div className="game-status__meta">
-        <MetaGroup parts={kickoffParts(result.date)} />
+        {/* The link rides with the kickoff rather than the venue, so it sits after
+            the time at every width rather than moving when the two halves stack. */}
+        <MetaGroup
+          parts={[
+            ...kickoffParts(result.date),
+            gamecastHref != null && (
+              <a
+                className="game-status__gamecast"
+                href={gamecastHref}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {GAMECAST_LABEL}
+              </a>
+            ),
+          ].filter(Boolean)}
+        />
         {venue != null && <MetaGroup parts={venue} />}
       </div>
     </>
@@ -586,6 +628,7 @@ export default function GameStatusSummary({
       <Game
         result={result}
         spread={game.spread}
+        gamecastHref={gamecastUrl(game.league, result.id)}
         logo={
           logos
             ? (side) => (

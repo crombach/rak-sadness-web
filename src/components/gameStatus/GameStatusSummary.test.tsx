@@ -386,9 +386,17 @@ describe("GameStatusSummary, the kickoff", () => {
   function kickoff(timeZone: string): Array<string | null> {
     process.env.TZ = timeZone;
     render(<GameStatusSummary game={game(result())} result={result()} />);
-    return [
-      ...document.querySelectorAll(".game-status__meta-group:first-child span"),
-    ].map((part) => part.textContent);
+    return (
+      [
+        ...document.querySelectorAll(
+          ".game-status__meta-group:first-child span",
+        ),
+      ]
+        // The link out rides in this half after the time. It says the same thing
+        // whatever zone the reader is in, so it is not part of what these ask.
+        .filter((part) => part.querySelector("a") == null)
+        .map((part) => part.textContent)
+    );
   }
 
   it("says the day, the year and the time in the reader's own zone, and names it", () => {
@@ -475,9 +483,27 @@ describe("GameStatusSummary, a game still being played", () => {
     ]);
   });
 
-  it("sends a reader nowhere else: the dialog is the whole of it", () => {
+  it("sends a reader on to ESPN's own page for the game", () => {
     renderLive();
-    expect(screen.queryByRole("link")).toBeNull();
+    expect(screen.getByRole("link", { name: "Gamecast" })).toHaveAttribute(
+      "href",
+      "https://www.espn.com/nfl/game/_/gameId/401",
+    );
+  });
+
+  it("sends a college reader to the college section of the same site", () => {
+    // The league names itself in the path, so the two land on different sections
+    // rather than both on the one the pro games use.
+    render(
+      <GameStatusSummary
+        game={{ ...game(live), league: League.COLLEGE }}
+        result={live}
+      />,
+    );
+    expect(screen.getByRole("link", { name: "Gamecast" })).toHaveAttribute(
+      "href",
+      "https://www.espn.com/college-football/game/_/gameId/401",
+    );
   });
 
   it("holds the down's line with a word where there is no down to say", () => {
