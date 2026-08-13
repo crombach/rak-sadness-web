@@ -20,13 +20,22 @@
   @include visually-hidden;
 }
 
-.table.--skeleton {
-  // The sheen is held to the table's own box, so it crosses the wireframe and not
-  // the page around it. The clip that holds it makes this box the one the header
-  // cells stick inside, which costs the wireframe nothing: it stands still until
-  // the week arrives, so they never come off their own row.
+// What holds the sheen to the wireframe rather than letting it cross the page
+// around it. A box of its own, cut to the table, rather than the `<table>`: a
+// browser generates a wrapper box around a table and splits the properties
+// between the two, so `position` and `overflow` written on one element do not
+// always land on the same box, and a clip that does not hold the sheen's own
+// containing block does not hold the sheen. This is one box either way.
+.skeleton__sheen {
   @include skeleton-sheen;
 
+  width: max-content;
+  // Centered where the frame is wider than the table, which the table does for
+  // itself in `Table.scss`.
+  margin-inline: auto;
+}
+
+.table.--skeleton {
   th {
     @include skeleton-reserve;
   }

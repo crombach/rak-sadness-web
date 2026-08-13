@@ -84,24 +84,27 @@ function SkeletonTable({ view }: { view: ScoresView }) {
       <span className="skeleton__status" role="status">
         Loading {view.toLowerCase()} results
       </span>
-      <TableShell
-        className="--skeleton"
-        columnCount={columns.length}
-        ariaBusy
-        ariaHidden
-        header={columns.map((column, index) => (
-          // The heading itself, hidden, so a header that wraps to two lines is two
-          // lines tall here as well.
-          <th
-            key={index}
-            className={headerClass(column)}
-            scope="col"
-            data-skeleton-text={column.header}
-          >
-            <span className="skeleton__bar" />
-          </th>
-        ))}
-      />
+      {/* The box the sheen sweeps inside, cut to the table by `SkeletonTable.scss`. */}
+      <div className="skeleton__sheen">
+        <TableShell
+          className="--skeleton"
+          columnCount={columns.length}
+          ariaBusy
+          ariaHidden
+          header={columns.map((column, index) => (
+            // The heading itself, hidden, so a header that wraps to two lines is two
+            // lines tall here as well.
+            <th
+              key={index}
+              className={headerClass(column)}
+              scope="col"
+              data-skeleton-text={column.header}
+            >
+              <span className="skeleton__bar" />
+            </th>
+          ))}
+        />
+      </div>
     </>
   );
 }
