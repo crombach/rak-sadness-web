@@ -283,6 +283,14 @@ describe("GameStatusDialog", () => {
     // over a tick, the one yet to start a calendar, and the column ESPN has no game
     // for a warning.
     await screen.findByRole("option", { name: /KC @ BUF/ });
+
+    // Under the search, whatever room is left below it, so the list never covers the
+    // game the dialog is already open on.
+    expect(screen.getByRole("listbox").closest("[data-side]")).toHaveAttribute(
+      "data-side",
+      "bottom",
+    );
+
     expect(
       screen.getAllByRole("option").map((option) =>
         within(option)
@@ -309,6 +317,11 @@ describe("GameStatusDialog", () => {
     ]);
 
     await user.click(screen.getByRole("option", { name: /MICH @ OSU/ }));
+
+    // Choosing ends the search, so a phone's keyboard comes down off the game that
+    // was just asked for. The dialog holds the focus rather than nothing.
+    expect(screen.getByRole("combobox", { name: "Game" })).not.toHaveFocus();
+    expect(document.activeElement).toHaveClass("dialog__popup");
 
     expect(getGameResultMock).toHaveBeenLastCalledWith(
       League.COLLEGE,
