@@ -317,23 +317,16 @@ describe("getLeagueResults, mapping", () => {
     expect(result.away.linescores).toEqual([]);
   });
 
-  it("carries the venue", async () => {
+  it("carries the town the game is played in", async () => {
     mockFetch([
       espnEvent({
         home: "BUF",
         away: "KC",
-        venue: {
-          fullName: "Highmark Stadium",
-          address: { city: "Orchard Park", state: "NY" },
-        },
+        venue: { address: { city: "Orchard Park", state: "NY" } },
       }),
     ]);
     const [result] = await getLeagueResults(League.PRO, WEEK, [BUF_KC]);
-    expect(result.venue).toEqual({
-      name: "Highmark Stadium",
-      city: "Orchard Park",
-      state: "NY",
-    });
+    expect(result.venue).toBe("Orchard Park, NY");
   });
 
   it("carries each side's logo, and neither where ESPN sent none", async () => {
@@ -356,10 +349,16 @@ describe("getLeagueResults, mapping", () => {
     expect(result.away.team.logoUrl).toBeUndefined();
   });
 
-  it("leaves the venue out where ESPN sent none", async () => {
+  it("leaves the venue out where ESPN sent no address for the ground", async () => {
+    // A ground with no address, and no ground at all, are both a game with nowhere
+    // to say it is played.
+    mockFetch([espnEvent({ home: "BUF", away: "KC", venue: {} }), bufVsKc]);
+    const [withVenue] = await getLeagueResults(League.PRO, WEEK, [BUF_KC]);
+    expect(withVenue.venue).toBeUndefined();
+
     mockFetch([bufVsKc]);
-    const [result] = await getLeagueResults(League.PRO, WEEK, [BUF_KC]);
-    expect(result.venue).toBeUndefined();
+    const [withNone] = await getLeagueResults(League.PRO, WEEK, [BUF_KC]);
+    expect(withNone.venue).toBeUndefined();
   });
 });
 

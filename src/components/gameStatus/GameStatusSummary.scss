@@ -21,9 +21,7 @@
 // What separates one part of the strip under the scoreline from the next.
 @mixin meta-dot {
   content: "·";
-  // Set where the dots are, so the strip can pull its parts together on a screen
-  // that has to hold three of them on one line.
-  margin-inline: var(--rak-meta-dot-gap);
+  margin-inline: var(--rak-space-2);
 }
 
 // A bar over the words an element holds, one on each line of it, so a name that wraps
@@ -138,15 +136,10 @@
 // What is the same about the game however it is going: when it starts and where it
 // is being played. Under the scoreline, as a footnote to it.
 //
-// One line where the dialog is wide enough to hold both, wrapping back to two where
-// a long venue name needs it. Set apart by the space between them rather than by a
-// glyph, since each half already reads with a `·` inside it.
+// One line where the dialog is wide enough to hold both halves, wrapping back to two
+// where it is not. Set apart by the space between them rather than by a glyph, since
+// each half already reads with a `·` inside it.
 .game-status__meta {
-  // Tight enough that the day, the kickoff and the link out hold one line on a
-  // phone. The room a wider screen has goes back at the foot of this block, where
-  // the two halves come onto one line and the dots between them read the same.
-  --rak-meta-dot-gap: var(--rak-space-1);
-
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -161,10 +154,6 @@
   }
 
   @include wide-screen {
-    // Room enough for the halves to share a line, so the dots can have their space
-    // back and the whole strip reads as one sentence rather than a crowded one.
-    --rak-meta-dot-gap: var(--rak-space-2);
-
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;

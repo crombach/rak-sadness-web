@@ -110,13 +110,6 @@ function kickoffParts(date: Date): Array<string> {
   ];
 }
 
-function venueParts(result: LeagueResult): Array<string> | undefined {
-  const { venue } = result;
-  if (venue == null) return undefined;
-  const place = [venue.city, venue.state].filter((it) => it != null).join(", ");
-  return place !== "" ? [venue.name, place] : [venue.name];
-}
-
 /**
  * One half of the strip under the scoreline, its parts dotted apart.
  *
@@ -475,7 +468,22 @@ function Game({
    */
   gamecastHref?: string;
 }) {
-  const venue = venueParts(result);
+  // The link rides with the place rather than the kickoff, so it ends the strip at
+  // every width rather than moving when the two halves stack. Both parts are their
+  // own, so a game ESPN sent no address for still carries the link.
+  const placeParts = [
+    result.venue,
+    gamecastHref != null && (
+      <a
+        className="game-status__gamecast"
+        href={gamecastHref}
+        target="_blank"
+        rel="noreferrer"
+      >
+        {GAMECAST_LABEL}
+      </a>
+    ),
+  ].filter(Boolean);
   // Only once the game is over, which is when the sentence under the scores says the
   // same thing. A side ahead at half time has won nothing yet.
   const isOver = result.status === GameStatus.FINAL;
@@ -514,24 +522,8 @@ function Game({
       {/* Under the scoreline rather than over it: the game is what the dialog was
           opened for, and when and where it is played is the footnote. */}
       <div className="game-status__meta">
-        {/* The link rides with the kickoff rather than the venue, so it sits after
-            the time at every width rather than moving when the two halves stack. */}
-        <MetaGroup
-          parts={[
-            ...kickoffParts(result.date),
-            gamecastHref != null && (
-              <a
-                className="game-status__gamecast"
-                href={gamecastHref}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {GAMECAST_LABEL}
-              </a>
-            ),
-          ].filter(Boolean)}
-        />
-        {venue != null && <MetaGroup parts={venue} />}
+        <MetaGroup parts={kickoffParts(result.date)} />
+        {placeParts.length > 0 && <MetaGroup parts={placeParts} />}
       </div>
     </>
   );

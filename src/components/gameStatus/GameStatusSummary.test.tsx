@@ -46,7 +46,7 @@ function result(over: Partial<LeagueResult> = {}): LeagueResult {
       record: "3-2",
       linescores: [7, 3, 10, 0],
     },
-    venue: { name: "Highmark Stadium", city: "Orchard Park", state: "NY" },
+    venue: "Orchard Park, NY",
     possession: {},
     winner: {
       team: { name: "Buffalo Bills", abbreviation: "BUF" },
@@ -211,11 +211,16 @@ describe("GameStatusSummary, a game that is over", () => {
     expect(screen.queryByText("Away")).toBeNull();
   });
 
-  it("heads the scoreline with the venue", () => {
+  it("ends the strip with where it was played and the link out, in that order", () => {
     renderFinal();
     // Each part on its own, since a dot between two of them is the stylesheet's.
-    expect(screen.getByText("Highmark Stadium")).toBeInTheDocument();
-    expect(screen.getByText("Orchard Park, NY")).toBeInTheDocument();
+    expect(
+      [
+        ...document.querySelectorAll(
+          ".game-status__meta-group:last-child span",
+        ),
+      ].map((part) => part.textContent),
+    ).toEqual(["Orchard Park, NY", "Gamecast"]);
   });
 
   it("says FT/OT, and nothing about how the quarters went", () => {
@@ -386,17 +391,9 @@ describe("GameStatusSummary, the kickoff", () => {
   function kickoff(timeZone: string): Array<string | null> {
     process.env.TZ = timeZone;
     render(<GameStatusSummary game={game(result())} result={result()} />);
-    return (
-      [
-        ...document.querySelectorAll(
-          ".game-status__meta-group:first-child span",
-        ),
-      ]
-        // The link out rides in this half after the time. It says the same thing
-        // whatever zone the reader is in, so it is not part of what these ask.
-        .filter((part) => part.querySelector("a") == null)
-        .map((part) => part.textContent)
-    );
+    return [
+      ...document.querySelectorAll(".game-status__meta-group:first-child span"),
+    ].map((part) => part.textContent);
   }
 
   it("says the day, the year and the time in the reader's own zone, and names it", () => {

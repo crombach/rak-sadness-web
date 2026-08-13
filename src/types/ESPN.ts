@@ -39,7 +39,6 @@ export type EspnCompetition = {
 };
 
 export type EspnVenue = {
-  fullName?: string;
   address?: {
     city?: string;
     state?: string;
