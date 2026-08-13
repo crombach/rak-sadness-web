@@ -20,6 +20,9 @@ $ink-share-player: 0.79;
  * `$share` is how much of its own box this glyph's ink fills, from the list above.
  */
 @mixin ink-height($ink, $share) {
+  // `.icon` sets a font size of its own, which the `em` below would otherwise be read
+  // against instead of against the text this icon stands beside.
+  font-size: inherit;
   width: calc(#{$ink} / #{$share});
   height: calc(#{$ink} / #{$share});
 }
