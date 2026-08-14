@@ -23,7 +23,6 @@
 .scores-nav__divider {
   width: var(--rak-border-width);
   height: var(--rak-icon-md);
-  margin: 0 var(--rak-space-2);
   background-color: var(--rak-on-solid);
 }
 
@@ -56,6 +55,10 @@
 .scores-nav__live-content {
   display: flex;
   align-items: center;
+  // The bar's own gap, so the divider sits as far from the refresh button beside
+  // it as it does from the picks button on its other side, which is `.scores-nav`'s
+  // own gap and not this one.
+  gap: var(--navbar-gap);
   // So the column can narrow past what the divider and button measure.
   min-width: 0;
 }
