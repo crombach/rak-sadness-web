@@ -70,7 +70,7 @@
   );
   --rak-table-border: var(--rak-border-width) solid var(--rak-table-cell-border);
   --rak-table-header-border: var(--rak-border-width) solid
-    var(--rak-primary-600);
+    var(--rak-table-header-divider);
   // For an edge that draws nothing. Never `none`, which resets the color to
   // `currentColor`.
   --rak-table-no-border: 0 solid var(--rak-primary-800);
@@ -110,7 +110,7 @@
       padding: var(--rak-table-cell-padding-y) var(--rak-table-header-padding-x);
       // Named even on the edges that carry no border, because a zero-width border
       // takes `currentColor`, which is white here.
-      border-color: var(--rak-primary-600);
+      border-color: var(--rak-table-header-divider);
 
       &:not(:last-child) {
         border-right: var(--rak-table-header-border);

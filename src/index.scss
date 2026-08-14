@@ -218,6 +218,11 @@
   // `--rak-surface`, which inverts, and the chrome's own dark tone nearly
   // vanishes against a surface that goes dark too.
   --rak-table-cell-border: var(--rak-primary-800);
+  // The rule between header cells. Not a step on the primary ramp: 600 against
+  // the header's own 800 fill cleared barely 1.5:1, in light mode as much as
+  // dark, since the header is chrome and neither one moves. Fixed rather than
+  // mode-aware for the same reason.
+  --rak-table-header-divider: #757575;
 
   --rak-text: #171a1c;
   --rak-text-secondary: #32383e;
