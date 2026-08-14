@@ -91,7 +91,7 @@ const NO_DOWN = "Between plays";
 const SPREAD_LABEL = "Rak Madness Spread";
 
 /** Said in its place for a game the picks put no line on. */
-const NO_SPREAD = "None";
+const NO_SPREAD = "NONE";
 
 /**
  * How a game that finished level, or on its number, was scored. Both are a point for
