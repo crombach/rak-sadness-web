@@ -180,7 +180,7 @@ export default function GameStatusDialog({
     games: scores?.games,
     week,
     season,
-    onFinal: onGameFinal,
+    onGameFinal,
   });
 
   return (

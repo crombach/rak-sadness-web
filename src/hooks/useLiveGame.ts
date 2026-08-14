@@ -28,7 +28,7 @@ export default function useLiveGame({
   games,
   week,
   season,
-  onFinal,
+  onGameFinal,
 }: {
   open: boolean;
   game?: WeekGame;
@@ -40,7 +40,7 @@ export default function useLiveGame({
    * `.table__cell-wipe` animations can catch up to an outcome the dialog saw
    * before the next scheduled refresh would have.
    */
-  onFinal?: () => void;
+  onGameFinal?: () => void;
 }): { shown?: LeagueResult; isLoading: boolean; isFetching: boolean } {
   const [found, setFound] = useState<{
     games: Array<WeekGame>;
@@ -85,7 +85,7 @@ export default function useLiveGame({
         if (result == null || result.status !== GameStatus.FINAL) {
           timer = window.setTimeout(poll, POLL_MS);
         } else {
-          onFinal?.();
+          onGameFinal?.();
         }
       };
       await poll();
@@ -97,7 +97,7 @@ export default function useLiveGame({
       // outstanding whatever it comes back with.
       setFetching(false);
     };
-  }, [open, games, label, league, eventId, settled, week, season, onFinal]);
+  }, [open, games, label, league, eventId, settled, week, season, onGameFinal]);
 
   const shown =
     settled ??

@@ -16,8 +16,6 @@ import "./HomePage.scss";
 /** Title case, to read like the week labels ESPN sends. */
 const seasonLabel = (season: number) => `${season} Season`;
 
-const doNothing = () => undefined;
-
 export default function HomePage() {
   const navigate = useNavigate();
   const {
@@ -76,7 +74,7 @@ export default function HomePage() {
               `/${seasonYear}/${selectedWeek?.value}/${view.toLowerCase()}`,
             )
           }
-          onRefresh={doNothing}
+          onRefresh={() => undefined}
           isRefreshing={false}
         />
       }
