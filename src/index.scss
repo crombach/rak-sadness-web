@@ -225,8 +225,8 @@
 
   // The row already chosen in a list, told apart from the one under the pointer.
   // Its own token rather than a step on the primary ramp, because that ramp's 100
-  // step is also the light-mode-only fill a toast's primary variant pairs with its
-  // own dark text, and the two need to move independently once dark mode inverts.
+  // step also stays fixed as the toast's own fill, paired there with its own dark
+  // text, and the two need to move independently once dark mode inverts.
   --rak-selected-fill: var(--rak-primary-100);
 
   --rak-disabled-bg: #f3f3f3;
