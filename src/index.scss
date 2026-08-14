@@ -212,6 +212,12 @@
   --rak-border: #838e9a;
   // A rule between two things that are already apart, which does not.
   --rak-divider: #cdd7e1;
+  // The table's own cell border. Its own token rather than a direct read of
+  // `--rak-primary-800`, since that ramp step is also the readout/header chrome
+  // and stays dark in both modes, while this has to move: it sits against
+  // `--rak-surface`, which inverts, and the chrome's own dark tone nearly
+  // vanishes against a surface that goes dark too.
+  --rak-table-cell-border: var(--rak-primary-800);
 
   --rak-text: #171a1c;
   --rak-text-secondary: #32383e;
@@ -381,6 +387,7 @@ html {
     --rak-fill-subtle: #1e2124;
     --rak-fill-muted: #262a2e;
     --rak-border: #6b7581;
+    --rak-table-cell-border: var(--rak-border);
 
     --rak-text: #f4f6f7;
     --rak-text-secondary: #cbd2d8;
