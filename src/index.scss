@@ -139,23 +139,22 @@
   // edge to be read against, on the same grey ramp as the rest of the app now.
   --rak-case: #373737;
 
-  // Primary scale: the navbar, table header, and key chrome. Tinted the same
-  // hue and saturation as `--rak-text-secondary`/`--rak-border` rather than
-  // left a flat achromatic grey, so the instrument chrome and the rest of the
-  // app's own greys read as one palette. Every step still clears its
-  // pairing's WCAG AA minimum, with room to spare. Dark mode pins this whole
-  // scale back to its old, darker values below: it already reads as a dark
-  // instrument sitting on a light page, and this lighter light-mode scale is
-  // not meant to change that.
-  --rak-primary-100: #c7ccd1;
+  // Primary scale: the navbar, table header, and key chrome. Grayscale, same as
+  // before, just lighter, so the instrument chrome reads as an instrument
+  // rather than a slab of near-black. Every step still clears its pairing's
+  // WCAG AA minimum, with room to spare. Dark mode pins this whole scale back
+  // to its old, darker values below: it already reads as a dark instrument
+  // sitting on a light page, and this lighter light-mode scale is not meant
+  // to change that.
+  --rak-primary-100: #cccccc;
   // One step over the 500 the navbar is filled in, for the keys set into it. A key
   // in the bar's own color is told from it by its edge alone, which is a line 4px
   // tall to carry a whole control.
-  --rak-primary-400: #606b76;
-  --rak-primary-500: #535c65;
-  --rak-primary-600: #454c54;
-  --rak-primary-700: #373d43;
-  --rak-primary-800: #292e32;
+  --rak-primary-400: #6b6b6b;
+  --rak-primary-500: #5c5c5c;
+  --rak-primary-600: #4c4c4c;
+  --rak-primary-700: #3d3d3d;
+  --rak-primary-800: #2e2e2e;
 
   // Semantic ramps. One ramp per meaning, whatever draws it: 100 is a soft fill
   // behind text, 300 fills a table cell, 500 and up are solid fills and text.
@@ -227,10 +226,10 @@
   // The rule between header cells. Not a step on the primary ramp: 600 against
   // the header's own 800 fill cleared barely 1.5:1, in light mode as much as
   // dark, since the header is chrome and neither one moves. Fixed rather than
-  // mode-aware for the same reason. Tinted to the same hue as the ramp beside
-  // it, hand-picked to clear 3:1 against the header's lighter light-mode fill.
-  // Dark mode pins it back to the old value below, against the old fill.
-  --rak-table-header-divider: #76828f;
+  // mode-aware for the same reason. Hand-picked to clear 3:1 against the
+  // header's lighter light-mode fill. Dark mode pins it back to the old value
+  // below, against the old fill.
+  --rak-table-header-divider: #808080;
   // The dialog progress bar's sweep. Its own token rather than a direct read of
   // `--rak-primary-500`, for the same reason as `--rak-panel-border`: that ramp
   // step stays dark in both modes, and the track it sweeps over
