@@ -18,24 +18,13 @@ $well-inset: 3px;
 }
 
 .logo-button {
+  // Back to the bar's own fill, which the navbar lifts a step for the keys it holds.
+  // This is the panel the device is named on rather than a key, so it is the surface
+  // those keys are lit against.
+  --rak-key-face: var(--rak-primary-500);
   // A flex item will not shrink below what it holds unless it is told it may, and
   // the name cannot give up its room until the button it sits in can.
   min-width: 0;
-
-  &__filter {
-    position: absolute;
-    width: 0;
-    height: 0;
-  }
-
-  &__logo {
-    width: 20px;
-    height: 20px;
-    // The name gives up the room, not the mark beside it.
-    flex-shrink: 0;
-    // The matching `<filter>` id is unique per instance, set inline in
-    // `LogoButton.tsx` rather than here, where it would have to be static.
-  }
 
   // Reads as the navbar's own heading rather than as button text, which is what
   // it looked like before the two became one button.

@@ -129,6 +129,10 @@ describe("GameStatusSummary, before there is anything to show", () => {
 });
 
 describe("GameStatusSummary, the pool's line on the game", () => {
+  // The label and the line are two elements, since the line alone is set in the
+  // table's face, so the sentence is read off the paragraph holding both.
+  const spreadLine = () => screen.getByText(/Rak Madness Spread/);
+
   it("names the favored side and what it gives", () => {
     render(
       <GameStatusSummary
@@ -136,13 +140,13 @@ describe("GameStatusSummary, the pool's line on the game", () => {
         result={result()}
       />,
     );
-    expect(screen.getByText("Rak Madness Spread: BUF -3")).toBeInTheDocument();
+    expect(spreadLine()).toHaveTextContent("Rak Madness Spread: BUF -3");
   });
 
   it("says so where the picks put no line on the game", () => {
     render(<GameStatusSummary game={game(result())} result={result()} />);
     // Said either way, so a game with no line is not one the dialog forgot about.
-    expect(screen.getByText("Rak Madness Spread: None")).toBeInTheDocument();
+    expect(spreadLine()).toHaveTextContent("Rak Madness Spread: None");
   });
 });
 

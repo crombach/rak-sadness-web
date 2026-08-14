@@ -13,6 +13,9 @@
   // Every button in here sits on the app's own primary, which a ring in that same
   // primary cannot be seen against.
   --rak-focus-ring: var(--rak-on-solid);
+  // A key set into the bar is lit a step over it, so it is a control before its edge
+  // is read. Elsewhere a solid key stands on white and needs no lift.
+  --rak-key-face: var(--rak-primary-400);
 }
 
 .navbar__content {

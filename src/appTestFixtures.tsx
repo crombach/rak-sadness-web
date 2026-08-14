@@ -158,7 +158,7 @@ export function notFoundResponse(): Response {
 }
 
 export function htmlResponse(): Response {
-  return new Response("<!doctype html><title>Rakulator</title>", {
+  return new Response("<!doctype html><title>The Rakulator</title>", {
     status: 200,
     headers: { "content-type": "text/html" },
   });

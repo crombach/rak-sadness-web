@@ -642,7 +642,9 @@ function Game({
     <>
       <p className="game-status__spread">
         {SPREAD_LABEL}:{" "}
-        {spread != null ? `${spread.team} ${spread.points}` : NO_SPREAD}
+        <span className="game-status__spread-value">
+          {spread != null ? `${spread.team} ${spread.points}` : NO_SPREAD}
+        </span>
       </p>
       <div
         className={getClasses("game-status__scoreline", {

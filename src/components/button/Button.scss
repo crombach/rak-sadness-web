@@ -5,8 +5,8 @@
 // A key at rest and a key sunk under a finger. The top face travels by the
 // difference between the two lifts, so the face lands where the lower edge was
 // and nothing around the key moves. Transform rather than margin for that
-// reason, and a state rather than a transition, so it still reads with animation
-// turned off.
+// reason, and a state rather than an animation: the travel is eased by the
+// transition below, and where motion is turned off the key still lands sunk.
 @mixin key($lift) {
   transform: translateY(calc(var(--rak-key-lift) - #{$lift}));
   box-shadow:
@@ -33,9 +33,13 @@
   font-weight: var(--rak-weight-semibold);
   line-height: var(--rak-line-height);
   cursor: pointer;
+  // The key's travel and the edge it stands on are timed with its fill, so a
+  // press is one move rather than a colour easing while the face jumps.
   transition:
     background-color var(--rak-duration-fast) var(--rak-ease-standard),
-    color var(--rak-duration-fast) var(--rak-ease-standard);
+    color var(--rak-duration-fast) var(--rak-ease-standard),
+    transform var(--rak-duration-fast) var(--rak-ease-key),
+    box-shadow var(--rak-duration-fast) var(--rak-ease-key);
 
   @include focus-ring;
 
@@ -91,7 +95,11 @@
 
     &.--primary {
       --rak-key-edge: var(--rak-primary-700);
-      background-color: var(--rak-primary-500);
+      // The face at rest, in a property rather than written flat, because the navbar
+      // lifts it a step to stand its keys off a bar in the same color. A fill that
+      // varies by surface cannot be overridden at one specificity without also
+      // beating the hover, press, and selected rules below.
+      background-color: var(--rak-key-face, var(--rak-primary-500));
 
       @include can-hover {
         &:hover {
