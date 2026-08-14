@@ -112,6 +112,7 @@
       // takes `currentColor`, which is white here.
       border-color: var(--rak-table-header-divider);
 
+      border-bottom: var(--rak-table-header-border);
       border-right: var(--rak-table-header-border);
       &:first-child {
         width: var(--rak-table-rank-width);
