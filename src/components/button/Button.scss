@@ -95,23 +95,26 @@
 
     &.--primary {
       --rak-key-edge: var(--rak-primary-700);
-      // The face at rest, in a property rather than written flat, because the navbar
-      // lifts it a step to stand its keys off a bar in the same color. A fill that
-      // varies by surface cannot be overridden at one specificity without also
-      // beating the hover, press, and selected rules below.
+      // Four steps of one ramp, one per state, in properties rather than written flat.
+      // The navbar lifts the whole set a step to stand its keys off a bar in the same
+      // color, and they move together: a rest fill raised on its own leaves a press
+      // crossing two steps at once, which reads as the key going down twice.
+      //
+      // Properties rather than an override, because a fill that varies by surface
+      // cannot be overridden at one specificity without also beating the rules below.
       background-color: var(--rak-key-face, var(--rak-primary-500));
 
       @include can-hover {
         &:hover {
-          background-color: var(--rak-primary-600);
+          background-color: var(--rak-key-hover, var(--rak-primary-600));
         }
       }
       &:active {
-        background-color: var(--rak-primary-700);
+        background-color: var(--rak-key-press, var(--rak-primary-700));
       }
       // Held by the route rather than the pointer, so it has to come after both.
       &.--selected {
-        background-color: var(--rak-primary-800);
+        background-color: var(--rak-key-held, var(--rak-primary-800));
       }
     }
 

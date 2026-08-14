@@ -18,10 +18,13 @@ $well-inset: 3px;
 }
 
 .logo-button {
-  // Back to the bar's own fill, which the navbar lifts a step for the keys it holds.
-  // This is the panel the device is named on rather than a key, so it is the surface
-  // those keys are lit against.
+  // Back to the ramp the app's other solid buttons run on, which the navbar lifts a
+  // step for the keys it holds. This is the panel the device is named on rather than
+  // a key, so it is the surface those keys are lit against. Every step is put back,
+  // not the rest fill alone, or a hover would land on the fill it started from.
   --rak-key-face: var(--rak-primary-500);
+  --rak-key-hover: var(--rak-primary-600);
+  --rak-key-press: var(--rak-primary-700);
   // A flex item will not shrink below what it holds unless it is told it may, and
   // the name cannot give up its room until the button it sits in can.
   min-width: 0;
@@ -81,9 +84,6 @@ $well-inset: 3px;
     // Out of any selection the user drags over the bar. Selectable, copying the
     // name carried the row of tildes out with it.
     user-select: none;
-    // Enough to read as segments that could light, not so much that it crowds the
-    // ones that are lit. Measured against the well behind it, which is darker than
-    // the bar around it and so takes less white than the bar did.
-    color: rgb(255 255 255 / 12%);
+    color: var(--rak-unlit);
   }
 }

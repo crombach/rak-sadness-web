@@ -23,8 +23,8 @@
   // stack stays behind it: a bare `monospace` resolves to Courier on some Android
   // builds, whose advance is narrow enough to change how many columns fit.
   --rak-font-mono:
-    "Spline Sans Mono Variable", "Spline Sans Mono", ui-monospace,
-    SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    monospace;
   // The app name alone, in the 14-segment display face a calculator reads out
   // through. It has no lowercase and draws every letter as a capital, so the
   // name stays ordinary mixed-case text in the DOM. `src/index.tsx` loads its
@@ -244,6 +244,11 @@
   --rak-bezel:
     inset 0 1px 0 rgb(255 255 255 / 10%), inset 0 -1px 0 rgb(0 0 0 / 30%);
   --rak-well: inset 0 1px 2px rgb(0 0 0 / 35%);
+  // A cell of a readout that is not lit. Enough to read as a shape that could light,
+  // not so much that it crowds the ones that are. Measured against the fill both
+  // readouts are sunk into, which is darker than the bar around them and so takes
+  // less white than the bar did.
+  --rak-unlit: rgb(255 255 255 / 12%);
   // How far a key stands off the panel, and how far it has left to travel once a
   // finger is on it. The difference is what it sinks by, so the two are named
   // together.
