@@ -5,6 +5,7 @@ import { GameStatus } from "../../types/ESPN";
 import { WeekInfo } from "../../types/League";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import { WeekGame } from "../../types/WeekGame";
+import prefetchLink from "../../utils/prefetchLink";
 import DialogCombobox from "../dialog/DialogCombobox";
 import DialogShell from "../dialog/DialogShell";
 import { CheckIcon, EventIcon, WarningIcon } from "../icon/Icon";
@@ -29,22 +30,10 @@ function gameSearchText(game: WeekGame): string {
  */
 const prefetchedLogoUrls = new Set<string>();
 
-/**
- * A hint, not a load: `rel=preload` is for a resource this render is about to put
- * on screen, and warns in the console when it is not. Most of a week's logos are
- * never opened in the same visit, so this is `rel=prefetch` instead, which carries
- * no such expectation.
- */
 function prefetchLogo(url: string) {
   if (prefetchedLogoUrls.has(url)) return;
   prefetchedLogoUrls.add(url);
-  const link = document.createElement("link");
-  // `as` only reflects as an attribute for `rel=preload`/`modulepreload`, so the
-  // property setter silently drops it here. Every attribute set directly instead.
-  link.setAttribute("rel", "prefetch");
-  link.setAttribute("as", "image");
-  link.setAttribute("href", url);
-  document.head.appendChild(link);
+  prefetchLink(url, { as: "image" });
 }
 
 /** The games a query offers, in picks table column order. */

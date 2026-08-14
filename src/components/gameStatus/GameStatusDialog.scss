@@ -1,4 +1,10 @@
+@use "sass:math";
 @use "../../styles/ink" as *;
+
+// CheckIcon's own aspect in Icon.tsx, `viewBox="257 -654 451 333"`. Named once
+// here because the slot below is sized to it whichever mark is showing, not
+// only when the checkmark itself is: it is the widest of the four shapes.
+$check-icon-ratio: math.div(451, 333);
 
 // An entry reads as its column then its game. Both at the one size, in the monospace
 // face every entry is set in, so the column is held to a width the game names line up
@@ -85,7 +91,7 @@
 .game-status__mark-icon {
   display: flex;
   justify-content: center;
-  width: calc(var(--rak-caps-ink) * 451 / 333);
+  width: calc(var(--rak-caps-ink) * #{$check-icon-ratio});
 
   svg {
     fill: currentColor;
