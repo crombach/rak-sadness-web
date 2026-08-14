@@ -242,11 +242,11 @@
   object-fit: contain;
   width: 32px;
   height: 32px;
-  // None outside dark mode, so this only ever lights the edge `--rak-logo-glow`
-  // gives a crest that mode cannot otherwise be sure will show. A filter rather
-  // than a background: it follows the crest's own alpha channel, so the light
-  // traces its silhouette instead of sitting behind it as a box or a disc.
-  filter: var(--rak-logo-glow);
+  // None outside dark mode, so this only ever draws the edge `--rak-logo-outline`
+  // gives a crest that mode cannot otherwise be sure will show. An outline rather
+  // than a border: it sits outside the box instead of inside it, so it costs the
+  // crest none of the room `width`/`height` above already measured it to.
+  outline: var(--rak-logo-outline);
 
   @include roomy-screen {
     width: 44px;

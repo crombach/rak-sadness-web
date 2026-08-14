@@ -246,11 +246,11 @@
   --rak-mark-final-text: var(--rak-success-600);
   --rak-mark-upcoming-bg: var(--rak-neutral-100);
   --rak-mark-upcoming-text: var(--rak-neutral-700);
-  // A rim light around a team's own crest in the game dialog. None here: a crest
-  // is ESPN's own art, not a color this app chose, and on white every one of them
-  // already reads. Only the dark override below lights an edge around it, since
-  // that is the mode a crest built for white can lose itself against.
-  --rak-logo-glow: none;
+  // An edge around a team's own crest in the game dialog. None here: a crest is
+  // ESPN's own art, not a color this app chose, and on white every one of them
+  // already reads. Only the dark override below draws one, since that is the mode
+  // a crest built for white can lose itself against.
+  --rak-logo-outline: none;
 
   --rak-text: #171a1c;
   --rak-text-secondary: #32383e;
@@ -455,12 +455,10 @@ html {
     --rak-mark-final-text: var(--rak-text);
     --rak-mark-upcoming-bg: var(--rak-fill-muted);
     --rak-mark-upcoming-text: var(--rak-text);
-    // Lit regardless of a crest's own colors, so a navy helmet on a navy
-    // background still has an edge against a page it did not draw itself for.
-    // Two layers, a tight bright one and a soft wide one, so the edge reads as
-    // light falling on the crest rather than as a ring drawn around it.
-    --rak-logo-glow: drop-shadow(0 0 1px rgb(255 255 255 / 80%))
-      drop-shadow(0 0 3px rgb(255 255 255 / 35%));
+    // Told from the page regardless of its own colors, so a navy helmet on a navy
+    // background still has an edge against a page it did not draw itself for. The
+    // same boundary any control's own edge is told from its surface with.
+    --rak-logo-outline: 1px solid var(--rak-border);
 
     // The dialog's busy sweep. Black-on-a-key reads against the light-mode
     // `--rak-disabled-bg`, and blends into it once that token goes dark.
