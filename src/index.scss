@@ -246,6 +246,11 @@
   --rak-mark-final-text: var(--rak-success-600);
   --rak-mark-upcoming-bg: var(--rak-neutral-100);
   --rak-mark-upcoming-text: var(--rak-neutral-700);
+  // The disc a team's own crest sits on in the game dialog. Transparent here: a
+  // crest is ESPN's own art, not a color this app chose, and on white every one
+  // of them already reads. Only the dark override below gives it a plate, since
+  // that is the mode a crest built for white can lose itself against.
+  --rak-logo-plate: transparent;
 
   --rak-text: #171a1c;
   --rak-text-secondary: #32383e;
@@ -450,6 +455,9 @@ html {
     --rak-mark-final-text: var(--rak-text);
     --rak-mark-upcoming-bg: var(--rak-fill-muted);
     --rak-mark-upcoming-text: var(--rak-text);
+    // Light regardless of a crest's own colors, so a navy helmet on a navy
+    // background is still a helmet against a page it did not draw itself for.
+    --rak-logo-plate: #e8eaec;
 
     // The dialog's busy sweep. Black-on-a-key reads against the light-mode
     // `--rak-disabled-bg`, and blends into it once that token goes dark.

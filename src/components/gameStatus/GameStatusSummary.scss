@@ -242,6 +242,11 @@
   object-fit: contain;
   width: 32px;
   height: 32px;
+  // Transparent outside dark mode, so this only ever shows as the ring `--rak-logo-plate`
+  // draws behind a crest that mode cannot otherwise be sure will show.
+  padding: var(--rak-space-1);
+  border-radius: 50%;
+  background-color: var(--rak-logo-plate);
 
   @include roomy-screen {
     width: 44px;
