@@ -112,13 +112,12 @@
       // takes `currentColor`, which is white here.
       border-color: var(--rak-table-header-divider);
 
-      &:not(:last-child) {
-        border-right: var(--rak-table-header-border);
-      }
+      border-right: var(--rak-table-header-border);
       &:first-child {
         width: var(--rak-table-rank-width);
         // The rank and the player read as one block, so nothing divides them.
         border-right: var(--rak-table-no-border);
+        border-left: var(--rak-table-header-border);
       }
       &:nth-child(2) {
         border-left: var(--rak-table-header-border);
@@ -212,8 +211,8 @@
       // row and put the cut at both ends.
       text-align: left;
       --rak-cell-base: var(--rak-in-contention-300);
-      // The fill stays pale in both modes, so the name has to stay this dark ink
-      // in both modes too, rather than take the generic cell text below.
+      // `--rak-text-on-pale` inverts to light ink in dark mode alongside this
+      // fill, which darkens there instead of staying pale.
       color: var(--rak-text-on-pale);
 
       &.--knocked-out {

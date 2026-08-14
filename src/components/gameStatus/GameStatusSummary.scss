@@ -162,7 +162,7 @@
   margin: 0;
   // The grey the labels over the two names are set in, so the line over the
   // scoreline and the labels inside it read as one tier of the same dialog.
-  color: var(--rak-text-tertiary);
+  color: var(--rak-text-secondary);
   font-size: var(--rak-text-sm);
   font-weight: var(--rak-weight-semibold);
   text-align: center;
@@ -174,7 +174,7 @@
 // which is the same grey their labels do, so the face is what tells the answer from
 // the question rather than a second color on one line.
 .game-status__spread-value {
-  color: var(--rak-text-tertiary);
+  color: var(--rak-text-secondary);
   font-family: var(--rak-font-mono);
   // Off the label's own weight, which is the other half of telling the answer from
   // the question: the label is what is bold here, and the line it gives is read.
@@ -192,7 +192,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--rak-space-1);
-  color: var(--rak-text-tertiary);
+  color: var(--rak-text-secondary);
   font-size: var(--rak-text-sm);
   text-align: center;
 
@@ -352,7 +352,7 @@
 .game-status__side-label {
   @include micro-label;
 
-  color: var(--rak-text-tertiary);
+  color: var(--rak-text-secondary);
   font-size: var(--rak-text-xs);
 }
 
@@ -407,7 +407,7 @@
 }
 
 .game-status__record {
-  color: var(--rak-text-tertiary);
+  color: var(--rak-text-secondary);
   font-size: var(--rak-text-sm);
 }
 

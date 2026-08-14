@@ -229,15 +229,20 @@
   // step stays dark in both modes, and the track it sweeps over
   // (`--rak-fill-subtle`) inverts, so the two nearly merge in dark mode.
   --rak-progress-fill: var(--rak-primary-500);
+  // The picks table's own token rather than a direct read of `--rak-warning-300`:
+  // that ramp step also fills the game dialog's `--invalid` mark, paired there
+  // with its own fixed dark text, and the two need to move independently once
+  // dark mode darkens this cell instead of the mark.
+  --rak-cell-unscoreable: var(--rak-warning-300);
 
   --rak-text: #171a1c;
   --rak-text-secondary: #32383e;
   --rak-text-tertiary: #555e68;
   // Foreground on a solid fill. Not a background: `--rak-surface` is the page.
   --rak-on-solid: #fff;
-  // Ink that never inverts. A player's status cell and a pick's yes/no/unscoreable
-  // cell keep the same pale fill in both modes, so the text and icon laid over them
-  // has to stay this dark in both modes too.
+  // The ink for a player's status cell and a pick's yes/no/unscoreable cell,
+  // pale here so this stays dark. Those fills darken instead of staying pale in
+  // dark mode, where this inverts to light ink alongside them.
   --rak-text-on-pale: #171a1c;
 
   // The row already chosen in a list, told apart from the one under the pointer.
@@ -409,6 +414,17 @@ html {
     --rak-disabled-edge: #101214;
 
     --rak-selected-fill: #35393d;
+
+    // The colorful table cells: a player's status and a pick's outcome. Same hue
+    // as the light-mode pastel, taken darker and more saturated, so a chip built
+    // to sit on a white page does not glare against this one. `--rak-text-on-pale`
+    // inverts to light ink alongside them, below.
+    --rak-success-300: #1b5719;
+    --rak-danger-300: #571919;
+    --rak-knocked-out-300: #573619;
+    --rak-in-contention-300: #194257;
+    --rak-cell-unscoreable: #4e5719;
+    --rak-text-on-pale: var(--rak-text);
 
     // The dialog's busy sweep. Black-on-a-key reads against the light-mode
     // `--rak-disabled-bg`, and blends into it once that token goes dark.

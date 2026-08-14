@@ -4,8 +4,8 @@
 // and derives the even-row stripe from it.
 .table {
   tbody {
-    // Each fill stays pale in both modes, so the outcome text has to stay this
-    // dark ink in both modes too, rather than take the generic cell text.
+    // `--rak-text-on-pale` inverts to light ink in dark mode alongside these
+    // fills, which darken there instead of staying pale.
     .table__pick.--yes {
       --rak-cell-base: var(--rak-success-300);
       color: var(--rak-text-on-pale);
@@ -16,8 +16,12 @@
       color: var(--rak-text-on-pale);
     }
 
+    // The picks table's own token rather than a direct read of `--rak-warning-300`:
+    // that ramp step also fills the game dialog's `--invalid` mark, paired there
+    // with its own fixed dark text, and the two need to move independently once
+    // dark mode darkens this cell instead.
     .table__pick.--unscoreable {
-      --rak-cell-base: var(--rak-warning-300);
+      --rak-cell-base: var(--rak-cell-unscoreable);
       color: var(--rak-text-on-pale);
     }
   }
