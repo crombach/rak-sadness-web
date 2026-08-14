@@ -20,10 +20,6 @@
 // the panel they are set into. `&__name` sets its own instead.
 .button.logo-button {
   padding: 0;
-  // `.button`'s own `overflow: hidden` is there to contain the `--busy` sheen,
-  // which this key never sets. Visible instead, so the glass's own shadow can
-  // throw past this box.
-  overflow: visible;
 }
 
 .logo-button {
@@ -55,6 +51,12 @@
     min-width: 0;
 
     @include lcd-glass;
+    // The mixin's plate ring is invisible here anyway, since the navbar is
+    // already that same primary step, and the highlight it throws past the box
+    // would now be clipped rather than bled, since this key stands the same
+    // height as the ones beside it. Sunk and lit from the inside instead, the
+    // same two cues drawn further out everywhere else.
+    box-shadow: var(--rak-well), var(--rak-key-top);
 
     // Bold is the only cut `src/index.tsx` loads: the face is monospaced, so the
     // heavier segments advance exactly as far as the light ones and cost nothing
