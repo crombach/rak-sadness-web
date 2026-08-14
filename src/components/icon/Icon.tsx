@@ -76,10 +76,15 @@ export function LeaderboardIcon() {
   );
 }
 
-export function RefreshIcon() {
+/**
+ * Filled rather than the outline `refresh` glyph the rest of Material Symbols
+ * offers, so the refresh key reads as solid mass beside the two filled keys next
+ * to it in the navbar rather than a step lighter.
+ */
+export function UpdateIcon() {
   return (
-    <Icon name="RefreshIcon">
-      <path d="M480-160q-133 0-226.5-93.5T160-480q0-133 93.5-226.5T480-800q85 0 149 34.5T740-671v-129h60v254H546v-60h168q-38-60-97-97t-137-37q-109 0-184.5 75.5T220-480q0 109 75.5 184.5T480-220q83 0 152-47.5T728-393h62q-29 105-115 169t-195 64Z" />
+    <Icon name="UpdateIcon">
+      <path d="M480-120q-75 0-140.5-28.5t-114-77q-48.5-48.5-77-114T120-480q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-840q82 0 155.5 35T760-706v-94h80v240H600v-80h110q-41-56-101-88t-129-32q-117 0-198.5 81.5T200-480q0 117 81.5 198.5T480-200q105 0 183.5-68T756-440h82q-15 137-117.5 228.5T480-120Zm112-192L440-464v-216h80v184l128 128-56 56Z" />
     </Icon>
   );
 }

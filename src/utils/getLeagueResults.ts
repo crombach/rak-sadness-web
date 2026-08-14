@@ -85,9 +85,20 @@ async function getLeagueEvents(
     const collegePromises = COLLEGE_GROUPS.map((groupId: number) => {
       const requestUrl = `${baseRequestUrl}&limit=400&groups=${groupId}`;
       return fetch(requestUrl)
-        .then((response) =>
-          response.json().then((json) => json.events as Array<EspnEvent>),
-        )
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(
+              `ESPN scoreboard request failed: ${response.status}`,
+            );
+          }
+          return response.json();
+        })
+        .then((json) => {
+          if (!Array.isArray(json.events)) {
+            throw new Error("ESPN scoreboard response had no events array");
+          }
+          return json.events as Array<EspnEvent>;
+        })
         .then((events) => {
           // ESPN jams the entire college postseason into one week.
           // So, we need to remove events that happen before the given NFL week.
@@ -113,7 +124,13 @@ async function getLeagueEvents(
 
   // For pro, we can just return the raw events list fetched from the API.
   const response = await fetch(baseRequestUrl);
+  if (!response.ok) {
+    throw new Error(`ESPN scoreboard request failed: ${response.status}`);
+  }
   const json = await response.json();
+  if (!Array.isArray(json.events)) {
+    throw new Error("ESPN scoreboard response had no events array");
+  }
   return json.events as Array<EspnEvent>;
 }
 

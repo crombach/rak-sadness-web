@@ -1,3 +1,4 @@
+import { Mock } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import {
@@ -6,9 +7,18 @@ import {
   RakMadnessScores,
   Status,
 } from "../../../types/RakMadnessScores";
+import { useScoreChanges } from "../../../context/AppDataContext";
 import { GameStatusContextProvider } from "../../../context/GameStatusContext";
 import { PlayerAnalysisContextProvider } from "../../../context/PlayerAnalysisContext";
+import { pickChangeKey } from "../../../utils/scoring/gameColumns";
 import PicksTable from "./PicksTable";
+
+vi.mock("../../../context/AppDataContext", () => ({
+  useScoreChanges: vi.fn(),
+  useIsWeekDecided: () => false,
+}));
+
+const mockScoreChanges = useScoreChanges as Mock;
 
 function pick(
   label: string,
@@ -65,6 +75,10 @@ function renderPicks(showGameStatus = vi.fn()) {
   );
   return { user, showGameStatus };
 }
+
+beforeEach(() => {
+  mockScoreChanges.mockReturnValue({ picks: new Map(), players: new Map() });
+});
 
 describe("PicksTable, empty states", () => {
   it("renders nothing without scores", () => {
@@ -247,5 +261,38 @@ describe("PlayerName, rendered through the table", () => {
     );
     await user.click(screen.getByText("Bob"));
     expect(showPlayerAnalysis).toHaveBeenCalledWith("Bob");
+  });
+});
+
+describe("PicksTable, a refresh's changes", () => {
+  it("wipes a pick a refresh just resolved, carrying the status it left", () => {
+    mockScoreChanges.mockReturnValue({
+      picks: new Map([[pickChangeKey("Alice", "C1"), "incomplete"]]),
+      players: new Map(),
+    });
+    render(<PicksTable scores={scores} />);
+
+    const cell = screen.getByText("MICH").closest("button");
+    expect(cell?.querySelector(".table__cell-wipe")).toHaveClass(
+      "--incomplete",
+    );
+  });
+
+  it("wipes nothing for a cell that did not change", () => {
+    render(<PicksTable scores={scores} />);
+
+    const cell = screen.getByText("MICH").closest("button");
+    expect(cell?.querySelector(".table__cell-wipe")).not.toBeInTheDocument();
+  });
+
+  it("wipes a player's name cell once they are just knocked out", () => {
+    mockScoreChanges.mockReturnValue({
+      picks: new Map(),
+      players: new Map([["Alice", false]]),
+    });
+    render(<PicksTable scores={scores} />);
+
+    const cell = screen.getByText("Alice").closest("button");
+    expect(cell?.querySelector(".table__cell-wipe")).toBeInTheDocument();
   });
 });

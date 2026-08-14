@@ -4,14 +4,20 @@
 // and derives the even-row stripe from it.
 .table {
   tbody {
+    // A wipe carries the same modifier class for whichever status it draws over,
+    // which is almost always `incomplete` and so has no rule of its own here:
+    // `Table.scss` names that one as `.table__cell-wipe`'s own default.
+    //
     // `--rak-text-on-pale` inverts to light ink in dark mode alongside these
     // fills, which darken there instead of staying pale.
-    .table__pick.--yes {
+    .table__pick.--yes,
+    .table__cell-wipe.--yes {
       --rak-cell-base: var(--rak-success-300);
       color: var(--rak-text-on-pale);
     }
 
-    .table__pick.--no {
+    .table__pick.--no,
+    .table__cell-wipe.--no {
       --rak-cell-base: var(--rak-danger-300);
       color: var(--rak-text-on-pale);
     }
@@ -20,7 +26,8 @@
     // that ramp step also fills the game dialog's `--invalid` mark, paired there
     // with its own fixed dark text, and the two need to move independently once
     // dark mode darkens this cell instead.
-    .table__pick.--unscoreable {
+    .table__pick.--unscoreable,
+    .table__cell-wipe.--unscoreable {
       --rak-cell-base: var(--rak-cell-unscoreable);
       color: var(--rak-text-on-pale);
     }

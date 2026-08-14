@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
 import { act } from "react";
 import ScoresNavbar, { COLLAPSE_DURATION_MS } from "./ScoresNavbar";
 
@@ -65,5 +66,35 @@ describe("ScoresNavbar", () => {
     expect(
       screen.queryByRole("button", { name: "Refresh" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("carries the update glyph, not the outline refresh one it replaced", () => {
+    render(<ScoresNavbar {...props} isWeekLive />);
+
+    expect(screen.getByTestId("UpdateIcon")).toBeInTheDocument();
+  });
+
+  it("fires onRefresh when clicked", async () => {
+    // No delay: the suite runs under fake timers for the collapse animation
+    // above, which real userEvent delays would hang against.
+    const user = userEvent.setup({ delay: null });
+    const onRefresh = vi.fn();
+    render(<ScoresNavbar {...props} isWeekLive onRefresh={onRefresh} />);
+
+    await user.click(screen.getByRole("button", { name: "Refresh" }));
+
+    expect(onRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not fire onRefresh while a refresh is already running", async () => {
+    const user = userEvent.setup({ delay: null });
+    const onRefresh = vi.fn();
+    render(
+      <ScoresNavbar {...props} isWeekLive isRefreshing onRefresh={onRefresh} />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Refresh" }));
+
+    expect(onRefresh).not.toHaveBeenCalled();
   });
 });

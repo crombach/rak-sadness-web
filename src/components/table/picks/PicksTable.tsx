@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { useScoreChanges } from "../../../context/AppDataContext";
 import { useShowGameStatus } from "../../../context/GameStatusContext";
 import {
   PickResult,
@@ -7,6 +8,10 @@ import {
   Status,
 } from "../../../types/RakMadnessScores";
 import rangeWithPrefix from "../../../utils/rangeWithPrefix";
+import {
+  LEAGUE_PREFIX,
+  pickChangeKey,
+} from "../../../utils/scoring/gameColumns";
 import PlayerName from "../playerName/PlayerName";
 import TableShell, { RankCell } from "../TableShell";
 import "./PicksTable.scss";
@@ -38,11 +43,14 @@ function leagueHeaders(labels: Array<string>) {
 function PickCell({
   result,
   gameLabel,
+  previousStatus,
   onClick,
 }: {
   result: PickResult;
   /** The column this cell is in, which is what names the game behind it. */
   gameLabel: string;
+  /** Set where this refresh just changed the status, to the status it left. */
+  previousStatus?: Status;
   onClick: (gameLabel: string) => void;
 }) {
   const statusLabel = PICK_STATUS_LABEL[result.status];
@@ -54,12 +62,22 @@ function PickCell({
     >
       <span>{result.pick || "N/A"}</span>
       {statusLabel && <span className="table__sr-only">{statusLabel}</span>}
+      {previousStatus != null && (
+        // Keyed by the status arriving, so a cell changed by two refreshes in a
+        // row wipes both times rather than sitting on the first run forever.
+        <span
+          key={result.status}
+          className={`table__cell-wipe --${previousStatus}`}
+          aria-hidden="true"
+        />
+      )}
     </button>
   );
 }
 
 function PicksTable({ scores }: { scores?: RakMadnessScores | null }) {
   const showGameStatus = useShowGameStatus();
+  const { picks: pickChanges } = useScoreChanges();
 
   if (scores == null) {
     return null;
@@ -71,8 +89,8 @@ function PicksTable({ scores }: { scores?: RakMadnessScores | null }) {
   const columnCount = FIXED_COLUMN_COUNT + collegeCount + proCount;
   // Built once for the headers and every row's cells, so a cell and the column it
   // sits under cannot disagree about which game they mean.
-  const collegeLabels = rangeWithPrefix(collegeCount, "C");
-  const proLabels = rangeWithPrefix(proCount, "P");
+  const collegeLabels = rangeWithPrefix(collegeCount, LEAGUE_PREFIX.college);
+  const proLabels = rangeWithPrefix(proCount, LEAGUE_PREFIX.pro);
 
   return (
     <TableShell
@@ -99,12 +117,15 @@ function PicksTable({ scores }: { scores?: RakMadnessScores | null }) {
             <PlayerName player={player} />
             {player.college.map((result, index) => (
               <td
-                key={`${player.name}-${collegeLabels[index]}`}
+                key={pickChangeKey(player.name, collegeLabels[index])}
                 className={`table__pick --${result.status}`}
               >
                 <PickCell
                   result={result}
                   gameLabel={collegeLabels[index]}
+                  previousStatus={pickChanges.get(
+                    pickChangeKey(player.name, collegeLabels[index]),
+                  )}
                   onClick={showGameStatus}
                 />
               </td>
@@ -112,12 +133,15 @@ function PicksTable({ scores }: { scores?: RakMadnessScores | null }) {
             <td>{player.score.college}</td>
             {player.pro.map((result, index) => (
               <td
-                key={`${player.name}-${proLabels[index]}`}
+                key={pickChangeKey(player.name, proLabels[index])}
                 className={`table__pick --${result.status}`}
               >
                 <PickCell
                   result={result}
                   gameLabel={proLabels[index]}
+                  previousStatus={pickChanges.get(
+                    pickChangeKey(player.name, proLabels[index]),
+                  )}
                   onClick={showGameStatus}
                 />
               </td>

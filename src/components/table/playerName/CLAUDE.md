@@ -9,3 +9,6 @@ color.
 `PlayerStatusIcon`: that icon on its own, sized from `--rak-player-icon-size`. The
 player analysis search renders it too, so the same player wears the same icon in
 both places.
+
+A player a refresh just knocked out renders a `.table__cell-wipe`, from
+`useScoreChanges()`, over the fill they held before that.

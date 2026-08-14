@@ -19,18 +19,10 @@ export async function getPlayerScores(
 ): Promise<RakMadnessScores> {
   const parsed = await parsePicksWorkbook(picksBuffer);
 
-  const collegeResults = await getLeagueResults(
-    League.COLLEGE,
-    week,
-    parsed.collegeMatchups,
-    season,
-  );
-  const proResults = await getLeagueResults(
-    League.PRO,
-    week,
-    parsed.proMatchups,
-    season,
-  );
+  const [collegeResults, proResults] = await Promise.all([
+    getLeagueResults(League.COLLEGE, week, parsed.collegeMatchups, season),
+    getLeagueResults(League.PRO, week, parsed.proMatchups, season),
+  ]);
   debugLog("league results", { collegeResults, proResults });
 
   const tiebreakerScore = getTiebreakerScore(

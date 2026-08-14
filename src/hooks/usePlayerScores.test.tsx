@@ -153,3 +153,57 @@ describe("usePlayerScores", () => {
     expect(result.current.scores?.tiebreaker).toBe(2);
   });
 });
+
+describe("usePlayerScores, refresh", () => {
+  it("does not re-fetch the picks spreadsheet", async () => {
+    getPlayerScoresMock.mockResolvedValue(scoresFor(5));
+    const { result } = renderHook(() => usePlayerScores(WEEK_5, SEASON), {
+      wrapper,
+    });
+    await waitFor(() => expect(result.current.scores).toEqual(scoresFor(5)));
+    const fetchCallsBeforeRefresh = (
+      global.fetch as MockedFunction<typeof fetch>
+    ).mock.calls.length;
+
+    await act(async () => {
+      await result.current.refresh();
+    });
+
+    expect(getPlayerScoresMock).toHaveBeenCalledTimes(2);
+    expect(global.fetch).toHaveBeenCalledTimes(fetchCallsBeforeRefresh);
+  });
+
+  it("collapses two refreshes started together into one scoring pass", async () => {
+    getPlayerScoresMock.mockResolvedValue(scoresFor(5));
+    const { result } = renderHook(() => usePlayerScores(WEEK_5, SEASON), {
+      wrapper,
+    });
+    await waitFor(() => expect(result.current.scores).toEqual(scoresFor(5)));
+    expect(getPlayerScoresMock).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      // Neither call is awaited before the next fires, the way two clicks in the
+      // same tick would land.
+      result.current.refresh();
+      result.current.refresh();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(getPlayerScoresMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps the scores on screen when a refresh's scoring throws", async () => {
+    getPlayerScoresMock.mockResolvedValue(scoresFor(5));
+    const { result } = renderHook(() => usePlayerScores(WEEK_5, SEASON), {
+      wrapper,
+    });
+    await waitFor(() => expect(result.current.scores).toEqual(scoresFor(5)));
+
+    getPlayerScoresMock.mockRejectedValueOnce(new Error("espn down"));
+    await act(async () => {
+      await result.current.refresh();
+    });
+
+    expect(result.current.scores).toEqual(scoresFor(5));
+  });
+});

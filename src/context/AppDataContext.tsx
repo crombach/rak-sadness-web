@@ -13,9 +13,10 @@ import usePicksSeasons from "../hooks/usePicksSeasons";
 import usePlayerScores from "../hooks/usePlayerScores";
 import { WeekInfo } from "../types/League";
 import isWeekDecided from "../utils/scoring/isWeekDecided";
+import { NO_SCORE_CHANGES, ScoreChanges } from "../utils/scoring/scoreChanges";
 
 type AppData = ReturnType<typeof useLeagueWeeks> &
-  ReturnType<typeof usePlayerScores> &
+  Omit<ReturnType<typeof usePlayerScores>, "scoreChanges"> &
   ReturnType<typeof usePicksSeasons> & {
     /**
      * The `WeekInfo` for a week number, or undefined if the season has no such
@@ -50,6 +51,14 @@ const AppDataContext = createContext<AppData | undefined>(undefined);
  * own with scores handed straight to it.
  */
 const WeekDecidedContext = createContext(false);
+
+/**
+ * What the most recent scoring attempt changed, so a table can flash only the
+ * cells that moved. Its own context for the same reason `WeekDecidedContext` is:
+ * every pick and player cell reads it, and `AppData` re-renders on every loading
+ * flag it carries.
+ */
+const ScoreChangesContext = createContext<ScoreChanges>(NO_SCORE_CHANGES);
 
 /** The season and week a results URL names, from `/<year>/<week>/…`. Empty elsewhere. */
 function routeFromPath(pathname: string): { season?: number; week?: number } {
@@ -111,7 +120,7 @@ export function AppDataContextProvider({
     [weeks],
   );
 
-  const { scores } = playerScores;
+  const { scores, scoreChanges } = playerScores;
   const weekDecided = useMemo(
     () => scores != null && isWeekDecided(scores),
     [scores],
@@ -158,7 +167,9 @@ export function AppDataContextProvider({
   return (
     <AppDataContext.Provider value={value}>
       <WeekDecidedContext.Provider value={weekDecided}>
-        {children}
+        <ScoreChangesContext.Provider value={scoreChanges}>
+          {children}
+        </ScoreChangesContext.Provider>
       </WeekDecidedContext.Provider>
     </AppDataContext.Provider>
   );
@@ -174,4 +185,8 @@ export function useAppData(): AppData {
 
 export function useIsWeekDecided(): boolean {
   return useContext(WeekDecidedContext);
+}
+
+export function useScoreChanges(): ScoreChanges {
+  return useContext(ScoreChangesContext);
 }
