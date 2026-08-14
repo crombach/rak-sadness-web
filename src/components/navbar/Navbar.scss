@@ -20,9 +20,8 @@
   // the one before it, so a press deepens once rather than crossing two steps and
   // reading as the key going down twice.
   --rak-key-face: var(--rak-primary-400);
-  --rak-key-hover: var(--rak-primary-500);
-  --rak-key-press: var(--rak-primary-600);
-  --rak-key-held: var(--rak-primary-700);
+  --rak-key-active: var(--rak-primary-500);
+  --rak-key-held: var(--rak-primary-600);
 }
 
 .navbar__content {

@@ -40,14 +40,14 @@
  */
 .results-caption {
   margin: 0;
-  // Across, the header cells' own padding, which is where the Rank heading lands
-  // too: that column is centered, but it comes out within half a pixel of this at
-  // both table sizes, so one value lines the caption up with it on every screen.
-  padding: var(--rak-space-2);
-  // Read from the near edge, never centered. The frame is as wide as the table,
-  // so a caption centered in it starts off the side of a phone and only arrives
-  // once the table has been panned across.
-  text-align: left;
+  // Down the bar only. Across, the text below carries its own, so the box it is
+  // centered in starts at the frame's edge rather than a padding in from it. Held
+  // here on the block axis because the wireframe below has no text to pad: it
+  // stands the bar up with a hidden copy of the caption's own words.
+  padding-block: var(--rak-space-2);
+  // Centered on what is on screen rather than on the frame, which the width below
+  // is what arranges.
+  text-align: center;
   // Between the navbar above and the header below, so the three step down into
   // the table. No border under it: the step off this fill is what divides the
   // caption from the header, and a rule drawn in either neighbour's color would
@@ -66,23 +66,31 @@
 }
 
 /**
- * Held at the near edge while the table pans under it, so the week is readable
- * whichever column is on screen. Left in flow it rides off the side with the
- * columns, because the frame is as wide as the week is long.
+ * Centered on the screen while the table pans under it, so the week reads in the
+ * middle of the view whichever column is on. Left in flow it rides off the side
+ * with the columns, because the frame is as wide as the week is long.
+ *
+ * The width is what centers it: `100cqi` is the scrolling box `PageLayout.scss`
+ * declares the container on, which is what is on screen, and `100%` is the frame.
+ * Whichever is narrower wins, so a table too wide for the window centers the
+ * caption on the window and one that fits centers it on the table. Plain centering
+ * would put it in the middle of the frame either way, which on a phone is off the
+ * side of the screen until the table has been panned halfway across.
  *
  * Only the text sticks. The bar stays in flow at the frame's full width, so its
  * fill runs the whole way across rather than stopping at the window's edge. That
- * also keeps the sticky area to a few words, which is the smallest hole this can
- * leave in the rasterized layer. See SCROLL-FLASH.md.
+ * also keeps the sticky area to one box, which is the smallest hole this can leave
+ * in the rasterized layer. See SCROLL-FLASH.md.
  */
 .results-caption__text {
   position: sticky;
-  // The padding the bar would have given it, now that it is placed rather than
-  // laid out. Held level with the Rank heading below on the way across, not only
-  // at rest.
-  left: var(--rak-space-2);
+  left: 0;
   // Sticky offsets are ignored on an inline box.
-  display: inline-block;
+  display: block;
+  width: min(100cqi, 100%);
+  // The header cells' own padding, which is what holds the words clear of the
+  // frame's edge once the table has been panned far enough for them to reach it.
+  padding-inline: var(--rak-space-2);
 }
 
 // A route that has not worked out which week it is headed for yet. Its room is

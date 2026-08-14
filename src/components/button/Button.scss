@@ -99,28 +99,33 @@
       @include key(var(--rak-key-pressed));
     }
 
+    // Three fills, not four: a pointer on the key and a finger down on it are the
+    // same fill. They were a step apart, which put two eased moves back to back on
+    // every click that ended with the pointer leaving, and that reads as the key
+    // bouncing rather than settling. The press is said in the travel and the edge
+    // instead, which is what a moulded key says it with. A phone has no pointer, so
+    // the same step is the one it gets on touch.
+    //
+    // Properties rather than an override, because a fill that varies by surface
+    // cannot be overridden at one specificity without also beating the rules below.
+    // The navbar shifts the whole set a step to stand its keys off a bar in the same
+    // color, and they move together: a rest fill raised on its own leaves a press
+    // crossing two steps at once.
     &.--primary {
       --rak-key-edge: var(--rak-primary-700);
-      // Four steps of one ramp, one per state, in properties rather than written flat.
-      // The navbar lifts the whole set a step to stand its keys off a bar in the same
-      // color, and they move together: a rest fill raised on its own leaves a press
-      // crossing two steps at once, which reads as the key going down twice.
-      //
-      // Properties rather than an override, because a fill that varies by surface
-      // cannot be overridden at one specificity without also beating the rules below.
       background-color: var(--rak-key-face, var(--rak-primary-500));
 
       @include can-hover {
         &:hover {
-          background-color: var(--rak-key-hover, var(--rak-primary-600));
+          background-color: var(--rak-key-active, var(--rak-primary-600));
         }
       }
       &:active {
-        background-color: var(--rak-key-press, var(--rak-primary-700));
+        background-color: var(--rak-key-active, var(--rak-primary-600));
       }
       // Held by the route rather than the pointer, so it has to come after both.
       &.--selected {
-        background-color: var(--rak-key-held, var(--rak-primary-800));
+        background-color: var(--rak-key-held, var(--rak-primary-700));
       }
     }
 
@@ -134,7 +139,7 @@
         }
       }
       &:active {
-        background-color: var(--rak-success-700);
+        background-color: var(--rak-success-600);
       }
     }
 
@@ -148,7 +153,7 @@
         }
       }
       &:active {
-        background-color: var(--rak-danger-700);
+        background-color: var(--rak-danger-600);
       }
     }
   }
@@ -187,5 +192,12 @@
   // take away the only thing that says what they pressed.
   &.--busy {
     @include skeleton-sheen;
+
+    // A key is disabled for as long as it is working, so this is where most of the
+    // app's waiting is seen. The sweep is white, which is invisible on the grey a
+    // disabled key stands in, and the key looked switched off rather than busy.
+    &:disabled {
+      --rak-loading-sheen: var(--rak-loading-sheen-on-light);
+    }
   }
 }

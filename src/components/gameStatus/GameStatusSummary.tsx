@@ -18,8 +18,14 @@ import "./GameStatusSummary.scss";
 /** Regulation is four quarters, and anything past them is overtime. */
 const REGULATION_PERIODS = 4;
 
-/** Joins the two scores, which meet in the middle of the scoreline at every width. */
-const SCORE_DASH = "–";
+/**
+ * Joins the two scores, which meet in the middle of the scoreline at every width.
+ *
+ * A hyphen rather than an en dash, because the readout is what draws it: DSEG7 has
+ * no en dash, and its hyphen is the bar across the middle of a cell, which is the
+ * one glyph in the face guaranteed to stand level with the digits either side.
+ */
+const SCORE_DASH = "-";
 
 /**
  * The character DSEG7 draws with every segment of a digit lit. A row of them behind

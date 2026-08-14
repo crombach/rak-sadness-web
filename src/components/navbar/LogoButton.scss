@@ -20,11 +20,10 @@ $well-inset: 3px;
 .logo-button {
   // Back to the ramp the app's other solid buttons run on, which the navbar lifts a
   // step for the keys it holds. This is the panel the device is named on rather than
-  // a key, so it is the surface those keys are lit against. Every step is put back,
-  // not the rest fill alone, or a hover would land on the fill it started from.
+  // a key, so it is the surface those keys are lit against. Both steps are put back,
+  // not the rest fill alone, or a pointer would land on the fill it started from.
   --rak-key-face: var(--rak-primary-500);
-  --rak-key-hover: var(--rak-primary-600);
-  --rak-key-press: var(--rak-primary-700);
+  --rak-key-active: var(--rak-primary-600);
   // A flex item will not shrink below what it holds unless it is told it may, and
   // the name cannot give up its room until the button it sits in can.
   min-width: 0;

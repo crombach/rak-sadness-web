@@ -151,7 +151,9 @@ $plate-width: 4px;
 .game-status__spread {
   align-self: center;
   margin: 0;
-  color: var(--rak-text-secondary);
+  // The grey the labels over the two names are set in, so the line over the
+  // scoreline and the labels inside it read as one tier of the same dialog.
+  color: var(--rak-text-tertiary);
   font-size: var(--rak-text-sm);
   font-weight: var(--rak-weight-semibold);
   text-align: center;
@@ -159,8 +161,9 @@ $plate-width: 4px;
 
 // The line itself, in the face the picks table sets every number in. `None` too: it
 // answers the same question, and a value that changes face with its own value reads
-// as two different fields. Held off the label in the grey the side labels are set
-// in, so what was asked and what the answer is are told apart before either is read.
+// as two different fields. Set in the grey the records under the two names carry,
+// which is the same grey their labels do, so the face is what tells the answer from
+// the question rather than a second color on one line.
 .game-status__spread-value {
   color: var(--rak-text-tertiary);
   font-family: var(--rak-font-mono);
@@ -312,9 +315,16 @@ $plate-width: 4px;
 // Held to the scores it joins, so it grows with them. Lit plain white rather than in
 // either side's hue: it belongs to neither of them, and on a readout a cell that is on
 // is on.
+//
+// A cell of the same readout, in the same face, which is what stands it level with the
+// digits either side: its hyphen is the bar across the middle of a cell, drawn on the
+// line the digits leave a gap on. Any drawn face puts its dash somewhere of its own.
 .game-status__dash {
   color: var(--rak-on-solid);
+  font-family: var(--rak-font-segment);
   font-size: var(--rak-score-size);
+  // The face ships in its bold cut alone, which `src/index.tsx` is what loads.
+  font-weight: var(--rak-weight-bold);
   line-height: 1.1;
 }
 

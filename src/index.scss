@@ -273,6 +273,10 @@
   --rak-loading-fill-on-solid: var(--rak-on-solid);
   --rak-loading-fill-opacity: 0.3;
   --rak-loading-sheen: rgb(255 255 255 / 30%);
+  // The same sweep on a fill light enough that white crossing it cannot be seen.
+  // The only one is a key that is working and disabled while it does, which stands
+  // in the app's lightest grey.
+  --rak-loading-sheen-on-light: rgb(0 0 0 / 10%);
 }
 
 body {
