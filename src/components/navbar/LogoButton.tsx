@@ -2,7 +2,7 @@ import Button from "../button/Button";
 import "./LogoButton.scss";
 
 /** Shown in the navbar on every page, whichever view is open. */
-export const APP_NAME = "The Rakulator";
+export const APP_NAME = "Rakulator";
 
 /**
  * The character DSEG14 draws with every segment lit. A row of them behind the

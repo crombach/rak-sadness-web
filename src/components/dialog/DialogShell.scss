@@ -47,7 +47,12 @@ $keyboard-gap: 12px;
     min(85dvh, var(--rak-viewport-height, 85dvh)) +
       var(--rak-keyboard-inset, 0px)
   );
-  padding: 20px;
+  padding-block: 20px;
+  // 2px tighter than the block padding: room enough for a game dialog's crest to
+  // carry its dark-mode rim light without the sheet's own edge cutting it off.
+  // `wide-screen` below restores the full 20px, since a centered window has room
+  // to spare on the sides a phone's sheet does not.
+  padding-inline: 18px;
   // The keyboard's room, so everything in the sheet stands above it while the sheet
   // itself runs on to the bottom edge of the screen behind it. Held there rather than
   // stood on top of the keyboard, so dismissing one never shows the sheet's lower edge
@@ -92,7 +97,7 @@ $keyboard-gap: 12px;
 
 .dialog__title {
   margin: 0;
-  color: var(--rak-primary-700);
+  color: var(--rak-text);
   font-size: var(--rak-text-lg);
   font-weight: 700;
 }
@@ -142,7 +147,7 @@ $bar-height: 2px;
     display: block;
     width: 40%;
     height: 100%;
-    background-color: var(--rak-primary-500);
+    background-color: var(--rak-progress-fill);
     animation: dialog-sweep 900ms ease-in-out infinite;
   }
 
@@ -180,6 +185,9 @@ $bar-height: 2px;
     width: min(640px, calc(100vw - 32px));
     max-height: min(680px, calc(var(--rak-viewport-height, 100dvh) - 64px));
     padding-bottom: 20px;
+    // Back to the block padding: a centered window has room on its sides a
+    // phone's sheet does not, so it never needed the mobile-only 18px above.
+    padding-inline: 20px;
     border-radius: var(--rak-radius-lg);
     transform: translate(-50%, -50%);
 

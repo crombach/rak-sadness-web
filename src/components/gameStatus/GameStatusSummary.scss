@@ -162,7 +162,7 @@
   margin: 0;
   // The grey the labels over the two names are set in, so the line over the
   // scoreline and the labels inside it read as one tier of the same dialog.
-  color: var(--rak-text-tertiary);
+  color: var(--rak-text-secondary);
   font-size: var(--rak-text-sm);
   font-weight: var(--rak-weight-semibold);
   text-align: center;
@@ -174,7 +174,7 @@
 // which is the same grey their labels do, so the face is what tells the answer from
 // the question rather than a second color on one line.
 .game-status__spread-value {
-  color: var(--rak-text-tertiary);
+  color: var(--rak-text-secondary);
   font-family: var(--rak-font-mono);
   // Off the label's own weight, which is the other half of telling the answer from
   // the question: the label is what is bold here, and the line it gives is read.
@@ -192,7 +192,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--rak-space-1);
-  color: var(--rak-text-tertiary);
+  color: var(--rak-text-secondary);
   font-size: var(--rak-text-sm);
   text-align: center;
 
@@ -242,6 +242,12 @@
   object-fit: contain;
   width: 32px;
   height: 32px;
+  // None outside dark mode, so this only ever draws the edge `--rak-logo-outline`
+  // gives a crest that mode cannot otherwise be sure will show. A filter rather
+  // than an outline or a border: both of those trace the image's own rectangular
+  // box, where this traces the crest's own alpha channel, so a round logo gets a
+  // round edge instead of a square one.
+  filter: var(--rak-logo-outline);
 
   @include roomy-screen {
     width: 44px;
@@ -352,7 +358,7 @@
 .game-status__side-label {
   @include micro-label;
 
-  color: var(--rak-text-tertiary);
+  color: var(--rak-text-secondary);
   font-size: var(--rak-text-xs);
 }
 
@@ -407,7 +413,7 @@
 }
 
 .game-status__record {
-  color: var(--rak-text-tertiary);
+  color: var(--rak-text-secondary);
   font-size: var(--rak-text-sm);
 }
 

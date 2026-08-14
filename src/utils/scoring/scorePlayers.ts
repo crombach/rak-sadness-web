@@ -7,6 +7,7 @@ import {
   getStatus,
   indexResultsByTeam,
 } from "./getPickResults";
+import { formatPickDisplay } from "./parsePick";
 import { ParsedPicks, TIEBREAKER_PICK_KEY } from "./parsePicksWorkbook";
 
 function sumPointValues(scores: Array<GameScore>): number {
@@ -93,12 +94,12 @@ export default function scorePlayers(
             : undefined,
       },
       college: collegePicks.map((pick, index) => ({
-        pick,
+        pick: formatPickDisplay(pick),
         status: getStatus(collegePickResults[index]),
         explanation: collegePickResults[index].explanation,
       })),
       pro: proPicks.map((pick, index) => ({
-        pick,
+        pick: formatPickDisplay(pick),
         status: getStatus(proPickResults[index]),
         explanation: proPickResults[index].explanation,
       })),

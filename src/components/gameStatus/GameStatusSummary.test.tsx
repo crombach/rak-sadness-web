@@ -146,7 +146,7 @@ describe("GameStatusSummary, the pool's line on the game", () => {
   it("says so where the picks put no line on the game", () => {
     render(<GameStatusSummary game={game(result())} result={result()} />);
     // Said either way, so a game with no line is not one the dialog forgot about.
-    expect(spreadLine()).toHaveTextContent("Rak Madness Spread: None");
+    expect(spreadLine()).toHaveTextContent("Rak Madness Spread: NONE");
   });
 });
 

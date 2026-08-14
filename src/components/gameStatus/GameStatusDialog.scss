@@ -17,7 +17,7 @@ $check-icon-ratio: math.div(451, 333);
 .dialog__option .game-status__option-label {
   flex: 0 0 auto;
   min-width: 2.5ch;
-  color: var(--rak-text-tertiary);
+  color: var(--rak-text-secondary);
 }
 
 .dialog__option .game-status__option-name {
@@ -65,23 +65,29 @@ $check-icon-ratio: math.div(451, 333);
   justify-content: center;
 
   &.--live {
-    @include mark-pill(var(--rak-danger-100), var(--rak-danger-600));
+    @include mark-pill(var(--rak-mark-live-bg), var(--rak-mark-live-text));
   }
 
   // The yellow the picks table fills a pick it cannot score with, this mark and that
   // cell saying the same thing about the same game.
   &.--invalid {
-    @include mark-pill(var(--rak-warning-300), var(--rak-warning-700));
+    @include mark-pill(
+      var(--rak-mark-invalid-bg),
+      var(--rak-mark-invalid-text)
+    );
   }
 
   &.--final {
-    @include mark-pill(var(--rak-success-100), var(--rak-success-600));
+    @include mark-pill(var(--rak-mark-final-bg), var(--rak-mark-final-text));
   }
 
   // Quiet beside the other three, since a game yet to kick off is nothing the pool
   // can act on.
   &.--upcoming {
-    @include mark-pill(var(--rak-neutral-100), var(--rak-neutral-700));
+    @include mark-pill(
+      var(--rak-mark-upcoming-bg),
+      var(--rak-mark-upcoming-text)
+    );
   }
 }
 

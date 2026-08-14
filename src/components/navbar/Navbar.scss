@@ -49,11 +49,8 @@
   gap: var(--rak-space-3);
   font-weight: var(--rak-weight-bold);
   // The app name does not wrap, so without this it pushes the buttons off the end
-  // of a bar too narrow to hold both rather than giving up its own room. Explicit
-  // zero rather than `overflow: hidden` doing it, so the name's own glass can still
-  // throw its shadow past this box.
+  // of a bar too narrow to hold both rather than giving up its own room.
   min-width: 0;
-  overflow: visible;
 }
 
 .navbar__content-right {

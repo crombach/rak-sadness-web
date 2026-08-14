@@ -12,9 +12,14 @@ const TOKEN_FOR_STATUS: Record<Status, string> = {
 
 function tokenValues(): Map<string, string> {
   const stylesheet = readFileSync("src/index.scss", "utf8");
+  // The export is a static file with no concept of the reader's system theme, so
+  // it has to match the light-mode base rather than any `@media` override of it.
+  // The light-mode base is everything before the first one, so a brace-matching
+  // regex isn't needed and can't be fooled by how deeply a future override nests.
+  const lightModeOnly = stylesheet.split("@media")[0];
   return new Map(
     Array.from(
-      stylesheet.matchAll(/(--rak-[a-z0-9-]+):\s*(#[0-9a-fA-F]{3,6})\s*;/g),
+      lightModeOnly.matchAll(/(--rak-[a-z0-9-]+):\s*(#[0-9a-fA-F]{3,6})\s*;/g),
       ([, token, value]) => [token, value.toLowerCase()],
     ),
   );
