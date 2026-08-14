@@ -439,9 +439,10 @@ $plate-width: 4px;
   // The face ships in its bold cut alone, which `src/index.tsx` is what loads.
   font-weight: var(--rak-weight-bold);
   font-variant-numeric: tabular-nums;
-  // A score in single figures fills the first cell and leaves the second unlit,
-  // rather than centering across both and standing over neither.
-  text-align: left;
+  // A score in single figures fills the units cell, its own place, and leaves the
+  // tens cell unlit, the way a hardware scoreboard blanks that digit rather than
+  // showing it as a zero. Centering across both would stand the number over neither.
+  text-align: right;
 }
 
 // The segments the display leaves dark, laid under the number rather than beside it.
