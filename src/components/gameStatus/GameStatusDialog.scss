@@ -98,8 +98,11 @@
   }
 
   // Cropped to its own edges rather than a square Material box, so its ink is its
-  // whole box and no share divides it.
+  // whole box and no share divides it. `.icon` sets a font size of its own, which
+  // `--rak-caps-ink`'s `em` would otherwise be read against instead of the word
+  // beside it.
   &.--final > svg {
+    font-size: inherit;
     height: var(--rak-caps-ink);
     width: calc(var(--rak-caps-ink) * 451 / 333);
   }
