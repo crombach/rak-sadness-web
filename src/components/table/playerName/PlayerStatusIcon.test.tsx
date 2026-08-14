@@ -24,7 +24,7 @@ describe("PlayerStatusIcon", () => {
     mockIsWeekDecided.mockReturnValue(false);
     render(<PlayerStatusIcon isKnockedOut={false} />);
     expect(
-      screen.getByTestId("SentimentVerySatisfiedIcon"),
+      screen.getByTestId("SentimentVerySatisfiedOutlinedIcon"),
     ).toBeInTheDocument();
   });
 

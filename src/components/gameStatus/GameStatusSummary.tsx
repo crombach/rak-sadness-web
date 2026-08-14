@@ -293,7 +293,11 @@ function Marker({ hasBall }: { hasBall: boolean }) {
   return hasBall ? (
     // A role of its own, because the shape inside is hidden and a bare `<span>`
     // carries no label into the accessibility tree.
-    <span className="game-status__marker" role="img" aria-label={HAS_BALL_LABEL}>
+    <span
+      className="game-status__marker"
+      role="img"
+      aria-label={HAS_BALL_LABEL}
+    >
       <PossessionIcon />
     </span>
   ) : (

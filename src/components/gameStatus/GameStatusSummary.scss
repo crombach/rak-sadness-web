@@ -4,8 +4,8 @@
 @use "../../styles/skeleton" as *;
 
 // How wide the plate around the scores' glass is drawn. Its own value rather than a
-// space token: the same number is taken back out of the block's padding, and the two
-// have to move together or the scoreline changes width.
+// space token: three of the four rings below are laid at it, and they are one bezel
+// only while all four spread the same.
 $plate-width: 4px;
 
 // Which side a player had to pick to score the point, and which one cost them it,
@@ -56,9 +56,15 @@ $plate-width: 4px;
 // A phone sets them a step over those names and no further down: the scores are what
 // the row is about, and a pair set as big as the two names stops reading as the answer
 // to it.
+//
+// The mark is given as the height of the shape rather than of a box around it, and
+// the gap is every space inside the glass: mark to edge, mark to score, score to dash.
+// One value, because a readout whose cells are spaced three different ways reads as
+// cells that mean three different things.
 .game-status {
   --rak-score-size: 1.5rem;
-  --rak-marker-size: 1.5rem;
+  --rak-marker-size: 0.875rem;
+  --rak-score-gap: var(--rak-space-1);
 
   display: flex;
   flex-direction: column;
@@ -74,7 +80,8 @@ $plate-width: 4px;
   // are abbreviations already and the row has nothing to win back.
   @include roomy-screen {
     --rak-score-size: 2rem;
-    --rak-marker-size: 1.8rem;
+    --rak-marker-size: 1rem;
+    --rak-score-gap: var(--rak-space-2);
   }
 }
 
@@ -396,7 +403,7 @@ $plate-width: 4px;
 .game-status__score {
   display: flex;
   align-items: center;
-  gap: var(--rak-space-1);
+  gap: var(--rak-score-gap);
   margin: 0;
   color: var(--rak-on-solid);
   font-size: var(--rak-score-size);
@@ -450,14 +457,11 @@ $plate-width: 4px;
   user-select: none;
 }
 
-// Sized against the score it points at rather than against the text around it. A
-// triangle fills little of its box, so it reads smaller than a letter set as big.
-//
 // A drawn shape rather than a triangle character, and no nudge off the middle of its
-// box. The shape is centered in the box it is drawn in, and a seven-segment digit
-// runs the whole em box, so both are centered in the line the row centers on and the
-// mark lands on the bar across the middle of the digit. A glyph landed wherever the
-// reader's font stack drew it.
+// box. The shape is cut to its own edges, and a seven-segment digit runs the whole em
+// box, so both are centered in the line the row centers on and the mark lands on the
+// bar across the middle of the digit. A glyph landed wherever the reader's font stack
+// drew it.
 .game-status__marker {
   display: flex;
   // Lit like the dash between the scores, and for the same reason: the mark belongs
@@ -465,9 +469,11 @@ $plate-width: 4px;
   color: var(--rak-on-solid);
 
   // Sized outright rather than in `em`, because `.icon` sets a font size of its
-  // own that an `em` here would be read against.
+  // own that an `em` here would be read against. Across, whatever that height makes
+  // it: the shape is 440 units wide over 560 tall in the box it is cut to, and the
+  // gap either side of the mark is the readout's to set rather than the box's.
   > svg {
-    width: var(--rak-marker-size);
+    width: calc(var(--rak-marker-size) * 440 / 560);
     height: var(--rak-marker-size);
   }
 
@@ -504,12 +510,11 @@ $plate-width: 4px;
   // Tight around the dash on a phone, where the room either side of it is room the
   // names have not got. A dash reads as joining the two scores at either gap, and the
   // wider one is only worth having where there is width to spend on it.
-  gap: var(--rak-space-1);
-  // Room either side of the pair, past the marker each of them already holds, so the
-  // scores are never read as running into the names beside them. The plate below
-  // takes its width out of this, so the block measures what it measured without one
-  // and `useScorelineFit` is asked the same question.
-  padding-inline: calc(var(--rak-space-2) - #{$plate-width});
+  gap: var(--rak-score-gap);
+  // The same space the cells inside are set apart by, so the pair sits in the glass
+  // the way it sits in itself. The plate below is drawn outside this box, so it is not
+  // room the readout has to find: what is spaced here is what is lit.
+  padding-inline: var(--rak-score-gap);
   // One screen holding both scores and the dash they meet at, sunk into the dialog the
   // way the app name is sunk into the navbar. The pair is one reading, so it is lit
   // behind one piece of glass rather than two.
@@ -529,10 +534,6 @@ $plate-width: 4px;
     0 0 0 $plate-width var(--rak-primary-500),
     0 -1px 0 $plate-width rgb(255 255 255 / 20%),
     0 2px 2px $plate-width rgb(0 0 0 / 22%);
-
-  @include roomy-screen {
-    gap: var(--rak-space-2);
-  }
 }
 
 .game-status__detail,

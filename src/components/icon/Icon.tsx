@@ -120,10 +120,16 @@ export function SkullOutlinedIcon() {
   );
 }
 
-export function SentimentVerySatisfiedIcon() {
+/**
+ * A player still standing, drawn as an outline beside the other two a status
+ * wears. Filled, the face is a disc with the eyes and the mouth cut out of it in
+ * the same direction the disc is drawn, which the non-zero fill rule reads as one
+ * shape rather than as holes: it came out as a blot.
+ */
+export function SentimentVerySatisfiedOutlinedIcon() {
   return (
-    <Icon name="SentimentVerySatisfiedIcon">
-      <path d="M601.5-296.5Q657-332 682-393H278q26 61 81 96.5T480-261q66 0 121.5-35.5ZM302-533l45-45 45 45 36-36-81-81-81 81 36 36Zm267 0 45-45 45 45 36-36-81-81-81 81 36 36ZM324-111.5Q251-143 197-197t-85.5-127Q80-397 80-480t31.5-156Q143-709 197-763t127-85.5Q397-880 480-880t156 31.5Q709-817 763-763t85.5 127Q880-563 880-480t-31.5 156Q817-251 763-197t-127 85.5Q563-80 480-80t-156-31.5Z" />
+    <Icon name="SentimentVerySatisfiedOutlinedIcon">
+      <path d="M601.5-296.5Q657-332 682-393H278q26 61 81 96.5T480-261q66 0 121.5-35.5ZM302-533l45-45 45 45 36-36-81-81-81 81 36 36Zm267 0 45-45 45 45 36-36-81-81-81 81 36 36ZM324-111.5Q251-143 197-197t-85.5-127Q80-397 80-480t31.5-156Q143-709 197-763t127-85.5Q397-880 480-880t156 31.5Q709-817 763-763t85.5 127Q880-563 880-480t-31.5 156Q817-251 763-197t-127 85.5Q563-80 480-80t-156-31.5ZM480-480Zm241 241q99-99 99-241t-99-241q-99-99-241-99t-241 99q-99 99-99 241t99 241q99 99 241 99t241-99Z" />
     </Icon>
   );
 }
@@ -183,11 +189,15 @@ export function WarningIcon() {
  * with a row of seven-segment digits. A glyph is placed by whichever font in the
  * stack happens to carry it, and the two triangles in one face are not even drawn
  * at the same height, so where it landed was the reader's font stack's to decide.
- * The shape is centered in this box, and the box is what the row centers.
+ *
+ * The box is cut to the shape's own edges rather than left at Material's, which
+ * gives a triangle a third of its width in air on one side and a fifth on the
+ * other. In the readout the mark is spaced against digits, and air the box carries
+ * is space the row cannot see to set.
  */
 export function PossessionIcon() {
   return (
-    <Icon name="PossessionIcon">
+    <Icon name="PossessionIcon" viewBox="320 -760 440 560">
       <path d="M320-200v-560l440 280-440 280Z" />
     </Icon>
   );

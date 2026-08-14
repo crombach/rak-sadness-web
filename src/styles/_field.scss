@@ -10,8 +10,9 @@
 /**
  * A slot cut into the panel, which is the other half of the app's one moulding
  * idea: the buttons beside these are keys standing off it, and a thing you set a
- * value in is a socket sunk into it. Drawn with the same well the readouts carry,
- * on a fill a step off the panel's white so the shadow has something to fall on.
+ * value in is a socket sunk into it. White, like the page it is cut into: what
+ * sinks it is the shadow across the top of it, and a grey fill under that read as
+ * a field switched off rather than as a hole.
  *
  * Squarer than a card and darker on the edge than a divider, because it is a
  * control's own boundary rather than a line between two things already apart.
@@ -25,7 +26,7 @@
   padding: var(--rak-space-1) 0 var(--rak-space-1) var(--rak-space-3);
   border: var(--rak-border-width-hairline) solid var(--rak-border);
   border-radius: var(--rak-radius-xs);
-  background-color: var(--rak-fill-subtle);
+  background-color: var(--rak-surface);
   box-shadow: var(--rak-well-light);
   color: var(--rak-text-secondary);
   font-family: inherit;
@@ -45,7 +46,7 @@
   // Deeper into the panel while it is being pressed, which is the one direction a
   // socket has to move in.
   &:active {
-    background-color: var(--rak-fill-muted);
+    background-color: var(--rak-fill-subtle);
   }
 
   @include focus-ring;

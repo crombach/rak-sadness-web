@@ -6,7 +6,8 @@ package built on components drags a UI library and emotion in behind it. Sharp
 for its square terminals, which match the app's keys and bezels.
 
 `Icon` draws in Symbols' own `0 -960 960 960` box, so nothing is rescaled. A
-caller with a shape from elsewhere passes `viewBox`; `GitHubIcon` is the only one.
+caller passes `viewBox` for a shape from elsewhere (`GitHubIcon`) or to cut the box
+to the shape's own edges (`PossessionIcon`).
 
 `Icon.scss` holds the 24px box. A caller wanting another size overrides
 `width`/`height` from an `--rak-icon-*` token.

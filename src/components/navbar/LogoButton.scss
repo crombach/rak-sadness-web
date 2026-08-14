@@ -1,9 +1,10 @@
 @use "../../styles/breakpoints" as *;
 
-// The well's own padding, taken out of the 7.2px the name has spare at the
-// narrowest width measured below. Any more and a 360px phone ends the name in an
-// ellipsis that it does not need to.
-$well-inset: 3px;
+// The well's own padding, so the name is set inside the glass rather than against
+// the edges of it. Measured on a 360px phone against the widest bar the app draws,
+// which is a week still being played: the name has 16.1px spare there, and this
+// spends 10 of it. Any more and a phone ends the name in an ellipsis it need not.
+$well-inset: 8px;
 
 // Not a key. Every other button on the bar is one, but this is the plate the
 // device is named on, and a name that sinks under a finger reads as a control.
@@ -67,7 +68,16 @@ $well-inset: 3px;
     padding-inline: $well-inset;
     border-radius: var(--rak-radius-xs);
     background-color: var(--rak-primary-800);
-    box-shadow: var(--rak-well);
+    // Cut into the bar rather than laid on it, in four layers: the lip the glass
+    // sits behind, throwing down across the top of it; that lip's own dark edge; the
+    // bottom of the cut, where what light reaches the hole comes back off it; and
+    // the panel just under it, lit the way a key's top edge is. The app's own
+    // `--rak-well` is one soft shadow, which reads as a darker patch of bar.
+    box-shadow:
+      inset 0 3px 5px rgb(0 0 0 / 55%),
+      inset 0 1px 0 rgb(0 0 0 / 50%),
+      inset 0 -1px 0 rgb(255 255 255 / 12%),
+      0 1px 0 rgb(255 255 255 / 16%);
     // The unlit segments are laid under the name rather than beside it.
     position: relative;
     // Holds the unlit row to the glass once the name is cut short, since it is as
