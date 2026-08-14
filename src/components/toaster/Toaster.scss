@@ -35,28 +35,28 @@ $toasterWidth: min(calc(100% - 48px), 400px);
   font-weight: var(--rak-weight-medium);
 
   &.--primary {
-    background-color: var(--rak-primary-100);
-    color: var(--rak-primary-700);
+    background-color: var(--rak-toast-primary-bg);
+    color: var(--rak-toast-primary-text);
   }
   &.--neutral {
     border-color: var(--rak-neutral-500);
-    background-color: var(--rak-neutral-100);
-    color: var(--rak-neutral-700);
+    background-color: var(--rak-toast-neutral-bg);
+    color: var(--rak-toast-neutral-text);
   }
   &.--success {
     border-color: var(--rak-success-500);
-    background-color: var(--rak-success-100);
-    color: var(--rak-success-700);
+    background-color: var(--rak-toast-success-bg);
+    color: var(--rak-toast-success-text);
   }
   &.--warning {
     border-color: var(--rak-warning-500);
-    background-color: var(--rak-warning-100);
-    color: var(--rak-warning-700);
+    background-color: var(--rak-toast-warning-bg);
+    color: var(--rak-toast-warning-text);
   }
   &.--danger {
     border-color: var(--rak-danger-500);
-    background-color: var(--rak-danger-100);
-    color: var(--rak-danger-700);
+    background-color: var(--rak-toast-danger-bg);
+    color: var(--rak-toast-danger-text);
   }
 
   // Both icons sit on the heading's line rather than the middle of the toast, which

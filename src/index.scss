@@ -246,6 +246,20 @@
   --rak-mark-final-text: var(--rak-success-600);
   --rak-mark-upcoming-bg: var(--rak-neutral-100);
   --rak-mark-upcoming-text: var(--rak-neutral-700);
+  // The toast's own fill and ink, each variant its own token rather than a
+  // direct read of its ramp step: `primary`, `success`, and `danger`'s 700
+  // step also fills `Button.scss`'s `--rak-key-edge` for that button, chrome
+  // that stays fixed in both modes while the toast's own ink needs to invert.
+  --rak-toast-primary-bg: var(--rak-primary-100);
+  --rak-toast-primary-text: var(--rak-primary-700);
+  --rak-toast-neutral-bg: var(--rak-neutral-100);
+  --rak-toast-neutral-text: var(--rak-neutral-700);
+  --rak-toast-success-bg: var(--rak-success-100);
+  --rak-toast-success-text: var(--rak-success-700);
+  --rak-toast-warning-bg: var(--rak-warning-100);
+  --rak-toast-warning-text: var(--rak-warning-700);
+  --rak-toast-danger-bg: var(--rak-danger-100);
+  --rak-toast-danger-text: var(--rak-danger-700);
   // An edge around a team's own crest in the game dialog. None here: a crest is
   // ESPN's own art, not a color this app chose, and on white every one of them
   // already reads. Only the dark override below draws one, since that is the mode
@@ -455,6 +469,23 @@ html {
     --rak-mark-final-text: var(--rak-text);
     --rak-mark-upcoming-bg: var(--rak-fill-muted);
     --rak-mark-upcoming-text: var(--rak-text);
+
+    // The toast's own darkened fills, off the same hues as their light
+    // pastel. `primary` and `neutral` are both grey chrome, so they take the
+    // selected-row and muted-panel fills already this dark; `success` and
+    // `danger` reuse the table cell's own darkened green/red. `warning` gets
+    // its own: its hue is the orange the rest of its ramp runs on, not the
+    // yellow-green `--rak-cell-unscoreable` took.
+    --rak-toast-primary-bg: var(--rak-selected-fill);
+    --rak-toast-neutral-bg: var(--rak-fill-muted);
+    --rak-toast-success-bg: var(--rak-success-300);
+    --rak-toast-warning-bg: #573a19;
+    --rak-toast-danger-bg: var(--rak-danger-300);
+    --rak-toast-primary-text: var(--rak-text);
+    --rak-toast-neutral-text: var(--rak-text);
+    --rak-toast-success-text: var(--rak-text);
+    --rak-toast-warning-text: var(--rak-text);
+    --rak-toast-danger-text: var(--rak-text);
     // Told from the page regardless of its own colors, so a navy helmet on a navy
     // background still has an edge against a page it did not draw itself for. The
     // same boundary any control's own edge is told from its surface with. Four
