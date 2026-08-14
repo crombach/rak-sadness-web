@@ -8,9 +8,9 @@ The picks-to-scoreboard pipeline, sequenced by `getPlayerScores`.
 - `marginAgainstSpread`: a side's margin, spread applied
 - `getPickResults`: picks scored, plus `getStatus`
 - `gameColumns`: `LEAGUES`, `LEAGUE_PREFIX`, `gameLabels`
-- `weekGames`: each column, its game and line
+- `weekGames`: each column, game and line
 - `getTiebreakerScore`: the Monday night total
-- `scorePlayers`: per-player totals
+- `scorePlayers`: per-player totals, sorted
 - `comparePlayerScores`: rank order, on merit
 - `isWeekDecided`: whether knockouts settled it
 - `remainingGames`: the open games

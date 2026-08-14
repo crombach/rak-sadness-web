@@ -78,8 +78,8 @@ export function LeaderboardIcon() {
 
 /**
  * Filled rather than the outline `refresh` glyph the rest of Material Symbols
- * offers, so the refresh key reads as solid mass beside the two filled keys next
- * to it in the navbar rather than a step lighter.
+ * offers, so the navbar's refresh key reads as solid mass beside the two filled
+ * keys next to it rather than a step lighter.
  */
 export function UpdateIcon() {
   return (
