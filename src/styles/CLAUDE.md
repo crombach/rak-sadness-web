@@ -11,6 +11,6 @@ keyframes. Design tokens live in `src/index.scss` instead.
 - `_a11y.scss`: `visually-hidden`
 - `_field.scss`: `field-shell` and `field-icon`, the home page selects' box
 - `_label.scss`: `micro-label`, the tracked capitals every small label is set in
-- `_listbox.scss`: `listbox-popup` and `listbox-item`, the shape of a Base UI popup
-  list, shared by the home page selects and the dialogs' combobox
+- `_lcd.scss`: `lcd-glass`, the readout the scoreline and the navbar name share
+- `_listbox.scss`: `listbox-popup` and `listbox-item`, a Base UI popup list's shape
 - `_skeleton.scss`: `skeleton-surface`, `skeleton-sheen`, `skeleton-reserve`

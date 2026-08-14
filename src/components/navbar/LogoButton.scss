@@ -1,15 +1,5 @@
 @use "../../styles/breakpoints" as *;
-
-// The well's own padding, so the name is set inside the glass rather than against
-// the edges of it. Measured on a 360px phone against the widest bar the app draws,
-// which is a week still being played: the name has 16.1px spare there, and this
-// spends 10 of it. Any more and a phone ends the name in an ellipsis it need not.
-$well-inset: 8px;
-
-// How wide the plate around the name's glass is drawn, the same recipe the
-// scoreline's own glass is set in in `GameStatusSummary.scss`. A shadow's spread
-// there, so it costs the name none of the width `$well-inset` was measured against.
-$plate-width: 4px;
+@use "../../styles/lcd" as *;
 
 // Not a key. Every other button on the bar is one, but this is the plate the
 // device is named on, and a name that sinks under a finger reads as a control.
@@ -25,9 +15,9 @@ $plate-width: 4px;
 
 // The glass is the whole key rather than a plate floating inside one. Written to
 // `Button.scss`'s own specificity for the same reason as the rule above: the
-// padding it sets is what stood the well 16px in from every edge, and a screen
-// with a margin of bar around it reads as smaller than the keys beside it rather
-// than as the panel they are set into.
+// button's own padding is not the glass's to inherit, since a screen with a
+// margin of bar around it reads as smaller than the keys beside it rather than as
+// the panel they are set into. `&__name` sets its own instead.
 .button.logo-button {
   padding: 0;
 }
@@ -44,7 +34,8 @@ $plate-width: 4px;
   min-width: 0;
 
   // Reads as the navbar's own heading rather than as button text, which is what
-  // it looked like before the two became one button.
+  // it looked like before the two became one button. `lcd-glass` is the well and
+  // plate the scoreline's own glass is cut in, in `GameStatusSummary.scss`.
   &__name {
     // The key's whole box, both ways, so the glass stands as tall as the keys on
     // the other end of the bar and as wide as the name it holds.
@@ -52,7 +43,21 @@ $plate-width: 4px;
     align-self: stretch;
     display: flex;
     align-items: center;
+    // The scoreline's own padding, so the two wells keep the same margin around
+    // what they hold.
+    padding-inline: var(--rak-space-2);
+    // Holds the unlit row to the glass once the name is cut short, since it is as
+    // long as the whole name whether or not all of it is shown. `lcd-glass` sets
+    // the `overflow` this also needs, to hide the row rather than crop the glass.
+    min-width: 0;
+
+    @include lcd-glass;
+
+    // Bold is the only cut `src/index.tsx` loads: the face is monospaced, so the
+    // heavier segments advance exactly as far as the light ones and cost nothing
+    // across a bar this tight.
     font-family: var(--rak-font-display);
+    font-weight: var(--rak-weight-bold);
     // As large as the narrowest phone can hold, because segments spell a letter
     // in far less ink than a drawn face does and this is hard to read below it.
     // The bound is the results routes: a week still being played takes 170px of
@@ -60,41 +65,6 @@ $plate-width: 4px;
     // A 360px phone is 110px of that, and the name measures 102.8px here. One
     // step up is 110.2px, which is why this is the step it stops at.
     font-size: var(--rak-text-sm);
-    // The bold cut, which `src/index.tsx` is what loads. It is the only one the
-    // app asks for: the face is monospaced, so the heavier segments advance
-    // exactly as far as the light ones and cost nothing across a bar this tight.
-    font-weight: var(--rak-weight-bold);
-    // Sunk into the bar, which is what makes the segments below read as a readout
-    // rather than as a font the name happens to be set in. Darker than the bar it
-    // is cut into, so the well has a fill of its own to be shadowed against.
-    //
-    // Across only. Down, the key's own height is what the glass stands, and both
-    // the name and the unlit row below center themselves in it.
-    padding-inline: $well-inset;
-    border-radius: var(--rak-radius-xs);
-    background-color: var(--rak-primary-800);
-    // Cut into the bar and framed in the bar's own plate, the same six layers the
-    // scoreline's glass is drawn in: the lip the glass sits behind, throwing down
-    // across the top of it; that lip's own dark edge; the bottom of the cut, where
-    // what light reaches the hole comes back off it; the plate itself, in the bar's
-    // own primary; and the two rings past it, the plate's lit top edge and the
-    // shadow it throws. The scoreline needs that third ring to read as a screen at
-    // all, sitting as it does on the dialog's white. Here it repeats a fill the bar
-    // already is, so it draws nothing of its own and is kept for the one thing it
-    // still does: give the two rings past it, which do show, the same band to sit on.
-    box-shadow:
-      inset 0 3px 5px rgb(0 0 0 / 55%),
-      inset 0 1px 0 rgb(0 0 0 / 50%),
-      inset 0 -1px 0 rgb(255 255 255 / 12%),
-      0 0 0 $plate-width var(--rak-primary-500),
-      0 -1px 0 $plate-width rgb(255 255 255 / 20%),
-      0 2px 2px $plate-width rgb(0 0 0 / 22%);
-    // The unlit segments are laid under the name rather than beside it.
-    position: relative;
-    // Holds the unlit row to the glass once the name is cut short, since it is as
-    // long as the whole name whether or not all of it is shown.
-    min-width: 0;
-    overflow: hidden;
 
     @include roomy-screen {
       font-size: var(--rak-text-md);
@@ -127,7 +97,7 @@ $plate-width: 4px;
     // the padding does not. Down, it takes the whole box and centers its one line
     // in it, which is what the name does on the other side of the same box.
     inset-block: 0;
-    left: $well-inset;
+    left: var(--rak-space-2);
     display: flex;
     align-items: center;
     // Out of any selection the user drags over the bar. Selectable, copying the

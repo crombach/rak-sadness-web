@@ -1,12 +1,8 @@
 @use "../../styles/a11y" as *;
 @use "../../styles/breakpoints" as *;
 @use "../../styles/label" as *;
+@use "../../styles/lcd" as *;
 @use "../../styles/skeleton" as *;
-
-// How wide the plate around the scores' glass is drawn. Its own value rather than a
-// space token: three of the four rings below are laid at it, and they are one bezel
-// only while all four spread the same.
-$plate-width: 4px;
 
 // Which side a player had to pick to score the point, and which one cost them it,
 // in the two hues the picks table fills a cell with. The 400 step, which is the one
@@ -520,24 +516,11 @@ $plate-width: 4px;
   padding-inline: var(--rak-score-gap);
   // One screen holding both scores and the dash they meet at, sunk into the dialog the
   // way the app name is sunk into the navbar. The pair is one reading, so it is lit
-  // behind one piece of glass rather than two.
+  // behind one piece of glass rather than two. `lcd-glass` is the one well-and-plate
+  // recipe `LogoButton.scss` cuts its own name into as well.
   padding-block: var(--rak-space-1);
-  border-radius: var(--rak-radius-xs);
-  background-color: var(--rak-primary-800);
-  // The glass sunk into a plate, in four layers: `--rak-well` cuts it in, the plate
-  // itself is the bar's own primary, and the two rings past it are the plate's lit
-  // top edge and the shadow it throws. Rings rather than a border or a wrapper,
-  // because a spread shadow is drawn outside the box without taking any room in the
-  // grid.
-  //
-  // The dialog is white, where an inset shadow alone reads as a raised black block
-  // rather than a hole. The navbar needs no plate: its own fill is already the
-  // surface this one has to bring with it.
-  box-shadow:
-    var(--rak-well),
-    0 0 0 $plate-width var(--rak-primary-500),
-    0 -1px 0 $plate-width rgb(255 255 255 / 20%),
-    0 2px 2px $plate-width rgb(0 0 0 / 22%);
+
+  @include lcd-glass;
 }
 
 .game-status__detail,
