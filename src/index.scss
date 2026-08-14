@@ -137,8 +137,8 @@
   --rak-brand-light: #a4a4a4;
   // What the app is mounted in on a screen too wide for the tiles to be its
   // ground. A shade over the frame around the table so that frame still has an
-  // edge to be read against.
-  --rak-case: #33383d;
+  // edge to be read against, on the same grey ramp as the rest of the app now.
+  --rak-case: #373737;
 
   // Primary scale, each step the grey the logo's own step in it delinearizes to,
   // so a surface moved off blue and onto this ramp keeps the contrast ratio it
@@ -220,12 +220,12 @@
   // Foreground on a solid fill. Not a background: `--rak-surface` is the page.
   --rak-on-solid: #fff;
 
-  --rak-disabled-bg: #f0f4f8;
-  --rak-disabled-text: #6b7480;
+  --rak-disabled-bg: #f3f3f3;
+  --rak-disabled-text: #737373;
   // The lower edge a key that cannot be pressed stands on. A disabled key keeps
   // its moulding, so enabling one eases its fill rather than growing an edge out
   // of nothing under a fill that is already moving.
-  --rak-disabled-edge: #cdd7e1;
+  --rak-disabled-edge: #d6d6d6;
 
   // How far an even row is taken from the fill its cells already carry. One value
   // for every column, so a striped name cell, a striped pick, and a striped score
