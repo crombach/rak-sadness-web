@@ -38,10 +38,11 @@
   --rak-table-player-width: 13.5em;
   --rak-table-pick-width: 6.5em;
   // Wide enough for `MNF POINTS` on one line, which is the longest pair of words a
-  // score heading opens with. A hair narrower and that heading breaks after `MNF`
-  // and takes the whole header row to three lines, since a cell's `height` is a
-  // floor. The room is cheaper than the row: the table already pans sideways on a
-  // phone, and the header standing half again as tall costs every screen.
+  // score heading opens with, with a few pixels over. At the 8em this was, that
+  // heading broke after `MNF` and took the whole header row to three lines, since a
+  // cell's `height` is a floor. The room is cheaper than the row: the table already
+  // pans sideways on a phone, and a header standing half again as tall costs every
+  // screen.
   --rak-table-score-width: 8.4em;
   // Read back by useFillerRows, which needs a row height to work out how many
   // rows fit below the real ones.

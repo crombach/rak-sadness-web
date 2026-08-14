@@ -10,12 +10,12 @@
 
   // Type. A squared face with cut corners and flat terminals, which is the app's
   // own chrome: it reads as an instrument panel rather than as a page, and its
-  // capitals hold at the sizes the labels are set. `Oxanium Variable` is the
-  // family `@fontsource-variable/oxanium` registers, which `src/index.tsx` loads.
-  // Naming it anything else downloads the font and renders in the fallback.
+  // capitals hold at the sizes the labels are set. Narrow enough for `MNF POINTS`
+  // to stand on one line in a score column, which is the tightest thing the app
+  // asks of a body face. `src/index.tsx` loads the four weights it is set at.
   --rak-font-body:
-    "Oxanium Variable", Oxanium, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Chakra Petch", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
     "Segoe UI Symbol";
   // Picks are laid out in character widths: `18ch` for a name, `3ch` for a pick
   // label. Shipped rather than left to the system, so every reader gets the same
@@ -99,8 +99,8 @@
   // Measured in a browser for the body face, which is what every shape drawn to these
   // sits beside. The mono face stands taller than it does, so a shape put next to the
   // table's text would have to be measured again rather than take these.
-  --rak-text-ink: 0.89em;
-  --rak-caps-ink: 0.69em;
+  --rak-text-ink: 0.92em;
+  --rak-caps-ink: 0.7em;
 
   // Motion. Three durations cover every transition and the one loop.
   --rak-duration-fast: 120ms;
