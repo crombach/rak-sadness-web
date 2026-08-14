@@ -382,11 +382,35 @@ def report_dupes(root):
 
 # --- length ----------------------------------------------------------------
 
-# Hard ceiling on a CLAUDE.md's own prose, in words. Exempt: the Subdirectories
-# list and the root's maintenance note, which grow with the repo rather than with
-# what the file chose to say. A ceiling, not a target. Most files stay far under
-# it: a one-line summary plus links is the format.
+# Floor on a CLAUDE.md's own prose, in words, and the whole budget for a file that
+# describes nothing item by item. Exempt: the Subdirectories list and the root's
+# maintenance note, which grow with the repo rather than with what the file chose to
+# say. A ceiling, not a target. Most files stay far under it: a one-line summary plus
+# links is the format.
 BODY_WORD_LIMIT = 120
+
+# A leaf index earns room per file it describes, since its length is set by how many
+# files sit beside it rather than by how much it chose to say. A flat ceiling taxed
+# exactly the files doing their job: on this repo the six index files sat at 118 to
+# 120 and every edit to one had to buy its words back out of another entry.
+#
+# Eight is one line: a name, then a clause saying what it is for. The base covers the
+# heading and any sentence before the list. A file that lists nothing gets the floor
+# and nothing more, so prose cannot buy room by adding bullets.
+ENTRY_BASE = 40
+ENTRY_WORDS = 8
+
+# An item that describes a file, which is a bullet opening with a code span. Prose
+# bullets do not earn room, since they are what the floor is already for.
+DESCRIBED = re.compile(r"^\s*[-*+]\s+`")
+
+# The names at the head of such a bullet, before the dash that starts its description.
+# One line often covers a family, and charging it for one file while it describes four
+# is the flat ceiling again in miniature. Stopping at the dash is what keeps a code
+# span inside the description from earning room: `--out DIR` in a clause is the file
+# explaining itself, not another file.
+NAMED = re.compile(r"`([^`\n]+)`")
+HEAD = re.compile(r"\s+[\u2014-]\s")
 
 EXEMPT_HEADINGS = {"subdirectories", "maintaining this tree"}
 
@@ -400,14 +424,19 @@ def counted_lines(text):
 
     A heading at level 1 or 2 opens or closes an exemption; deeper headings stay
     inside whatever section they belong to.
+
+    No heading counts, at any level. A section title is navigation rather than
+    something the file chose to say, and charging for it taxes the split that makes
+    a file readable: three short sections cost more than one long one saying the
+    same. `lint_readme.py` has always dropped them, and this is the same rule.
     """
     kept = []
     exempt = False
     for line in text.splitlines():
-        m = HEADING_RE.match(line.strip())
-        if m and len(m.group(1)) <= 2:
-            exempt = m.group(2).lower() in EXEMPT_HEADINGS
-        if not exempt:
+        heading = HEADING_RE.match(line.strip())
+        if heading and len(heading.group(1)) <= 2:
+            exempt = heading.group(2).lower() in EXEMPT_HEADINGS
+        if not exempt and not heading:
             kept.append(line)
     return kept
 
@@ -417,10 +446,27 @@ def text_words(text):
     return sum(len(line.split()) for line in counted_lines(text))
 
 
+def described(text):
+    """How many files this CLAUDE.md describes, counting names rather than bullets."""
+    return sum(len(NAMED.findall(HEAD.split(line, 1)[0]))
+               for line in counted_lines(text) if DESCRIBED.match(line))
+
+
+def budget(text):
+    """This file's word budget: the floor, or an allowance per file it describes."""
+    return max(BODY_WORD_LIMIT, ENTRY_BASE + ENTRY_WORDS * described(text))
+
+
 def body_words(path):
     """Word count of the CLAUDE.md at `path`, outside the exempt sections."""
     with open(path, encoding="utf-8") as fh:
         return text_words(fh.read())
+
+
+def body_budget(path):
+    """The word budget of the CLAUDE.md at `path`."""
+    with open(path, encoding="utf-8") as fh:
+        return budget(fh.read())
 
 
 def blocks(text):
@@ -462,27 +508,26 @@ def report_blocks(text, indent="    ", show=3):
 
 
 def length_findings(root):
-    """(path, word count) per CLAUDE.md over the ceiling."""
+    """(path, word count, budget) per CLAUDE.md over its own budget."""
     findings = []
     for rel in sorted(claude_md_dirs(root)):
         path = os.path.join(root, rel, CLAUDE_MD)
-        count = body_words(path)
-        if count > BODY_WORD_LIMIT:
-            findings.append((path, count))
+        count, allowed = body_words(path), body_budget(path)
+        if count > allowed:
+            findings.append((path, count, allowed))
     return findings
 
 
 def report_length(root):
     findings = length_findings(root)
     if not findings:
-        print("OK: every CLAUDE.md is within %d words" % BODY_WORD_LIMIT)
+        print("OK: every CLAUDE.md is within its word budget")
         return 0
-    print("%d CLAUDE.md file(s) over the %d-word ceiling:\n"
-          % (len(findings), BODY_WORD_LIMIT))
-    for path, count in findings:
+    print("%d CLAUDE.md file(s) over budget:\n" % len(findings))
+    for path, count, allowed in findings:
         print("  %s" % path)
-        print("    %d words, %d over (Subdirectories and the root's maintenance "
-              "note excluded)" % (count, count - BODY_WORD_LIMIT))
+        print("    %d words against %d, %d over (Subdirectories and the root's "
+              "maintenance note excluded)" % (count, allowed, count - allowed))
         with open(path, encoding="utf-8") as fh:
             report_blocks(fh.read())
         print("    fix: cut prose, or move what is read only during one kind of "
@@ -535,17 +580,17 @@ def report_count(targets):
             return 2
 
     over = 0
-    print("%6s %6s  %s" % ("words", "left", "file"))
+    print("%6s %7s %6s  %s" % ("words", "budget", "left", "file"))
     for path, text in items:
-        count = text_words(text)
-        left = BODY_WORD_LIMIT - count
-        print("%6d %6d  %s" % (count, left, path))
+        count, allowed = text_words(text), budget(text)
+        left = allowed - count
+        print("%6d %7d %6d  %s" % (count, allowed, left, path))
         if left < 0:
             over += 1
         if left <= TIGHT:
             report_blocks(text, indent="        ")
     if over:
-        print("\n%d file(s) over the %d-word ceiling." % (over, BODY_WORD_LIMIT))
+        print("\n%d file(s) over budget." % over)
     return 1 if over else 0
 
 
