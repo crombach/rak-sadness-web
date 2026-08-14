@@ -234,6 +234,18 @@
   // with its own fixed dark text, and the two need to move independently once
   // dark mode darkens this cell instead of the mark.
   --rak-cell-unscoreable: var(--rak-warning-300);
+  // The game dialog's own marks (`--live`, `--invalid`, `--final`, `--upcoming`),
+  // each its own token rather than a direct read of the ramp step it shares with
+  // a toast variant: `Toaster.scss` keeps its own pale fill in both modes, so the
+  // two need to move independently once dark mode darkens a mark instead.
+  --rak-mark-live-bg: var(--rak-danger-100);
+  --rak-mark-live-text: var(--rak-danger-600);
+  --rak-mark-invalid-bg: var(--rak-warning-300);
+  --rak-mark-invalid-text: var(--rak-warning-700);
+  --rak-mark-final-bg: var(--rak-success-100);
+  --rak-mark-final-text: var(--rak-success-600);
+  --rak-mark-upcoming-bg: var(--rak-neutral-100);
+  --rak-mark-upcoming-text: var(--rak-neutral-700);
 
   --rak-text: #171a1c;
   --rak-text-secondary: #32383e;
@@ -425,6 +437,19 @@ html {
     --rak-in-contention-300: #194257;
     --rak-cell-unscoreable: #4e5719;
     --rak-text-on-pale: var(--rak-text);
+
+    // The game dialog's marks, off the same darkened hues as the cells above:
+    // `--live` off the danger cell's red, `--invalid` off the unscoreable cell's
+    // yellow-green, `--final` off the success cell's green. `--upcoming` has no
+    // cell to match, so it takes the neutral panel fill already this dark.
+    --rak-mark-live-bg: var(--rak-danger-300);
+    --rak-mark-live-text: var(--rak-text);
+    --rak-mark-invalid-bg: var(--rak-cell-unscoreable);
+    --rak-mark-invalid-text: var(--rak-text);
+    --rak-mark-final-bg: var(--rak-success-300);
+    --rak-mark-final-text: var(--rak-text);
+    --rak-mark-upcoming-bg: var(--rak-fill-muted);
+    --rak-mark-upcoming-text: var(--rak-text);
 
     // The dialog's busy sweep. Black-on-a-key reads against the light-mode
     // `--rak-disabled-bg`, and blends into it once that token goes dark.
