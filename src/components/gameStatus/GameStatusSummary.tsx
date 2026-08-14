@@ -732,6 +732,9 @@ export default function GameStatusSummary({
   // Which game's marks failed to load, rather than a flag, so moving to another
   // game asks about its marks instead of inheriting a verdict on the last one's.
   const [logolessId, setLogolessId] = useState<string>();
+  // Every URL that has already fired its own load, so a team seen once does not
+  // go back to a placeholder on a later game or a poll of this one.
+  const [loadedLogoUrls, setLoadedLogoUrls] = useState<Set<string>>(new Set());
 
   if (game == null) {
     return null;
@@ -760,16 +763,34 @@ export default function GameStatusSummary({
         gamecastHref={gamecastUrl(game.league, result.id)}
         logo={
           logos
-            ? (side) => (
-                <img
-                  className="game-status__logo"
-                  src={side.team.logoUrl}
-                  // The team's name is beside it, so the mark says nothing a reader
-                  // of the page in words is missing.
-                  alt=""
-                  onError={() => setLogolessId(result.id)}
-                />
-              )
+            ? (side) => {
+                const url = side.team.logoUrl as string;
+                const isLoaded = loadedLogoUrls.has(url);
+                return (
+                  <>
+                    {/* Stands in until the real image below fires its own load, so a
+                        team icon never pops in over an answer already on screen. */}
+                    {!isLoaded && (
+                      <span
+                        className="game-status__logo --placeholder"
+                        aria-hidden="true"
+                      />
+                    )}
+                    <img
+                      className="game-status__logo"
+                      src={url}
+                      // The team's name is beside it, so the mark says nothing a
+                      // reader of the page in words is missing.
+                      alt=""
+                      hidden={!isLoaded}
+                      onLoad={() =>
+                        setLoadedLogoUrls((loaded) => new Set(loaded).add(url))
+                      }
+                      onError={() => setLogolessId(result.id)}
+                    />
+                  </>
+                );
+              }
             : undefined
         }
       />
