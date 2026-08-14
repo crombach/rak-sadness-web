@@ -459,6 +459,11 @@ html {
     // background still has an edge against a page it did not draw itself for. The
     // same boundary any control's own edge is told from its surface with.
     --rak-logo-outline: 1px solid var(--rak-border);
+    // An even row is mixed toward this. `--rak-primary-800` is nearly the fill's
+    // own darkness once the fill goes dark too, so mixing toward it stopped
+    // reading as a row apart from its neighbor. Light instead, the same distance
+    // the other way, so the two rows part again.
+    --rak-stripe-with: var(--rak-text);
 
     // The dialog's busy sweep. Black-on-a-key reads against the light-mode
     // `--rak-disabled-bg`, and blends into it once that token goes dark.
