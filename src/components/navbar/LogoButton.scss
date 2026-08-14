@@ -20,6 +20,10 @@
 // the panel they are set into. `&__name` sets its own instead.
 .button.logo-button {
   padding: 0;
+  // `.button`'s own `overflow: hidden` is there to contain the `--busy` sheen,
+  // which this key never sets. Visible instead, so the glass's own shadow can
+  // throw past this box.
+  overflow: visible;
 }
 
 .logo-button {
