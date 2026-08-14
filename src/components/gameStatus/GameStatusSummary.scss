@@ -242,12 +242,11 @@
   object-fit: contain;
   width: 32px;
   height: 32px;
-  // Transparent outside dark mode, so this only ever shows as the ring `--rak-logo-plate`
-  // draws behind a crest that mode cannot otherwise be sure will show. Thin: the
-  // plate is a rim around the crest, not a frame it shrinks to fit inside.
-  padding: 2px;
-  border-radius: 50%;
-  background-color: var(--rak-logo-plate);
+  // None outside dark mode, so this only ever lights the edge `--rak-logo-glow`
+  // gives a crest that mode cannot otherwise be sure will show. A filter rather
+  // than a background: it follows the crest's own alpha channel, so the light
+  // traces its silhouette instead of sitting behind it as a box or a disc.
+  filter: var(--rak-logo-glow);
 
   @include roomy-screen {
     width: 44px;
