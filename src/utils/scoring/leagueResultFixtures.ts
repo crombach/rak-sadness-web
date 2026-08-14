@@ -60,6 +60,35 @@ export function finalGame({
   };
 }
 
+/** A game still being played. */
+export function liveGame({
+  home,
+  away,
+  homeScore,
+  awayScore,
+}: {
+  home: string;
+  away: string;
+  homeScore: number;
+  awayScore: number;
+}): LeagueResult {
+  return {
+    id: EVENT_ID,
+    name: `${away} at ${home}`,
+    shortName: `${away} @ ${home}`,
+    date: GAME_DATE,
+    status: GameStatus.LIVE,
+    detailMessage: "8:42 - 3rd Quarter",
+    isNeutralSite: false,
+    home: side(home, homeScore),
+    away: side(away, awayScore),
+    possession: NO_POSSESSION,
+    winner: { team: null, homeAway: null, by: 0 },
+    loser: { team: null, homeAway: null, by: 0 },
+    totalScore: homeScore + awayScore,
+  };
+}
+
 /** A game that has not kicked off. Scoring treats it as incomplete. */
 export function upcomingGame({
   home,

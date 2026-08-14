@@ -154,6 +154,7 @@ export default function ResultsFrame({
         scores={scores}
         week={weekInfo}
         season={season}
+        onGameFinal={onRefresh}
       />
     </PageLayout>
   );

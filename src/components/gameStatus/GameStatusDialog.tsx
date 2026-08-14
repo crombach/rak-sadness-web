@@ -130,6 +130,7 @@ export default function GameStatusDialog({
   scores,
   week,
   season,
+  onGameFinal,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -140,6 +141,13 @@ export default function GameStatusDialog({
   week?: WeekInfo;
   /** The year that week's season started in. */
   season?: number;
+  /**
+   * Called once the game shown here is polled final, so the week's scores can
+   * be rescored and the table's `.table__cell-wipe` animations can play for
+   * whatever that outcome changed, instead of waiting for the next manual
+   * refresh.
+   */
+  onGameFinal?: () => void;
 }) {
   const [game, setGame] = useState<WeekGame>();
   const [query, setQuery] = useState("");
@@ -172,6 +180,7 @@ export default function GameStatusDialog({
     games: scores?.games,
     week,
     season,
+    onFinal: onGameFinal,
   });
 
   return (
