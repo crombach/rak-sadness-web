@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { preload } from "react-dom";
 import useArrival from "../../hooks/useArrival";
 import useLiveGame from "../../hooks/useLiveGame";
 import { GameStatus } from "../../types/ESPN";
@@ -21,6 +20,31 @@ import "./GameStatusDialog.scss";
  */
 function gameSearchText(game: WeekGame): string {
   return `${game.label}  ${game.name}`;
+}
+
+/**
+ * Every URL this session has already asked the browser to warm, so a week with
+ * marks fetched twice, or a game reopened later, never asks for the same logo
+ * twice.
+ */
+const prefetchedLogoUrls = new Set<string>();
+
+/**
+ * A hint, not a load: `rel=preload` is for a resource this render is about to put
+ * on screen, and warns in the console when it is not. Most of a week's logos are
+ * never opened in the same visit, so this is `rel=prefetch` instead, which carries
+ * no such expectation.
+ */
+function prefetchLogo(url: string) {
+  if (prefetchedLogoUrls.has(url)) return;
+  prefetchedLogoUrls.add(url);
+  const link = document.createElement("link");
+  // `as` only reflects as an attribute for `rel=preload`/`modulepreload`, so the
+  // property setter silently drops it here. Every attribute set directly instead.
+  link.setAttribute("rel", "prefetch");
+  link.setAttribute("as", "image");
+  link.setAttribute("href", url);
+  document.head.appendChild(link);
 }
 
 /** The games a query offers, in picks table column order. */
@@ -135,13 +159,13 @@ export default function GameStatusDialog({
   // this list by identity.
   const games = useMemo(() => scores?.games ?? [], [scores]);
 
-  // Every mark the week could draw, asked for as soon as the week is scored rather
+  // Every logo the week could show, asked for as soon as the week is scored rather
   // than when a game is opened, so the scoreline comes up with its marks already on
-  // it. React holds one request per URL however many renders ask for it.
+  // it.
   games.forEach((it) => {
     [it.result?.home.team.logoUrl, it.result?.away.team.logoUrl].forEach(
       (url) => {
-        if (url != null) preload(url, { as: "image" });
+        if (url != null) prefetchLogo(url);
       },
     );
   });

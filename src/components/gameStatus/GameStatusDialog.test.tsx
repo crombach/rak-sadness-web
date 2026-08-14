@@ -217,7 +217,7 @@ describe("GameStatusDialog", () => {
     // scoreline never comes up and then fills in.
     expect(
       [
-        ...document.head.querySelectorAll('link[rel="preload"][as="image"]'),
+        ...document.head.querySelectorAll('link[rel="prefetch"][as="image"]'),
       ].map((link) => link.getAttribute("href")),
     ).toEqual([
       "https://espn.com/OSU.png",
