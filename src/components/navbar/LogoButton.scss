@@ -33,9 +33,8 @@
   // the name cannot give up its room until the button it sits in can.
   min-width: 0;
 
-  // Reads as the navbar's own heading rather than as button text, which is what
-  // it looked like before the two became one button. `lcd-glass` is the well and
-  // plate the scoreline's own glass is cut in, in `GameStatusSummary.scss`.
+  // Reads as the navbar's own heading rather than as button text. `lcd-glass` is
+  // the well and plate the scoreline's own glass is cut in, in `GameStatusSummary.scss`.
   &__name {
     // The key's whole box, both ways, so the glass stands as tall as the keys on
     // the other end of the bar and as wide as the name it holds.

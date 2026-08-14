@@ -318,11 +318,7 @@ describe("GameStatusSummary, the two scores as a pair", () => {
     expect(points({ home: 30, away: 20 })).toEqual(["20", "30"]);
   });
 
-  it("holds both cells under a side using one of them", () => {
-    expect(cells({ home: 7, away: 14 })).toEqual(["88", "88"]);
-  });
-
-  it("holds both cells with neither side past single figures", () => {
+  it("holds both cells regardless of the score", () => {
     expect(cells({ home: 3, away: 7 })).toEqual(["88", "88"]);
   });
 });

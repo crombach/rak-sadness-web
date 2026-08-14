@@ -27,6 +27,13 @@
   margin-inline: var(--rak-space-2);
 }
 
+// The dash and the score digits share one face, so both are set in it the same way.
+@mixin segment-face {
+  font-family: var(--rak-font-segment);
+  // The face ships in its bold cut alone, which `src/index.tsx` is what loads.
+  font-weight: var(--rak-weight-bold);
+}
+
 // A bar over the words an element holds, one on each line of it, so a name that wraps
 // to two lines comes out as two bars rather than as one across both. The bar is as wide
 // as the box, which the scoreline's grid gives both sides equally, so the two sides of
@@ -66,14 +73,12 @@
   flex-direction: column;
   gap: var(--rak-space-4);
 
-  // Smaller than the face this row used to be set in, and no smaller than it reads.
-  // A seven-segment digit is wider per em than a drawn one, so the same size took the
-  // block from 227px to 254px and pushed `useScorelineFit` into abbreviating a pair
-  // as long as `Jacksonville Jaguars` against `Washington Commanders`, which used to
-  // fit. Measured back to 223px here. It costs the number nothing: a segment digit
-  // stands its whole em box tall against a drawn one's cap height, so this is more
-  // ink than 2.5rem was. A phone is left where it was, since at that width the names
-  // are abbreviations already and the row has nothing to win back.
+  // A seven-segment digit is wider per em than a drawn one and stands its whole em
+  // box tall against a drawn one's cap height, so this reads as large as a bigger
+  // size in a normal face would. Sized down from that to leave `useScorelineFit`
+  // room for a pair as long as `Jacksonville Jaguars` against `Washington Commanders`
+  // without abbreviating. A phone is narrower than either name fits regardless, so
+  // its own size stays where the rest of the row already sets it.
   @include roomy-screen {
     --rak-score-size: 2rem;
     --rak-marker-size: 1rem;
@@ -326,11 +331,10 @@
 // digits either side: its hyphen is the bar across the middle of a cell, drawn on the
 // line the digits leave a gap on. Any drawn face puts its dash somewhere of its own.
 .game-status__dash {
+  @include segment-face;
+
   color: var(--rak-on-solid);
-  font-family: var(--rak-font-segment);
   font-size: var(--rak-score-size);
-  // The face ships in its bold cut alone, which `src/index.tsx` is what loads.
-  font-weight: var(--rak-weight-bold);
   line-height: 1.1;
 }
 
@@ -429,11 +433,10 @@
 // is what a readout is for, and it is large enough here that segments cost the reader
 // nothing. Everything else stays in a face that draws letters.
 .game-status__points {
+  @include segment-face;
+
   position: relative;
   min-width: 2ch;
-  font-family: var(--rak-font-segment);
-  // The face ships in its bold cut alone, which `src/index.tsx` is what loads.
-  font-weight: var(--rak-weight-bold);
   font-variant-numeric: tabular-nums;
   // A score in single figures fills the units cell, its own place, and leaves the
   // tens cell unlit, the way a hardware scoreboard blanks that digit rather than
