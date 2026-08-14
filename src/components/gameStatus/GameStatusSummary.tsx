@@ -13,13 +13,28 @@ import { GameSide, LeagueResult } from "../../types/LeagueResult";
 import { GameSpread, WeekGame } from "../../types/WeekGame";
 import getClasses from "../../utils/getClasses";
 import marginAgainstSpread from "../../utils/scoring/marginAgainstSpread";
+import { PossessionIcon } from "../icon/Icon";
 import "./GameStatusSummary.scss";
 
 /** Regulation is four quarters, and anything past them is overtime. */
 const REGULATION_PERIODS = 4;
 
-/** Joins the two scores, which meet in the middle of the scoreline at every width. */
-const SCORE_DASH = "–";
+/**
+ * Joins the two scores, which meet in the middle of the scoreline at every width.
+ *
+ * A hyphen rather than an en dash, because the readout is what draws it: DSEG7 has
+ * no en dash, and its hyphen is the bar across the middle of a cell, which is the
+ * one glyph in the face guaranteed to stand level with the digits either side.
+ */
+const SCORE_DASH = "-";
+
+/**
+ * The character DSEG7 draws with every segment of a digit lit. A row of them behind
+ * the score is the display's unlit segments, the way a real readout shows the cells
+ * it is not currently using. `LogoButton.tsx` does the same for the app name, in the
+ * fourteen-segment face that draws letters.
+ */
+const ALL_SEGMENTS_ON = "8";
 
 /**
  * What a game yet to kick off is doing, said in place of ESPN's own wording.
@@ -44,11 +59,8 @@ function gamecastUrl(league: League, id: string): string {
   return `https://www.espn.com/${league}/game/_/gameId/${id}`;
 }
 
-/** Points at the score of the side with the ball, from whichever side that is. */
-const MARKER: Record<HomeAway, string> = {
-  [HomeAway.HOME]: "◂",
-  [HomeAway.AWAY]: "▸",
-};
+/** What the mark beside a score is called, for anyone who cannot see it. */
+const HAS_BALL_LABEL = "Has the ball";
 
 /**
  * What each side is called over its name.
@@ -228,16 +240,11 @@ function outcomeText(result: LeagueResult, spread?: GameSpread): string {
 }
 
 /**
- * Whether a score is written with a leading zero, which is where it is in single
- * figures and the other side is not.
- *
- * The pair reads as one number either side of the dash, and a lone digit beside a
- * two-digit number reads as the smaller of the two by its width before it is read at
- * all. Both sides in single figures are left alone: there is nothing to line up with.
+ * How many cells a side's readout is, whatever it is showing. Two, because the room
+ * for a second digit is held whether or not there is one, so a score going from 7 to
+ * 14 between two polls moves neither the dash nor the sides either side of it.
  */
-function isPadded(score: number, opponentScore: number): boolean {
-  return score < 10 && opponentScore >= 10;
-}
+const SCORE_CELLS = 2;
 
 /** Where the game is up to, over the scores. */
 function Detail({ result }: { result: LeagueResult }) {
@@ -273,43 +280,40 @@ function Note({
  * Which side has the ball, pointed at their score.
  *
  * Both sides wear one whatever the game is doing, and every side without the ball
- * wears an invisible one. It holds the room the visible one takes, so neither the ball
+ * wears an unlit one. It holds the room the lit one takes, so neither the ball
  * changing hands, nor a poll that finds nobody with it, nor a game ending moves the
  * scores.
  */
-function Marker({
-  homeAway,
-  hasBall,
-}: {
-  homeAway: HomeAway;
-  hasBall: boolean;
-}) {
+function Marker({ hasBall }: { hasBall: boolean }) {
   return hasBall ? (
-    <span className="game-status__marker" aria-label="Has the ball">
-      {MARKER[homeAway]}
+    // A role of its own, because the shape inside is hidden and a bare `<span>`
+    // carries no label into the accessibility tree.
+    <span
+      className="game-status__marker"
+      role="img"
+      aria-label={HAS_BALL_LABEL}
+    >
+      <PossessionIcon />
     </span>
   ) : (
     <span aria-hidden="true" className="game-status__marker --blank">
-      {MARKER[homeAway]}
+      <PossessionIcon />
     </span>
   );
 }
 
 function Score({
   side,
-  opponent,
   homeAway,
   hasBall,
   outcome,
 }: {
   side: GameSide;
-  /** The other side, which is what says whether this number is padded. */
-  opponent: GameSide;
   homeAway: HomeAway;
   hasBall: boolean;
   outcome?: SideOutcome;
 }) {
-  const padded = isPadded(side.score, opponent.score);
+  const points = `${side.score}`;
   return (
     <p
       className={getClasses("game-status__score", `--${homeAway}`, {
@@ -319,15 +323,16 @@ function Score({
     >
       {/* Held apart from the marker beside it so the wireframe can draw a bar over
           the number alone, and so a number of one digit takes the room two do. */}
-      <span
-        className="game-status__points"
-        // A padded number is read out as two of them, so the score itself is what
-        // is announced instead.
-        aria-label={padded ? `${side.score}` : undefined}
-      >
-        {padded ? `0${side.score}` : side.score}
+      <span className="game-status__points">
+        {/* Both cells, lit or not, so a score in single figures shows the one it is
+            not using rather than a zero standing in it. The face is monospaced, so
+            the row lands exactly under the number without being measured. */}
+        <span className="game-status__points-ghost" aria-hidden="true">
+          {ALL_SEGMENTS_ON.repeat(SCORE_CELLS)}
+        </span>
+        {points}
       </span>
-      <Marker homeAway={homeAway} hasBall={hasBall} />
+      <Marker hasBall={hasBall} />
     </p>
   );
 }
@@ -359,7 +364,6 @@ function Center({
       <div className="game-status__scores">
         <Score
           side={result.away}
-          opponent={result.home}
           homeAway={HomeAway.AWAY}
           hasBall={hasBall(HomeAway.AWAY)}
           outcome={outcomeOf(result.away)}
@@ -369,7 +373,6 @@ function Center({
         </span>
         <Score
           side={result.home}
-          opponent={result.away}
           homeAway={HomeAway.HOME}
           hasBall={hasBall(HomeAway.HOME)}
           outcome={outcomeOf(result.home)}
@@ -627,7 +630,9 @@ function Game({
     <>
       <p className="game-status__spread">
         {SPREAD_LABEL}:{" "}
-        {spread != null ? `${spread.team} ${spread.points}` : NO_SPREAD}
+        <span className="game-status__spread-value">
+          {spread != null ? `${spread.team} ${spread.points}` : NO_SPREAD}
+        </span>
       </p>
       <div
         className={getClasses("game-status__scoreline", {
@@ -727,6 +732,9 @@ export default function GameStatusSummary({
   // Which game's marks failed to load, rather than a flag, so moving to another
   // game asks about its marks instead of inheriting a verdict on the last one's.
   const [logolessId, setLogolessId] = useState<string>();
+  // Every URL that has already fired its own load, so a team seen once does not
+  // go back to a placeholder on a later game or a poll of this one.
+  const [loadedLogoUrls, setLoadedLogoUrls] = useState<Set<string>>(new Set());
 
   if (game == null) {
     return null;
@@ -755,16 +763,34 @@ export default function GameStatusSummary({
         gamecastHref={gamecastUrl(game.league, result.id)}
         logo={
           logos
-            ? (side) => (
-                <img
-                  className="game-status__logo"
-                  src={side.team.logoUrl}
-                  // The team's name is beside it, so the mark says nothing a reader
-                  // of the page in words is missing.
-                  alt=""
-                  onError={() => setLogolessId(result.id)}
-                />
-              )
+            ? (side) => {
+                const url = side.team.logoUrl as string;
+                const isLoaded = loadedLogoUrls.has(url);
+                return (
+                  <>
+                    {/* Stands in until the real image below fires its own load, so a
+                        team icon never pops in over an answer already on screen. */}
+                    {!isLoaded && (
+                      <span
+                        className="game-status__logo --placeholder"
+                        aria-hidden="true"
+                      />
+                    )}
+                    <img
+                      className="game-status__logo"
+                      src={url}
+                      // The team's name is beside it, so the mark says nothing a
+                      // reader of the page in words is missing.
+                      alt=""
+                      hidden={!isLoaded}
+                      onLoad={() =>
+                        setLoadedLogoUrls((loaded) => new Set(loaded).add(url))
+                      }
+                      onError={() => setLogolessId(result.id)}
+                    />
+                  </>
+                );
+              }
             : undefined
         }
       />

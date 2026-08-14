@@ -1,4 +1,5 @@
 @use "../../styles/breakpoints" as *;
+@use "../../styles/label" as *;
 @use "../../styles/skeleton" as *;
 
 .results-scores {
@@ -26,6 +27,10 @@
   // height; painted the same, it reads as that row being the taller for it rather
   // than as the page running out before the table does.
   background-color: var(--rak-primary-800);
+  // The table is the app's screen, so the dark band around it is drawn as the
+  // bezel holding it: lit along its top edge and shadowed along its bottom. Inset,
+  // so it costs no room and nothing inside the frame moves.
+  box-shadow: var(--rak-bezel);
 }
 
 /**
@@ -35,14 +40,14 @@
  */
 .results-caption {
   margin: 0;
-  // Across, the header cells' own padding, which is where the Rank heading lands
-  // too: that column is centered, but it comes out within half a pixel of this at
-  // both table sizes, so one value lines the caption up with it on every screen.
-  padding: var(--rak-space-2);
-  // Read from the near edge, never centered. The frame is as wide as the table,
-  // so a caption centered in it starts off the side of a phone and only arrives
-  // once the table has been panned across.
-  text-align: left;
+  // Down the bar only. Across, the text below carries its own, so the box it is
+  // centered in starts at the frame's edge rather than a padding in from it. Held
+  // here on the block axis because the wireframe below has no text to pad: it
+  // stands the bar up with a hidden copy of the caption's own words.
+  padding-block: var(--rak-space-2);
+  // Centered on what is on screen rather than on the frame, which the width below
+  // is what arranges.
+  text-align: center;
   // Between the navbar above and the header below, so the three step down into
   // the table. No border under it: the step off this fill is what divides the
   // caption from the header, and a rule drawn in either neighbour's color would
@@ -52,32 +57,40 @@
   // See SCROLL-FLASH.md.
   color: var(--rak-on-solid);
   // The header row's own type, so the two read as one head with a line drawn
-  // through it rather than as two bands set differently. Both values are
-  // `Table.scss`'s: the size it puts on `.table` and the weight a `<th>` carries
-  // by default. Written out because they are the table's, and this stands
-  // outside it.
-  font-size: 0.8rem;
-  font-weight: var(--rak-weight-bold);
+  // through it rather than as two bands set differently. The size is the token
+  // `.table` reads too; the capitals and the tracking are what every heading in
+  // the app is set in.
+  @include micro-label;
+
+  font-size: var(--rak-text-table);
 }
 
 /**
- * Held at the near edge while the table pans under it, so the week is readable
- * whichever column is on screen. Left in flow it rides off the side with the
- * columns, because the frame is as wide as the week is long.
+ * Centered on the screen while the table pans under it, so the week reads in the
+ * middle of the view whichever column is on. Left in flow it rides off the side
+ * with the columns, because the frame is as wide as the week is long.
+ *
+ * The width is what centers it: `100cqi` is the scrolling box `PageLayout.scss`
+ * declares the container on, which is what is on screen, and `100%` is the frame.
+ * Whichever is narrower wins, so a table too wide for the window centers the
+ * caption on the window and one that fits centers it on the table. Plain centering
+ * would put it in the middle of the frame either way, which on a phone is off the
+ * side of the screen until the table has been panned halfway across.
  *
  * Only the text sticks. The bar stays in flow at the frame's full width, so its
  * fill runs the whole way across rather than stopping at the window's edge. That
- * also keeps the sticky area to a few words, which is the smallest hole this can
- * leave in the rasterized layer. See SCROLL-FLASH.md.
+ * also keeps the sticky area to one box, which is the smallest hole this can leave
+ * in the rasterized layer. See SCROLL-FLASH.md.
  */
 .results-caption__text {
   position: sticky;
-  // The padding the bar would have given it, now that it is placed rather than
-  // laid out. Held level with the Rank heading below on the way across, not only
-  // at rest.
-  left: var(--rak-space-2);
+  left: 0;
   // Sticky offsets are ignored on an inline box.
-  display: inline-block;
+  display: block;
+  width: min(100cqi, 100%);
+  // The header cells' own padding, which is what holds the words clear of the
+  // frame's edge once the table has been panned far enough for them to reach it.
+  padding-inline: var(--rak-space-2);
 }
 
 // A route that has not worked out which week it is headed for yet. Its room is
@@ -102,15 +115,16 @@
 }
 
 // Room enough that the table does not fill the width, so the frame is cut to the
-// table and what is left either side is the page's own tiled blue, the same
+// table and what is left either side is the page's own tiled ground, the same
 // background the home page stands on.
 @include roomy-screen {
   .results-scores {
     width: max-content;
     // The panel the page carries on every other route, handed to the table now
-    // that it is the thing standing on the blue. `PageLayout.scss` gives this up
-    // at the same width.
-    box-shadow: var(--rak-shadow-overlay);
+    // that it is the thing standing on that ground. `PageLayout.scss` gives this up
+    // at the same width. The bezel is written again beside it: one `box-shadow`
+    // replaces the other, and the frame is drawn as a bezel at every width.
+    box-shadow: var(--rak-bezel), var(--rak-shadow-overlay);
   }
 
   // The table goes up to its roomier size at this width, so the caption goes with

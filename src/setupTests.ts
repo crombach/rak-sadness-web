@@ -16,6 +16,22 @@ globalThis.ResizeObserver = class {
   disconnect(): void {}
 };
 
+// jsdom lays nothing out, so it evaluates no media query either and ships no
+// `matchMedia` at all. Answering no to every one of them puts a test on the widest
+// screen, which is what jsdom's own viewport reports, and matches what the
+// stylesheet cannot say here: none of its breakpoints apply under a test run.
+window.matchMedia = (media: string): MediaQueryList =>
+  ({
+    media,
+    matches: false,
+    onchange: null,
+    addEventListener: (): void => {},
+    removeEventListener: (): void => {},
+    addListener: (): void => {},
+    removeListener: (): void => {},
+    dispatchEvent: (): boolean => false,
+  }) as MediaQueryList;
+
 // @testing-library/dom decides whether fake timers are installed by looking for
 // a `jest` global, then advances the clock through it. Without this shim its
 // waiting helpers schedule work on the faked clock and never resolve, so every

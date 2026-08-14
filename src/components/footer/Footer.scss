@@ -1,6 +1,8 @@
+// The quietest ink the app has that still clears 4.5:1 on the surface these links
+// stand on.
 .footer,
 .footer > * {
-  color: #888888;
+  color: var(--rak-text-tertiary);
 }
 
 .footer {

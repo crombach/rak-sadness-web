@@ -6,7 +6,6 @@
 // Material draws every glyph on a 24-unit box but not out to its edges, and how much of
 // that box the ink fills is not the same glyph to glyph. Read off the path data in
 // `components/icon/Icon.tsx` and confirmed in a browser.
-$ink-share-check-box: 0.75;
 $ink-share-event: 0.833;
 $ink-share-warning: 0.792;
 // The three a player's status is drawn with. The trophy fills 0.75 and the skull and

@@ -129,6 +129,10 @@ describe("GameStatusSummary, before there is anything to show", () => {
 });
 
 describe("GameStatusSummary, the pool's line on the game", () => {
+  // The label and the line are two elements, since the line alone is set in the
+  // table's face, so the sentence is read off the paragraph holding both.
+  const spreadLine = () => screen.getByText(/Rak Madness Spread/);
+
   it("names the favored side and what it gives", () => {
     render(
       <GameStatusSummary
@@ -136,13 +140,13 @@ describe("GameStatusSummary, the pool's line on the game", () => {
         result={result()}
       />,
     );
-    expect(screen.getByText("Rak Madness Spread: BUF -3")).toBeInTheDocument();
+    expect(spreadLine()).toHaveTextContent("Rak Madness Spread: BUF -3");
   });
 
   it("says so where the picks put no line on the game", () => {
     render(<GameStatusSummary game={game(result())} result={result()} />);
     // Said either way, so a game with no line is not one the dialog forgot about.
-    expect(screen.getByText("Rak Madness Spread: None")).toBeInTheDocument();
+    expect(spreadLine()).toHaveTextContent("Rak Madness Spread: None");
   });
 });
 
@@ -270,6 +274,18 @@ describe("GameStatusSummary, a game that is over", () => {
   });
 });
 
+/**
+ * The digits the readout has lit, without the row of unlit cells laid under them.
+ * The seven-segment face draws the score over its own dark segments, and that layer
+ * is a text node's worth of eights in the same element.
+ */
+function litDigits(element: Element): string {
+  return [...element.childNodes]
+    .filter((node) => node.nodeType === Node.TEXT_NODE)
+    .map((node) => node.textContent ?? "")
+    .join("");
+}
+
 describe("GameStatusSummary, the two scores as a pair", () => {
   function points(scores: { home: number; away: number }): Array<string> {
     const scored = result({
@@ -278,29 +294,32 @@ describe("GameStatusSummary, the two scores as a pair", () => {
     });
     render(<GameStatusSummary game={game(scored)} result={scored} />);
     return [...document.querySelectorAll(".game-status__points")].map(
-      (span) => span.textContent ?? "",
+      litDigits,
     );
   }
 
-  it("pads the side in single figures where the other is not", () => {
-    expect(points({ home: 7, away: 14 })).toEqual(["14", "07"]);
+  /** The row of unlit cells laid under one side's digits. */
+  function cells(scores: { home: number; away: number }): Array<string> {
+    points(scores);
+    return [...document.querySelectorAll(".game-status__points-ghost")].map(
+      (ghost) => ghost.textContent ?? "",
+    );
+  }
+
+  it("lights the digits a score has and no leading zero", () => {
+    expect(points({ home: 7, away: 14 })).toEqual(["14", "7"]);
   });
 
-  it("pads whichever side is the short one", () => {
-    expect(points({ home: 21, away: 3 })).toEqual(["03", "21"]);
-  });
-
-  it("leaves two single figures alone, having nothing to line them up with", () => {
-    expect(points({ home: 7, away: 3 })).toEqual(["3", "7"]);
+  it("does the same whichever side is the short one", () => {
+    expect(points({ home: 21, away: 3 })).toEqual(["3", "21"]);
   });
 
   it("leaves two double figures alone", () => {
     expect(points({ home: 30, away: 20 })).toEqual(["20", "30"]);
   });
 
-  it("reads a padded score out as the number it is", () => {
-    points({ home: 7, away: 14 });
-    expect(screen.getByLabelText("7")).toHaveTextContent("07");
+  it("holds both cells regardless of the score", () => {
+    expect(cells({ home: 3, away: 7 })).toEqual(["88", "88"]);
   });
 });
 
@@ -323,7 +342,11 @@ describe("GameStatusSummary, which side took the point", () => {
       missed: textOf(
         ".game-status__team-name.--missed .game-status__name-short",
       ),
-      scores: textOf(".game-status__score.--scored .game-status__points"),
+      scores: [
+        ...document.querySelectorAll(
+          ".game-status__score.--scored .game-status__points",
+        ),
+      ].map(litDigits),
     };
   }
 

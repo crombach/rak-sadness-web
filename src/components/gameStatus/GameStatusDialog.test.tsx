@@ -217,7 +217,7 @@ describe("GameStatusDialog", () => {
     // scoreline never comes up and then fills in.
     expect(
       [
-        ...document.head.querySelectorAll('link[rel="preload"][as="image"]'),
+        ...document.head.querySelectorAll('link[rel="prefetch"][as="image"]'),
       ].map((link) => link.getAttribute("href")),
     ).toEqual([
       "https://espn.com/OSU.png",
@@ -309,12 +309,12 @@ describe("GameStatusDialog", () => {
         "EventIcon",
       ),
     ).toBeInTheDocument();
-    // The two worth acting on say so in a word, the other two in a shape alone.
+    // Every mark says its state in a word beside its shape.
     expect(screen.getAllByRole("img").map((mark) => mark.textContent)).toEqual([
-      "",
+      "DONE",
       "WARN",
       "LIVE",
-      "",
+      "SOON",
     ]);
 
     await user.click(screen.getByRole("option", { name: /DAL @ PHI/ }));

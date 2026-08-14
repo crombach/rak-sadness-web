@@ -13,6 +13,15 @@
   // Every button in here sits on the app's own primary, which a ring in that same
   // primary cannot be seen against.
   --rak-focus-ring: var(--rak-on-solid);
+  // A key set into the bar is lit a step over it, so it is a control before its edge
+  // is read. Elsewhere a solid key stands on white and needs no lift.
+  //
+  // The whole ramp shifts, not the rest fill alone: every state stays one step from
+  // the one before it, so a press deepens once rather than crossing two steps and
+  // reading as the key going down twice.
+  --rak-key-face: var(--rak-primary-400);
+  --rak-key-active: var(--rak-primary-500);
+  --rak-key-held: var(--rak-primary-600);
 }
 
 .navbar__content {
@@ -52,7 +61,12 @@
   flex: 0 0 auto;
   // Named because `ScoresNavbar` cancels it with a negative margin while the
   // refresh button collapses, and a gap around nothing would otherwise remain.
-  --navbar-gap: var(--rak-space-1);
+  //
+  // Tighter than a desktop's but not the smallest step: with the name plate drawn
+  // as one key the bar is three keys and a screen, and at 4px the three ran
+  // together into one block. Measured on a 360px phone, where the widest bar the
+  // app draws leaves 28px between the two groups and this spends 12 of it.
+  --navbar-gap: var(--rak-space-2);
   gap: var(--navbar-gap);
 
   @include roomy-screen {

@@ -40,12 +40,31 @@
   &.--tiles-loaded::before {
     opacity: 1;
   }
+
+  // A phone only. The tiles are the whole surface behind a page held in one hand,
+  // and past that they are two strips either side of a content column 1024px wide,
+  // which reads as wallpaper the app forgot to finish rather than as its ground.
+  // The case the app is mounted in takes over there, since with the tiles gone the
+  // brand fill is a field of color rather than the ground under a pattern.
+  @include roomy-screen {
+    background-color: var(--rak-case);
+
+    &::before {
+      display: none;
+    }
+  }
 }
 
 .page__content {
   flex: 1;
   width: min(1024px, 100%);
   max-width: 100%;
+  // The one thing in the app that has to be as wide as what is on screen rather
+  // than as wide as the box it sits in is the caption over the table, and this is
+  // the box on screen. It measures itself against this in `cqi` from
+  // `ResultsFrame.scss`. Safe here because the width above is stated rather than
+  // read off the contents, which is the one thing inline-size containment forbids.
+  container-type: inline-size;
   display: flex;
   // Centered while what is inside fits, aligned to the start once it does not.
   // Plain centering splits the overflow across both edges, and the half that
@@ -76,11 +95,11 @@
     // header, so the surface every other page carries goes back below.
     background-color: var(--rak-primary-800);
 
-    // Nothing of its own, so the tiled blue behind the page shows either side of
+    // Nothing of its own, so the tiled ground behind the page shows either side of
     // the table, which is what every other page stands on. The shadow goes with
-    // it: it is what lifts a panel off that blue, and with the fill gone there is
+    // it: it is what lifts a panel off that ground, and with the fill gone there is
     // no panel here to lift. `ResultsFrame.scss` puts it on the table, which is
-    // what stands on the blue instead.
+    // what stands on that ground instead.
     @include roomy-screen {
       background-color: transparent;
       box-shadow: none;

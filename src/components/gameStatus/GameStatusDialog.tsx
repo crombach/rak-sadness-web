@@ -1,14 +1,14 @@
 import { useMemo, useState } from "react";
-import { preload } from "react-dom";
 import useArrival from "../../hooks/useArrival";
 import useLiveGame from "../../hooks/useLiveGame";
 import { GameStatus } from "../../types/ESPN";
 import { WeekInfo } from "../../types/League";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import { WeekGame } from "../../types/WeekGame";
+import prefetchLink from "../../utils/prefetchLink";
 import DialogCombobox from "../dialog/DialogCombobox";
 import DialogShell from "../dialog/DialogShell";
-import { CheckBoxIcon, EventIcon, WarningIcon } from "../icon/Icon";
+import { CheckIcon, EventIcon, WarningIcon } from "../icon/Icon";
 import GameStatusSummary from "./GameStatusSummary";
 import "./GameStatusDialog.scss";
 
@@ -21,6 +21,19 @@ import "./GameStatusDialog.scss";
  */
 function gameSearchText(game: WeekGame): string {
   return `${game.label}  ${game.name}`;
+}
+
+/**
+ * Every URL this session has already asked the browser to warm, so a week with
+ * marks fetched twice, or a game reopened later, never asks for the same logo
+ * twice.
+ */
+const prefetchedLogoUrls = new Set<string>();
+
+function prefetchLogo(url: string) {
+  if (prefetchedLogoUrls.has(url)) return;
+  prefetchedLogoUrls.add(url);
+  prefetchLink(url, { as: "image" });
 }
 
 /** The games a query offers, in picks table column order. */
@@ -37,12 +50,12 @@ export function gamesMatching(
 /**
  * Where a game stands, in one mark, on every game the search offers.
  *
- * The two states worth acting on say so in words as well: LIVE beside a red dot for a
- * game being played, and WARN beside a warning for a column ESPN lists no game for,
- * which is the one game the dialog can say nothing else about. A shape alone carries
- * the two that are not: a calendar before kickoff and a tick once the game is over.
- * That a live game is being asked about again is the progress bar's to say, which is
- * how every other wait in the app says it.
+ * Every state says so in a word beside its shape: LIVE beside a red dot for a game
+ * being played, WARN beside a warning for a column ESPN lists no game for, which is
+ * the one game the dialog can say nothing else about, DONE beside a tick once the
+ * game is over, and SOON beside a calendar before kickoff. That a live game is being
+ * asked about again is the progress bar's to say, which is how every other wait in
+ * the app says it.
  */
 function GameMark({
   game,
@@ -59,7 +72,9 @@ function GameMark({
         role="img"
         aria-label="Not listed by ESPN"
       >
-        <WarningIcon />
+        <span className="game-status__mark-icon">
+          <WarningIcon />
+        </span>
         WARN
       </span>
     );
@@ -67,16 +82,21 @@ function GameMark({
   if (status === GameStatus.FINAL) {
     return (
       <span className="game-status__mark --final" role="img" aria-label="Final">
-        <CheckBoxIcon />
+        <span className="game-status__mark-icon">
+          <CheckIcon />
+        </span>
+        DONE
       </span>
     );
   }
   if (status === GameStatus.LIVE) {
     return (
       <span className="game-status__mark --live" role="img" aria-label="Live">
-        {/* Read out by the label above rather than as letters, so a reader being
-            read to hears "Live" and not "L I V E". */}
-        <span className="game-status__live-dot" />
+        <span className="game-status__mark-icon">
+          {/* Read out by the label above rather than as letters, so a reader being
+              read to hears "Live" and not "L I V E". */}
+          <span className="game-status__live-dot" />
+        </span>
         LIVE
       </span>
     );
@@ -87,7 +107,10 @@ function GameMark({
       role="img"
       aria-label="Yet to kick off"
     >
-      <EventIcon />
+      <span className="game-status__mark-icon">
+        <EventIcon />
+      </span>
+      SOON
     </span>
   );
 }
@@ -125,13 +148,13 @@ export default function GameStatusDialog({
   // this list by identity.
   const games = useMemo(() => scores?.games ?? [], [scores]);
 
-  // Every mark the week could draw, asked for as soon as the week is scored rather
+  // Every logo the week could show, asked for as soon as the week is scored rather
   // than when a game is opened, so the scoreline comes up with its marks already on
-  // it. React holds one request per URL however many renders ask for it.
+  // it.
   games.forEach((it) => {
     [it.result?.home.team.logoUrl, it.result?.away.team.logoUrl].forEach(
       (url) => {
-        if (url != null) preload(url, { as: "image" });
+        if (url != null) prefetchLogo(url);
       },
     );
   });

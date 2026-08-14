@@ -26,25 +26,54 @@ const BACKGROUND_STYLE = {
 const loadedSources = new Set<string>();
 
 /**
- * Whether the browser holds the image, so a background drawn from it can be faded
- * in rather than appear all at once. True from the first render once the image has
- * been through here before, which is what keeps the fade to the first page.
+ * The width the stylesheet stops drawing the tiles at, asked as a query. Read from
+ * the token `index.scss` exports rather than written again here, so the fetch and
+ * the paint cannot disagree about where a phone ends.
+ *
+ * Negated rather than turned into a `max-width`, which would take in the breakpoint
+ * itself: the stylesheet's own query is `min-width`, and this has to be exactly the
+ * width it does not cover.
  */
-function useImageLoaded(source: string): boolean {
+function tilesDrawnQuery(): string {
+  const width = getComputedStyle(document.documentElement)
+    .getPropertyValue("--rak-breakpoint-roomy")
+    .trim();
+  return `not all and (min-width: ${width})`;
+}
+
+/**
+ * Whether the browser holds the tile, so a background drawn from it can be faded in
+ * rather than appear all at once. True from the first render once the image has been
+ * through here before, which is what keeps the fade to the first page.
+ *
+ * Asked for only where the stylesheet draws it. Above that width the tiles are
+ * `display: none`, so the browser never fetches them for the page itself and this
+ * was the only thing pulling them down. Watched rather than read once, because a
+ * window dragged narrow crosses the same line without a reload.
+ */
+function useTileLoaded(source: string): boolean {
   const [isLoaded, setIsLoaded] = useState(() => loadedSources.has(source));
 
   useEffect(() => {
     if (loadedSources.has(source)) return;
-    const image = new Image();
-    // Listen before asking, because an image already in the cache still fires
-    // `load`, and it can fire as soon as the source is set.
-    image.onload = () => {
-      loadedSources.add(source);
-      setIsLoaded(true);
+    const drawn = window.matchMedia(tilesDrawnQuery());
+    let image: HTMLImageElement | undefined;
+    const fetchOnce = () => {
+      if (image || !drawn.matches) return;
+      image = new Image();
+      // Listen before asking, because an image already in the cache still fires
+      // `load`, and it can fire as soon as the source is set.
+      image.onload = () => {
+        loadedSources.add(source);
+        setIsLoaded(true);
+      };
+      image.src = source;
     };
-    image.src = source;
+    fetchOnce();
+    drawn.addEventListener("change", fetchOnce);
     return () => {
-      image.onload = null;
+      drawn.removeEventListener("change", fetchOnce);
+      if (image) image.onload = null;
     };
   }, [source]);
 
@@ -75,7 +104,7 @@ export default function PageLayout({
    */
   scrollable?: boolean;
 }>) {
-  const areTilesLoaded = useImageLoaded(BACKGROUND_TILE);
+  const areTilesLoaded = useTileLoaded(BACKGROUND_TILE);
 
   return (
     <div
@@ -107,7 +136,7 @@ export default function PageLayout({
         </span>
         <p className="page__rotate-message">Turn your phone upright</p>
         <p className="page__rotate-detail">
-          Rakulator does not support landscape on a phone.
+          The Rakulator does not support landscape on a phone.
         </p>
       </div>
     </div>

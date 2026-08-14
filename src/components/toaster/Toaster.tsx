@@ -1,6 +1,6 @@
 import {
   CheckCircleIcon,
-  CloseRoundedIcon,
+  CloseIcon,
   InfoIcon,
   ReportIcon,
   WarningIcon,
@@ -66,7 +66,7 @@ export default function Toaster() {
               className="toast__close"
               onClick={() => removeToast(toast)}
             >
-              <CloseRoundedIcon />
+              <CloseIcon />
             </Button>
           </div>
         );

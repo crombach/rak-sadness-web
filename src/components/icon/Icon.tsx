@@ -2,28 +2,41 @@ import { ReactNode } from "react";
 import "./Icon.scss";
 
 /**
- * The icon set, drawn from path data copied verbatim out of
- * `@mui/icons-material`, which ships Material Design icons under Apache 2.0.
- *
- * Inlined rather than imported because those components are built on
- * `@mui/material`'s `createSvgIcon`, which pulled `@mui/material` and emotion into
- * the bundle for the sake of ten shapes. The `<svg>` here carries the same box and
- * fill rules that `SvgIcon` applied, so nothing downstream had to be resized.
- *
- * One shape comes from Material Symbols instead, which that package does not
- * carry. Same icon, same licence, filled style to match the rest, with its path
- * data rescaled from Symbols' `0 -960 960 960` box onto the standard one here so
- * it drops onto the same grid as everything else.
+ * The box Material Symbols draws in. Every shape below is copied verbatim out of
+ * the set at weight 400, so none of them has to be rescaled onto a grid of the
+ * app's own.
  */
-function Icon({ name, children }: { name: string; children: ReactNode }) {
+const SYMBOLS_VIEW_BOX = "0 -960 960 960";
+
+/**
+ * The icon set, drawn from Material Symbols Sharp at weight 400, which Google
+ * ships under Apache 2.0. Sharp because its terminals are square and its corners
+ * unrounded, which is the same panel the app's keys and bezels are pressed out of.
+ *
+ * Inlined as path data rather than imported, because an icon package built on
+ * components pulls a UI library and a CSS-in-JS runtime into the bundle for the
+ * sake of a dozen shapes.
+ *
+ * One shape is not Material at all: `GitHubIcon` is a wordmark, and passes the
+ * `viewBox` it was drawn in.
+ */
+function Icon({
+  name,
+  viewBox = SYMBOLS_VIEW_BOX,
+  children,
+}: {
+  name: string;
+  viewBox?: string;
+  children: ReactNode;
+}) {
   return (
     <svg
       className="icon"
-      viewBox="0 0 24 24"
+      viewBox={viewBox}
       aria-hidden="true"
       focusable="false"
-      // The name `@mui/icons-material` put here, which the toaster suite looks an
-      // icon up by. An icon is decorative, so there is nothing else to find it by.
+      // An icon here is decorative, so a test has nothing else to find it by. The
+      // toaster and player status suites both look one up by this.
       data-testid={name}
     >
       {children}
@@ -34,7 +47,7 @@ function Icon({ name, children }: { name: string; children: ReactNode }) {
 export function UnfoldMoreIcon() {
   return (
     <Icon name="UnfoldMoreIcon">
-      <path d="M12 5.83 15.17 9l1.41-1.41L12 3 7.41 7.59 8.83 9zm0 12.34L8.83 15l-1.41 1.41L12 21l4.59-4.59L15.17 15z" />
+      <path d="M480-120 300-300l44-44 136 136 136-136 44 44-180 180ZM344-612l-44-44 180-180 180 180-44 44-136-136-136 136Z" />
     </Icon>
   );
 }
@@ -42,7 +55,7 @@ export function UnfoldMoreIcon() {
 export function InfoIcon() {
   return (
     <Icon name="InfoIcon">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m1 15h-2v-6h2zm0-8h-2V7h2z" />
+      <path d="M453-280h60v-240h-60v240Zm50.5-323.2q9.5-9.2 9.5-22.8 0-14.45-9.48-24.22-9.48-9.78-23.5-9.78t-23.52 9.78Q447-640.45 447-626q0 13.6 9.48 22.8 9.48 9.2 23.5 9.2t23.52-9.2ZM480.27-80q-82.74 0-155.5-31.5Q252-143 197.5-197.5t-86-127.34Q80-397.68 80-480.5t31.5-155.66Q143-709 197.5-763t127.34-85.5Q397.68-880 480.5-880t155.66 31.5Q709-817 763-763t85.5 127Q880-563 880-480.27q0 82.74-31.5 155.5Q817-252 763-197.68q-54 54.31-127 86Q563-80 480.27-80Z" />
     </Icon>
   );
 }
@@ -50,7 +63,7 @@ export function InfoIcon() {
 export function FactCheckIcon() {
   return (
     <Icon name="FactCheckIcon">
-      <path d="M20 3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2M10 17H5v-2h5zm0-4H5v-2h5zm0-4H5V7h5zm4.82 6L12 12.16l1.41-1.41 1.41 1.42L17.99 9l1.42 1.42z" />
+      <path d="M200-280h200v-80H200v80Zm382-80 198-198-57-57-141 142-57-57-56 57 113 113Zm-382-80h200v-80H200v80Zm0-160h200v-80H200v80ZM72-120v-720h816v720H72Z" />
     </Icon>
   );
 }
@@ -58,7 +71,7 @@ export function FactCheckIcon() {
 export function LeaderboardIcon() {
   return (
     <Icon name="LeaderboardIcon">
-      <path d="M7.5 21H2V9h5.5zm7.25-18h-5.5v18h5.5zM22 11h-5.5v10H22z" />
+      <path d="M80-120v-480h210v480H80Zm295 0v-720h210v720H375Zm295 0v-400h210v400H670Z" />
     </Icon>
   );
 }
@@ -66,7 +79,7 @@ export function LeaderboardIcon() {
 export function RefreshIcon() {
   return (
     <Icon name="RefreshIcon">
-      <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z" />
+      <path d="M480-160q-133 0-226.5-93.5T160-480q0-133 93.5-226.5T480-800q85 0 149 34.5T740-671v-129h60v254H546v-60h168q-38-60-97-97t-137-37q-109 0-184.5 75.5T220-480q0 109 75.5 184.5T480-220q83 0 152-47.5T728-393h62q-29 105-115 169t-195 64Z" />
     </Icon>
   );
 }
@@ -74,7 +87,7 @@ export function RefreshIcon() {
 export function ScreenRotationIcon() {
   return (
     <Icon name="ScreenRotationIcon">
-      <path d="M16.48 2.52c3.27 1.55 5.61 4.72 5.97 8.48h1.5C23.44 4.84 18.29 0 12 0l-.66.03 3.81 3.81zm-6.25-.77c-.59-.59-1.54-.59-2.12 0L1.75 8.11c-.59.59-.59 1.54 0 2.12l12.02 12.02c.59.59 1.54.59 2.12 0l6.36-6.36c.59-.59.59-1.54 0-2.12zm4.6 19.44L2.81 9.17l6.36-6.36 12.02 12.02zm-7.31.29C4.25 19.94 1.91 16.76 1.55 13H.05C.56 19.16 5.71 24 12 24l.66-.03-3.81-3.81z" />
+      <path d="M544-48 128-462h86l330 330 246-246H652v-60h240v240h-60v-138L544-48ZM68-522v-240h60v138l288-288 416 414h-86L416-828 170-582h138v60H68Z" />
     </Icon>
   );
 }
@@ -82,7 +95,7 @@ export function ScreenRotationIcon() {
 export function EmojiEventsIcon() {
   return (
     <Icon name="EmojiEventsIcon">
-      <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2M5 8V7h2v3.82C5.84 10.4 5 9.3 5 8m14 0c0 1.3-.84 2.4-2 2.82V7h2z" />
+      <path d="M298-120v-60h152v-148q-54-11-96-46.5T296-463q-74-8-125-60t-51-125v-104h164v-88h392v88h164v104q0 73-51 125t-125 60q-16 53-58 88.5T510-328v148h152v60H298Zm-14-406v-166H180v44q0 45 29.5 78.5T284-526Zm392 0q45-10 74.5-43.5T780-648v-44H676v166Z" />
     </Icon>
   );
 }
@@ -94,38 +107,41 @@ export function EmojiEventsIcon() {
 export function EmojiEventsOutlinedIcon() {
   return (
     <Icon name="EmojiEventsOutlinedIcon">
-      <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2M5 8V7h2v3.82C5.84 10.4 5 9.3 5 8m7 6c-1.65 0-3-1.35-3-3V5h6v6c0 1.65-1.35 3-3 3m7-6c0 1.3-.84 2.4-2 2.82V7h2z" />
+      <path d="M298-120v-60h152v-148q-54-11-96-46.5T296-463q-74-8-125-60t-51-125v-104h164v-88h392v88h164v104q0 73-51 125t-125 60q-16 53-58 88.5T510-328v148h152v60H298Zm-14-406v-166H180v44q0 45 29.5 78.5T284-526Zm292.5 101q39.5-40 39.5-97v-258H344v258q0 57 39.5 97t96.5 40q57 0 96.5-40ZM676-526q45-10 74.5-43.5T780-648v-44H676v166Zm-196-57Z" />
+    </Icon>
+  );
+}
+
+export function SkullOutlinedIcon() {
+  return (
+    <Icon name="SkullOutlinedIcon">
+      <path d="M240-80v-170q-36-16-65.5-43T124-355.5Q103-391 91.5-433T80-520q0-158 112-259t288-101q176 0 288 101t112 259q0 45-11.5 87T836-355.5Q815-320 785.5-293T720-250v170H240Zm60-60h70v-100h60v100h100v-100h60v100h70v-147q37-11 66.5-33t50.5-52.5q21-30.5 32-68.02 11-37.52 11-79.33 0-133.99-94-217.07Q632-820 480.04-820q-151.95 0-246 83.09Q140-653.82 140-519.81q0 41.81 11 79.31t32 68q21 30.5 50.5 52.5t66.5 33v147Zm120-220h120l-60-120-60 120Zm-79.91-100q28.91 0 49.41-20.59 20.5-20.59 20.5-49.5t-20.59-49.41q-20.59-20.5-49.5-20.5t-49.41 20.59q-20.5 20.59-20.5 49.5t20.59 49.41q20.59 20.5 49.5 20.5Zm280 0q28.91 0 49.41-20.59 20.5-20.59 20.5-49.5t-20.59-49.41q-20.59-20.5-49.5-20.5t-49.41 20.59q-20.5 20.59-20.5 49.5t20.59 49.41q20.59 20.5 49.5 20.5ZM480-140Z" />
     </Icon>
   );
 }
 
 /**
- * A Material Symbol rather than a Material Design icon, rescaled onto the same 24
- * grid as everything else here, drawn as an outline to sit beside the outlined
- * trophy above.
+ * A player still standing, drawn as an outline beside the other two a status
+ * wears. Filled, the face is a disc with the eyes and the mouth cut out of it in
+ * the same direction the disc is drawn, which the non-zero fill rule reads as one
+ * shape rather than as holes: it came out as a blot.
  */
-export function SkullOutlinedIcon() {
+export function SentimentVerySatisfiedOutlinedIcon() {
   return (
-    <Icon name="SkullOutlinedIcon">
-      <path d="M6 22v-4.25q-.98-.43-1.71-1.14t-1.25-1.61q-.51-.9-.78-1.93T2 11q0-3.95 2.8-6.48t7.2-2.53q4.4 0 7.2 2.53t2.8 6.48q0 1.05-.26 2.08t-.78 1.93q-.51.9-1.25 1.61T18 17.75v4.25H15v-2h-2v2h-2v-2h-2v2H6Zm2-2h1v-2h2v2h2v-2h2v2h1v-3.55q.95-.22 1.69-.75t1.25-1.25q.51-.72.79-1.6T20.5 11q0-3.13-2.21-5.31Q16.07 3.5 12 3.5T5.71 5.69Q3.5 7.87 3.5 11q0 .97.28 1.85t.79 1.6q.51.72 1.25 1.25T7.5 16.45V20H8Zm2.5-4.25h3l-1.5-3-1.5 3ZM8.5 13q.83 0 1.41-.59T10.5 11q0-.83-.59-1.41T8.5 9q-.83 0-1.41.59T6.5 11q0 .83.59 1.41T8.5 13Zm7 0q.83 0 1.41-.59T17.5 11q0-.83-.59-1.41T15.5 9q-.83 0-1.41.59T13.5 11q0 .83.59 1.41T15.5 13ZM12 12Z" />
+    <Icon name="SentimentVerySatisfiedOutlinedIcon">
+      <path d="M601.5-296.5Q657-332 682-393H278q26 61 81 96.5T480-261q66 0 121.5-35.5ZM302-533l45-45 45 45 36-36-81-81-81 81 36 36Zm267 0 45-45 45 45 36-36-81-81-81 81 36 36ZM324-111.5Q251-143 197-197t-85.5-127Q80-397 80-480t31.5-156Q143-709 197-763t127-85.5Q397-880 480-880t156 31.5Q709-817 763-763t85.5 127Q880-563 880-480t-31.5 156Q817-251 763-197t-127 85.5Q563-80 480-80t-156-31.5ZM480-480Zm241 241q99-99 99-241t-99-241q-99-99-241-99t-241 99q-99 99-99 241t99 241q99 99 241 99t241-99Z" />
     </Icon>
   );
 }
 
-export function SentimentVerySatisfiedIcon() {
+/**
+ * The tick alone, cropped to its own edges rather than Material's full
+ * 960x960 box, which would otherwise sit empty around it.
+ */
+export function CheckIcon() {
   return (
-    <Icon name="SentimentVerySatisfiedIcon">
-      <circle cx="15.5" cy="9.5" r="1.5" />
-      <circle cx="8.5" cy="9.5" r="1.5" />
-      <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2M12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8m-5-6c.78 2.34 2.72 4 5 4s4.22-1.66 5-4z" />
-    </Icon>
-  );
-}
-
-export function CheckBoxIcon() {
-  return (
-    <Icon name="CheckBoxIcon">
-      <path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m-9 14-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8z" />
+    <Icon name="CheckIcon" viewBox="257 -654 451 333">
+      <path d="m419-321 289-290-43-43-246 247-119-119-43 43 162 162Z" />
     </Icon>
   );
 }
@@ -133,7 +149,7 @@ export function CheckBoxIcon() {
 export function EventIcon() {
   return (
     <Icon name="EventIcon">
-      <path d="M17 12h-5v5h5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1zm3 18H5V8h14z" />
+      <path d="M528-248.18q-28-28.19-28-69Q500-358 528.18-386q28.19-28 69-28Q638-414 666-385.82q28 28.19 28 69Q694-276 665.82-248q-28.19 28-69 28Q556-220 528-248.18ZM120-80v-740h125v-60h65v60h340v-60h65v60h125v740H120Zm60-60h600v-430H180v430Z" />
     </Icon>
   );
 }
@@ -141,15 +157,15 @@ export function EventIcon() {
 export function CheckCircleIcon() {
   return (
     <Icon name="CheckCircleIcon">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8z" />
+      <path d="m421-298 283-283-46-45-237 237-120-120-45 45 165 166Zm59 218q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 31.5-156t86-127Q252-817 325-848.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 82-31.5 155T763-197.5q-54 54.5-127 86T480-80Z" />
     </Icon>
   );
 }
 
-export function CloseRoundedIcon() {
+export function CloseIcon() {
   return (
-    <Icon name="CloseRoundedIcon">
-      <path d="M18.3 5.71a.996.996 0 0 0-1.41 0L12 10.59 7.11 5.7a.996.996 0 0 0-1.41 0c-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0L12 13.41l4.89 4.89c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4" />
+    <Icon name="CloseIcon">
+      <path d="m249-207-42-42 231-231-231-231 42-42 231 231 231-231 42 42-231 231 231 231-42 42-231-231-231 231Z" />
     </Icon>
   );
 }
@@ -157,7 +173,7 @@ export function CloseRoundedIcon() {
 export function ReportIcon() {
   return (
     <Icon name="ReportIcon">
-      <path d="M15.73 3H8.27L3 8.27v7.46L8.27 21h7.46L21 15.73V8.27zM12 17.3c-.72 0-1.3-.58-1.3-1.3s.58-1.3 1.3-1.3 1.3.58 1.3 1.3-.58 1.3-1.3 1.3m1-4.3h-2V7h2z" />
+      <path d="M480-281q14 0 24.5-10.5T515-316q0-14-10.5-24.5T480-351q-14 0-24.5 10.5T445-316q0 14 10.5 24.5T480-281Zm-30-144h60v-263h-60v263ZM330-120 120-330v-300l210-210h300l210 210v300L630-120H330Z" />
     </Icon>
   );
 }
@@ -165,14 +181,35 @@ export function ReportIcon() {
 export function WarningIcon() {
   return (
     <Icon name="WarningIcon">
-      <path d="M1 21h22L12 2zm12-3h-2v-2h2zm0-4h-2v-4h2z" />
+      <path d="m40-120 440-760 440 760H40Zm465.5-125.68q8.5-8.67 8.5-21.5 0-12.82-8.68-21.32-8.67-8.5-21.5-8.5-12.82 0-21.32 8.68-8.5 8.67-8.5 21.5 0 12.82 8.68 21.32 8.67 8.5 21.5 8.5 12.82 0 21.32-8.68ZM454-348h60v-224h-60v224Z" />
+    </Icon>
+  );
+}
+
+/**
+ * Which side has the ball, pointed at their score in the game dialog.
+ *
+ * A shape rather than a triangle character, because the mark has to stand level
+ * with a row of seven-segment digits. A glyph is placed by whichever font in the
+ * stack happens to carry it, and the two triangles in one face are not even drawn
+ * at the same height, so where it landed was the reader's font stack's to decide.
+ *
+ * The box is cut to the shape's own edges rather than left at Material's, which
+ * gives a triangle a third of its width in air on one side and a fifth on the
+ * other. In the readout the mark is spaced against digits, and air the box carries
+ * is space the row cannot see to set.
+ */
+export function PossessionIcon() {
+  return (
+    <Icon name="PossessionIcon" viewBox="320 -760 440 560">
+      <path d="M320-200v-560l440 280-440 280Z" />
     </Icon>
   );
 }
 
 export function GitHubIcon() {
   return (
-    <Icon name="GitHubIcon">
+    <Icon name="GitHubIcon" viewBox="0 0 24 24">
       <path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27" />
     </Icon>
   );

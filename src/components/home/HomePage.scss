@@ -7,6 +7,9 @@
   @include field-shell;
 
   justify-content: space-between;
+  // The face the tables and the dialog's own search are set in. What a socket holds
+  // is a value read off the device, the same as a cell of the table below it.
+  font-family: var(--rak-font-mono);
   cursor: pointer;
 
   &[data-disabled] {
@@ -31,6 +34,10 @@
 
 .select__item {
   @include listbox-item;
+
+  // The trigger's face, so what an option says and what the socket shows once it is
+  // chosen are set the same.
+  font-family: var(--rak-font-mono);
 }
 
 .home__controls {
@@ -67,9 +74,20 @@
   width: 100%;
   min-width: min-content;
   min-height: var(--rak-control-height);
-  transition-property: height, min-height, opacity, color, background-color;
-  transition-duration: var(--rak-duration-slow);
-  transition-timing-function: var(--rak-ease-standard);
+  // Collapsing takes the slow step and everything a key does keeps the fast one, so
+  // both durations are listed per property rather than set once on the shorthand.
+  // The two halves are told apart by what they are for, not by which rule they came
+  // from, so the key's own timing is repeated here from `Button.scss`.
+  transition:
+    height var(--rak-duration-slow) var(--rak-ease-standard),
+    min-height var(--rak-duration-slow) var(--rak-ease-standard),
+    margin-top var(--rak-duration-slow) var(--rak-ease-standard),
+    padding var(--rak-duration-slow) var(--rak-ease-standard),
+    opacity var(--rak-duration-slow) var(--rak-ease-standard),
+    background-color var(--rak-duration-slow) var(--rak-ease-standard),
+    color var(--rak-duration-slow) var(--rak-ease-standard),
+    box-shadow var(--rak-duration-slow) var(--rak-ease-key),
+    transform var(--rak-duration-fast) var(--rak-ease-key);
   margin-top: var(--rak-control-gap);
   opacity: 1;
   visibility: visible;

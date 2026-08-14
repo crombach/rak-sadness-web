@@ -188,10 +188,10 @@ describe("the app, first load", () => {
     // Matched whole rather than by substring, so the unlit segments drawn over
     // the name have to stay out of the button's accessible name to pass.
     expect(
-      screen.getByRole("button", { name: "Rakulator" }),
+      screen.getByRole("button", { name: "The Rakulator" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { level: 1, name: "Rakulator" }),
+      screen.getByRole("heading", { level: 1, name: "The Rakulator" }),
     ).toBeInTheDocument();
   });
 

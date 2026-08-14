@@ -1,0 +1,25 @@
+// The one "screen cut into a panel" look every readout in the app shares: the
+// scoreline in the game dialog and the app's own name in the navbar. Mixins only,
+// so this emits no CSS of its own however many files pull it in.
+
+/**
+ * A well of `--rak-primary-800`, framed in a plate `$plate-width` wide: the plate
+ * itself in the surface's own primary, and past it the plate's lit top edge and
+ * the shadow it throws. Rings rather than a border or a wrapper, because a spread
+ * shadow is drawn outside the box without taking any room in the layout.
+ *
+ * The plate ring draws nothing where the surface the glass sits on is already
+ * `--rak-primary-500`, which is the navbar. It still earns its keep there: the two
+ * rings past it, which do show, need that band to sit on.
+ */
+@mixin lcd-glass($plate-width: 4px) {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--rak-radius-xs);
+  background-color: var(--rak-primary-800);
+  box-shadow:
+    var(--rak-well),
+    0 0 0 $plate-width var(--rak-primary-500),
+    0 -1px 0 $plate-width rgb(255 255 255 / 20%),
+    0 2px 2px $plate-width rgb(0 0 0 / 22%);
+}

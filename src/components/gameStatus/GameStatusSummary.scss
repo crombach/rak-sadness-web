@@ -1,20 +1,23 @@
 @use "../../styles/a11y" as *;
 @use "../../styles/breakpoints" as *;
+@use "../../styles/label" as *;
+@use "../../styles/lcd" as *;
 @use "../../styles/skeleton" as *;
 
 // Which side a player had to pick to score the point, and which one cost them it,
-// in the two hues the picks table fills a cell with. The 600 rather than the 300 that
-// fill is: 300 is a wash behind black text and does not carry as ink on white.
+// in the two hues the picks table fills a cell with. The 400 step, which is the one
+// that reads both on the white a name is set on and on the dark its score is lit
+// against, so a side and its number are the same color rather than two shades of it.
 //
 // Neither side is marked where nobody scored, and the sentence under the scores names
 // the side in words, so nothing here rests on the hue alone.
 @mixin outcome {
   &.--scored {
-    color: var(--rak-success-600);
+    color: var(--rak-success-400);
   }
 
   &.--missed {
-    color: var(--rak-danger-600);
+    color: var(--rak-danger-400);
   }
 }
 
@@ -22,6 +25,13 @@
 @mixin meta-dot {
   content: "·";
   margin-inline: var(--rak-space-2);
+}
+
+// The dash and the score digits share one face, so both are set in it the same way.
+@mixin segment-face {
+  font-family: var(--rak-font-segment);
+  // The face ships in its bold cut alone, which `src/index.tsx` is what loads.
+  font-weight: var(--rak-weight-bold);
 }
 
 // A bar over the words an element holds, one on each line of it, so a name that wraps
@@ -49,17 +59,31 @@
 // A phone sets them a step over those names and no further down: the scores are what
 // the row is about, and a pair set as big as the two names stops reading as the answer
 // to it.
+//
+// The mark is given as the height of the shape rather than of a box around it, and
+// the gap is every space around it: mark to edge, mark to score. One value, because
+// a mark spaced two different ways from what it stands beside reads as two different
+// marks. The score meets the dash with no gap at all: the pair reads as one number
+// split by the line between them, not as two numbers with room to spare.
 .game-status {
   --rak-score-size: 1.5rem;
-  --rak-marker-size: 1.5rem;
+  --rak-marker-size: 0.875rem;
+  --rak-score-gap: var(--rak-space-1);
 
   display: flex;
   flex-direction: column;
   gap: var(--rak-space-4);
 
+  // A seven-segment digit is wider per em than a drawn one and stands its whole em
+  // box tall against a drawn one's cap height, so this reads as large as a bigger
+  // size in a normal face would. Sized down from that to leave `useScorelineFit`
+  // room for a pair as long as `Jacksonville Jaguars` against `Washington Commanders`
+  // without abbreviating. A phone is narrower than either name fits regardless, so
+  // its own size stays where the rest of the row already sets it.
   @include roomy-screen {
-    --rak-score-size: 2.5rem;
-    --rak-marker-size: 2.25rem;
+    --rak-score-size: 2rem;
+    --rak-marker-size: 1rem;
+    --rak-score-gap: var(--rak-space-2);
   }
 }
 
@@ -102,6 +126,12 @@
     }
   }
 
+  // A wireframe knows no score, so it lights no cells and shows none waiting either.
+  // The bar over the number is what stands in for the whole readout.
+  .game-status__points-ghost {
+    display: none;
+  }
+
   // The mark's own square, filled. Round, because a square block reads as a blot at
   // that size.
   .game-status__logo {
@@ -130,10 +160,25 @@
 .game-status__spread {
   align-self: center;
   margin: 0;
-  color: var(--rak-text-secondary);
+  // The grey the labels over the two names are set in, so the line over the
+  // scoreline and the labels inside it read as one tier of the same dialog.
+  color: var(--rak-text-tertiary);
   font-size: var(--rak-text-sm);
   font-weight: var(--rak-weight-semibold);
   text-align: center;
+}
+
+// The line itself, in the face the picks table sets every number in. `None` too: it
+// answers the same question, and a value that changes face with its own value reads
+// as two different fields. Set in the grey the records under the two names carry,
+// which is the same grey their labels do, so the face is what tells the answer from
+// the question rather than a second color on one line.
+.game-status__spread-value {
+  color: var(--rak-text-tertiary);
+  font-family: var(--rak-font-mono);
+  // Off the label's own weight, which is the other half of telling the answer from
+  // the question: the label is what is bold here, and the line it gives is read.
+  font-weight: normal;
 }
 
 // What is the same about the game however it is going: when it starts and where it
@@ -202,6 +247,16 @@
     width: 44px;
     height: 44px;
   }
+}
+
+// Stands in the same cell the real image below it also holds, so the two swap
+// with nothing else on the row moving. Static rather than the wireframe's sheen:
+// the rest of the row is the real answer already, and a sweep next to it reads
+// as the answer being unsure of itself.
+.game-status__logo.--placeholder {
+  @include skeleton-surface;
+
+  border-radius: 50%;
 }
 
 // Each side out on its own edge, and between them one block holding both scores and,
@@ -279,26 +334,33 @@
   }
 }
 
-// Held to the scores it joins, so it grows with them.
+// Held to the scores it joins, so it grows with them. Lit plain white rather than in
+// either side's hue: it belongs to neither of them, and on a readout a cell that is on
+// is on.
+//
+// A cell of the same readout, in the same face, which is what stands it level with the
+// digits either side: its hyphen is the bar across the middle of a cell, drawn on the
+// line the digits leave a gap on. Any drawn face puts its dash somewhere of its own.
 .game-status__dash {
-  color: var(--rak-primary-700);
+  @include segment-face;
+
+  color: var(--rak-on-solid);
   font-size: var(--rak-score-size);
   line-height: 1.1;
 }
 
 .game-status__side-label {
+  @include micro-label;
+
   color: var(--rak-text-tertiary);
   font-size: var(--rak-text-xs);
-  font-weight: var(--rak-weight-semibold);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 // A step up on the rest of the side text, since the score beside it is what the row is
 // otherwise all about, and set tighter than the app's own leading: a name of two or
 // three words is one name, and reads as one thing only if its lines are set close.
 .game-status__team-name {
-  color: var(--rak-text-primary);
+  color: var(--rak-text);
   font-size: var(--rak-text-lg);
   font-weight: var(--rak-weight-semibold);
   line-height: 1.1;
@@ -352,9 +414,9 @@
 .game-status__score {
   display: flex;
   align-items: center;
-  gap: var(--rak-space-1);
+  gap: var(--rak-score-gap);
   margin: 0;
-  color: var(--rak-primary-700);
+  color: var(--rak-on-solid);
   font-size: var(--rak-score-size);
   font-weight: var(--rak-weight-bold);
   line-height: 1.1;
@@ -365,33 +427,76 @@
     flex-direction: row-reverse;
   }
 
+  // One glyph for both sides, turned around here rather than written as the other
+  // triangle. The face draws the two at different heights, so a pair of them would
+  // sit a pixel apart on a row whose whole point is that the sides mirror.
+  &.--home .game-status__marker {
+    transform: scaleX(-1);
+  }
+
   @include outcome;
 }
 
 // Two digits wide whether the side has one or two, so a score going from 7 to 14
 // between two polls moves neither the dash nor the sides either side of it.
+//
+// The one place in the app the seven-segment face is set. A pair of two-digit scores
+// is what a readout is for, and it is large enough here that segments cost the reader
+// nothing. Everything else stays in a face that draws letters.
 .game-status__points {
+  @include segment-face;
+
+  position: relative;
   min-width: 2ch;
   font-variant-numeric: tabular-nums;
-  text-align: center;
+  // A score in single figures fills the units cell, its own place, and leaves the
+  // tens cell unlit, the way a hardware scoreboard blanks that digit rather than
+  // showing it as a zero. Centering across both would stand the number over neither.
+  text-align: right;
 }
 
-// Sized against the score it points at rather than against the text around it. A
-// triangle fills little of its em box, so it reads smaller than a letter set as big.
-.game-status__marker {
-  color: var(--rak-brand-light);
-  font-size: var(--rak-marker-size);
-  line-height: 1;
-  // A triangle is drawn on the middle of the em box and a digit stands on the
-  // baseline, so lining the two boxes up leaves the triangle low. Measured at a
-  // tenth of its own size, at both of the sizes it is set at.
-  transform: translateY(-0.1em);
+// The segments the display leaves dark, laid under the number rather than beside it.
+// Stretched across the whole box and centered like the number, so the two stay
+// stacked whether the score is one digit or two.
+.game-status__points-ghost {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  // One wash for every cell that is off, whatever the lit ones beside it are drawn in.
+  // A cell has no color of its own until it is lit.
+  color: var(--rak-unlit);
+  // Out of any selection dragged over the scoreline. Selectable, copying the score
+  // carried the row of eights out with it.
+  user-select: none;
+}
 
-  // Both sides carry a marker whatever the game is doing, and every side without the
-  // ball wears an invisible one. It holds the room the visible one takes, so the
-  // scores stay either side of the middle as the ball changes hands.
+// A drawn shape rather than a triangle character, and no nudge off the middle of its
+// box. The shape is cut to its own edges, and a seven-segment digit runs the whole em
+// box, so both are centered in the line the row centers on and the mark lands on the
+// bar across the middle of the digit. A glyph landed wherever the reader's font stack
+// drew it.
+.game-status__marker {
+  display: flex;
+  // Lit like the dash between the scores, and for the same reason: the mark belongs
+  // to neither side's hue, and on a readout a cell that is on is on.
+  color: var(--rak-on-solid);
+
+  // Sized outright rather than in `em`, because `.icon` sets a font size of its
+  // own that an `em` here would be read against. Across, whatever that height makes
+  // it: the shape is 440 units wide over 560 tall in the box it is cut to, and the
+  // gap either side of the mark is the readout's to set rather than the box's.
+  > svg {
+    width: calc(var(--rak-marker-size) * 440 / 560);
+    height: var(--rak-marker-size);
+  }
+
+  // Both sides carry a marker whatever the game is doing, and the side without the
+  // ball wears an unlit one. It holds the room the lit one takes, so the scores stay
+  // either side of the middle as the ball changes hands, and it is the same cell the
+  // digits beside it show waiting: the readout has a shape for possession whether or
+  // not anybody has it.
   &.--blank {
-    opacity: 0;
+    color: var(--rak-unlit);
   }
 }
 
@@ -415,17 +520,17 @@
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   justify-self: center;
-  // Tight around the dash on a phone, where the room either side of it is room the
-  // names have not got. A dash reads as joining the two scores at either gap, and the
-  // wider one is only worth having where there is width to spend on it.
-  gap: var(--rak-space-1);
-  // Room either side of the pair, past the marker each of them already holds, so the
-  // scores are never read as running into the names beside them.
-  padding-inline: var(--rak-space-2);
+  // The same space a side's own marker sits its score apart by, so the glass keeps
+  // one rhythm rather than two. The plate below is drawn outside this box, so it is
+  // not room the readout has to find: what is spaced here is what is lit.
+  padding-inline: var(--rak-score-gap);
+  // One screen holding both scores and the dash they meet at, sunk into the dialog the
+  // way the app name is sunk into the navbar. The pair is one reading, so it is lit
+  // behind one piece of glass rather than two. `lcd-glass` is the one well-and-plate
+  // recipe `LogoButton.scss` cuts its own name into as well.
+  padding-block: var(--rak-space-1);
 
-  @include roomy-screen {
-    gap: var(--rak-space-2);
-  }
+  @include lcd-glass;
 }
 
 .game-status__detail,
@@ -440,7 +545,7 @@
 
 .game-status__detail {
   grid-row: 1;
-  color: var(--rak-text-primary);
+  color: var(--rak-text);
   font-size: var(--rak-text-md);
   font-weight: var(--rak-weight-semibold);
 }

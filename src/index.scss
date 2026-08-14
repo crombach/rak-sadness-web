@@ -8,18 +8,23 @@
   // system is set to dark.
   color-scheme: light;
 
-  // Type. `Inter Variable` is the family `@fontsource-variable/inter` registers,
-  // which `src/index.tsx` loads. Naming it anything else downloads the font and
-  // renders in the fallback.
+  // Type. A squared face with cut corners and flat terminals, which is the app's
+  // own chrome: it reads as an instrument panel rather than as a page, and its
+  // capitals hold at the sizes the labels are set. Narrow enough for `MNF POINTS`
+  // to stand on one line in a score column, which is the tightest thing the app
+  // asks of a body face. `src/index.tsx` loads the four weights it is set at.
   --rak-font-body:
-    "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Chakra Petch", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
     "Segoe UI Symbol";
   // Picks are laid out in character widths: `18ch` for a name, `3ch` for a pick
-  // label. A bare `monospace` resolves to Courier on some Android builds, whose
-  // advance width is narrow enough to change how many columns fit.
+  // label. Shipped rather than left to the system, so every reader gets the same
+  // advance and the columns come out the width they were declared at. The system
+  // stack stays behind it: a bare `monospace` resolves to Courier on some Android
+  // builds, whose advance is narrow enough to change how many columns fit.
   --rak-font-mono:
-    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    monospace;
   // The app name alone, in the 14-segment display face a calculator reads out
   // through. It has no lowercase and draws every letter as a capital, so the
   // name stays ordinary mixed-case text in the DOM. `src/index.tsx` loads its
@@ -28,17 +33,40 @@
   // over a row of all-segments-on characters, and only a fixed advance keeps the
   // two layers on top of each other while the face is still downloading.
   --rak-font-display: "DSEG14 Classic", var(--rak-font-mono);
+  // The digits alone, in the seven-segment face the same foundry draws. Only the
+  // scoreline in the game dialog is set in this: a pair of two-digit scores is
+  // what a readout is for, and segments cost too much of a reader at the sizes
+  // everything else is set. `src/index.tsx` loads its bold cut and only that one.
+  // The fallback is the mono stack for the same reason as the line above: the
+  // digits are drawn over a row of all-segments-on characters, and only a fixed
+  // advance keeps the two layers stacked while the face is still downloading.
+  --rak-font-segment: "DSEG7 Classic", var(--rak-font-mono);
 
   --rak-text-xs: 0.75rem;
   --rak-text-sm: 0.875rem;
   --rak-text-md: 1rem;
   --rak-text-lg: 1.25rem;
+  // Off the scale above, because it is the size a phone's table is set at and the
+  // width every column is declared in. The caption over the table reads it too, so
+  // the two stay one head with a line through it however either is changed.
+  --rak-text-table: 0.8rem;
 
   --rak-weight-medium: 500;
   --rak-weight-semibold: 600;
   --rak-weight-bold: 700;
 
   --rak-line-height: 1.5;
+
+  // The width the tiled logo stops being drawn at, which `PageLayout.tsx` reads so
+  // it can stop fetching the tile there too. The breakpoints themselves are Sass,
+  // because a media query cannot read a custom property, and this is the one place
+  // outside a stylesheet that has to ask a breakpoint's question.
+  --rak-breakpoint-roomy: #{$breakpoint-roomy};
+
+  // What a label set in capitals is opened up by. Capitals are drawn on one
+  // height and run together without it, and every small label in the app is set
+  // this way, so the value is named once here rather than at each of them.
+  --rak-label-tracking: 0.06em;
 
   // Space, on a 4px grid.
   --rak-space-1: 4px;
@@ -47,9 +75,12 @@
   --rak-space-4: 16px;
   --rak-space-6: 24px;
 
-  --rak-radius-xs: 3px;
-  --rak-radius-sm: 6px;
-  --rak-radius-lg: 12px;
+  // Squarer than a card's. The app is drawn as a moulded case with keys set into
+  // it, and a corner rounded much past this stops reading as something pressed
+  // out of a panel.
+  --rak-radius-xs: 2px;
+  --rak-radius-sm: 4px;
+  --rak-radius-lg: 8px;
 
   // Every line the app draws around or between things. A control's boundary has
   // to be told from the surface behind it, so it is darker than a rule drawn
@@ -67,18 +98,24 @@
   --rak-icon-lg: 40px;
 
   // How tall text stands as ink, as a share of its own size, for an icon set beside it
-  // to be drawn to. Measured in a browser, where the body face and the mono face come
-  // out the same: a line of mixed-case text runs from its ascender to its descender,
+  // to be drawn to: a line of mixed-case text runs from its ascender to its descender,
   // and a word set in capitals is its cap height alone. Left in `em`, so either is read
   // against whatever text it is set beside.
-  --rak-text-ink: 0.944em;
-  --rak-caps-ink: 0.728em;
+  //
+  // Measured in a browser for the body face, which is what every shape drawn to these
+  // sits beside. The mono face stands taller than it does, so a shape put next to the
+  // table's text would have to be measured again rather than take these.
+  --rak-text-ink: 0.92em;
+  --rak-caps-ink: 0.7em;
 
   // Motion. Three durations cover every transition and the one loop.
   --rak-duration-fast: 120ms;
   --rak-duration-slow: 300ms;
   --rak-duration-loop: 2000ms;
   --rak-ease-standard: ease;
+  // A key's travel. Out fast and settling, the way a moulded key answers a
+  // finger, rather than the symmetric curve every other transition uses.
+  --rak-ease-key: cubic-bezier(0.2, 0.8, 0.3, 1);
 
   // Stacking, one step per layer the page stacks, so what sits above what is
   // decided in one place. A z-index outside this list orders an element against
@@ -97,32 +134,56 @@
   --rak-z-modal: 1000;
 
   // The page behind the tiled logo, and the largest surface on a phone.
-  --rak-brand-light: #6eaad9;
+  --rak-brand-light: #a4a4a4;
+  // What the app is mounted in on a screen too wide for the tiles to be its
+  // ground. A shade over the frame around the table so that frame still has an
+  // edge to be read against, on the same grey ramp as the rest of the app now.
+  --rak-case: #373737;
 
-  // Primary scale, from the logo's mid blue.
-  --rak-primary-100: #acc2d2;
-  --rak-primary-500: #375267;
-  --rak-primary-600: #2d4253;
-  --rak-primary-700: #243542;
-  --rak-primary-800: #1b2832;
+  // Primary scale, each step the grey the logo's own step in it delinearizes to,
+  // so a surface moved off blue and onto this ramp keeps the contrast ratio it
+  // was set at rather than a new one this ramp would have to be measured for.
+  --rak-primary-100: #bfbfbf;
+  // One step over the 500 the navbar is filled in, for the keys set into it. A key
+  // in the bar's own color is told from it by its edge alone, which is a line 4px
+  // tall to carry a whole control.
+  --rak-primary-400: #5e5e5e;
+  --rak-primary-500: #4f4f4f;
+  --rak-primary-600: #404040;
+  --rak-primary-700: #333333;
+  --rak-primary-800: #262626;
 
   // Semantic ramps. One ramp per meaning, whatever draws it: 100 is a soft fill
   // behind text, 300 fills a table cell, 500 and up are solid fills and text.
   // The table's fills are steps on these rather than a palette of their own, so
   // a wrong pick and a failure are the same red.
+  //
+  // 400 is the one step that reads on the app's white and on the dark a readout
+  // is sunk into, which is what lets the game dialog draw a side's name and its
+  // score in the same color. No step can clear 4.5:1 on both, so it is set at the
+  // dark end of what does on white: 4.6:1 there, and 3.2:1 on the glass, which the
+  // score clears as large text at every size it is set.
   --rak-success-100: #e3fbe3;
   --rak-success-300: #a3faa0;
+  --rak-success-400: #1f871f;
   --rak-success-500: #1f7a1f;
   --rak-success-600: #136c13;
   --rak-success-700: #0a470a;
 
   --rak-danger-100: #fce4e4;
   --rak-danger-300: #faa0a0;
+  --rak-danger-400: #d13c3c;
   --rak-danger-500: #c41c1c;
   --rak-danger-600: #a51818;
   --rak-danger-700: #7d1212;
 
   --rak-warning-100: #fdf0e1;
+  // Yellow rather than the orange the rest of its ramp runs on, because of what it
+  // is drawn beside. A picks row opens with the player's own cell, which is the
+  // orange of `--rak-knocked-out-300` once they are out, and every pick after it is
+  // one of these. Ten degrees of hue apart, the two read as one fill and the row
+  // stops saying which of the two things it means. This is forty off that orange
+  // and fifty off the green it also sits beside.
   --rak-warning-300: #edfaa0;
   --rak-warning-500: #9a5b13;
   --rak-warning-700: #492b08;
@@ -159,8 +220,12 @@
   // Foreground on a solid fill. Not a background: `--rak-surface` is the page.
   --rak-on-solid: #fff;
 
-  --rak-disabled-bg: #f0f4f8;
-  --rak-disabled-text: #6b7480;
+  --rak-disabled-bg: #f3f3f3;
+  --rak-disabled-text: #737373;
+  // The lower edge a key that cannot be pressed stands on. A disabled key keeps
+  // its moulding, so enabling one eases its fill rather than growing an edge out
+  // of nothing under a fill that is already moving.
+  --rak-disabled-edge: #d6d6d6;
 
   // How far an even row is taken from the fill its cells already carry. One value
   // for every column, so a striped name cell, a striped pick, and a striped score
@@ -196,12 +261,40 @@
     0 8px 24px -4px rgb(var(--rak-shadow-color) / 18%),
     0 16px 40px -8px rgb(var(--rak-shadow-color) / 12%);
 
+  // Moulding, for the three things the app draws as parts of a device rather than
+  // as panes of a page: a key, the bezel around a screen, and the well a readout
+  // is sunk into. Every one is an alpha, so it is read against whatever fill it is
+  // laid on and none of them has to be repainted per surface. The dark lower edge
+  // a key stands on is not here: it is that key's own color one step down, which
+  // only `Button.scss` knows.
+  --rak-key-top: inset 0 1px 0 rgb(255 255 255 / 18%);
+  --rak-bezel:
+    inset 0 1px 0 rgb(255 255 255 / 10%), inset 0 -1px 0 rgb(0 0 0 / 30%);
+  --rak-well: inset 0 1px 2px rgb(0 0 0 / 35%);
+  // The same cut, on the panel's own white rather than on a readout's dark. A
+  // shadow that reads as a hole against black is a bruise against white.
+  --rak-well-light: inset 0 1px 2px rgb(0 0 0 / 12%);
+  // A cell of a readout that is not lit. Enough to read as a shape that could light,
+  // not so much that it crowds the ones that are. Measured against the fill both
+  // readouts are sunk into, which is darker than the bar around them and so takes
+  // less white than the bar did.
+  --rak-unlit: rgb(255 255 255 / 12%);
+  // How far a key stands off the panel, and how far it has left to travel once a
+  // finger is on it. The difference is what it sinks by, so the two are named
+  // together.
+  --rak-key-lift: 2px;
+  --rak-key-pressed: 1px;
+
   // Loading. One fill for a placeholder bar and one sheen that crosses it, shared
   // by every wireframe in the app.
   --rak-loading-fill: var(--rak-text-tertiary);
   --rak-loading-fill-on-solid: var(--rak-on-solid);
   --rak-loading-fill-opacity: 0.3;
   --rak-loading-sheen: rgb(255 255 255 / 30%);
+  // The same sweep on a fill light enough that white crossing it cannot be seen.
+  // The only one is a key that is working and disabled while it does, which stands
+  // in the app's lightest grey.
+  --rak-loading-sheen-on-light: rgb(0 0 0 / 10%);
 }
 
 body {

@@ -1,7 +1,7 @@
 import { useIsWeekDecided } from "../../../context/AppDataContext";
 import {
   EmojiEventsOutlinedIcon,
-  SentimentVerySatisfiedIcon,
+  SentimentVerySatisfiedOutlinedIcon,
   SkullOutlinedIcon,
 } from "../../icon/Icon";
 import "./PlayerStatusIcon.scss";
@@ -30,7 +30,7 @@ export default function PlayerStatusIcon({
       ) : isWeekDecided ? (
         <EmojiEventsOutlinedIcon />
       ) : (
-        <SentimentVerySatisfiedIcon />
+        <SentimentVerySatisfiedOutlinedIcon />
       )}
     </span>
   );

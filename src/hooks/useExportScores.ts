@@ -34,9 +34,11 @@ export default function useExportScores(
         link.download = `rak-madness_${season}_week-${week.value}_results.xlsx`;
         link.click();
         link.remove();
-        // The blob is held until its URL is released, and every export mints
-        // another one.
-        window.URL.revokeObjectURL(url);
+        // The click starts the download asynchronously, so revoking on the same
+        // tick can win the race and hand the browser a dead URL. There's no API
+        // to confirm the blob was read, but a macrotask tick reliably comes
+        // after it in practice, across current browsers.
+        setTimeout(() => window.URL.revokeObjectURL(url), 0);
 
         showToast(
           new Toast("success", "Success", `Exported results spreadsheet`),

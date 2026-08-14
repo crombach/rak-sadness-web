@@ -2,7 +2,7 @@ import { Dialog } from "@base-ui-components/react/dialog";
 import { PropsWithChildren, ReactNode } from "react";
 import useViewportInsets from "../../hooks/useViewportInsets";
 import Button from "../button/Button";
-import { CloseRoundedIcon } from "../icon/Icon";
+import { CloseIcon } from "../icon/Icon";
 import "./DialogShell.scss";
 
 /**
@@ -52,7 +52,7 @@ export default function DialogShell({
               iconOnly
               onClick={() => onOpenChange(false)}
             >
-              <CloseRoundedIcon />
+              <CloseIcon />
             </Button>
           </header>
 

@@ -3,15 +3,18 @@
 
 // Base UI ships the combobox unstyled, so these rules carry its whole look. It
 // sits inside a popup and is shorter than a page-level control, so it keeps its own
-// box rather than taking `field-shell`, and borrows only the focus ring.
+// box rather than taking `field-shell`, and borrows only the focus ring. The socket
+// that shell is drawn as is repeated here at this one's height, so the two read as
+// the same part of the same panel.
 .dialog__search {
   display: flex;
   align-items: center;
   gap: var(--rak-space-2);
   padding: 3px 12px;
-  border: 1px solid var(--rak-border);
-  border-radius: var(--rak-radius-sm);
-  background-color: var(--rak-on-solid);
+  border: var(--rak-border-width-hairline) solid var(--rak-border);
+  border-radius: var(--rak-radius-xs);
+  background-color: var(--rak-surface);
+  box-shadow: var(--rak-well-light);
 
   // On the shell rather than on the input inside it, so the ring goes round the
   // whole search including its icons.

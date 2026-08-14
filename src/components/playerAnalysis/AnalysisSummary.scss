@@ -1,3 +1,5 @@
+@use "../../styles/label" as *;
+
 .analysis {
   // What a pick chip sets its text in by, which a line under one indents by to
   // stand under that text rather than under the chip.
@@ -52,12 +54,11 @@
 
 .analysis__standing,
 .analysis__section-title {
+  @include micro-label;
+
   margin: 0;
   color: var(--rak-text-tertiary);
   font-size: var(--rak-text-xs);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 // Columns rather than a wrapping row, so the same game sits at the same x down

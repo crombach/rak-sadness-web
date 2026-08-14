@@ -2,6 +2,18 @@
 @use "../../styles/focus" as *;
 @use "../../styles/skeleton" as *;
 
+// A key at rest and a key sunk under a finger. The top face travels by the
+// difference between the two lifts, so the face lands where the lower edge was
+// and nothing around the key moves. Transform rather than margin for that
+// reason, and a state rather than an animation: the travel is eased by the
+// transition below, and where motion is turned off the key still lands sunk.
+@mixin key($lift) {
+  transform: translateY(calc(var(--rak-key-lift) - #{$lift}));
+  box-shadow:
+    var(--rak-key-top),
+    0 #{$lift} 0 var(--rak-key-edge);
+}
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -21,9 +33,13 @@
   font-weight: var(--rak-weight-semibold);
   line-height: var(--rak-line-height);
   cursor: pointer;
+  // The key's travel and the edge it stands on are timed with its fill, so a
+  // press is one move rather than a colour easing while the face jumps.
   transition:
     background-color var(--rak-duration-fast) var(--rak-ease-standard),
-    color var(--rak-duration-fast) var(--rak-ease-standard);
+    color var(--rak-duration-fast) var(--rak-ease-standard),
+    transform var(--rak-duration-fast) var(--rak-ease-key),
+    box-shadow var(--rak-duration-fast) var(--rak-ease-key);
 
   @include focus-ring;
 
@@ -53,6 +69,17 @@
     aspect-ratio: 1;
   }
 
+  // A key moulded out of the panel: lit along its top edge, standing on a lower
+  // edge in its own color one step down. Each variant names that step below, so
+  // a key is never edged in a color it does not otherwise carry. A key that
+  // cannot be pressed is still a key on the panel, so it stands on the same edge
+  // in the disabled grey, and enabling one only eases its fill.
+  &.--solid {
+    --rak-key-edge: var(--rak-disabled-edge);
+
+    @include key(var(--rak-key-lift));
+  }
+
   // Every color below is scoped to :not(:disabled). The variant selectors are
   // more specific than `&:disabled`, so without that the disabled fill loses.
   &.--solid:not(:disabled) {
@@ -61,24 +88,49 @@
     // primary, and the offset gap shows that fill too.
     --rak-focus-ring: var(--rak-on-solid);
 
+    &:active {
+      @include key(var(--rak-key-pressed));
+    }
+
+    // The chosen view is a key being held down, so it stands where a pressed one
+    // does and stays there. After `:active`, so pressing the key already chosen
+    // moves nothing.
+    &.--selected {
+      @include key(var(--rak-key-pressed));
+    }
+
+    // Three fills, not four: a pointer on the key and a finger down on it are the
+    // same fill. They were a step apart, which put two eased moves back to back on
+    // every click that ended with the pointer leaving, and that reads as the key
+    // bouncing rather than settling. The press is said in the travel and the edge
+    // instead, which is what a moulded key says it with. A phone has no pointer, so
+    // the same step is the one it gets on touch.
+    //
+    // Properties rather than an override, because a fill that varies by surface
+    // cannot be overridden at one specificity without also beating the rules below.
+    // The navbar shifts the whole set a step to stand its keys off a bar in the same
+    // color, and they move together: a rest fill raised on its own leaves a press
+    // crossing two steps at once.
     &.--primary {
-      background-color: var(--rak-primary-500);
+      --rak-key-edge: var(--rak-primary-700);
+      background-color: var(--rak-key-face, var(--rak-primary-500));
 
       @include can-hover {
         &:hover {
-          background-color: var(--rak-primary-600);
+          background-color: var(--rak-key-active, var(--rak-primary-600));
         }
       }
       &:active {
-        background-color: var(--rak-primary-700);
+        background-color: var(--rak-key-active, var(--rak-primary-600));
       }
       // Held by the route rather than the pointer, so it has to come after both.
       &.--selected {
-        background-color: var(--rak-primary-800);
+        background-color: var(--rak-key-held, var(--rak-primary-700));
       }
     }
 
     &.--success {
+      --rak-key-edge: var(--rak-success-700);
       background-color: var(--rak-success-500);
 
       @include can-hover {
@@ -87,11 +139,12 @@
         }
       }
       &:active {
-        background-color: var(--rak-success-700);
+        background-color: var(--rak-success-600);
       }
     }
 
     &.--danger {
+      --rak-key-edge: var(--rak-danger-700);
       background-color: var(--rak-danger-500);
 
       @include can-hover {
@@ -100,7 +153,7 @@
         }
       }
       &:active {
-        background-color: var(--rak-danger-700);
+        background-color: var(--rak-danger-600);
       }
     }
   }
@@ -139,5 +192,12 @@
   // take away the only thing that says what they pressed.
   &.--busy {
     @include skeleton-sheen;
+
+    // A key is disabled for as long as it is working, so this is where most of the
+    // app's waiting is seen. The sweep is white, which is invisible on the grey a
+    // disabled key stands in, and the key looked switched off rather than busy.
+    &:disabled {
+      --rak-loading-sheen: var(--rak-loading-sheen-on-light);
+    }
   }
 }
