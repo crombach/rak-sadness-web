@@ -167,6 +167,9 @@ $plate-width: 4px;
 .game-status__spread-value {
   color: var(--rak-text-tertiary);
   font-family: var(--rak-font-mono);
+  // Off the label's own weight, which is the other half of telling the answer from
+  // the question: the label is what is bold here, and the line it gives is read.
+  font-weight: normal;
 }
 
 // What is the same about the game however it is going: when it starts and where it
@@ -448,16 +451,25 @@ $plate-width: 4px;
 }
 
 // Sized against the score it points at rather than against the text around it. A
-// triangle fills little of its em box, so it reads smaller than a letter set as big.
+// triangle fills little of its box, so it reads smaller than a letter set as big.
 //
-// No nudge off the middle of its box. A seven-segment digit is drawn from the top of
-// the em box down to the baseline, so its ink is already centered in the line box the
-// row centers on, and the triangle's is too. The mark lands on the bar across the
-// middle of the digit beside it, which is where a readout points from.
+// A drawn shape rather than a triangle character, and no nudge off the middle of its
+// box. The shape is centered in the box it is drawn in, and a seven-segment digit
+// runs the whole em box, so both are centered in the line the row centers on and the
+// mark lands on the bar across the middle of the digit. A glyph landed wherever the
+// reader's font stack drew it.
 .game-status__marker {
-  color: var(--rak-brand-light);
-  font-size: var(--rak-marker-size);
-  line-height: 1;
+  display: flex;
+  // Lit like the dash between the scores, and for the same reason: the mark belongs
+  // to neither side's hue, and on a readout a cell that is on is on.
+  color: var(--rak-on-solid);
+
+  // Sized outright rather than in `em`, because `.icon` sets a font size of its
+  // own that an `em` here would be read against.
+  > svg {
+    width: var(--rak-marker-size);
+    height: var(--rak-marker-size);
+  }
 
   // Both sides carry a marker whatever the game is doing, and the side without the
   // ball wears an unlit one. It holds the room the lit one takes, so the scores stay

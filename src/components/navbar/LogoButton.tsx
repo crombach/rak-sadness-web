@@ -21,16 +21,16 @@ const UNLIT_SEGMENTS = APP_NAME.replace(/\S/g, ALL_SEGMENTS_ON);
 export default function LogoButton({ onClick }: { onClick: () => void }) {
   return (
     <Button onClick={onClick} className="logo-button">
-      {/*
-        The name is the element's own text rather than a third span, so that
-        running out of room still ends it in an ellipsis. `text-overflow` reaches
-        in-flow inline content only, and would skip a positioned one.
-      */}
       <span className="logo-button__name">
         <span className="logo-button__name-ghost" aria-hidden="true">
           {UNLIT_SEGMENTS}
         </span>
-        {APP_NAME}
+        {/*
+          The name in a box of its own, because the well around it is a flex
+          container: the glass has to fill the whole key, and `text-overflow`
+          reaches the text of a block, not a flex item the browser wrapped for it.
+        */}
+        <span className="logo-button__name-text">{APP_NAME}</span>
       </span>
     </Button>
   );

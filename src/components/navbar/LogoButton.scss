@@ -17,6 +17,15 @@ $well-inset: 3px;
   }
 }
 
+// The glass is the whole key rather than a plate floating inside one. Written to
+// `Button.scss`'s own specificity for the same reason as the rule above: the
+// padding it sets is what stood the well 16px in from every edge, and a screen
+// with a margin of bar around it reads as smaller than the keys beside it rather
+// than as the panel they are set into.
+.button.logo-button {
+  padding: 0;
+}
+
 .logo-button {
   // Back to the ramp the app's other solid buttons run on, which the navbar lifts a
   // step for the keys it holds. This is the panel the device is named on rather than
@@ -31,6 +40,12 @@ $well-inset: 3px;
   // Reads as the navbar's own heading rather than as button text, which is what
   // it looked like before the two became one button.
   &__name {
+    // The key's whole box, both ways, so the glass stands as tall as the keys on
+    // the other end of the bar and as wide as the name it holds.
+    flex: 1;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
     font-family: var(--rak-font-display);
     // As large as the narrowest phone can hold, because segments spell a letter
     // in far less ink than a drawn face does and this is hard to read below it.
@@ -43,16 +58,31 @@ $well-inset: 3px;
     // app asks for: the face is monospaced, so the heavier segments advance
     // exactly as far as the light ones and cost nothing across a bar this tight.
     font-weight: var(--rak-weight-bold);
-    text-align: left;
     // Sunk into the bar, which is what makes the segments below read as a readout
     // rather than as a font the name happens to be set in. Darker than the bar it
     // is cut into, so the well has a fill of its own to be shadowed against.
-    padding: var(--rak-space-1) $well-inset;
+    //
+    // Across only. Down, the key's own height is what the glass stands, and both
+    // the name and the unlit row below center themselves in it.
+    padding-inline: $well-inset;
     border-radius: var(--rak-radius-xs);
     background-color: var(--rak-primary-800);
     box-shadow: var(--rak-well);
     // The unlit segments are laid under the name rather than beside it.
     position: relative;
+    // Holds the unlit row to the glass once the name is cut short, since it is as
+    // long as the whole name whether or not all of it is shown.
+    min-width: 0;
+    overflow: hidden;
+
+    @include roomy-screen {
+      font-size: var(--rak-text-md);
+    }
+  }
+
+  // The name itself. Its own box rather than the well's text, because the well is
+  // a flex container and `text-overflow` reaches the text of a block.
+  &__name-text {
     // One line at every width. The navbar is sized for it, and a wrapped app name
     // pushed the bar taller than the buttons standing next to it.
     white-space: nowrap;
@@ -63,10 +93,6 @@ $well-inset: 3px;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
-
-    @include roomy-screen {
-      font-size: var(--rak-text-md);
-    }
   }
 
   // The segments the display leaves dark. Every glyph in the face advances the
@@ -75,11 +101,14 @@ $well-inset: 3px;
   // difference: every segment the name lights is one this lights too.
   &__name-ghost {
     position: absolute;
-    // The well's own padding, said again because an absolutely positioned box is
+    // The glass's own padding, said again because an absolutely positioned box is
     // placed against the padding box's outer edge and would otherwise start where
-    // the padding does not.
-    top: var(--rak-space-1);
+    // the padding does not. Down, it takes the whole box and centers its one line
+    // in it, which is what the name does on the other side of the same box.
+    inset-block: 0;
     left: $well-inset;
+    display: flex;
+    align-items: center;
     // Out of any selection the user drags over the bar. Selectable, copying the
     // name carried the row of tildes out with it.
     user-select: none;

@@ -61,7 +61,12 @@
   flex: 0 0 auto;
   // Named because `ScoresNavbar` cancels it with a negative margin while the
   // refresh button collapses, and a gap around nothing would otherwise remain.
-  --navbar-gap: var(--rak-space-1);
+  //
+  // Tighter than a desktop's but not the smallest step: with the name plate drawn
+  // as one key the bar is three keys and a screen, and at 4px the three ran
+  // together into one block. Measured on a 360px phone, where the widest bar the
+  // app draws leaves 28px between the two groups and this spends 12 of it.
+  --navbar-gap: var(--rak-space-2);
   gap: var(--navbar-gap);
 
   @include roomy-screen {

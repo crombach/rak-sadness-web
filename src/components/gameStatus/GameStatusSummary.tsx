@@ -13,6 +13,7 @@ import { GameSide, LeagueResult } from "../../types/LeagueResult";
 import { GameSpread, WeekGame } from "../../types/WeekGame";
 import getClasses from "../../utils/getClasses";
 import marginAgainstSpread from "../../utils/scoring/marginAgainstSpread";
+import { PossessionIcon } from "../icon/Icon";
 import "./GameStatusSummary.scss";
 
 /** Regulation is four quarters, and anything past them is overtime. */
@@ -58,12 +59,8 @@ function gamecastUrl(league: League, id: string): string {
   return `https://www.espn.com/${league}/game/_/gameId/${id}`;
 }
 
-/**
- * Points at the score of the side with the ball. One glyph for both sides, since
- * the stylesheet turns the home side's around: the face draws the two triangles at
- * different heights, and a row built to mirror cannot carry that.
- */
-const MARKER = "▸";
+/** What the mark beside a score is called, for anyone who cannot see it. */
+const HAS_BALL_LABEL = "Has the ball";
 
 /**
  * What each side is called over its name.
@@ -294,12 +291,14 @@ function Note({
  */
 function Marker({ hasBall }: { hasBall: boolean }) {
   return hasBall ? (
-    <span className="game-status__marker" aria-label="Has the ball">
-      {MARKER}
+    // A role of its own, because the shape inside is hidden and a bare `<span>`
+    // carries no label into the accessibility tree.
+    <span className="game-status__marker" role="img" aria-label={HAS_BALL_LABEL}>
+      <PossessionIcon />
     </span>
   ) : (
     <span aria-hidden="true" className="game-status__marker --blank">
-      {MARKER}
+      <PossessionIcon />
     </span>
   );
 }

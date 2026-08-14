@@ -57,6 +57,12 @@
 
   --rak-line-height: 1.5;
 
+  // The width the tiled logo stops being drawn at, which `PageLayout.tsx` reads so
+  // it can stop fetching the tile there too. The breakpoints themselves are Sass,
+  // because a media query cannot read a custom property, and this is the one place
+  // outside a stylesheet that has to ask a breakpoint's question.
+  --rak-breakpoint-roomy: #{$breakpoint-roomy};
+
   // What a label set in capitals is opened up by. Capitals are drawn on one
   // height and run together without it, and every small label in the app is set
   // this way, so the value is named once here rather than at each of them.

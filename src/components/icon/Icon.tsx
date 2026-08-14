@@ -176,6 +176,23 @@ export function WarningIcon() {
   );
 }
 
+/**
+ * Which side has the ball, pointed at their score in the game dialog.
+ *
+ * A shape rather than a triangle character, because the mark has to stand level
+ * with a row of seven-segment digits. A glyph is placed by whichever font in the
+ * stack happens to carry it, and the two triangles in one face are not even drawn
+ * at the same height, so where it landed was the reader's font stack's to decide.
+ * The shape is centered in this box, and the box is what the row centers.
+ */
+export function PossessionIcon() {
+  return (
+    <Icon name="PossessionIcon">
+      <path d="M320-200v-560l440 280-440 280Z" />
+    </Icon>
+  );
+}
+
 export function GitHubIcon() {
   return (
     <Icon name="GitHubIcon" viewBox="0 0 24 24">
