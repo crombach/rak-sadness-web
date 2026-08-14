@@ -325,10 +325,6 @@ describe("GameStatusSummary, the two scores as a pair", () => {
   it("holds both cells with neither side past single figures", () => {
     expect(cells({ home: 3, away: 7 })).toEqual(["88", "88"]);
   });
-
-  it("gives a score past two digits a cell of its own", () => {
-    expect(cells({ home: 7, away: 100 })).toEqual(["888", "88"]);
-  });
 });
 
 describe("GameStatusSummary, which side took the point", () => {

@@ -324,12 +324,11 @@ function Score({
       {/* Held apart from the marker beside it so the wireframe can draw a bar over
           the number alone, and so a number of one digit takes the room two do. */}
       <span className="game-status__points">
-        {/* Every cell of the readout, lit or not, so a score in single figures shows
-            the one it is not using rather than a zero standing in it. The face is
-            monospaced, so the row lands exactly under the number without being
-            measured. A score past two digits gets a cell for each. */}
+        {/* Both cells, lit or not, so a score in single figures shows the one it is
+            not using rather than a zero standing in it. The face is monospaced, so
+            the row lands exactly under the number without being measured. */}
         <span className="game-status__points-ghost" aria-hidden="true">
-          {ALL_SEGMENTS_ON.repeat(Math.max(SCORE_CELLS, points.length))}
+          {ALL_SEGMENTS_ON.repeat(SCORE_CELLS)}
         </span>
         {points}
       </span>

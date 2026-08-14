@@ -6,6 +6,11 @@
 // spends 10 of it. Any more and a phone ends the name in an ellipsis it need not.
 $well-inset: 8px;
 
+// How wide the plate around the name's glass is drawn, the same recipe the
+// scoreline's own glass is set in in `GameStatusSummary.scss`. A shadow's spread
+// there, so it costs the name none of the width `$well-inset` was measured against.
+$plate-width: 4px;
+
 // Not a key. Every other button on the bar is one, but this is the plate the
 // device is named on, and a name that sinks under a finger reads as a control.
 // Written out to `Button.scss`'s own specificity and one class past it, which is
@@ -68,16 +73,22 @@ $well-inset: 8px;
     padding-inline: $well-inset;
     border-radius: var(--rak-radius-xs);
     background-color: var(--rak-primary-800);
-    // Cut into the bar rather than laid on it, in four layers: the lip the glass
-    // sits behind, throwing down across the top of it; that lip's own dark edge; the
-    // bottom of the cut, where what light reaches the hole comes back off it; and
-    // the panel just under it, lit the way a key's top edge is. The app's own
-    // `--rak-well` is one soft shadow, which reads as a darker patch of bar.
+    // Cut into the bar and framed in the bar's own plate, the same six layers the
+    // scoreline's glass is drawn in: the lip the glass sits behind, throwing down
+    // across the top of it; that lip's own dark edge; the bottom of the cut, where
+    // what light reaches the hole comes back off it; the plate itself, in the bar's
+    // own blue; and the two rings past it, the plate's lit top edge and the shadow
+    // it throws. The scoreline needs that third ring to read as a screen at all,
+    // sitting as it does on the dialog's white. Here it repeats a blue the bar
+    // already is, so it draws nothing of its own and is kept for the one thing it
+    // still does: give the two rings past it, which do show, the same band to sit on.
     box-shadow:
       inset 0 3px 5px rgb(0 0 0 / 55%),
       inset 0 1px 0 rgb(0 0 0 / 50%),
       inset 0 -1px 0 rgb(255 255 255 / 12%),
-      0 1px 0 rgb(255 255 255 / 16%);
+      0 0 0 $plate-width var(--rak-primary-500),
+      0 -1px 0 $plate-width rgb(255 255 255 / 20%),
+      0 2px 2px $plate-width rgb(0 0 0 / 22%);
     // The unlit segments are laid under the name rather than beside it.
     position: relative;
     // Holds the unlit row to the glass once the name is cut short, since it is as
