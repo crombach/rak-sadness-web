@@ -71,13 +71,18 @@
 
   // A key moulded out of the panel: lit along its top edge, standing on a lower
   // edge in its own color one step down. Each variant names that step below, so
-  // a key is never edged in a color it does not otherwise carry. A key that
-  // cannot be pressed is still a key on the panel, so it stands on the same edge
-  // in the disabled grey, and enabling one only eases its fill.
+  // a key is never edged in a color it does not otherwise carry.
   &.--solid {
     --rak-key-edge: var(--rak-disabled-edge);
 
     @include key(var(--rak-key-lift));
+
+    // A key that cannot be pressed reads as already held down, and the existing
+    // transform/box-shadow transition lifts it back to rest the moment it can be
+    // pressed again.
+    &:disabled {
+      @include key(var(--rak-key-pressed));
+    }
   }
 
   // Every color below is scoped to :not(:disabled). The variant selectors are

@@ -9,6 +9,7 @@ import getClasses from "../../utils/getClasses";
 import Button from "../button/Button";
 import Footer from "../footer/Footer";
 import LogoButton, { APP_NAME } from "../navbar/LogoButton";
+import ScoresNavbar from "../navbar/ScoresNavbar";
 import PageLayout from "../pageLayout/PageLayout";
 import "./HomePage.scss";
 
@@ -59,6 +60,24 @@ export default function HomePage() {
     <PageLayout
       title={APP_NAME}
       navbarLeft={<LogoButton onClick={() => navigate("/")} />}
+      navbarRight={
+        // Shown here too, disabled until there is a week to switch between, so
+        // the navbar looks the same before its own routes exist as it does on
+        // them. No live refresh: there is no week open yet to poll a game
+        // against.
+        <ScoresNavbar
+          view={null}
+          disabled={hasNoScoresYet}
+          isWeekLive={false}
+          onViewChange={(view) =>
+            navigate(
+              `/${seasonYear}/${selectedWeek?.value}/${view.toLowerCase()}`,
+            )
+          }
+          onRefresh={() => undefined}
+          isRefreshing={false}
+        />
+      }
     >
       {/*
         Only the first load hides the controls. Switching seasons disables them

@@ -21,7 +21,8 @@ export default function ScoresNavbar({
   disabled = false,
   isWeekLive,
 }: {
-  view: ScoresView;
+  /** `null` while no view is open yet, so neither button reads as selected. */
+  view: ScoresView | null;
   onViewChange: (view: ScoresView) => void;
   onRefresh: () => void;
   isRefreshing: boolean;
@@ -41,17 +42,19 @@ export default function ScoresNavbar({
     return () => clearTimeout(timer);
   }, [isWeekLive, isLiveMounted]);
 
+  // A results route always names a view, even while it loads, so that button
+  // keeps looking selected through the wait: only `aria-disabled`, never a real
+  // `disabled` that would greyscale its highlight. The home page has no view
+  // yet to show as selected, so there is nothing that look would protect, and
+  // it greys out for real instead.
+  const noViewYet = disabled && view == null;
+
   return (
     // The two views are the only way through the results, so they are navigation
     // rather than a pair of loose buttons.
     <nav className="scores-nav" aria-label="Results view">
-      {/*
-        `aria-disabled` rather than `disabled` while a week loads. The buttons sit
-        where they will sit, showing the view the URL already names, and keep both
-        their place in the tab order and their own look until there is something
-        to switch between.
-      */}
       <Button
+        disabled={noViewYet}
         ariaDisabled={disabled}
         compact
         selected={view === "Scoreboard"}
@@ -64,6 +67,7 @@ export default function ScoresNavbar({
         <span className="scores-nav__label">Scoreboard</span>
       </Button>
       <Button
+        disabled={noViewYet}
         ariaDisabled={disabled}
         compact
         selected={view === "Picks"}

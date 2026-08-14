@@ -41,6 +41,13 @@ export default tseslint.config(
     },
   },
   {
+    // Standalone Node CLI tooling behind a skill, not part of the app bundle.
+    files: [".claude/skills/**/scripts/**/*.js"],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
+  {
     files: ["**/*.test.{ts,tsx}"],
     ...testingLibrary.configs["flat/react"],
     rules: {
