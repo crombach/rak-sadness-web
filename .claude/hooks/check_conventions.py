@@ -61,6 +61,12 @@ MEDIA = re.compile(
     r"|<\s*/?\s*(?:img|video|source|picture|figure|figcaption)\b[^>]*>",
     re.IGNORECASE)
 MEDIA_TOKEN = re.compile(r"^<?\S*%s\S*>?$" % MEDIA_TARGET, re.IGNORECASE)
+LIST_ITEM = re.compile(r"^\s*(?:[-*+]|\d+\.)\s+")
+# A heading is the template's word, not the writer's, and an attribution footer is
+# appended after the body is drafted. Charging the budget for either spends it on
+# text nobody chose.
+HEADING_LINE = re.compile(r"^#{1,6}\s+")
+SIGNATURE = re.compile(r"^\s*\U0001f575️?\s.+\sby\s\[[^\]]+\]\(https?://[^)]+\)\s*$")
 
 SEPARATORS = ("&&", "||", ";", "|", "&", "\n")
 WRAPPERS = ("timeout", "time", "nice", "nohup", "stdbuf", "command", "builtin",
@@ -167,12 +173,15 @@ def headings(text):
 
 
 def prose_words(body):
-    """Words a reviewer reads. A fenced block, a table, a checklist and an embedded
-    image or video are not prose, so none of them counts against the budget."""
+    """Words a reviewer reads. A fenced block, a table, a checklist, a heading, an
+    attribution footer and an embedded image or video are not prose the writer chose,
+    so none of them counts against the budget."""
     text = MEDIA.sub("", COMMENTS.sub("", FENCE.sub("", body)))
     kept, skipping_item = [], False
     for line in text.splitlines():
-        if TABLE_ROW.match(line):
+        if TABLE_ROW.match(line) or HEADING_LINE.match(line.strip()):
+            continue
+        if SIGNATURE.match(line):
             continue
         if CHECKLIST_ITEM.match(line):
             skipping_item = True
@@ -185,10 +194,6 @@ def prose_words(body):
         kept.append(line)
     return len([word for word in " ".join(kept).split()
                 if not MEDIA_TOKEN.match(word)])
-
-
-LIST_ITEM = re.compile(r"^\s*(?:[-*+]|\d+\.)\s+")
-HEADING_LINE = re.compile(r"^#{1,6}\s+")
 
 
 def heaviest_blocks(body, show=3):

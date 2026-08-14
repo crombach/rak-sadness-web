@@ -13,11 +13,12 @@ https://www.conventionalcommits.org/en/v1.0.0/
   feat(auth): [YCOM-21] add device-code login
   refactor(api)!: drop v1 response envelope
 
-Shortest body a reviewer can review from, under 200 words. Bullets, one line each,
+Shortest body a reviewer can review from, under 256 words. Bullets, one line each,
 not paragraphs. Every line must change how they read the diff. Cut every line that
-does not, and delete every section left with nothing to say. An embedded screenshot
-or recording does not count against the budget. Add one where seeing the change
-beats reading about it, usually a UX change, not as a matter of course.
+does not, and delete every section left with nothing to say. A heading, an
+attribution footer and an embedded screenshot or recording do not count against
+the budget. Add one where seeing the change beats reading about it,
+usually a UX change, not as a matter of course.
 
 Never in the body: a retelling of the ticket, the path taken to the change,
 alternatives rejected, counts of files or lines or tests, timings, coverage or
