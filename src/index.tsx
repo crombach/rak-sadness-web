@@ -22,10 +22,43 @@ import "@fontsource/ibm-plex-mono/600.css";
 import "@fontsource/ibm-plex-mono/700.css";
 import "@fontsource/dseg14-classic/700.css";
 import "@fontsource/dseg7-classic/700.css";
+import chakraPetch400Url from "@fontsource/chakra-petch/files/chakra-petch-latin-400-normal.woff2?url";
+import chakraPetch500Url from "@fontsource/chakra-petch/files/chakra-petch-latin-500-normal.woff2?url";
+import chakraPetch600Url from "@fontsource/chakra-petch/files/chakra-petch-latin-600-normal.woff2?url";
+import chakraPetch700Url from "@fontsource/chakra-petch/files/chakra-petch-latin-700-normal.woff2?url";
+import ibmPlexMono400Url from "@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2?url";
+import ibmPlexMono600Url from "@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-600-normal.woff2?url";
+import ibmPlexMono700Url from "@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-700-normal.woff2?url";
+import dseg14Url from "@fontsource/dseg14-classic/files/dseg14-classic-latin-700-normal.woff2?url";
+import dseg7Url from "@fontsource/dseg7-classic/files/dseg7-classic-latin-700-normal.woff2?url";
 import { AppDataContextProvider } from "./context/AppDataContext";
 import { ToastContextProvider } from "./context/ToastContext";
 import Toaster from "./components/toaster/Toaster";
 import "./index.scss";
+
+// @font-face only fetches a file once layout needs it, which for the segment
+// faces is after their ghost has already committed to a fallback width. A
+// preload starts every weight downloading alongside the app shell instead.
+const PRELOAD_FONT_URLS = [
+  chakraPetch400Url,
+  chakraPetch500Url,
+  chakraPetch600Url,
+  chakraPetch700Url,
+  ibmPlexMono400Url,
+  ibmPlexMono600Url,
+  ibmPlexMono700Url,
+  dseg14Url,
+  dseg7Url,
+];
+for (const href of PRELOAD_FONT_URLS) {
+  const link = document.createElement("link");
+  link.rel = "preload";
+  link.as = "font";
+  link.type = "font/woff2";
+  link.crossOrigin = "anonymous";
+  link.href = href;
+  document.head.appendChild(link);
+}
 
 const container = document.getElementById("root");
 if (!container) {
