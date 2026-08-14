@@ -37,7 +37,7 @@ export default function parsePick(pickString: string) {
  * so the underdog's number reads the same way the favorite's "-" already does.
  * A cell that already carries a sign, or names no team, is returned untouched.
  */
-export function formatPickDisplay(pickString: any): any {
+export function formatPickDisplay<T>(pickString: T): T | string {
   if (typeof pickString !== "string") return pickString;
 
   const match = trailingSpread.exec(pickString.trim());
