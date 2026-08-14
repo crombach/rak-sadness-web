@@ -69,6 +69,17 @@
     aspect-ratio: 1;
   }
 
+  // A key moulded out of the panel: lit along its top edge, standing on a lower
+  // edge in its own color one step down. Each variant names that step below, so
+  // a key is never edged in a color it does not otherwise carry. A key that
+  // cannot be pressed is still a key on the panel, so it stands on the same edge
+  // in the disabled grey, and enabling one only eases its fill.
+  &.--solid {
+    --rak-key-edge: var(--rak-disabled-edge);
+
+    @include key(var(--rak-key-lift));
+  }
+
   // Every color below is scoped to :not(:disabled). The variant selectors are
   // more specific than `&:disabled`, so without that the disabled fill loses.
   &.--solid:not(:disabled) {
@@ -76,11 +87,6 @@
     // A ring in the app's own primary cannot be seen on a fill in the app's own
     // primary, and the offset gap shows that fill too.
     --rak-focus-ring: var(--rak-on-solid);
-
-    // A key moulded out of the panel: lit along its top edge, standing on a lower
-    // edge in its own color one step down. Each variant names that step below, so
-    // a key is never edged in a color it does not otherwise carry.
-    @include key(var(--rak-key-lift));
 
     &:active {
       @include key(var(--rak-key-pressed));

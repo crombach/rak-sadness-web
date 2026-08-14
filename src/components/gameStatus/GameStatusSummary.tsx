@@ -52,11 +52,12 @@ function gamecastUrl(league: League, id: string): string {
   return `https://www.espn.com/${league}/game/_/gameId/${id}`;
 }
 
-/** Points at the score of the side with the ball, from whichever side that is. */
-const MARKER: Record<HomeAway, string> = {
-  [HomeAway.HOME]: "◂",
-  [HomeAway.AWAY]: "▸",
-};
+/**
+ * Points at the score of the side with the ball. One glyph for both sides, since
+ * the stylesheet turns the home side's around: the face draws the two triangles at
+ * different heights, and a row built to mirror cannot carry that.
+ */
+const MARKER = "▸";
 
 /**
  * What each side is called over its name.
@@ -281,24 +282,18 @@ function Note({
  * Which side has the ball, pointed at their score.
  *
  * Both sides wear one whatever the game is doing, and every side without the ball
- * wears an invisible one. It holds the room the visible one takes, so neither the ball
+ * wears an unlit one. It holds the room the lit one takes, so neither the ball
  * changing hands, nor a poll that finds nobody with it, nor a game ending moves the
  * scores.
  */
-function Marker({
-  homeAway,
-  hasBall,
-}: {
-  homeAway: HomeAway;
-  hasBall: boolean;
-}) {
+function Marker({ hasBall }: { hasBall: boolean }) {
   return hasBall ? (
     <span className="game-status__marker" aria-label="Has the ball">
-      {MARKER[homeAway]}
+      {MARKER}
     </span>
   ) : (
     <span aria-hidden="true" className="game-status__marker --blank">
-      {MARKER[homeAway]}
+      {MARKER}
     </span>
   );
 }
@@ -342,7 +337,7 @@ function Score({
         </span>
         {points}
       </span>
-      <Marker homeAway={homeAway} hasBall={hasBall} />
+      <Marker hasBall={hasBall} />
     </p>
   );
 }

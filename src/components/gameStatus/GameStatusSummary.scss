@@ -9,19 +9,19 @@
 $plate-width: 4px;
 
 // Which side a player had to pick to score the point, and which one cost them it,
-// in the two hues the picks table fills a cell with. The step is named by the caller
-// because the two places this is used are lit on opposite surfaces: 600 carries as ink
-// on the white the names are set on, and 300 is what reads on the readout's own dark.
+// in the two hues the picks table fills a cell with. The 400 step, which is the one
+// that reads both on the white a name is set on and on the dark its score is lit
+// against, so a side and its number are the same color rather than two shades of it.
 //
 // Neither side is marked where nobody scored, and the sentence under the scores names
 // the side in words, so nothing here rests on the hue alone.
-@mixin outcome($step) {
+@mixin outcome {
   &.--scored {
-    color: var(--rak-success-#{$step});
+    color: var(--rak-success-400);
   }
 
   &.--missed {
-    color: var(--rak-danger-#{$step});
+    color: var(--rak-danger-400);
   }
 }
 
@@ -334,7 +334,7 @@ $plate-width: 4px;
   font-weight: var(--rak-weight-semibold);
   line-height: 1.1;
 
-  @include outcome(600);
+  @include outcome;
 }
 
 // A phone gets the abbreviation, a name of three words wrapping to three lines in
@@ -396,7 +396,14 @@ $plate-width: 4px;
     flex-direction: row-reverse;
   }
 
-  @include outcome(300);
+  // One glyph for both sides, turned around here rather than written as the other
+  // triangle. The face draws the two at different heights, so a pair of them would
+  // sit a pixel apart on a row whose whole point is that the sides mirror.
+  &.--home .game-status__marker {
+    transform: scaleX(-1);
+  }
+
+  @include outcome;
 }
 
 // Two digits wide whether the side has one or two, so a score going from 7 to 14
@@ -432,14 +439,15 @@ $plate-width: 4px;
 
 // Sized against the score it points at rather than against the text around it. A
 // triangle fills little of its em box, so it reads smaller than a letter set as big.
+//
+// No nudge off the middle of its box. A seven-segment digit is drawn from the top of
+// the em box down to the baseline, so its ink is already centered in the line box the
+// row centers on, and the triangle's is too. The mark lands on the bar across the
+// middle of the digit beside it, which is where a readout points from.
 .game-status__marker {
   color: var(--rak-brand-light);
   font-size: var(--rak-marker-size);
   line-height: 1;
-  // A triangle is drawn on the middle of the em box and a digit stands on the
-  // baseline, so lining the two boxes up leaves the triangle low. Measured at a
-  // tenth of its own size, at both of the sizes it is set at.
-  transform: translateY(-0.1em);
 
   // Both sides carry a marker whatever the game is doing, and the side without the
   // ball wears an unlit one. It holds the room the lit one takes, so the scores stay

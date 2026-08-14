@@ -67,9 +67,22 @@
   width: 100%;
   min-width: min-content;
   min-height: var(--rak-control-height);
-  transition-property: height, min-height, opacity, color, background-color;
-  transition-duration: var(--rak-duration-slow);
-  transition-timing-function: var(--rak-ease-standard);
+  // Collapsing takes the slow step and everything a key does keeps the fast one.
+  // Written out rather than as a property list on one duration, which is what this
+  // was: it put the key's edge and its travel on no list at all, so a button coming
+  // out of `disabled` landed its moulding in a frame while its fill was still
+  // easing. The two halves are told apart by what they are for, not by which rule
+  // they came from, so the key's own timing is repeated here from `Button.scss`.
+  transition:
+    height var(--rak-duration-slow) var(--rak-ease-standard),
+    min-height var(--rak-duration-slow) var(--rak-ease-standard),
+    margin-top var(--rak-duration-slow) var(--rak-ease-standard),
+    padding var(--rak-duration-slow) var(--rak-ease-standard),
+    opacity var(--rak-duration-slow) var(--rak-ease-standard),
+    background-color var(--rak-duration-slow) var(--rak-ease-standard),
+    color var(--rak-duration-slow) var(--rak-ease-standard),
+    box-shadow var(--rak-duration-slow) var(--rak-ease-key),
+    transform var(--rak-duration-fast) var(--rak-ease-key);
   margin-top: var(--rak-control-gap);
   opacity: 1;
   visibility: visible;

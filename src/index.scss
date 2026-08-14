@@ -145,14 +145,22 @@
   // behind text, 300 fills a table cell, 500 and up are solid fills and text.
   // The table's fills are steps on these rather than a palette of their own, so
   // a wrong pick and a failure are the same red.
+  //
+  // 400 is the one step that reads on the app's white and on the dark a readout
+  // is sunk into, which is what lets the game dialog draw a side's name and its
+  // score in the same color. No step can clear 4.5:1 on both, so it is set at the
+  // dark end of what does on white: 4.6:1 there, and 3.2:1 on the glass, which the
+  // score clears as large text at every size it is set.
   --rak-success-100: #e3fbe3;
   --rak-success-300: #a3faa0;
+  --rak-success-400: #1f871f;
   --rak-success-500: #1f7a1f;
   --rak-success-600: #136c13;
   --rak-success-700: #0a470a;
 
   --rak-danger-100: #fce4e4;
   --rak-danger-300: #faa0a0;
+  --rak-danger-400: #d13c3c;
   --rak-danger-500: #c41c1c;
   --rak-danger-600: #a51818;
   --rak-danger-700: #7d1212;
@@ -199,6 +207,10 @@
 
   --rak-disabled-bg: #f0f4f8;
   --rak-disabled-text: #6b7480;
+  // The lower edge a key that cannot be pressed stands on. A disabled key keeps
+  // its moulding, so enabling one eases its fill rather than growing an edge out
+  // of nothing under a fill that is already moving.
+  --rak-disabled-edge: #cdd7e1;
 
   // How far an even row is taken from the fill its cells already carry. One value
   // for every column, so a striped name cell, a striped pick, and a striped score
@@ -252,7 +264,7 @@
   // How far a key stands off the panel, and how far it has left to travel once a
   // finger is on it. The difference is what it sinks by, so the two are named
   // together.
-  --rak-key-lift: 4px;
+  --rak-key-lift: 2px;
   --rak-key-pressed: 1px;
 
   // Loading. One fill for a placeholder bar and one sheen that crosses it, shared
