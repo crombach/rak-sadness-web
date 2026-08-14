@@ -27,7 +27,6 @@ import chakraPetch500Url from "@fontsource/chakra-petch/files/chakra-petch-latin
 import chakraPetch600Url from "@fontsource/chakra-petch/files/chakra-petch-latin-600-normal.woff2?url";
 import chakraPetch700Url from "@fontsource/chakra-petch/files/chakra-petch-latin-700-normal.woff2?url";
 import ibmPlexMono400Url from "@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2?url";
-import ibmPlexMono600Url from "@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-600-normal.woff2?url";
 import ibmPlexMono700Url from "@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-700-normal.woff2?url";
 import dseg14Url from "@fontsource/dseg14-classic/files/dseg14-classic-latin-700-normal.woff2?url";
 import dseg7Url from "@fontsource/dseg7-classic/files/dseg7-classic-latin-700-normal.woff2?url";
@@ -47,7 +46,6 @@ const PREFETCH_FONT_URLS = [
   chakraPetch600Url,
   chakraPetch700Url,
   ibmPlexMono400Url,
-  ibmPlexMono600Url,
   ibmPlexMono700Url,
   dseg14Url,
   dseg7Url,
@@ -59,6 +57,11 @@ for (const href of PREFETCH_FONT_URLS) {
     crossorigin: "anonymous",
   });
 }
+// A prefetch hint alone left this one arriving late: the home page's season
+// select is usually the very first thing opened, and its selected row is the
+// only home-page text set at 600, so a slow fetch showed the fallback face
+// first. Asked for outright instead, so it is decoded well before that click.
+document.fonts.load('600 1em "IBM Plex Mono"').catch(() => {});
 
 const container = document.getElementById("root");
 if (!container) {
