@@ -136,7 +136,7 @@ export default function PageLayout({
         </span>
         <p className="page__rotate-message">Turn your phone upright</p>
         <p className="page__rotate-detail">
-          The Rakulator does not support landscape on a phone.
+          Rakulator does not support landscape on a phone.
         </p>
       </div>
     </div>

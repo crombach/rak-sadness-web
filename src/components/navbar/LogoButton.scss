@@ -18,8 +18,22 @@
 // button's own padding is not the glass's to inherit, since a screen with a
 // margin of bar around it reads as smaller than the keys beside it rather than as
 // the panel they are set into. `&__name` sets its own instead.
+//
+// `min-height` is written out here too, at the same specificity, to beat
+// `.button`'s own touch-target floor: this is the panel the other keys stand on,
+// not a key of its own height, so it is sized to the name it holds rather than
+// matched to the row beside it.
 .button.logo-button {
   padding: 0;
+  min-height: calc(
+    var(--rak-text-sm) * var(--rak-line-height) + var(--rak-space-2)
+  );
+
+  @include roomy-screen {
+    min-height: calc(
+      var(--rak-text-md) * var(--rak-line-height) + var(--rak-space-2)
+    );
+  }
 }
 
 .logo-button {
@@ -36,8 +50,8 @@
   // Reads as the navbar's own heading rather than as button text. `lcd-glass` is
   // the well and plate the scoreline's own glass is cut in, in `GameStatusSummary.scss`.
   &__name {
-    // The key's whole box, both ways, so the glass stands as tall as the keys on
-    // the other end of the bar and as wide as the name it holds.
+    // The key's whole box, both ways, so the glass fills the plate's own height
+    // and stands as wide as the name it holds.
     flex: 1;
     align-self: stretch;
     display: flex;
@@ -53,9 +67,9 @@
     @include lcd-glass;
     // The mixin's plate ring is invisible here anyway, since the navbar is
     // already that same primary step, and the highlight it throws past the box
-    // would now be clipped rather than bled, since this key stands the same
-    // height as the ones beside it. Sunk and lit from the inside instead, the
-    // same two cues drawn further out everywhere else.
+    // would now be clipped rather than bled, since the glass fills the key's own
+    // edge on every side. Sunk and lit from the inside instead, the same two
+    // cues drawn further out everywhere else.
     box-shadow: var(--rak-well), var(--rak-key-top);
 
     // Bold is the only cut `src/index.tsx` loads: the face is monospaced, so the
@@ -66,9 +80,8 @@
     // As large as the narrowest phone can hold, because segments spell a letter
     // in far less ink than a drawn face does and this is hard to read below it.
     // The bound is the results routes: a week still being played takes 170px of
-    // the bar for its own buttons, which leaves the name the screen less 250px.
-    // A 360px phone is 110px of that, and the name measures 102.8px here. One
-    // step up is 110.2px, which is why this is the step it stops at.
+    // the bar for its own buttons, which leaves this side 174px on a 360px phone.
+    // The name measures 102.8px here, well inside that.
     font-size: var(--rak-text-sm);
 
     @include roomy-screen {
