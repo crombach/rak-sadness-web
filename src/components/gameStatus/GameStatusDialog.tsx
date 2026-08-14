@@ -59,7 +59,9 @@ function GameMark({
         role="img"
         aria-label="Not listed by ESPN"
       >
-        <WarningIcon />
+        <span className="game-status__mark-icon">
+          <WarningIcon />
+        </span>
         WARN
       </span>
     );
@@ -67,7 +69,9 @@ function GameMark({
   if (status === GameStatus.FINAL) {
     return (
       <span className="game-status__mark --final" role="img" aria-label="Final">
-        <CheckIcon />
+        <span className="game-status__mark-icon">
+          <CheckIcon />
+        </span>
         DONE
       </span>
     );
@@ -75,9 +79,11 @@ function GameMark({
   if (status === GameStatus.LIVE) {
     return (
       <span className="game-status__mark --live" role="img" aria-label="Live">
-        {/* Read out by the label above rather than as letters, so a reader being
-            read to hears "Live" and not "L I V E". */}
-        <span className="game-status__live-dot" />
+        <span className="game-status__mark-icon">
+          {/* Read out by the label above rather than as letters, so a reader being
+              read to hears "Live" and not "L I V E". */}
+          <span className="game-status__live-dot" />
+        </span>
         LIVE
       </span>
     );
@@ -88,7 +94,9 @@ function GameMark({
       role="img"
       aria-label="Yet to kick off"
     >
-      <EventIcon />
+      <span className="game-status__mark-icon">
+        <EventIcon />
+      </span>
       SOON
     </span>
   );

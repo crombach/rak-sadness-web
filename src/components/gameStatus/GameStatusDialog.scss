@@ -77,37 +77,46 @@
   &.--upcoming {
     @include mark-pill(var(--rak-neutral-100), var(--rak-neutral-700));
   }
+}
 
-  // Every shape stands as tall as the capitals of the word beside it. Each glyph is
-  // drawn to its own share of its own box, so each says which.
+// One width for every mark's shape, the checkmark's own, which is the widest of the
+// four. So a pill's width comes from its word alone, never from which shape happens
+// to sit beside it. Narrower shapes center inside it rather than filling it.
+.game-status__mark-icon {
+  display: flex;
+  justify-content: center;
+  width: calc(var(--rak-caps-ink) * 451 / 333);
 
-  // Drawn to its own edges, so its height is all ink and there is no box to divide.
-  .game-status__live-dot {
-    width: var(--rak-caps-ink);
-    height: var(--rak-caps-ink);
-    border-radius: 50%;
-    background-color: var(--rak-danger-500);
-  }
-
-  &.--invalid > svg {
-    @include ink-height(var(--rak-caps-ink), $ink-share-warning);
-  }
-
-  &.--upcoming > svg {
-    @include ink-height(var(--rak-caps-ink), $ink-share-event);
-  }
-
-  // Cropped to its own edges rather than a square Material box, so its ink is its
-  // whole box and no share divides it. `.icon` sets a font size of its own, which
-  // `--rak-caps-ink`'s `em` would otherwise be read against instead of the word
-  // beside it.
-  &.--final > svg {
-    font-size: inherit;
-    height: var(--rak-caps-ink);
-    width: calc(var(--rak-caps-ink) * 451 / 333);
-  }
-
-  & > svg {
+  svg {
     fill: currentColor;
   }
+}
+
+// Every shape stands as tall as the capitals of the word beside it. Each glyph is
+// drawn to its own share of its own box, so each says which.
+
+// Drawn to its own edges, so its height is all ink and there is no box to divide.
+.game-status__live-dot {
+  width: var(--rak-caps-ink);
+  height: var(--rak-caps-ink);
+  border-radius: 50%;
+  background-color: var(--rak-danger-500);
+}
+
+.game-status__mark.--invalid .game-status__mark-icon svg {
+  @include ink-height(var(--rak-caps-ink), $ink-share-warning);
+}
+
+.game-status__mark.--upcoming .game-status__mark-icon svg {
+  @include ink-height(var(--rak-caps-ink), $ink-share-event);
+}
+
+// Already cropped to its own edges rather than a square Material box, so it fills
+// the slot's own width exactly rather than needing a share to divide it. `.icon`
+// sets a font size of its own, which `--rak-caps-ink`'s `em` would otherwise be
+// read against instead of the word beside it.
+.game-status__mark.--final .game-status__mark-icon svg {
+  font-size: inherit;
+  width: 100%;
+  height: var(--rak-caps-ink);
 }
