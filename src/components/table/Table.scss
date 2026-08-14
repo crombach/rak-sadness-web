@@ -68,7 +68,7 @@
       ) -
       2 * var(--rak-table-cell-padding-x) - 2 * var(--rak-border-width)
   );
-  --rak-table-border: var(--rak-border-width) solid var(--rak-table-cell-border);
+  --rak-table-border: var(--rak-border-width) solid var(--rak-panel-border);
   --rak-table-header-border: var(--rak-border-width) solid
     var(--rak-table-header-divider);
   // For an edge that draws nothing. Never `none`, which resets the color to

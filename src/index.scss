@@ -212,17 +212,23 @@
   --rak-border: #838e9a;
   // A rule between two things that are already apart, which does not.
   --rak-divider: #cdd7e1;
-  // The table's own cell border. Its own token rather than a direct read of
-  // `--rak-primary-800`, since that ramp step is also the readout/header chrome
-  // and stays dark in both modes, while this has to move: it sits against
-  // `--rak-surface`, which inverts, and the chrome's own dark tone nearly
-  // vanishes against a surface that goes dark too.
-  --rak-table-cell-border: var(--rak-primary-800);
+  // The edge of a panel pressed into the device: a table cell, a popup opening
+  // off a socket. Its own token rather than a direct read of `--rak-primary-800`,
+  // since that ramp step is also the readout/header chrome and stays dark in both
+  // modes, while this has to move: it sits against `--rak-surface`, which
+  // inverts, and the chrome's own dark tone nearly vanishes against a surface
+  // that goes dark too.
+  --rak-panel-border: var(--rak-primary-800);
   // The rule between header cells. Not a step on the primary ramp: 600 against
   // the header's own 800 fill cleared barely 1.5:1, in light mode as much as
   // dark, since the header is chrome and neither one moves. Fixed rather than
   // mode-aware for the same reason.
   --rak-table-header-divider: #757575;
+  // The dialog progress bar's sweep. Its own token rather than a direct read of
+  // `--rak-primary-500`, for the same reason as `--rak-panel-border`: that ramp
+  // step stays dark in both modes, and the track it sweeps over
+  // (`--rak-fill-subtle`) inverts, so the two nearly merge in dark mode.
+  --rak-progress-fill: var(--rak-primary-500);
 
   --rak-text: #171a1c;
   --rak-text-secondary: #32383e;
@@ -392,7 +398,7 @@ html {
     --rak-fill-subtle: #1e2124;
     --rak-fill-muted: #262a2e;
     --rak-border: #6b7581;
-    --rak-table-cell-border: var(--rak-border);
+    --rak-panel-border: var(--rak-border);
 
     --rak-text: #f4f6f7;
     --rak-text-secondary: #cbd2d8;
@@ -403,6 +409,15 @@ html {
     --rak-disabled-edge: #101214;
 
     --rak-selected-fill: #35393d;
+
+    // The dialog's busy sweep. Black-on-a-key reads against the light-mode
+    // `--rak-disabled-bg`, and blends into it once that token goes dark.
+    --rak-loading-sheen-on-light: rgb(255 255 255 / 10%);
+    // The dialog progress bar's own sweep, off the primary ramp's dark chrome
+    // step in light mode. That step stays dark in both modes, and the track it
+    // sweeps over (`--rak-fill-subtle`) goes dark too, so the sweep needs to
+    // lighten here instead.
+    --rak-progress-fill: var(--rak-border);
 
     --rak-well-light: inset 0 1px 2px rgb(0 0 0 / 42%);
     --rak-state-hover: rgb(255 255 255 / 8%);

@@ -12,7 +12,7 @@
  */
 @mixin focus-ring($on: ":focus-visible") {
   &#{$on} {
-    outline: 2px solid var(--rak-focus-ring, var(--rak-primary-500));
+    outline: 2px solid var(--rak-focus-ring, var(--rak-text));
     outline-offset: 2px;
   }
 }
