@@ -31,12 +31,11 @@
   font-size: var(--rak-text-sm);
 }
 
-// What a mark that says its state in a word is shaped like. The word is what makes it
-// wider than the box below, so the two that carry one share everything but their hue.
+// What every mark is shaped like, the four sharing everything but their hue.
 //
-// Monospace, and both words four letters, so the two come out the same size: set in the
-// body face, `WARN` would run wider than `LIVE` and the list's right edge would step in
-// and out as a game kicked off.
+// Monospace, and every word four letters, so all four come out the same size: set in
+// the body face, `WARN` would run wider than `LIVE` and the list's right edge would
+// step in and out as a game kicked off.
 @mixin mark-pill($background, $foreground) {
   width: auto;
   gap: var(--rak-space-1);
@@ -50,21 +49,14 @@
   letter-spacing: var(--rak-label-tracking);
 }
 
-// One box whatever is in it, so the marks line up down the list and the search does
-// not shift as the game it names goes from one state to the next. The two that say
-// their state in a word are pills, and wider: every mark sits against the same edge,
-// so what changes as a game kicks off is the width behind that edge.
+// Every mark is a pill, and every one sits against the same edge, so what changes
+// as a game kicks off, finishes, or drops off ESPN's board is the width behind
+// that edge rather than where it starts.
 .game-status__mark {
-  // Room for the tallest of the glyphs below, which is the one drawn to the least of
-  // its own box, so an icon-only mark takes the same room in either of its two states.
-  --rak-mark-box: calc(var(--rak-text-ink) / #{$ink-share-check-box});
-
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--rak-mark-box);
-  height: var(--rak-mark-box);
 
   &.--live {
     @include mark-pill(var(--rak-danger-100), var(--rak-danger-600));
@@ -76,9 +68,18 @@
     @include mark-pill(var(--rak-warning-300), var(--rak-warning-700));
   }
 
-  // Every shape below stands as tall as the ink of the text beside it, which is a whole
-  // line of it in the two that carry no word, and the capitals of the word itself in
-  // the pills. Each glyph is drawn to its own share of its box, so each says which.
+  &.--final {
+    @include mark-pill(var(--rak-success-100), var(--rak-success-600));
+  }
+
+  // Quiet beside the other three, since a game yet to kick off is nothing the pool
+  // can act on.
+  &.--upcoming {
+    @include mark-pill(var(--rak-neutral-100), var(--rak-neutral-700));
+  }
+
+  // Every shape stands as tall as the capitals of the word beside it. Each glyph is
+  // drawn to its own share of its own box, so each says which.
 
   // Drawn to its own edges, so its height is all ink and there is no box to divide.
   .game-status__live-dot {
@@ -88,24 +89,22 @@
     background-color: var(--rak-danger-500);
   }
 
-  // Quiet, neither a game yet to kick off nor one that is over being anything to act
-  // on. Told apart by their shape rather than by a hue, which is left to the pills.
-  &.--final > svg,
-  &.--upcoming > svg {
-    fill: var(--rak-text-tertiary);
-  }
-
-  &.--final > svg {
-    @include ink-height(var(--rak-text-ink), $ink-share-check-box);
-  }
-
-  &.--upcoming > svg {
-    @include ink-height(var(--rak-text-ink), $ink-share-event);
-  }
-
   &.--invalid > svg {
     @include ink-height(var(--rak-caps-ink), $ink-share-warning);
+  }
 
+  &.--upcoming > svg {
+    @include ink-height(var(--rak-caps-ink), $ink-share-event);
+  }
+
+  // Cropped to its own edges rather than a square Material box, so its ink is its
+  // whole box and no share divides it.
+  &.--final > svg {
+    height: var(--rak-caps-ink);
+    width: calc(var(--rak-caps-ink) * 451 / 333);
+  }
+
+  & > svg {
     fill: currentColor;
   }
 }

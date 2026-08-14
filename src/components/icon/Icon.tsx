@@ -134,10 +134,14 @@ export function SentimentVerySatisfiedOutlinedIcon() {
   );
 }
 
-export function CheckBoxIcon() {
+/**
+ * The tick `CheckCircleIcon` draws inside its ring, cropped to its own edges
+ * rather than the square box that would otherwise sit empty around it.
+ */
+export function CheckIcon() {
   return (
-    <Icon name="CheckBoxIcon">
-      <path d="m419-321 289-290-43-43-246 247-119-119-43 43 162 162ZM120-120v-720h720v720H120Z" />
+    <Icon name="CheckIcon" viewBox="257 -654 451 333">
+      <path d="m419-321 289-290-43-43-246 247-119-119-43 43 162 162Z" />
     </Icon>
   );
 }
