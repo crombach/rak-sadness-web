@@ -21,7 +21,8 @@ export default function ScoresNavbar({
   disabled = false,
   isWeekLive,
 }: {
-  view: ScoresView;
+  /** `null` while no view is open yet, so neither button reads as selected. */
+  view: ScoresView | null;
   onViewChange: (view: ScoresView) => void;
   onRefresh: () => void;
   isRefreshing: boolean;

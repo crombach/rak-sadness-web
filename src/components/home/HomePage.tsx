@@ -68,7 +68,7 @@ export default function HomePage() {
         // them. No live refresh: there is no week open yet to poll a game
         // against.
         <ScoresNavbar
-          view="Scoreboard"
+          view={null}
           disabled={hasNoScoresYet}
           isWeekLive={false}
           onViewChange={(view) =>
