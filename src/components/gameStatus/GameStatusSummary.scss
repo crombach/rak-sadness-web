@@ -61,9 +61,10 @@
 // to it.
 //
 // The mark is given as the height of the shape rather than of a box around it, and
-// the gap is every space inside the glass: mark to edge, mark to score, score to dash.
-// One value, because a readout whose cells are spaced three different ways reads as
-// cells that mean three different things.
+// the gap is every space around it: mark to edge, mark to score. One value, because
+// a mark spaced two different ways from what it stands beside reads as two different
+// marks. The score meets the dash with no gap at all: the pair reads as one number
+// split by the line between them, not as two numbers with room to spare.
 .game-status {
   --rak-score-size: 1.5rem;
   --rak-marker-size: 0.875rem;
@@ -519,13 +520,9 @@
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   justify-self: center;
-  // Tight around the dash on a phone, where the room either side of it is room the
-  // names have not got. A dash reads as joining the two scores at either gap, and the
-  // wider one is only worth having where there is width to spend on it.
-  gap: var(--rak-score-gap);
-  // The same space the cells inside are set apart by, so the pair sits in the glass
-  // the way it sits in itself. The plate below is drawn outside this box, so it is not
-  // room the readout has to find: what is spaced here is what is lit.
+  // The same space a side's own marker sits its score apart by, so the glass keeps
+  // one rhythm rather than two. The plate below is drawn outside this box, so it is
+  // not room the readout has to find: what is spaced here is what is lit.
   padding-inline: var(--rak-score-gap);
   // One screen holding both scores and the dash they meet at, sunk into the dialog the
   // way the app name is sunk into the navbar. The pair is one reading, so it is lit
