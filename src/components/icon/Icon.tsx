@@ -135,8 +135,8 @@ export function SentimentVerySatisfiedOutlinedIcon() {
 }
 
 /**
- * The tick `CheckCircleIcon` draws inside its ring, cropped to its own edges
- * rather than the square box that would otherwise sit empty around it.
+ * The tick alone, cropped to its own edges rather than Material's full
+ * 960x960 box, which would otherwise sit empty around it.
  */
 export function CheckIcon() {
   return (

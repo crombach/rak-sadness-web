@@ -35,8 +35,9 @@ export default function useExportScores(
         link.click();
         link.remove();
         // The click starts the download asynchronously, so revoking on the same
-        // tick can win the race and hand the browser a dead URL. A tick's wait
-        // is enough for the browser to have already read the blob.
+        // tick can win the race and hand the browser a dead URL. There's no API
+        // to confirm the blob was read, but a macrotask tick reliably comes
+        // after it in practice, across current browsers.
         setTimeout(() => window.URL.revokeObjectURL(url), 0);
 
         showToast(
