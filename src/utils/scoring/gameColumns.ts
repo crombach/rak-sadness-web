@@ -3,6 +3,11 @@ import rangeWithPrefix from "../rangeWithPrefix";
 
 export type LeagueKey = "college" | "pro";
 
+/** `player.name`, then `C1`/`P1` etc, the key a score change is tracked under. */
+export function pickChangeKey(playerName: string, gameLabel: string): string {
+  return `${playerName}-${gameLabel}`;
+}
+
 /** Read in this order wherever a week's games are walked league by league. */
 export const LEAGUES: Array<LeagueKey> = ["college", "pro"];
 

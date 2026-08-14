@@ -120,6 +120,9 @@ describe("the app, results views", () => {
         ),
       ).toBeInTheDocument();
     });
+    // A refresh reuses the workbook already in memory, so a transient failure has
+    // nothing to fall back to but what was already on screen.
+    expect(screen.getByText("MNF Points Pick")).toBeInTheDocument();
   });
 });
 

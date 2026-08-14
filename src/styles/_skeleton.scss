@@ -2,9 +2,9 @@
 @use "breakpoints" as *;
 
 // The one way the app says it is still working. A wireframe stands in for content
-// that is not there yet; a sheen crosses content that is there but stale. Nothing
-// spins, and no button shimmers, so a wait always looks like a wait wherever it
-// happens.
+// that is not there yet; a sheen crosses content that is there but stale,
+// including a button's own face while it works. Nothing spins, so a wait always
+// looks like a wait wherever it happens.
 //
 // Unlike the other partials here this one emits CSS, the keyframes below. A Sass
 // module is evaluated once however many files `@use` it, so they are written out

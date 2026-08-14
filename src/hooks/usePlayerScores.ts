@@ -7,6 +7,10 @@ import loadStoredPicks from "../utils/loadStoredPicks";
 import { writeCachedPicks } from "../utils/picksCache";
 import { readFileToBuffer } from "../utils/readFileToBuffer";
 import { getPlayerScores } from "../utils/scoring/getPlayerScores";
+import scoreChanges, {
+  NO_SCORE_CHANGES,
+  ScoreChanges,
+} from "../utils/scoring/scoreChanges";
 
 /** Long enough that holding the refresh button down sends one request. */
 const REFRESH_THROTTLE_MS = 500;
@@ -30,6 +34,13 @@ type ScoringRequest = {
   /** Shown when the picks arrived but scoring them threw. */
   onScoreFailure: Toast;
   onSuccess?: Toast;
+  /**
+   * Set on a refresh, where the scores already on screen came from the same
+   * workbook and are still the best answer there is. Unset elsewhere, where
+   * scoring has never succeeded for this week and there is nothing to fall back
+   * to.
+   */
+  keepScoresOnFailure?: boolean;
 };
 
 /**
@@ -55,6 +66,8 @@ export default function usePlayerScores(
 
   const [picksBuffer, setPicksBuffer] = useState<ArrayBuffer>();
   const [scores, setScores] = useState<RakMadnessScores>();
+  const [scoreChangesState, setScoreChangesState] =
+    useState<ScoreChanges>(NO_SCORE_CHANGES);
   const [attemptedFor, setAttemptedFor] = useState<LastAttempt>();
   const [isScoresLoading, setScoresLoading] = useState(true);
   const [isRefreshing, setRefreshing] = useState(false);
@@ -62,6 +75,15 @@ export default function usePlayerScores(
   // over the week that replaced it. Two can be in flight whenever the selected
   // week changes while the first is still loading.
   const latestAttempt = useRef(0);
+  // Set for the length of an attempt, so a second click cannot start another one
+  // before the state update announcing the first has even landed.
+  const isAttemptInFlight = useRef(false);
+  // The scores an attempt can be diffed against, and the week and season they are
+  // for. A week or season switch leaves this behind, so the new week's first
+  // score is never read as a change from the old week's last one.
+  const previousScores = useRef<
+    { key: string; scores: RakMadnessScores } | undefined
+  >(undefined);
 
   // Every path into the scores runs through here, so the loading flags and the
   // failure toasts cannot drift between them.
@@ -71,13 +93,16 @@ export default function usePlayerScores(
       onLoadFailure,
       onScoreFailure,
       onSuccess,
+      keepScoresOnFailure = false,
     }: ScoringRequest) => {
       if (!selectedWeek || season == null) return;
       const attempt = ++latestAttempt.current;
       const isLatest = () => latestAttempt.current === attempt;
+      isAttemptInFlight.current = true;
       setScoresLoading(true);
 
       const attempted = { season, week: selectedWeek.value };
+      const key = `${attempted.season}:${attempted.week}`;
 
       let buffer: ArrayBuffer;
       try {
@@ -91,8 +116,11 @@ export default function usePlayerScores(
           error,
         );
         setScores(undefined);
+        previousScores.current = undefined;
+        setScoreChangesState(NO_SCORE_CHANGES);
         setAttemptedFor(attempted);
         setScoresLoading(false);
+        isAttemptInFlight.current = false;
         showToast(onLoadFailure);
         return;
       }
@@ -100,6 +128,12 @@ export default function usePlayerScores(
       try {
         const weekScores = await getPlayerScores(selectedWeek, buffer, season);
         if (!isLatest()) return;
+        const before =
+          previousScores.current?.key === key
+            ? previousScores.current.scores
+            : undefined;
+        setScoreChangesState(scoreChanges(before, weekScores));
+        previousScores.current = { key, scores: weekScores };
         setScores(weekScores);
         if (onSuccess) {
           showToast(onSuccess);
@@ -107,12 +141,17 @@ export default function usePlayerScores(
       } catch (error) {
         if (!isLatest()) return;
         console.error("Failed to calculate scores", error);
-        setScores(undefined);
+        if (!keepScoresOnFailure) {
+          setScores(undefined);
+          previousScores.current = undefined;
+          setScoreChangesState(NO_SCORE_CHANGES);
+        }
         showToast(onScoreFailure);
       } finally {
         if (isLatest()) {
           setScoresLoading(false);
           setAttemptedFor(attempted);
+          isAttemptInFlight.current = false;
         }
       }
     },
@@ -174,40 +213,56 @@ export default function usePlayerScores(
   // function literal, so useCallback cannot see its dependencies.
   const refreshThrottled = useMemo(
     () =>
-      throttle(async () => {
-        if (picksBuffer == null || selectedWeek == null) return;
-        setRefreshing(true);
-        clearToasts();
-        // Refreshing rescores the workbook already in memory, so there is no
-        // separate way for loading it to fail.
-        const failure = scoringFailed(selectedWeek.value);
-        try {
-          await attemptScoring({
-            loadPicks: async () => picksBuffer,
-            onLoadFailure: failure,
-            onScoreFailure: failure,
-            onSuccess: new Toast(
-              "success",
-              "Success",
-              "Results successfully updated",
-            ),
-          });
-        } finally {
-          setRefreshing(false);
-        }
-      }, REFRESH_THROTTLE_MS),
+      throttle(
+        async () => {
+          if (picksBuffer == null || selectedWeek == null) return;
+          setRefreshing(true);
+          clearToasts();
+          // Refreshing rescores the workbook already in memory, so there is no
+          // separate way for loading it to fail.
+          const failure = scoringFailed(selectedWeek.value);
+          try {
+            await attemptScoring({
+              loadPicks: async () => picksBuffer,
+              onLoadFailure: failure,
+              onScoreFailure: failure,
+              onSuccess: new Toast(
+                "success",
+                "Success",
+                "Results successfully updated",
+              ),
+              keepScoresOnFailure: true,
+            });
+          } finally {
+            setRefreshing(false);
+          }
+          // No trailing edge: a second click inside the window is dropped rather
+          // than queued, so it cannot fire a request of its own once the window
+          // ends. `attemptInFlight` below is what actually blocks it meanwhile.
+        },
+        REFRESH_THROTTLE_MS,
+        { trailing: false },
+      ),
     [picksBuffer, selectedWeek, attemptScoring, clearToasts],
   );
 
+  // Cancels a trailing call this throttle would otherwise still owe once the
+  // component holding it is gone.
+  useEffect(() => () => refreshThrottled.cancel(), [refreshThrottled]);
+
   const refresh = useCallback(async () => {
-    if (isScoresLoading) return;
+    // A ref rather than the `isScoresLoading` state, which two clicks in the same
+    // tick would both still read as false: the state update announcing the first
+    // click's attempt has not landed yet.
+    if (isAttemptInFlight.current) return;
     await refreshThrottled();
-  }, [isScoresLoading, refreshThrottled]);
+  }, [refreshThrottled]);
 
   // Memoized so `AppDataContext` can memoize the value it publishes.
   return useMemo(
     () => ({
       scores,
+      scoreChanges: scoreChangesState,
       attemptedFor,
       isScoresLoading,
       isRefreshing,
@@ -216,6 +271,7 @@ export default function usePlayerScores(
     }),
     [
       scores,
+      scoreChangesState,
       attemptedFor,
       isScoresLoading,
       isRefreshing,

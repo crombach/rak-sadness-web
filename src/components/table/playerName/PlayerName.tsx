@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { useScoreChanges } from "../../../context/AppDataContext";
 import { PlayerScore } from "../../../types/RakMadnessScores";
 import getClasses from "../../../utils/getClasses";
 import { useShowPlayerAnalysis } from "../../../context/PlayerAnalysisContext";
@@ -7,6 +8,8 @@ import "./PlayerName.scss";
 
 function PlayerName({ player }: { player: PlayerScore }) {
   const showPlayerAnalysis = useShowPlayerAnalysis();
+  const { players: playerChanges } = useScoreChanges();
+  const justKnockedOut = playerChanges.has(player.name);
 
   return (
     <td
@@ -26,6 +29,9 @@ function PlayerName({ player }: { player: PlayerScore }) {
         <span className="table__sr-only">
           {player.status.isKnockedOut ? "Knocked out" : "Still in contention"}
         </span>
+        {justKnockedOut && (
+          <span className="table__cell-wipe" aria-hidden="true" />
+        )}
       </button>
     </td>
   );

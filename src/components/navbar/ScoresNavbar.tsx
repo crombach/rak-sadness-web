@@ -1,5 +1,5 @@
 import { CSSProperties, useEffect, useState } from "react";
-import { FactCheckIcon, LeaderboardIcon, RefreshIcon } from "../icon/Icon";
+import { FactCheckIcon, LeaderboardIcon, UpdateIcon } from "../icon/Icon";
 import Button from "../button/Button";
 import "./ScoresNavbar.scss";
 
@@ -89,13 +89,15 @@ export default function ScoresNavbar({
             <div className="scores-nav__divider" />
             <Button
               ariaLabel="Refresh"
-              ariaDisabled={disabled}
+              // Also unavailable mid-refresh, so a second click while one is
+              // already running cannot queue another.
+              ariaDisabled={disabled || isRefreshing}
               busy={isRefreshing}
               compact
               onClick={onRefresh}
               className="scores-nav__button"
             >
-              <RefreshIcon />
+              <UpdateIcon />
             </Button>
           </div>
         </div>

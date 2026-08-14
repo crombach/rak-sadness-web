@@ -11,6 +11,33 @@
   background-color: color-mix(in srgb, var(--rak-cell-fill) $strength, black);
 }
 
+// A refresh changing a cell's status draws the color it held before over the
+// color it holds now, then wipes that away left to right, so the new value
+// reads as revealed rather than as a fill simply swapping. `--rak-cell-base`
+// names the color it wipes away, the same token every status fill and the
+// striped row beneath it already read from, set here by whichever status class
+// a change's previous value was, in `PicksTable.scss` and below.
+@keyframes rak-cell-wipe {
+  from {
+    clip-path: inset(0 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 100%);
+  }
+}
+
+// The striped-row mix, read back for whichever property carries a cell's fill:
+// `--rak-cell-fill`, which a pressed or hovered cell mixes further from, or
+// `background-color` directly, which a wipe overlay has no further state to mix
+// from.
+@mixin striped-fill($property) {
+  #{$property}: color-mix(
+    in srgb,
+    var(--rak-cell-base) var(--rak-stripe-strength),
+    var(--rak-stripe-with)
+  );
+}
+
 .table {
   // Centered across, and flush to the top, which is where the wireframe stands. The
   // rows below carry the table to the bottom of the window, and what is left under
@@ -145,6 +172,11 @@
     display: block;
     width: 100%;
     height: 100%;
+    // Containing block for `.table__cell-wipe`, painted over this button's own
+    // content rather than over the `<td>`, which stays un-positioned. Nothing here
+    // becomes sticky, which is what `SCROLL-FLASH.md` traces the Android fling
+    // flash to.
+    position: relative;
     // The cell's own rule reaches the text it holds directly. Said again here for
     // the two columns that wrap theirs in a button.
     overflow: hidden;
@@ -158,6 +190,23 @@
     font: inherit;
     text-align: inherit;
     cursor: pointer;
+  }
+
+  // What a refresh changing this cell's status draws over the new value, then
+  // wipes away. Rendered only where a change actually happened, so a cell whose
+  // status held steady never gains one. `--rak-cell-base` would otherwise
+  // inherit the *new* status's fill from the `<td>` around it, which is why this
+  // names its own default, `incomplete` being what a pick almost always wipes
+  // away from. `PicksTable.scss` layers the rarer previous statuses over it, and
+  // `.table__player-col` below covers the one change a name cell can show.
+  .table__cell-wipe {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    --rak-cell-base: var(--rak-surface);
+    background-color: var(--rak-cell-base);
+    animation: rak-cell-wipe var(--rak-duration-slow) var(--rak-ease-standard)
+      forwards;
   }
 
   // A pick's or a player's status, said in words for the fill color a sighted
@@ -219,6 +268,13 @@
       &.--knocked-out {
         --rak-cell-base: var(--rak-knocked-out-300);
       }
+
+      // The one change a name cell can show is a player just being knocked out,
+      // so the wipe always draws the fill they held before that, not the one
+      // inherited from the `<td>`'s own, already-updated class above.
+      .table__cell-wipe {
+        --rak-cell-base: var(--rak-in-contention-300);
+      }
     }
 
     td {
@@ -254,11 +310,11 @@
     }
 
     tr:nth-child(even) td {
-      --rak-cell-fill: color-mix(
-        in srgb,
-        var(--rak-cell-base) var(--rak-stripe-strength),
-        var(--rak-stripe-with)
-      );
+      @include striped-fill(--rak-cell-fill);
+    }
+
+    tr:nth-child(even) .table__cell-wipe {
+      @include striped-fill(background-color);
     }
 
     // Keeps the last real row clear of a phone's rounded corners and home

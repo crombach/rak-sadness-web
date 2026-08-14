@@ -23,12 +23,29 @@ export type ParsedPicks = {
 };
 
 /**
+ * One buffer to the parse already run on it, so a refresh rescoring the same
+ * workbook does not pay for the xlsx parse again. Keyed by the buffer's own
+ * identity rather than its bytes: the picks a `RakMadnessScores` was built from
+ * never change without a new buffer replacing it. A `WeakMap` rather than a
+ * plain one, so a buffer this hook has moved on from can still be collected.
+ */
+const parsed = new WeakMap<ArrayBuffer, Promise<ParsedPicks>>();
+
+/**
  * `xlsx-js-style` is over half the bundle, and nothing on the first paint needs
  * it, so it is fetched when a workbook actually turns up.
  */
-export default async function parsePicksWorkbook(
+export default function parsePicksWorkbook(
   picksBuffer: ArrayBuffer,
 ): Promise<ParsedPicks> {
+  const cached = parsed.get(picksBuffer);
+  if (cached != null) return cached;
+  const parsing = parseWorkbook(picksBuffer);
+  parsed.set(picksBuffer, parsing);
+  return parsing;
+}
+
+async function parseWorkbook(picksBuffer: ArrayBuffer): Promise<ParsedPicks> {
   const XLSX = await import("xlsx-js-style");
   const workbook = XLSX.read(picksBuffer, { type: "array" });
   const picksSheet = workbook.Sheets[Object.keys(workbook.Sheets)[0]];
