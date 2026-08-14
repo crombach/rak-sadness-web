@@ -2,6 +2,18 @@
 @use "../../styles/focus" as *;
 @use "../../styles/skeleton" as *;
 
+// A key at rest and a key sunk under a finger. The top face travels by the
+// difference between the two lifts, so the face lands where the lower edge was
+// and nothing around the key moves. Transform rather than margin for that
+// reason, and a state rather than a transition, so it still reads with animation
+// turned off.
+@mixin key($lift) {
+  transform: translateY(calc(var(--rak-key-lift) - #{$lift}));
+  box-shadow:
+    var(--rak-key-top),
+    0 #{$lift} 0 var(--rak-key-edge);
+}
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -61,7 +73,24 @@
     // primary, and the offset gap shows that fill too.
     --rak-focus-ring: var(--rak-on-solid);
 
+    // A key moulded out of the panel: lit along its top edge, standing on a lower
+    // edge in its own color one step down. Each variant names that step below, so
+    // a key is never edged in a color it does not otherwise carry.
+    @include key(var(--rak-key-lift));
+
+    &:active {
+      @include key(var(--rak-key-pressed));
+    }
+
+    // The chosen view is a key being held down, so it stands where a pressed one
+    // does and stays there. After `:active`, so pressing the key already chosen
+    // moves nothing.
+    &.--selected {
+      @include key(var(--rak-key-pressed));
+    }
+
     &.--primary {
+      --rak-key-edge: var(--rak-primary-700);
       background-color: var(--rak-primary-500);
 
       @include can-hover {
@@ -79,6 +108,7 @@
     }
 
     &.--success {
+      --rak-key-edge: var(--rak-success-700);
       background-color: var(--rak-success-500);
 
       @include can-hover {
@@ -92,6 +122,7 @@
     }
 
     &.--danger {
+      --rak-key-edge: var(--rak-danger-700);
       background-color: var(--rak-danger-500);
 
       @include can-hover {

@@ -270,6 +270,18 @@ describe("GameStatusSummary, a game that is over", () => {
   });
 });
 
+/**
+ * The digits the readout has lit, without the row of unlit cells laid under them.
+ * The seven-segment face draws the score over its own dark segments, and that layer
+ * is a text node's worth of eights in the same element.
+ */
+function litDigits(element: Element): string {
+  return [...element.childNodes]
+    .filter((node) => node.nodeType === Node.TEXT_NODE)
+    .map((node) => node.textContent ?? "")
+    .join("");
+}
+
 describe("GameStatusSummary, the two scores as a pair", () => {
   function points(scores: { home: number; away: number }): Array<string> {
     const scored = result({
@@ -278,7 +290,7 @@ describe("GameStatusSummary, the two scores as a pair", () => {
     });
     render(<GameStatusSummary game={game(scored)} result={scored} />);
     return [...document.querySelectorAll(".game-status__points")].map(
-      (span) => span.textContent ?? "",
+      litDigits,
     );
   }
 
@@ -300,7 +312,7 @@ describe("GameStatusSummary, the two scores as a pair", () => {
 
   it("reads a padded score out as the number it is", () => {
     points({ home: 7, away: 14 });
-    expect(screen.getByLabelText("7")).toHaveTextContent("07");
+    expect(litDigits(screen.getByLabelText("7"))).toBe("07");
   });
 });
 
@@ -323,7 +335,11 @@ describe("GameStatusSummary, which side took the point", () => {
       missed: textOf(
         ".game-status__team-name.--missed .game-status__name-short",
       ),
-      scores: textOf(".game-status__score.--scored .game-status__points"),
+      scores: [
+        ...document.querySelectorAll(
+          ".game-status__score.--scored .game-status__points",
+        ),
+      ].map(litDigits),
     };
   }
 

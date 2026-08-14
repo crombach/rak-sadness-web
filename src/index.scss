@@ -8,13 +8,16 @@
   // system is set to dark.
   color-scheme: light;
 
-  // Type. `Inter Variable` is the family `@fontsource-variable/inter` registers,
-  // which `src/index.tsx` loads. Naming it anything else downloads the font and
-  // renders in the fallback.
+  // Type. A squared-off grotesque, which is what the app's own chrome is drawn
+  // in: flat terminals and wide apertures read as an instrument panel and still
+  // hold up at the sizes the labels are set. `Space Grotesk Variable` is the
+  // family `@fontsource-variable/space-grotesk` registers, which `src/index.tsx`
+  // loads. Naming it anything else downloads the font and renders in the
+  // fallback.
   --rak-font-body:
-    "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-    "Segoe UI Symbol";
+    "Space Grotesk Variable", "Space Grotesk", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   // Picks are laid out in character widths: `18ch` for a name, `3ch` for a pick
   // label. A bare `monospace` resolves to Courier on some Android builds, whose
   // advance width is narrow enough to change how many columns fit.
@@ -28,17 +31,34 @@
   // over a row of all-segments-on characters, and only a fixed advance keeps the
   // two layers on top of each other while the face is still downloading.
   --rak-font-display: "DSEG14 Classic", var(--rak-font-mono);
+  // The digits alone, in the seven-segment face the same foundry draws. Only the
+  // scoreline in the game dialog is set in this: a pair of two-digit scores is
+  // what a readout is for, and segments cost too much of a reader at the sizes
+  // everything else is set. `src/index.tsx` loads its bold cut and only that one.
+  // The fallback is the mono stack for the same reason as the line above: the
+  // digits are drawn over a row of all-segments-on characters, and only a fixed
+  // advance keeps the two layers stacked while the face is still downloading.
+  --rak-font-segment: "DSEG7 Classic", var(--rak-font-mono);
 
   --rak-text-xs: 0.75rem;
   --rak-text-sm: 0.875rem;
   --rak-text-md: 1rem;
   --rak-text-lg: 1.25rem;
+  // Off the scale above, because it is the size a phone's table is set at and the
+  // width every column is declared in. The caption over the table reads it too, so
+  // the two stay one head with a line through it however either is changed.
+  --rak-text-table: 0.8rem;
 
   --rak-weight-medium: 500;
   --rak-weight-semibold: 600;
   --rak-weight-bold: 700;
 
   --rak-line-height: 1.5;
+
+  // What a label set in capitals is opened up by. Capitals are drawn on one
+  // height and run together without it, and every small label in the app is set
+  // this way, so the value is named once here rather than at each of them.
+  --rak-label-tracking: 0.06em;
 
   // Space, on a 4px grid.
   --rak-space-1: 4px;
@@ -47,9 +67,12 @@
   --rak-space-4: 16px;
   --rak-space-6: 24px;
 
-  --rak-radius-xs: 3px;
-  --rak-radius-sm: 6px;
-  --rak-radius-lg: 12px;
+  // Squarer than a card's. The app is drawn as a moulded case with keys set into
+  // it, and a corner rounded much past this stops reading as something pressed
+  // out of a panel.
+  --rak-radius-xs: 2px;
+  --rak-radius-sm: 4px;
+  --rak-radius-lg: 8px;
 
   // Every line the app draws around or between things. A control's boundary has
   // to be told from the surface behind it, so it is darker than a rule drawn
@@ -123,7 +146,10 @@
   --rak-danger-700: #7d1212;
 
   --rak-warning-100: #fdf0e1;
-  --rak-warning-300: #edfaa0;
+  // Orange like the rest of its ramp, and far enough off `--rak-success-300` to be
+  // told from it. The two fill neighbouring cells in the picks table, and a yellow
+  // -green here read as a shade of that green rather than as its own answer.
+  --rak-warning-300: #fad9a0;
   --rak-warning-500: #9a5b13;
   --rak-warning-700: #492b08;
 
@@ -195,6 +221,22 @@
   --rak-shadow-modal:
     0 8px 24px -4px rgb(var(--rak-shadow-color) / 18%),
     0 16px 40px -8px rgb(var(--rak-shadow-color) / 12%);
+
+  // Moulding, for the three things the app draws as parts of a device rather than
+  // as panes of a page: a key, the bezel around a screen, and the well a readout
+  // is sunk into. Every one is an alpha, so it is read against whatever fill it is
+  // laid on and none of them has to be repainted per surface. The dark lower edge
+  // a key stands on is not here: it is that key's own color one step down, which
+  // only `Button.scss` knows.
+  --rak-key-top: inset 0 1px 0 rgb(255 255 255 / 18%);
+  --rak-bezel:
+    inset 0 1px 0 rgb(255 255 255 / 10%), inset 0 -1px 0 rgb(0 0 0 / 30%);
+  --rak-well: inset 0 1px 2px rgb(0 0 0 / 35%);
+  // How far a key stands off the panel, and how far it has left to travel once a
+  // finger is on it. The difference is what it sinks by, so the two are named
+  // together.
+  --rak-key-lift: 2px;
+  --rak-key-pressed: 1px;
 
   // Loading. One fill for a placeholder bar and one sheen that crosses it, shared
   // by every wireframe in the app.

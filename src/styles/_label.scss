@@ -1,0 +1,17 @@
+// The small screen-printed label the app names a thing with, wherever it names
+// one. Mixins only, so this emits no CSS of its own however many files pull it in.
+
+/**
+ * Capitals, tracked open, at the smallest size the app sets. Capitals alone are
+ * the same height as each other and run together without the tracking, which is
+ * why the two always go together.
+ *
+ * Only the casing, the weight and the tracking come from here. Size and color are
+ * left to the caller, because a label on the table's dark header and a label over
+ * a list on white are the same kind of thing set against different surfaces.
+ */
+@mixin micro-label {
+  font-weight: var(--rak-weight-bold);
+  letter-spacing: var(--rak-label-tracking);
+  text-transform: uppercase;
+}

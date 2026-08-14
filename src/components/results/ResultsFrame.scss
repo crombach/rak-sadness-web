@@ -1,4 +1,5 @@
 @use "../../styles/breakpoints" as *;
+@use "../../styles/label" as *;
 @use "../../styles/skeleton" as *;
 
 .results-scores {
@@ -26,6 +27,10 @@
   // height; painted the same, it reads as that row being the taller for it rather
   // than as the page running out before the table does.
   background-color: var(--rak-primary-800);
+  // The table is the app's screen, so the dark band around it is drawn as the
+  // bezel holding it: lit along its top edge and shadowed along its bottom. Inset,
+  // so it costs no room and nothing inside the frame moves.
+  box-shadow: var(--rak-bezel);
 }
 
 /**
@@ -52,12 +57,12 @@
   // See SCROLL-FLASH.md.
   color: var(--rak-on-solid);
   // The header row's own type, so the two read as one head with a line drawn
-  // through it rather than as two bands set differently. Both values are
-  // `Table.scss`'s: the size it puts on `.table` and the weight a `<th>` carries
-  // by default. Written out because they are the table's, and this stands
-  // outside it.
-  font-size: 0.8rem;
-  font-weight: var(--rak-weight-bold);
+  // through it rather than as two bands set differently. The size is the token
+  // `.table` reads too; the capitals and the tracking are what every heading in
+  // the app is set in.
+  @include micro-label;
+
+  font-size: var(--rak-text-table);
 }
 
 /**
@@ -109,8 +114,9 @@
     width: max-content;
     // The panel the page carries on every other route, handed to the table now
     // that it is the thing standing on the blue. `PageLayout.scss` gives this up
-    // at the same width.
-    box-shadow: var(--rak-shadow-overlay);
+    // at the same width. The bezel is written again beside it: one `box-shadow`
+    // replaces the other, and the frame is drawn as a bezel at every width.
+    box-shadow: var(--rak-bezel), var(--rak-shadow-overlay);
   }
 
   // The table goes up to its roomier size at this width, so the caption goes with

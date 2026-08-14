@@ -1,6 +1,9 @@
+// The quietest ink the app has that still clears 4.5:1 on the surface these links
+// stand on. The grey they were drawn in before was not one of the app's own colors
+// and came to 3.54:1 there, which is under the floor for text this size.
 .footer,
 .footer > * {
-  color: #888888;
+  color: var(--rak-text-tertiary);
 }
 
 .footer {

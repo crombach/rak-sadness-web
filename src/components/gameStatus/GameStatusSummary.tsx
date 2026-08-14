@@ -22,6 +22,14 @@ const REGULATION_PERIODS = 4;
 const SCORE_DASH = "–";
 
 /**
+ * The character DSEG7 draws with every segment of a digit lit. A row of them behind
+ * the score is the display's unlit segments, the way a real readout shows the cells
+ * it is not currently using. `LogoButton.tsx` does the same for the app name, in the
+ * fourteen-segment face that draws letters.
+ */
+const ALL_SEGMENTS_ON = "8";
+
+/**
  * What a game yet to kick off is doing, said in place of ESPN's own wording.
  *
  * ESPN says a scheduled game as its kickoff, in Eastern time. The strip under the
@@ -310,6 +318,7 @@ function Score({
   outcome?: SideOutcome;
 }) {
   const padded = isPadded(side.score, opponent.score);
+  const points = padded ? `0${side.score}` : `${side.score}`;
   return (
     <p
       className={getClasses("game-status__score", `--${homeAway}`, {
@@ -325,7 +334,13 @@ function Score({
         // is announced instead.
         aria-label={padded ? `${side.score}` : undefined}
       >
-        {padded ? `0${side.score}` : side.score}
+        {/* One unlit cell per digit shown, so a score of one digit is one cell and
+            not two. The face is monospaced, so the row lands exactly under the
+            number without being measured. */}
+        <span className="game-status__points-ghost" aria-hidden="true">
+          {ALL_SEGMENTS_ON.repeat(points.length)}
+        </span>
+        {points}
       </span>
       <Marker homeAway={homeAway} hasBall={hasBall} />
     </p>

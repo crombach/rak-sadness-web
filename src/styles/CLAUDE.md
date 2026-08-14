@@ -10,6 +10,7 @@ keyframes. Design tokens live in `src/index.scss` instead.
 - `_ink.scss`: `ink-height`, an icon drawn as tall as the text beside it
 - `_a11y.scss`: `visually-hidden`
 - `_field.scss`: `field-shell` and `field-icon`, the home page selects' box
+- `_label.scss`: `micro-label`, the tracked capitals every small label is set in
 - `_listbox.scss`: `listbox-popup` and `listbox-item`, the shape of a Base UI popup
   list, shared by the home page selects and the dialogs' combobox
 - `_skeleton.scss`: `skeleton-surface`, `skeleton-sheen`, `skeleton-reserve`

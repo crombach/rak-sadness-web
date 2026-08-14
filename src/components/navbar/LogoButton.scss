@@ -1,5 +1,22 @@
 @use "../../styles/breakpoints" as *;
 
+// The well's own padding, taken out of the 7.2px the name has spare at the
+// narrowest width measured below. Any more and a 360px phone ends the name in an
+// ellipsis that it does not need to.
+$well-inset: 3px;
+
+// Not a key. Every other button on the bar is one, but this is the plate the
+// device is named on, and a name that sinks under a finger reads as a control.
+// Written out to `Button.scss`'s own specificity and one class past it, which is
+// what it takes to put back what `.button.--solid:not(:disabled)` sets there.
+.button.--solid.logo-button:not(:disabled) {
+  &,
+  &:active {
+    box-shadow: none;
+    transform: none;
+  }
+}
+
 .logo-button {
   // A flex item will not shrink below what it holds unless it is told it may, and
   // the name cannot give up its room until the button it sits in can.
@@ -36,6 +53,13 @@
     // exactly as far as the light ones and cost nothing across a bar this tight.
     font-weight: var(--rak-weight-bold);
     text-align: left;
+    // Sunk into the bar, which is what makes the segments below read as a readout
+    // rather than as a font the name happens to be set in. Darker than the bar it
+    // is cut into, so the well has a fill of its own to be shadowed against.
+    padding: var(--rak-space-1) $well-inset;
+    border-radius: var(--rak-radius-xs);
+    background-color: var(--rak-primary-800);
+    box-shadow: var(--rak-well);
     // The unlit segments are laid under the name rather than beside it.
     position: relative;
     // One line at every width. The navbar is sized for it, and a wrapped app name
@@ -60,13 +84,17 @@
   // difference: every segment the name lights is one this lights too.
   &__name-ghost {
     position: absolute;
-    top: 0;
-    left: 0;
+    // The well's own padding, said again because an absolutely positioned box is
+    // placed against the padding box's outer edge and would otherwise start where
+    // the padding does not.
+    top: var(--rak-space-1);
+    left: $well-inset;
     // Out of any selection the user drags over the bar. Selectable, copying the
     // name carried the row of tildes out with it.
     user-select: none;
     // Enough to read as segments that could light, not so much that it crowds the
-    // ones that are lit. Measured against the navbar's own fill at this size.
-    color: rgb(255 255 255 / 18%);
+    // ones that are lit. Measured against the well behind it, which is darker than
+    // the bar around it and so takes less white than the bar did.
+    color: rgb(255 255 255 / 12%);
   }
 }

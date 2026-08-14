@@ -1,5 +1,6 @@
 @use "../../styles/breakpoints" as *;
 @use "../../styles/a11y" as *;
+@use "../../styles/label" as *;
 
 // A cell taken the given distance toward black, from whatever fill it carries,
 // striped or not. Mixed rather than run through `filter: brightness()`, which is
@@ -25,7 +26,8 @@
   // and the width of a column would be back to depending on how many there are.
   width: max-content;
   // A phone's size, which a roomier screen puts back up at the foot of this file.
-  font-size: 0.8rem;
+  // The caption over the table reads the same token, so the two stay one head.
+  font-size: var(--rak-text-table);
   // The columns, in the table's own font, so they hold the same number of characters
   // at either size. Wide enough for what a cell of that kind usually holds: a rank
   // and a score are two digits, a pick is a team and its spread, and a name runs to
@@ -78,6 +80,9 @@
     background-color: var(--rak-primary-800);
 
     th {
+      // The screen-printed label every heading in the app is set in.
+      @include micro-label;
+
       // Each cell sticks on its own rather than the row's section doing it for
       // them. The player column sticks left, and a cell sticking inside a
       // sticky <thead> is a case Firefox on Android hands back to the main

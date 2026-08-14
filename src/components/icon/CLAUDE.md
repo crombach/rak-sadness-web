@@ -1,12 +1,15 @@
 # icon
 
 Every icon the app draws, as one `<svg>` each. Path data copied verbatim from
-`@mui/icons-material` (Material Design icons, Apache 2.0), inlined because those
-components drag `@mui/material` and emotion in behind them. `SkullOutlinedIcon`
-comes from Material Symbols instead, same licence, rescaled onto the 24px grid.
+Material Symbols Sharp at weight 400 (Apache 2.0), inlined because an icon
+package built on components drags a UI library and emotion in behind it. Sharp
+for its square terminals, which match the app's keys and bezels.
+
+`Icon` draws in Symbols' own `0 -960 960 960` box, so nothing is rescaled. A
+caller with a shape from elsewhere passes `viewBox`; `GitHubIcon` is the only one.
 
 `Icon.scss` holds the 24px box. A caller wanting another size overrides
 `width`/`height` from an `--rak-icon-*` token.
 
-Each icon keeps the `data-testid` its MUI counterpart had, which is how the toaster
-suite finds them.
+Each icon carries a `data-testid`, which is how the toaster and player status
+suites find them.
