@@ -177,10 +177,13 @@
   --rak-danger-700: #7d1212;
 
   --rak-warning-100: #fdf0e1;
-  // Orange like the rest of its ramp, and far enough off `--rak-success-300` to be
-  // told from it. The two fill neighbouring cells in the picks table, and a yellow
-  // -green here read as a shade of that green rather than as its own answer.
-  --rak-warning-300: #fad9a0;
+  // Yellow rather than the orange the rest of its ramp runs on, because of what it
+  // is drawn beside. A picks row opens with the player's own cell, which is the
+  // orange of `--rak-knocked-out-300` once they are out, and every pick after it is
+  // one of these. Ten degrees of hue apart, the two read as one fill and the row
+  // stops saying which of the two things it means. This is forty off that orange
+  // and fifty off the green it also sits beside.
+  --rak-warning-300: #edfaa0;
   --rak-warning-500: #9a5b13;
   --rak-warning-700: #492b08;
 
