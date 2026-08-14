@@ -1,4 +1,5 @@
 import { PlayerScore } from "../../types/RakMadnessScores";
+import isWeekOver from "./isWeekOver";
 import plural from "../plural";
 import remainingGames, {
   pickDifference,
@@ -62,6 +63,9 @@ export default function applyKnockouts(
 ): Array<PlayerScore> {
   const games = remainingGames(sortedScores);
   const isCollegeDone = games.every((game) => game.league !== "college");
+  // Once the week is over there are no remaining games to differ on, so the
+  // count is always zero and saying so is redundant.
+  const weekOver = isWeekOver(sortedScores);
 
   return sortedScores.map((activeScore, activeIndex) => {
     // If a player has no picks, they're knocked out.
@@ -99,7 +103,10 @@ export default function applyKnockouts(
           return knockedOut(
             activeScore,
             `Knocked out on Total Score by ${rivalScore.name}. ` +
-              `Behind by ${totalScoreDiff} with ${plural(totalDifferentPicks, "different pick")} remaining.`,
+              `Behind by ${totalScoreDiff}` +
+              (weekOver
+                ? "."
+                : ` with ${plural(totalDifferentPicks, "different pick")} remaining.`),
           );
         } else if (totalDifferentPicks === totalScoreDiff) {
           // Either distance is absent when that player left the Monday night
@@ -122,7 +129,10 @@ export default function applyKnockouts(
               return knockedOut(
                 activeScore,
                 `Knocked out on College Score tiebreaker by ${rivalScore.name}. ` +
-                  `Behind by ${collegeScoreDiff} with ${plural(differentCollegePicks, "different college pick")} remaining.`,
+                  `Behind by ${collegeScoreDiff}` +
+                  (weekOver
+                    ? "."
+                    : ` with ${plural(differentCollegePicks, "different college pick")} remaining.`),
               );
             }
             // If college games are done and players are tied, check pro against the spread tiebreaker.
@@ -137,8 +147,11 @@ export default function applyKnockouts(
                 return knockedOut(
                   activeScore,
                   `Knocked out on Pro Score Against the Spread tiebreaker by ${rivalScore.name}. ` +
-                    `Behind by ${proAgainstTheSpreadScoreDiff} with ${plural(differentProPicksWithSpreads, "different pick")} remaining ` +
-                    `for pro games with spreads.`,
+                    `Behind by ${proAgainstTheSpreadScoreDiff}` +
+                    (weekOver
+                      ? "."
+                      : ` with ${plural(differentProPicksWithSpreads, "different pick")} remaining ` +
+                        `for pro games with spreads.`),
                 );
               }
             }

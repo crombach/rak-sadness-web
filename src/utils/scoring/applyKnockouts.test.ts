@@ -125,6 +125,17 @@ describe("applyKnockouts", () => {
     );
   });
 
+  it("omits the remaining-picks clause once the week is fully resolved", () => {
+    const result = applyKnockouts([
+      player({ name: "Alice", total: 3, pro: [pickResult("BUF", "yes")] }),
+      player({ name: "Bob", total: 1, pro: [pickResult("BUF", "yes")] }),
+    ]);
+
+    expect(result[1].status.explanation).toBe(
+      "Knocked out on Total Score by Alice. Behind by 2.",
+    );
+  });
+
   it("leaves a trailing player standing while different picks can close the gap", () => {
     const result = applyKnockouts([
       player({
@@ -162,6 +173,31 @@ describe("applyKnockouts", () => {
     expect(result[1].status.explanation).toBe(
       "Knocked out on College Score tiebreaker by Alice. " +
         "Behind by 1 with 0 different college picks remaining.",
+    );
+  });
+
+  it("omits the remaining-picks clause on the college tiebreaker once resolved", () => {
+    const result = applyKnockouts([
+      player({
+        name: "Alice",
+        total: 5,
+        collegeScore: 3,
+        proScore: 2,
+        college: [pickResult("OSU", "yes")],
+        tiebreakerPick: 40,
+      }),
+      player({
+        name: "Bob",
+        total: 5,
+        collegeScore: 2,
+        proScore: 3,
+        college: [pickResult("OSU", "yes")],
+        tiebreakerPick: 40,
+      }),
+    ]);
+
+    expect(result[1].status.explanation).toBe(
+      "Knocked out on College Score tiebreaker by Alice. Behind by 1.",
     );
   });
 
@@ -216,6 +252,36 @@ describe("applyKnockouts", () => {
     expect(result[1].status.explanation).toBe(
       "Knocked out on Pro Score Against the Spread tiebreaker by Alice. " +
         "Behind by 1 with 0 different picks remaining for pro games with spreads.",
+    );
+  });
+
+  it("omits the remaining-picks clause on the spread tiebreaker once resolved", () => {
+    const result = applyKnockouts([
+      player({
+        name: "Alice",
+        total: 4,
+        collegeScore: 2,
+        proScore: 2,
+        proAgainstTheSpread: 2,
+        college: [pickResult("OSU", "yes")],
+        pro: [pickResult("BUF -3", "yes")],
+        tiebreakerPick: 40,
+      }),
+      player({
+        name: "Bob",
+        total: 4,
+        collegeScore: 2,
+        proScore: 2,
+        proAgainstTheSpread: 1,
+        college: [pickResult("OSU", "yes")],
+        pro: [pickResult("BUF -3", "yes")],
+        tiebreakerPick: 40,
+      }),
+    ]);
+
+    expect(result[1].status.explanation).toBe(
+      "Knocked out on Pro Score Against the Spread tiebreaker by Alice. " +
+        "Behind by 1.",
     );
   });
 
