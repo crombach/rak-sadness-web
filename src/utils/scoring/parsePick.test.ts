@@ -1,4 +1,4 @@
-import parsePick from "./parsePick";
+import parsePick, { formatPickDisplay } from "./parsePick";
 
 describe("parsePick", () => {
   it("reads a team and a signed spread", () => {
@@ -94,5 +94,28 @@ describe("parsePick", () => {
       teamAbbreviation: undefined,
       spread: -7,
     });
+  });
+});
+
+describe("formatPickDisplay", () => {
+  it("puts a + on a spread written with no sign", () => {
+    expect(formatPickDisplay("NE 7")).toBe("NE +7");
+  });
+
+  it("leaves a spread that already carries a sign untouched", () => {
+    expect(formatPickDisplay("BUF -7")).toBe("BUF -7");
+    expect(formatPickDisplay("KC +3.5")).toBe("KC +3.5");
+  });
+
+  it("leaves a pick with no spread untouched", () => {
+    expect(formatPickDisplay("SF")).toBe("SF");
+  });
+
+  it("leaves a pick naming no team untouched", () => {
+    expect(formatPickDisplay("-7")).toBe("-7");
+  });
+
+  it("leaves a non-string cell untouched", () => {
+    expect(formatPickDisplay(undefined)).toBeUndefined();
   });
 });

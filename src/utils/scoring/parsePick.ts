@@ -31,3 +31,20 @@ export default function parsePick(pickString: string) {
     spread: spread != null ? Number(spread[1].replace(/\s+/g, "")) : 0,
   };
 }
+
+/**
+ * The cell's own text, with a "+" put on a spread that was written with no sign,
+ * so the underdog's number reads the same way the favorite's "-" already does.
+ * A cell that already carries a sign, or names no team, is returned untouched.
+ */
+export function formatPickDisplay(pickString: any): any {
+  if (typeof pickString !== "string") return pickString;
+
+  const match = trailingSpread.exec(pickString.trim());
+  if (match == null || /^[+-]/.test(match[1].trim())) return pickString;
+
+  const { teamAbbreviation, spread } = parsePick(pickString);
+  if (teamAbbreviation == null || spread <= 0) return pickString;
+
+  return `${teamAbbreviation} +${spread}`;
+}
