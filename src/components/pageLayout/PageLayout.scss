@@ -44,8 +44,11 @@
   // A phone only. The tiles are the whole surface behind a page held in one hand,
   // and past that they are two strips either side of a content column 1024px wide,
   // which reads as wallpaper the app forgot to finish rather than as its ground.
-  // The brand blue is left showing there.
+  // The case the app is mounted in takes over there, since with the tiles gone the
+  // brand blue is a field of color rather than the ground under a pattern.
   @include roomy-screen {
+    background-color: var(--rak-case);
+
     &::before {
       display: none;
     }

@@ -8,25 +8,33 @@
 @use "focus" as *;
 
 /**
- * A hairline box on the page's own surface. No shadow: the buttons beside these
- * carry none either, and one lifted control among flat ones reads as a mistake
- * rather than as depth.
+ * A slot cut into the panel, which is the other half of the app's one moulding
+ * idea: the buttons beside these are keys standing off it, and a thing you set a
+ * value in is a socket sunk into it. Drawn with the same well the readouts carry,
+ * on a fill a step off the panel's white so the shadow has something to fall on.
+ *
+ * Squarer than a card and darker on the edge than a divider, because it is a
+ * control's own boundary rather than a line between two things already apart.
  */
 @mixin field-shell {
   display: flex;
   align-items: center;
-  gap: var(--rak-space-2);
   min-height: var(--rak-touch-target);
-  padding: var(--rak-space-1) var(--rak-space-3);
+  // No padding on the trailing edge: the chevron below has a bay of its own there,
+  // and it carries its own.
+  padding: var(--rak-space-1) 0 var(--rak-space-1) var(--rak-space-3);
   border: var(--rak-border-width-hairline) solid var(--rak-border);
-  border-radius: var(--rak-radius-sm);
-  background-color: var(--rak-surface);
+  border-radius: var(--rak-radius-xs);
+  background-color: var(--rak-fill-subtle);
+  box-shadow: var(--rak-well-light);
   color: var(--rak-text-secondary);
   font-family: inherit;
   font-size: var(--rak-text-md);
   line-height: var(--rak-line-height);
   text-align: left;
-  transition: border-color var(--rak-duration-fast) var(--rak-ease-standard);
+  transition:
+    border-color var(--rak-duration-fast) var(--rak-ease-standard),
+    background-color var(--rak-duration-fast) var(--rak-ease-standard);
 
   @include can-hover {
     &:hover {
@@ -34,16 +42,25 @@
     }
   }
 
+  // Deeper into the panel while it is being pressed, which is the one direction a
+  // socket has to move in.
   &:active {
-    background-color: var(--rak-fill-subtle);
+    background-color: var(--rak-fill-muted);
   }
 
   @include focus-ring;
 }
 
-/** The chevron a field carries on its trailing edge. */
+/**
+ * The chevron a field carries on its trailing edge, in a bay of its own divided
+ * off from the value: the field says what is set and the bay says it can be
+ * changed, which on a panel are two parts rather than one.
+ */
 @mixin field-icon {
   display: flex;
   align-items: center;
+  align-self: stretch;
+  padding-inline: var(--rak-space-2);
+  border-left: var(--rak-border-width-hairline) solid var(--rak-border);
   color: var(--rak-text-tertiary);
 }

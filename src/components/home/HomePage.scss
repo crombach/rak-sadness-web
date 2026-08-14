@@ -7,6 +7,9 @@
   @include field-shell;
 
   justify-content: space-between;
+  // The face the tables and the dialog's own search are set in. What a socket holds
+  // is a value read off the device, the same as a cell of the table below it.
+  font-family: var(--rak-font-mono);
   cursor: pointer;
 
   &[data-disabled] {
@@ -31,6 +34,10 @@
 
 .select__item {
   @include listbox-item;
+
+  // The trigger's face, so what an option says and what the socket shows once it is
+  // chosen are set the same.
+  font-family: var(--rak-font-mono);
 }
 
 .home__controls {

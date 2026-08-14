@@ -20,8 +20,11 @@ $-max-rows: 5;
   );
   overflow-y: auto;
   padding: var(--rak-space-1) 0;
-  border: var(--rak-border-width-hairline) solid var(--rak-border);
-  border-radius: var(--rak-radius-sm);
+  // The edge the table is framed in, squared off like everything else pressed out
+  // of the panel, so a list opening off a socket reads as part of the same device
+  // rather than as a card the browser dropped on top of it.
+  border: var(--rak-border-width-hairline) solid var(--rak-primary-800);
+  border-radius: var(--rak-radius-xs);
   background-color: var(--rak-surface);
   box-shadow: var(--rak-shadow-overlay);
 }
@@ -38,8 +41,12 @@ $-max-rows: 5;
     background-color: var(--rak-fill-subtle);
   }
 
+  // The one already set, said in the app's own blue rather than a step further
+  // down the same greys the row under the pointer uses. Two neutrals one step
+  // apart cannot say which of them means chosen.
   &[data-selected] {
-    background-color: var(--rak-fill-muted);
+    background-color: var(--rak-primary-100);
+    font-weight: var(--rak-weight-semibold);
   }
 
   // A rule between rows rather than around them, so a long list reads down

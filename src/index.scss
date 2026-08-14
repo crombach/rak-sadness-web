@@ -129,6 +129,11 @@
 
   // The page behind the tiled logo, and the largest surface on a phone.
   --rak-brand-light: #6eaad9;
+  // What the app is mounted in on a screen too wide for the tiles to be its
+  // ground. Neutral rather than blue, so the app's own blue is the only blue on
+  // the screen, and a shade over the frame around the table so that frame still
+  // has an edge to be read against.
+  --rak-case: #33383d;
 
   // Primary scale, from the logo's mid blue.
   --rak-primary-100: #acc2d2;
@@ -256,6 +261,9 @@
   --rak-bezel:
     inset 0 1px 0 rgb(255 255 255 / 10%), inset 0 -1px 0 rgb(0 0 0 / 30%);
   --rak-well: inset 0 1px 2px rgb(0 0 0 / 35%);
+  // The same cut, on the panel's own white rather than on a readout's dark. A
+  // shadow that reads as a hole against black is a bruise against white.
+  --rak-well-light: inset 0 1px 2px rgb(0 0 0 / 12%);
   // A cell of a readout that is not lit. Enough to read as a shape that could light,
   // not so much that it crowds the ones that are. Measured against the fill both
   // readouts are sunk into, which is darker than the bar around them and so takes
