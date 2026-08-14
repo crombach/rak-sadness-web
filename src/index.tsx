@@ -37,9 +37,11 @@ import Toaster from "./components/toaster/Toaster";
 import "./index.scss";
 
 // @font-face only fetches a file once layout needs it, which for the segment
-// faces is after their ghost has already committed to a fallback width. A
-// preload starts every weight downloading alongside the app shell instead.
-const PRELOAD_FONT_URLS = [
+// faces is after their ghost has already committed to a fallback width. Most of
+// these weights are not what the route on screen first paints in, so this asks
+// the browser to warm them rather than to `preload` them: `preload` promises a
+// weight is about to be used and warns in the console when it is not.
+const PREFETCH_FONT_URLS = [
   chakraPetch400Url,
   chakraPetch500Url,
   chakraPetch600Url,
@@ -50,13 +52,15 @@ const PRELOAD_FONT_URLS = [
   dseg14Url,
   dseg7Url,
 ];
-for (const href of PRELOAD_FONT_URLS) {
+for (const href of PREFETCH_FONT_URLS) {
   const link = document.createElement("link");
-  link.rel = "preload";
-  link.as = "font";
-  link.type = "font/woff2";
-  link.crossOrigin = "anonymous";
-  link.href = href;
+  // `as` only reflects as an attribute for `rel=preload`/`modulepreload`, so the
+  // property setter would silently drop it here. Every attribute set directly.
+  link.setAttribute("rel", "prefetch");
+  link.setAttribute("as", "font");
+  link.setAttribute("type", "font/woff2");
+  link.setAttribute("crossorigin", "anonymous");
+  link.setAttribute("href", href);
   document.head.appendChild(link);
 }
 
