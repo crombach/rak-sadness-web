@@ -212,6 +212,9 @@
       // row and put the cut at both ends.
       text-align: left;
       --rak-cell-base: var(--rak-in-contention-300);
+      // The fill stays pale in both modes, so the name has to stay this dark ink
+      // in both modes too, rather than take the generic cell text below.
+      color: var(--rak-text-on-pale);
 
       &.--knocked-out {
         --rak-cell-base: var(--rak-knocked-out-300);
@@ -219,7 +222,7 @@
     }
 
     td {
-      color: black;
+      color: var(--rak-text);
       // Every cell holds a number or a short pick, which reads as a column when
       // it is centered under a centered heading. The name is the exception, and
       // sets itself back below.

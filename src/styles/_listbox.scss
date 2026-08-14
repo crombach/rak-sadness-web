@@ -45,7 +45,7 @@ $-max-rows: 5;
   // down the same greys the row under the pointer uses. Two neutrals one step
   // apart cannot say which of them means chosen.
   &[data-selected] {
-    background-color: var(--rak-primary-100);
+    background-color: var(--rak-selected-fill);
     font-weight: var(--rak-weight-semibold);
   }
 

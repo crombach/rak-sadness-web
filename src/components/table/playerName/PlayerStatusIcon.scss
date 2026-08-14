@@ -7,7 +7,7 @@
     // Black on the tables' own fills, where the icon carries the same weight as
     // the name beside it. Somewhere with no fill behind it to say which status
     // this is, the caller sets `--rak-player-icon-fill` to say it in the icon.
-    fill: var(--rak-player-icon-fill, black);
+    fill: var(--rak-player-icon-fill, var(--rak-text-on-pale));
     // `.icon` sets a font size of its own, which an `em` size would otherwise be
     // read against instead of against the text this icon stands beside.
     font-size: inherit;

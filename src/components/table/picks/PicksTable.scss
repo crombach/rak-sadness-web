@@ -4,16 +4,21 @@
 // and derives the even-row stripe from it.
 .table {
   tbody {
+    // Each fill stays pale in both modes, so the outcome text has to stay this
+    // dark ink in both modes too, rather than take the generic cell text.
     .table__pick.--yes {
       --rak-cell-base: var(--rak-success-300);
+      color: var(--rak-text-on-pale);
     }
 
     .table__pick.--no {
       --rak-cell-base: var(--rak-danger-300);
+      color: var(--rak-text-on-pale);
     }
 
     .table__pick.--unscoreable {
       --rak-cell-base: var(--rak-warning-300);
+      color: var(--rak-text-on-pale);
     }
   }
 }

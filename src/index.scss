@@ -3,9 +3,8 @@
 // Design tokens. Base UI ships no styles, so every visual in the app resolves
 // back to these.
 :root {
-  // The app draws one light palette. Saying so is what stops the browser from
-  // rendering form controls and scrollbars in dark chrome against it when the
-  // system is set to dark.
+  // The light palette below, and native form controls/scrollbars to match. The
+  // dark media query at the foot of this file overrides both together.
   color-scheme: light;
 
   // Type. A squared face with cut corners and flat terminals, which is the app's
@@ -219,6 +218,16 @@
   --rak-text-tertiary: #555e68;
   // Foreground on a solid fill. Not a background: `--rak-surface` is the page.
   --rak-on-solid: #fff;
+  // Ink that never inverts. A player's status cell and a pick's yes/no/unscoreable
+  // cell keep the same pale fill in both modes, so the text and icon laid over them
+  // has to stay this dark in both modes too.
+  --rak-text-on-pale: #171a1c;
+
+  // The row already chosen in a list, told apart from the one under the pointer.
+  // Its own token rather than a step on the primary ramp, because that ramp's 100
+  // step is also the light-mode-only fill a toast's primary variant pairs with its
+  // own dark text, and the two need to move independently once dark mode inverts.
+  --rak-selected-fill: var(--rak-primary-100);
 
   --rak-disabled-bg: #f3f3f3;
   --rak-disabled-text: #737373;
@@ -348,5 +357,43 @@ html {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+// The OS signal alone: no toggle, no stored override. The instrument-panel chrome
+// (navbar, keys, table header, the readout glass) already reads as a dark device
+// standing on a light page, so it carries over unchanged; only the page itself,
+// its text, and the handful of tokens that sit directly on `--rak-surface` invert.
+// Every value below was chosen to clear WCAG AA against the surface it pairs with.
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --rak-brand-light: #232629;
+
+    --rak-success-400: #4ade80;
+    --rak-danger-400: #f87171;
+    --rak-gold-700: #e8b84b;
+    --rak-knocked-out-on-light: #ffb069;
+    --rak-in-contention-on-light: #74c6f5;
+
+    --rak-surface: #17191c;
+    --rak-fill-subtle: #1e2124;
+    --rak-fill-muted: #262a2e;
+    --rak-border: #6b7581;
+
+    --rak-text: #f4f6f7;
+    --rak-text-secondary: #cbd2d8;
+    --rak-text-tertiary: #98a2ac;
+
+    --rak-disabled-bg: #232629;
+    --rak-disabled-text: #8a949e;
+    --rak-disabled-edge: #101214;
+
+    --rak-selected-fill: #35393d;
+
+    --rak-well-light: inset 0 1px 2px rgb(0 0 0 / 42%);
+    --rak-state-hover: rgb(255 255 255 / 8%);
+    --rak-state-press: rgb(255 255 255 / 16%);
   }
 }
