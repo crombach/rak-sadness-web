@@ -298,25 +298,36 @@ describe("GameStatusSummary, the two scores as a pair", () => {
     );
   }
 
-  it("pads the side in single figures where the other is not", () => {
-    expect(points({ home: 7, away: 14 })).toEqual(["14", "07"]);
+  /** The row of unlit cells laid under one side's digits. */
+  function cells(scores: { home: number; away: number }): Array<string> {
+    points(scores);
+    return [...document.querySelectorAll(".game-status__points-ghost")].map(
+      (ghost) => ghost.textContent ?? "",
+    );
+  }
+
+  it("lights the digits a score has and no leading zero", () => {
+    expect(points({ home: 7, away: 14 })).toEqual(["14", "7"]);
   });
 
-  it("pads whichever side is the short one", () => {
-    expect(points({ home: 21, away: 3 })).toEqual(["03", "21"]);
-  });
-
-  it("leaves two single figures alone, having nothing to line them up with", () => {
-    expect(points({ home: 7, away: 3 })).toEqual(["3", "7"]);
+  it("does the same whichever side is the short one", () => {
+    expect(points({ home: 21, away: 3 })).toEqual(["3", "21"]);
   });
 
   it("leaves two double figures alone", () => {
     expect(points({ home: 30, away: 20 })).toEqual(["20", "30"]);
   });
 
-  it("reads a padded score out as the number it is", () => {
-    points({ home: 7, away: 14 });
-    expect(litDigits(screen.getByLabelText("7"))).toBe("07");
+  it("holds both cells under a side using one of them", () => {
+    expect(cells({ home: 7, away: 14 })).toEqual(["88", "88"]);
+  });
+
+  it("holds both cells with neither side past single figures", () => {
+    expect(cells({ home: 3, away: 7 })).toEqual(["88", "88"]);
+  });
+
+  it("gives a score past two digits a cell of its own", () => {
+    expect(cells({ home: 7, away: 100 })).toEqual(["888", "88"]);
   });
 });
 

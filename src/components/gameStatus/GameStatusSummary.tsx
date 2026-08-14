@@ -240,16 +240,11 @@ function outcomeText(result: LeagueResult, spread?: GameSpread): string {
 }
 
 /**
- * Whether a score is written with a leading zero, which is where it is in single
- * figures and the other side is not.
- *
- * The pair reads as one number either side of the dash, and a lone digit beside a
- * two-digit number reads as the smaller of the two by its width before it is read at
- * all. Both sides in single figures are left alone: there is nothing to line up with.
+ * How many cells a side's readout is, whatever it is showing. Two, because the room
+ * for a second digit is held whether or not there is one, so a score going from 7 to
+ * 14 between two polls moves neither the dash nor the sides either side of it.
  */
-function isPadded(score: number, opponentScore: number): boolean {
-  return score < 10 && opponentScore >= 10;
-}
+const SCORE_CELLS = 2;
 
 /** Where the game is up to, over the scores. */
 function Detail({ result }: { result: LeagueResult }) {
@@ -309,20 +304,16 @@ function Marker({ hasBall }: { hasBall: boolean }) {
 
 function Score({
   side,
-  opponent,
   homeAway,
   hasBall,
   outcome,
 }: {
   side: GameSide;
-  /** The other side, which is what says whether this number is padded. */
-  opponent: GameSide;
   homeAway: HomeAway;
   hasBall: boolean;
   outcome?: SideOutcome;
 }) {
-  const padded = isPadded(side.score, opponent.score);
-  const points = padded ? `0${side.score}` : `${side.score}`;
+  const points = `${side.score}`;
   return (
     <p
       className={getClasses("game-status__score", `--${homeAway}`, {
@@ -332,17 +323,13 @@ function Score({
     >
       {/* Held apart from the marker beside it so the wireframe can draw a bar over
           the number alone, and so a number of one digit takes the room two do. */}
-      <span
-        className="game-status__points"
-        // A padded number is read out as two of them, so the score itself is what
-        // is announced instead.
-        aria-label={padded ? `${side.score}` : undefined}
-      >
-        {/* One unlit cell per digit shown, so a score of one digit is one cell and
-            not two. The face is monospaced, so the row lands exactly under the
-            number without being measured. */}
+      <span className="game-status__points">
+        {/* Every cell of the readout, lit or not, so a score in single figures shows
+            the one it is not using rather than a zero standing in it. The face is
+            monospaced, so the row lands exactly under the number without being
+            measured. A score past two digits gets a cell for each. */}
         <span className="game-status__points-ghost" aria-hidden="true">
-          {ALL_SEGMENTS_ON.repeat(points.length)}
+          {ALL_SEGMENTS_ON.repeat(Math.max(SCORE_CELLS, points.length))}
         </span>
         {points}
       </span>
@@ -378,7 +365,6 @@ function Center({
       <div className="game-status__scores">
         <Score
           side={result.away}
-          opponent={result.home}
           homeAway={HomeAway.AWAY}
           hasBall={hasBall(HomeAway.AWAY)}
           outcome={outcomeOf(result.away)}
@@ -388,7 +374,6 @@ function Center({
         </span>
         <Score
           side={result.home}
-          opponent={result.away}
           homeAway={HomeAway.HOME}
           hasBall={hasBall(HomeAway.HOME)}
           outcome={outcomeOf(result.home)}
