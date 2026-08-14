@@ -134,23 +134,24 @@
   --rak-z-modal: 1000;
 
   // The page behind the tiled logo, and the largest surface on a phone.
-  --rak-brand-light: #6eaad9;
+  --rak-brand-light: #a4a4a4;
   // What the app is mounted in on a screen too wide for the tiles to be its
-  // ground. Neutral rather than blue, so the app's own blue is the only blue on
-  // the screen, and a shade over the frame around the table so that frame still
-  // has an edge to be read against.
+  // ground. A shade over the frame around the table so that frame still has an
+  // edge to be read against.
   --rak-case: #33383d;
 
-  // Primary scale, from the logo's mid blue.
-  --rak-primary-100: #acc2d2;
+  // Primary scale, each step the grey the logo's own step in it delinearizes to,
+  // so a surface moved off blue and onto this ramp keeps the contrast ratio it
+  // was set at rather than a new one this ramp would have to be measured for.
+  --rak-primary-100: #bfbfbf;
   // One step over the 500 the navbar is filled in, for the keys set into it. A key
   // in the bar's own color is told from it by its edge alone, which is a line 4px
   // tall to carry a whole control.
-  --rak-primary-400: #41627b;
-  --rak-primary-500: #375267;
-  --rak-primary-600: #2d4253;
-  --rak-primary-700: #243542;
-  --rak-primary-800: #1b2832;
+  --rak-primary-400: #5e5e5e;
+  --rak-primary-500: #4f4f4f;
+  --rak-primary-600: #404040;
+  --rak-primary-700: #333333;
+  --rak-primary-800: #262626;
 
   // Semantic ramps. One ramp per meaning, whatever draws it: 100 is a soft fill
   // behind text, 300 fills a table cell, 500 and up are solid fills and text.

@@ -115,13 +115,13 @@
 }
 
 // Room enough that the table does not fill the width, so the frame is cut to the
-// table and what is left either side is the page's own tiled blue, the same
+// table and what is left either side is the page's own tiled ground, the same
 // background the home page stands on.
 @include roomy-screen {
   .results-scores {
     width: max-content;
     // The panel the page carries on every other route, handed to the table now
-    // that it is the thing standing on the blue. `PageLayout.scss` gives this up
+    // that it is the thing standing on that ground. `PageLayout.scss` gives this up
     // at the same width. The bezel is written again beside it: one `box-shadow`
     // replaces the other, and the frame is drawn as a bezel at every width.
     box-shadow: var(--rak-bezel), var(--rak-shadow-overlay);

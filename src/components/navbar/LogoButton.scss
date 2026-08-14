@@ -77,9 +77,9 @@ $plate-width: 4px;
     // scoreline's glass is drawn in: the lip the glass sits behind, throwing down
     // across the top of it; that lip's own dark edge; the bottom of the cut, where
     // what light reaches the hole comes back off it; the plate itself, in the bar's
-    // own blue; and the two rings past it, the plate's lit top edge and the shadow
-    // it throws. The scoreline needs that third ring to read as a screen at all,
-    // sitting as it does on the dialog's white. Here it repeats a blue the bar
+    // own primary; and the two rings past it, the plate's lit top edge and the
+    // shadow it throws. The scoreline needs that third ring to read as a screen at
+    // all, sitting as it does on the dialog's white. Here it repeats a fill the bar
     // already is, so it draws nothing of its own and is kept for the one thing it
     // still does: give the two rings past it, which do show, the same band to sit on.
     box-shadow:

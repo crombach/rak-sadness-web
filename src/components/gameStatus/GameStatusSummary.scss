@@ -525,9 +525,10 @@ $plate-width: 4px;
   border-radius: var(--rak-radius-xs);
   background-color: var(--rak-primary-800);
   // The glass sunk into a plate, in four layers: `--rak-well` cuts it in, the plate
-  // itself is the bar's own blue, and the two rings past it are the plate's lit top
-  // edge and the shadow it throws. Rings rather than a border or a wrapper, because a
-  // spread shadow is drawn outside the box without taking any room in the grid.
+  // itself is the bar's own primary, and the two rings past it are the plate's lit
+  // top edge and the shadow it throws. Rings rather than a border or a wrapper,
+  // because a spread shadow is drawn outside the box without taking any room in the
+  // grid.
   //
   // The dialog is white, where an inset shadow alone reads as a raised black block
   // rather than a hole. The navbar needs no plate: its own fill is already the

@@ -45,7 +45,7 @@
   // and past that they are two strips either side of a content column 1024px wide,
   // which reads as wallpaper the app forgot to finish rather than as its ground.
   // The case the app is mounted in takes over there, since with the tiles gone the
-  // brand blue is a field of color rather than the ground under a pattern.
+  // brand fill is a field of color rather than the ground under a pattern.
   @include roomy-screen {
     background-color: var(--rak-case);
 
@@ -95,11 +95,11 @@
     // header, so the surface every other page carries goes back below.
     background-color: var(--rak-primary-800);
 
-    // Nothing of its own, so the tiled blue behind the page shows either side of
+    // Nothing of its own, so the tiled ground behind the page shows either side of
     // the table, which is what every other page stands on. The shadow goes with
-    // it: it is what lifts a panel off that blue, and with the fill gone there is
+    // it: it is what lifts a panel off that ground, and with the fill gone there is
     // no panel here to lift. `ResultsFrame.scss` puts it on the table, which is
-    // what stands on the blue instead.
+    // what stands on that ground instead.
     @include roomy-screen {
       background-color: transparent;
       box-shadow: none;
