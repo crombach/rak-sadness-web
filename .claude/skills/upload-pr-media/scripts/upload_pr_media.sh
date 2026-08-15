@@ -1,17 +1,9 @@
 #!/usr/bin/env bash
-# Host one or more images or recordings on the repo's pr-assets branch and
-# print the raw URL each one is reachable at for a PR body.
+# Uploads files to the repo's pr-assets branch and prints the raw URL each
+# one is reachable at. See the upload-pr-media SKILL.md for why this branch
+# exists and how --feature should be named.
 #
 # Usage: upload_pr_media.sh --feature <name> <file> [<file> ...]
-#
-# --feature names the directory on pr-assets the files land under. Reuses
-# the directory if a prior run already made one for this feature.
-#
-# gh has no API to attach a file to a PR body: only the web UI's
-# drag-and-drop upload gets a user-attachments URL. pr-assets is this repo's
-# standing workaround, a branch that holds nothing but images and
-# recordings, one directory per feature. This script is the only thing that
-# should ever write to it.
 
 set -euo pipefail
 
@@ -79,7 +71,7 @@ git -C "$WT" add "$FEATURE"
 if git -C "$WT" diff --cached --quiet; then
   echo "Nothing changed, $FEATURE/ already holds these files." >&2
 else
-  git -C "$WT" commit -q -m "chore: add $FEATURE PR screenshots"
+  git -C "$WT" commit -q -m "chore: add $FEATURE PR media"
   git -C "$WT" push -q origin pr-assets
 fi
 

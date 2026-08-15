@@ -10,9 +10,10 @@ bash .claude/skills/upload-pr-media/scripts/upload_pr_media.sh \
   --feature <name> <file> [<file> ...]
 ```
 
-Prints one `https://raw.githubusercontent.com/...` URL per file. Embed it in
-the PR body: `![before](<url>)` for an image, `<video src="<url>"
-controls></video>` for an `.mp4`/`.webm` (GitHub's markdown renders both).
+Prints `RESULT: OK` then one `https://raw.githubusercontent.com/...` URL per
+file. Embed it in the PR body: `![before](<url>)` for an image, `<video
+src="<url>" controls></video>` for an `.mp4`/`.webm` (GitHub's markdown
+renders both).
 
 `--feature` should read like a slug for what the PR is about, not the git
 branch name character for character: readable in a URL, and stable if the
