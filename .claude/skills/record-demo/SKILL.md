@@ -63,5 +63,5 @@ it in step with those if their URLs or query params change.
 ## Once you have the file
 
 Use `SendUserFile` to show the user the result. That step is a tool call, not
-a script. To embed it in a PR body instead, the `upload-pr-screenshot` skill
+a script. To embed it in a PR body instead, the `upload-pr-media` skill
 hosts it and hands back the URL.

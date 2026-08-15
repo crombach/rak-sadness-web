@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
-# Host one or more images on the repo's pr-assets branch and print the raw
-# URL each one renders at in a PR body.
+# Host one or more images or recordings on the repo's pr-assets branch and
+# print the raw URL each one is reachable at for a PR body.
 #
-# Usage: upload_pr_screenshot.sh --feature <name> <file> [<file> ...]
+# Usage: upload_pr_media.sh --feature <name> <file> [<file> ...]
 #
 # --feature names the directory on pr-assets the files land under. Reuses
 # the directory if a prior run already made one for this feature.
 #
-# gh has no API to attach an image to a PR body: only the web UI's
+# gh has no API to attach a file to a PR body: only the web UI's
 # drag-and-drop upload gets a user-attachments URL. pr-assets is this repo's
-# standing workaround, a branch that holds nothing but images, one directory
-# per feature. This script is the only thing that should ever write to it.
+# standing workaround, a branch that holds nothing but images and
+# recordings, one directory per feature. This script is the only thing that
+# should ever write to it.
 
 set -euo pipefail
 
