@@ -64,3 +64,25 @@ it in step with those if their URLs or query params change.
 
 Use `SendUserFile` to show the user the result. That step is a tool call, not
 a script.
+
+## Embedding one in a PR body
+
+`gh` has no API to attach an image to a PR body directly; the
+`user-attachments` URLs only come from the web UI's drag-and-drop upload.
+This repo instead keeps a standing `pr-assets` orphan-style branch as an
+image host, one directory per feature branch (`dark-mode/`, `refresh-key/`,
+...). To add one:
+
+```bash
+git fetch origin pr-assets
+git worktree add <scratch-path> pr-assets
+cp <screenshot>.png <scratch-path>/<feature-name>/<screenshot>.png
+git -C <scratch-path> add <feature-name>
+git -C <scratch-path> commit -m "chore: add <feature-name> PR screenshots"
+git -C <scratch-path> push origin pr-assets
+git worktree remove <scratch-path>
+```
+
+Then reference it in the PR body as
+`https://raw.githubusercontent.com/<owner>/<repo>/pr-assets/<feature-name>/<file>.png`.
+Never add these PNGs to the feature branch itself.
