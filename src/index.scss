@@ -191,9 +191,9 @@
   --rak-warning-500: #9a5b13;
   --rak-warning-700: #492b08;
 
-  --rak-neutral-100: #f0f4f8;
-  --rak-neutral-500: #555e68;
-  --rak-neutral-700: #32383e;
+  --rak-neutral-100: #f3f3f3;
+  --rak-neutral-500: #5d5d5d;
+  --rak-neutral-700: #373737;
 
   // The player analysis accent, on the line each route carries and on the button
   // that unfolds the rest. Its own hue rather than a step on any ramp above, so a
@@ -210,12 +210,12 @@
   --rak-in-contention-on-light: #126287;
 
   --rak-surface: #fff;
-  --rak-fill-subtle: #f0f4f8;
-  --rak-fill-muted: #dde7ee;
+  --rak-fill-subtle: #f3f3f3;
+  --rak-fill-muted: #e5e5e5;
   // A control's own boundary, which has to be told from the surface behind it.
-  --rak-border: #838e9a;
+  --rak-border: #8d8d8d;
   // A rule between two things that are already apart, which does not.
-  --rak-divider: #cdd7e1;
+  --rak-divider: #d6d6d6;
   // The edge of a panel pressed into the device: a table cell, a popup opening
   // off a socket. Its own token rather than a direct read of `--rak-primary-800`,
   // since that ramp step is also the readout/header chrome and stays dark in both
@@ -272,15 +272,15 @@
   // a crest built for white can lose itself against.
   --rak-logo-outline: none;
 
-  --rak-text: #171a1c;
-  --rak-text-secondary: #32383e;
-  --rak-text-tertiary: #555e68;
+  --rak-text: #1a1a1a;
+  --rak-text-secondary: #373737;
+  --rak-text-tertiary: #5d5d5d;
   // Foreground on a solid fill. Not a background: `--rak-surface` is the page.
   --rak-on-solid: #fff;
   // The ink for a player's status cell and a pick's yes/no/unscoreable cell,
   // pale here so this stays dark. Those fills darken instead of staying pale in
   // dark mode, where this inverts to light ink alongside them.
-  --rak-text-on-pale: #171a1c;
+  --rak-text-on-pale: #1a1a1a;
 
   // The row already chosen in a list, told apart from the one under the pointer.
   // Its own token rather than a step on the primary ramp, because that ramp's 100
@@ -439,7 +439,7 @@ html {
     --rak-primary-800: #262626;
     --rak-table-header-divider: #757575;
 
-    --rak-brand-light: #232629;
+    --rak-brand-light: #262626;
 
     --rak-success-400: #4ade80;
     --rak-danger-400: #f87171;
@@ -447,21 +447,21 @@ html {
     --rak-knocked-out-on-light: #ffb069;
     --rak-in-contention-on-light: #74c6f5;
 
-    --rak-surface: #17191c;
-    --rak-fill-subtle: #1e2124;
-    --rak-fill-muted: #262a2e;
-    --rak-border: #6b7581;
+    --rak-surface: #191919;
+    --rak-fill-subtle: #212121;
+    --rak-fill-muted: #292929;
+    --rak-border: #747474;
     --rak-panel-border: var(--rak-border);
 
-    --rak-text: #f4f6f7;
-    --rak-text-secondary: #cbd2d8;
-    --rak-text-tertiary: #98a2ac;
+    --rak-text: #f6f6f6;
+    --rak-text-secondary: #d1d1d1;
+    --rak-text-tertiary: #a1a1a1;
 
-    --rak-disabled-bg: #232629;
-    --rak-disabled-text: #8a949e;
-    --rak-disabled-edge: #101214;
+    --rak-disabled-bg: #262626;
+    --rak-disabled-text: #939393;
+    --rak-disabled-edge: #121212;
 
-    --rak-selected-fill: #35393d;
+    --rak-selected-fill: #383838;
 
     // The colorful table cells: a player's status and a pick's outcome. Same hue
     // as the light-mode pastel, taken darker and more saturated, so a chip built
