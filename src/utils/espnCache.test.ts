@@ -10,6 +10,10 @@ import {
   writeCachedCalendar,
   writeCachedResults,
 } from "./espnCache";
+import {
+  blockAllStorageMethods,
+  mockRejectedSetItem,
+} from "./storageMockUtils";
 
 const SEASON = 2025;
 const BUF_KC = "BUF|KC";
@@ -163,9 +167,7 @@ describe("espnCache, calendars", () => {
 describe("espnCache, storage that will not have it", () => {
   it("leaves nothing behind when a write is rejected", () => {
     writeCachedResults(SEASON, 3, League.PRO, { [BUF_KC]: game() });
-    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
-      throw new Error("QuotaExceededError");
-    });
+    mockRejectedSetItem();
 
     writeCachedResults(SEASON, 4, League.PRO, { [BUF_KC]: game() });
 
@@ -174,14 +176,7 @@ describe("espnCache, storage that will not have it", () => {
   });
 
   it("misses rather than throws when every localStorage method throws", () => {
-    const blocked = () => {
-      throw new Error("storage blocked");
-    };
-    vi.spyOn(Storage.prototype, "getItem").mockImplementation(blocked);
-    vi.spyOn(Storage.prototype, "setItem").mockImplementation(blocked);
-    vi.spyOn(Storage.prototype, "removeItem").mockImplementation(blocked);
-    vi.spyOn(Storage.prototype, "key").mockImplementation(blocked);
-    vi.spyOn(Storage.prototype, "length", "get").mockImplementation(blocked);
+    blockAllStorageMethods();
 
     expect(readCachedResults(SEASON, 3, League.PRO)).toEqual({});
     expect(() =>

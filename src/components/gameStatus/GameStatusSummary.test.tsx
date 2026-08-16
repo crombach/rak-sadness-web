@@ -541,11 +541,6 @@ describe("GameStatusSummary, a game still being played", () => {
     expect(screen.getByLabelText("Has the ball")).toBeInTheDocument();
     expect(screen.queryByText("KC ball")).toBeNull();
   });
-
-  it("marks the side with the ball", () => {
-    renderLive();
-    expect(screen.getByLabelText("Has the ball")).toBeInTheDocument();
-  });
 });
 
 describe("GameStatusSummary, a game yet to kick off", () => {

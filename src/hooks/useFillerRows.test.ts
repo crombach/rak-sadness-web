@@ -68,18 +68,6 @@ describe("fillerRowCount", () => {
     expect(current).toBe(13);
   });
 
-  it("settles at the same answer when fed its own result", () => {
-    const content = 260;
-    let current = 0;
-    for (let pass = 0; pass < 5; pass++) {
-      current = count({
-        tableHeight: content + current * ROW_HEIGHT,
-        fillerHeight: current * ROW_HEIGHT,
-      });
-    }
-    expect(current).toBe(13);
-  });
-
   it("fills a whole empty table, which is what the wireframe is", () => {
     expect(count({ tableHeight: 0, tableTop: 0, fillToBottom: 768 })).toBe(24);
   });

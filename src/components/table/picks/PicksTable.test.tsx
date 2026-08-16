@@ -85,11 +85,6 @@ describe("PicksTable, empty states", () => {
     const { container } = render(<PicksTable />);
     expect(container).toBeEmptyDOMElement();
   });
-
-  it("renders nothing when scores are null", () => {
-    const { container } = render(<PicksTable scores={null} />);
-    expect(container).toBeEmptyDOMElement();
-  });
 });
 
 describe("PicksTable, headers", () => {

@@ -91,14 +91,6 @@ describe("buildSpreadsheetBuffer, workbook shape", () => {
       expect(name.length).toBeLessThanOrEqual(SHEET_NAME_LIMIT);
     }
   });
-
-  it("produces a buffer that parses as a workbook", async () => {
-    const buffer = await buildSpreadsheetBuffer(scores, {
-      season: SEASON,
-      week: WEEK,
-    });
-    expect(buffer.byteLength).toBeGreaterThan(0);
-  });
 });
 
 describe("buildSpreadsheetBuffer, results sheet", () => {

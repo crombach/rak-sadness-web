@@ -2,20 +2,11 @@ import { render, screen } from "@testing-library/react";
 import SkeletonTable from "./SkeletonTable";
 
 describe("SkeletonTable", () => {
-  it("hides the wireframe from a screen reader", () => {
+  it("marks the wireframe hidden and busy for a screen reader", () => {
     render(<SkeletonTable view="Scoreboard" />);
-    expect(screen.getByRole("table", { hidden: true })).toHaveAttribute(
-      "aria-hidden",
-      "true",
-    );
-  });
-
-  it("marks the table busy while it stands in for one still loading", () => {
-    render(<SkeletonTable view="Scoreboard" />);
-    expect(screen.getByRole("table", { hidden: true })).toHaveAttribute(
-      "aria-busy",
-      "true",
-    );
+    const table = screen.getByRole("table", { hidden: true });
+    expect(table).toHaveAttribute("aria-hidden", "true");
+    expect(table).toHaveAttribute("aria-busy", "true");
   });
 
   it("tells a screen reader results are loading, not ~1500 empty cells", () => {
