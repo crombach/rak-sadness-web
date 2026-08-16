@@ -6,6 +6,15 @@ import remainingGames, {
   RemainingGame,
 } from "./remainingGames";
 
+function remainingSuffix(
+  weekOver: boolean,
+  count: number,
+  noun: string,
+  tail = "",
+): string {
+  return weekOver ? "." : ` with ${plural(count, noun)} remaining${tail}.`;
+}
+
 function knockedOut(score: PlayerScore, explanation: string): PlayerScore {
   return {
     ...score,
@@ -104,9 +113,7 @@ export default function applyKnockouts(
             activeScore,
             `Knocked out on Total Score by ${rivalScore.name}. ` +
               `Behind by ${totalScoreDiff}` +
-              (weekOver
-                ? "."
-                : ` with ${plural(totalDifferentPicks, "different pick")} remaining.`),
+              remainingSuffix(weekOver, totalDifferentPicks, "different pick"),
           );
         } else if (totalDifferentPicks === totalScoreDiff) {
           // Either distance is absent when that player left the Monday night
@@ -130,9 +137,11 @@ export default function applyKnockouts(
                 activeScore,
                 `Knocked out on College Score tiebreaker by ${rivalScore.name}. ` +
                   `Behind by ${collegeScoreDiff}` +
-                  (weekOver
-                    ? "."
-                    : ` with ${plural(differentCollegePicks, "different college pick")} remaining.`),
+                  remainingSuffix(
+                    weekOver,
+                    differentCollegePicks,
+                    "different college pick",
+                  ),
               );
             }
             // If college games are done and players are tied, check pro against the spread tiebreaker.
@@ -148,10 +157,12 @@ export default function applyKnockouts(
                   activeScore,
                   `Knocked out on Pro Score Against the Spread tiebreaker by ${rivalScore.name}. ` +
                     `Behind by ${proAgainstTheSpreadScoreDiff}` +
-                    (weekOver
-                      ? "."
-                      : ` with ${plural(differentProPicksWithSpreads, "different pick")} remaining ` +
-                        `for pro games with spreads.`),
+                    remainingSuffix(
+                      weekOver,
+                      differentProPicksWithSpreads,
+                      "different pick",
+                      " for pro games with spreads",
+                    ),
                 );
               }
             }

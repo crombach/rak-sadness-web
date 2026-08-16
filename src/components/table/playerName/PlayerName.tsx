@@ -3,6 +3,7 @@ import { useScoreChanges } from "../../../context/AppDataContext";
 import { PlayerScore } from "../../../types/RakMadnessScores";
 import getClasses from "../../../utils/getClasses";
 import { useShowPlayerAnalysis } from "../../../context/PlayerAnalysisContext";
+import { PLAYER_COL_CLASS } from "../TableShell";
 import PlayerStatusIcon from "./PlayerStatusIcon";
 import "./PlayerName.scss";
 
@@ -13,7 +14,7 @@ function PlayerName({ player }: { player: PlayerScore }) {
 
   return (
     <td
-      className={getClasses("table__player-col", {
+      className={getClasses(PLAYER_COL_CLASS, {
         "--knocked-out": player.status.isKnockedOut,
       })}
     >

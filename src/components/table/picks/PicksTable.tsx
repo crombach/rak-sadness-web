@@ -13,7 +13,11 @@ import {
   pickChangeKey,
 } from "../../../utils/scoring/gameColumns";
 import PlayerName from "../playerName/PlayerName";
-import TableShell, { RankCell } from "../TableShell";
+import TableShell, {
+  PICK_COL_CLASS,
+  PLAYER_COL_CLASS,
+  RankCell,
+} from "../TableShell";
 import "./PicksTable.scss";
 
 /** Rank, player, college score, pro score, and total score. */
@@ -34,7 +38,7 @@ function leagueHeaders(labels: Array<string>) {
   return labels.map((header) => (
     // The class is what gives a game's column its width, which the wireframe gives
     // the same column before there is a game in it.
-    <th key={header} className="table__pick-col" scope="col">
+    <th key={header} className={PICK_COL_CLASS} scope="col">
       {header}
     </th>
   ));
@@ -75,6 +79,41 @@ function PickCell({
   );
 }
 
+/** One league's row of pick cells, keyed and labeled by the same column list the header used. */
+function PickCells({
+  playerName,
+  picks,
+  labels,
+  pickChanges,
+  onClick,
+}: {
+  playerName: string;
+  picks: Array<PickResult>;
+  labels: Array<string>;
+  pickChanges: Map<string, Status>;
+  onClick: (gameLabel: string) => void;
+}) {
+  return (
+    <>
+      {picks.map((result, index) => (
+        <td
+          key={pickChangeKey(playerName, labels[index])}
+          className={`table__pick --${result.status}`}
+        >
+          <PickCell
+            result={result}
+            gameLabel={labels[index]}
+            previousStatus={pickChanges.get(
+              pickChangeKey(playerName, labels[index]),
+            )}
+            onClick={onClick}
+          />
+        </td>
+      ))}
+    </>
+  );
+}
+
 function PicksTable({ scores }: { scores?: RakMadnessScores | null }) {
   const showGameStatus = useShowGameStatus();
   const { picks: pickChanges } = useScoreChanges();
@@ -99,7 +138,7 @@ function PicksTable({ scores }: { scores?: RakMadnessScores | null }) {
       header={
         <>
           <th scope="col">Rank</th>
-          <th className="table__player-col" scope="col">
+          <th className={PLAYER_COL_CLASS} scope="col">
             Player
           </th>
           {leagueHeaders(collegeLabels)}
@@ -115,37 +154,21 @@ function PicksTable({ scores }: { scores?: RakMadnessScores | null }) {
           <tr key={player.name}>
             <RankCell rank={index + 1} />
             <PlayerName player={player} />
-            {player.college.map((result, index) => (
-              <td
-                key={pickChangeKey(player.name, collegeLabels[index])}
-                className={`table__pick --${result.status}`}
-              >
-                <PickCell
-                  result={result}
-                  gameLabel={collegeLabels[index]}
-                  previousStatus={pickChanges.get(
-                    pickChangeKey(player.name, collegeLabels[index]),
-                  )}
-                  onClick={showGameStatus}
-                />
-              </td>
-            ))}
+            <PickCells
+              playerName={player.name}
+              picks={player.college}
+              labels={collegeLabels}
+              pickChanges={pickChanges}
+              onClick={showGameStatus}
+            />
             <td>{player.score.college}</td>
-            {player.pro.map((result, index) => (
-              <td
-                key={pickChangeKey(player.name, proLabels[index])}
-                className={`table__pick --${result.status}`}
-              >
-                <PickCell
-                  result={result}
-                  gameLabel={proLabels[index]}
-                  previousStatus={pickChanges.get(
-                    pickChangeKey(player.name, proLabels[index]),
-                  )}
-                  onClick={showGameStatus}
-                />
-              </td>
-            ))}
+            <PickCells
+              playerName={player.name}
+              picks={player.pro}
+              labels={proLabels}
+              pickChanges={pickChanges}
+              onClick={showGameStatus}
+            />
             <td>{player.score.pro}</td>
             <td>
               <b>{player.score.total}</b>

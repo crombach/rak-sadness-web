@@ -13,6 +13,7 @@
 - `getClasses`: className join, fixed and conditional names
 - `plural`: a count and its noun, pluralized
 - `rangeWithPrefix`: labeled index arrays (C1, C2…)
+- `matching`: case-folded substring search, shared by both dialogs' item lists
 - `readFileToBuffer`: an upload's bytes
 - `prefetchLink`: prefetch, no unused-preload console warning
 

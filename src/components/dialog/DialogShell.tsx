@@ -5,6 +5,9 @@ import Button from "../button/Button";
 import { CloseIcon } from "../icon/Icon";
 import "./DialogShell.scss";
 
+/** The class the dialog's popup carries, so other modules can select it. */
+export const DIALOG_POPUP_CLASS = "dialog__popup";
+
 /**
  * The dialog every full-screen answer in the app is shown in.
  *
@@ -43,7 +46,7 @@ export default function DialogShell({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Backdrop className="dialog__backdrop" />
-        <Dialog.Popup className="dialog__popup">
+        <Dialog.Popup className={DIALOG_POPUP_CLASS}>
           <header className="dialog__header">
             <Dialog.Title className="dialog__title">{title}</Dialog.Title>
             <Button

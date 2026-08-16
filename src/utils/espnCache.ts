@@ -12,7 +12,7 @@
 import { GameStatus } from "../types/ESPN";
 import { League } from "../types/League";
 import { LeagueResult } from "../types/LeagueResult";
-import localStorageCache from "./localStorageCache";
+import localStorageCache, { LocalStorageCache } from "./localStorageCache";
 
 /** A size guard, not a history. A week of both leagues is tens of KB. */
 const MAX_CACHED_WEEKS = 6;
@@ -30,21 +30,38 @@ type Versioned<T> = { version: number; value: T };
 /** A game ESPN has finished with, or null for a matchup it never listed. */
 export type CachedGame = LeagueResult | null;
 
-const results = localStorageCache<Versioned<StoredGames>>({
-  prefix: "rak-madness:espn:results:",
-  cap: MAX_CACHED_WEEKS,
-  label: "ESPN results",
-  encode: (value) => JSON.stringify(value),
-  decode: (text) => JSON.parse(text),
-});
+/** Unwraps a `Versioned` cache to one that reads a miss for any other version. */
+function versioned<T>(
+  cache: LocalStorageCache<Versioned<T>>,
+): LocalStorageCache<T> {
+  return {
+    read: (name) => {
+      const stored = cache.read(name);
+      return stored?.version === VERSION ? stored.value : undefined;
+    },
+    write: (name, value) => cache.write(name, { version: VERSION, value }),
+  };
+}
 
-const calendars = localStorageCache<Versioned<unknown>>({
-  prefix: "rak-madness:espn:calendar:",
-  cap: MAX_CACHED_WEEKS,
-  label: "ESPN calendar",
-  encode: (value) => JSON.stringify(value),
-  decode: (text) => JSON.parse(text),
-});
+const results = versioned(
+  localStorageCache<Versioned<StoredGames>>({
+    prefix: "rak-madness:espn:results:",
+    cap: MAX_CACHED_WEEKS,
+    label: "ESPN results",
+    encode: (value) => JSON.stringify(value),
+    decode: (text) => JSON.parse(text),
+  }),
+);
+
+const calendars = versioned(
+  localStorageCache<Versioned<unknown>>({
+    prefix: "rak-madness:espn:calendar:",
+    cap: MAX_CACHED_WEEKS,
+    label: "ESPN calendar",
+    encode: (value) => JSON.stringify(value),
+    decode: (text) => JSON.parse(text),
+  }),
+);
 
 /**
  * What a matchup is filed under.
@@ -70,11 +87,11 @@ export function readCachedResults(
   const stored = results.read(`${season}:${week}:${league}`);
   // An entry of the version in hand can still be nonsense, since anything at all can
   // be written to storage this shares with the rest of the origin.
-  if (stored?.version !== VERSION || typeof stored.value !== "object") {
+  if (typeof stored !== "object") {
     return {};
   }
   const games: Record<string, CachedGame> = {};
-  Object.entries(stored.value ?? {}).forEach(([key, game]) => {
+  Object.entries(stored ?? {}).forEach(([key, game]) => {
     games[key] = game == null ? null : { ...game, date: new Date(game.date) };
   });
   return games;
@@ -97,10 +114,7 @@ export function writeCachedResults(
     stored[key] =
       game == null ? null : { ...game, date: game.date.toISOString() };
   });
-  results.write(`${season}:${week}:${league}`, {
-    version: VERSION,
-    value: stored,
-  });
+  results.write(`${season}:${week}:${league}`, stored);
 }
 
 /** Whether an answer is one this browser can hold on to for good. */
@@ -118,8 +132,7 @@ export function readCachedCalendar<T>(
   league: League,
   season: number,
 ): T | undefined {
-  const stored = calendars.read(`${league}:${season}`);
-  return stored?.version === VERSION ? (stored.value as T) : undefined;
+  return calendars.read(`${league}:${season}`) as T | undefined;
 }
 
 export function writeCachedCalendar(
@@ -127,8 +140,5 @@ export function writeCachedCalendar(
   season: number,
   scoreboard: unknown,
 ): void {
-  calendars.write(`${league}:${season}`, {
-    version: VERSION,
-    value: scoreboard,
-  });
+  calendars.write(`${league}:${season}`, scoreboard);
 }

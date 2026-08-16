@@ -3,6 +3,7 @@ import useArrival from "../../hooks/useArrival";
 import { PlayerAnalysis } from "../../types/PlayerAnalysis";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import getClasses from "../../utils/getClasses";
+import matching from "../../utils/matching";
 import getPlayerAnalysis from "../../utils/scoring/getPlayerAnalysis";
 import DialogCombobox from "../dialog/DialogCombobox";
 import DialogShell from "../dialog/DialogShell";
@@ -26,8 +27,7 @@ export function playersMatching(
   options: Array<PlayerOption>,
   query: string,
 ): Array<PlayerOption> {
-  const needle = query.trim().toLowerCase();
-  return options.filter((option) => option.name.toLowerCase().includes(needle));
+  return matching(options, query, (option) => option.name);
 }
 
 /**

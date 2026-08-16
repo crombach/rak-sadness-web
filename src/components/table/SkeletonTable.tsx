@@ -1,7 +1,7 @@
 import { memo } from "react";
 import rangeWithPrefix from "../../utils/rangeWithPrefix";
 import { ScoresView } from "../navbar/ScoresNavbar";
-import TableShell from "./TableShell";
+import TableShell, { PICK_COL_CLASS, PLAYER_COL_CLASS } from "./TableShell";
 import "./SkeletonTable.scss";
 
 /**
@@ -67,8 +67,8 @@ const PICKS_COLUMNS: Array<Column> = [
 
 /** The class the real table's header cell of that kind carries, and its width with it. */
 function headerClass(column: Column): string | undefined {
-  if (column.isPlayer) return "table__player-col";
-  return column.isPick ? "table__pick-col" : undefined;
+  if (column.isPlayer) return PLAYER_COL_CLASS;
+  return column.isPick ? PICK_COL_CLASS : undefined;
 }
 
 /**

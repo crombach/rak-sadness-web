@@ -14,6 +14,22 @@
     0 #{$lift} 0 var(--rak-key-edge);
 }
 
+// The fill, hover, and press shared by every solid color variant. `--primary`
+// layers its `--selected` rule on top of this, in its own block.
+@mixin button-color($edge, $base, $active) {
+  --rak-key-edge: #{$edge};
+  background-color: #{$base};
+
+  @include can-hover {
+    &:hover {
+      background-color: #{$active};
+    }
+  }
+  &:active {
+    background-color: #{$active};
+  }
+}
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -117,17 +133,12 @@
     // color, and they move together: a rest fill raised on its own leaves a press
     // crossing two steps at once.
     &.--primary {
-      --rak-key-edge: var(--rak-primary-700);
-      background-color: var(--rak-key-face, var(--rak-primary-500));
+      @include button-color(
+        var(--rak-primary-700),
+        var(--rak-key-face, var(--rak-primary-500)),
+        var(--rak-key-active, var(--rak-primary-600))
+      );
 
-      @include can-hover {
-        &:hover {
-          background-color: var(--rak-key-active, var(--rak-primary-600));
-        }
-      }
-      &:active {
-        background-color: var(--rak-key-active, var(--rak-primary-600));
-      }
       // Held by the route rather than the pointer, so it has to come after both.
       &.--selected {
         background-color: var(--rak-key-held, var(--rak-primary-700));
@@ -135,31 +146,19 @@
     }
 
     &.--success {
-      --rak-key-edge: var(--rak-success-700);
-      background-color: var(--rak-success-500);
-
-      @include can-hover {
-        &:hover {
-          background-color: var(--rak-success-600);
-        }
-      }
-      &:active {
-        background-color: var(--rak-success-600);
-      }
+      @include button-color(
+        var(--rak-success-700),
+        var(--rak-success-500),
+        var(--rak-success-600)
+      );
     }
 
     &.--danger {
-      --rak-key-edge: var(--rak-danger-700);
-      background-color: var(--rak-danger-500);
-
-      @include can-hover {
-        &:hover {
-          background-color: var(--rak-danger-600);
-        }
-      }
-      &:active {
-        background-color: var(--rak-danger-600);
-      }
+      @include button-color(
+        var(--rak-danger-700),
+        var(--rak-danger-500),
+        var(--rak-danger-600)
+      );
     }
   }
 

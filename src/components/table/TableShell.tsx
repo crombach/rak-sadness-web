@@ -2,6 +2,11 @@ import { ReactNode, useRef } from "react";
 import useFillerRows, { FILLER_ROW_CLASS } from "../../hooks/useFillerRows";
 import "./Table.scss";
 
+/** The sticky player column's class, which `Table.scss` also sizes and pins. */
+export const PLAYER_COL_CLASS = "table__player-col";
+/** A game column's class, which `Table.scss` also sizes. */
+export const PICK_COL_CLASS = "table__pick-col";
+
 /**
  * The frame both results tables share.
  *

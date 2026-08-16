@@ -1,3 +1,5 @@
+@use "sass:map";
+
 $toasterWidth: min(calc(100% - 48px), 400px);
 
 .toaster {
@@ -34,29 +36,23 @@ $toasterWidth: min(calc(100% - 48px), 400px);
   box-shadow: var(--rak-shadow-overlay);
   font-weight: var(--rak-weight-medium);
 
-  &.--primary {
-    background-color: var(--rak-toast-primary-bg);
-    color: var(--rak-toast-primary-text);
-  }
-  &.--neutral {
-    border-color: var(--rak-neutral-500);
-    background-color: var(--rak-toast-neutral-bg);
-    color: var(--rak-toast-neutral-text);
-  }
-  &.--success {
-    border-color: var(--rak-success-500);
-    background-color: var(--rak-toast-success-bg);
-    color: var(--rak-toast-success-text);
-  }
-  &.--warning {
-    border-color: var(--rak-warning-500);
-    background-color: var(--rak-toast-warning-bg);
-    color: var(--rak-toast-warning-text);
-  }
-  &.--danger {
-    border-color: var(--rak-danger-500);
-    background-color: var(--rak-toast-danger-bg);
-    color: var(--rak-toast-danger-text);
+  // Primary carries no border-color entry: its border stays the base shade set
+  // above, unlike the other four which repaint it to their own -500.
+  $toast-border-colors: (
+    neutral: var(--rak-neutral-500),
+    success: var(--rak-success-500),
+    warning: var(--rak-warning-500),
+    danger: var(--rak-danger-500),
+  );
+
+  @each $type in (primary, neutral, success, warning, danger) {
+    &.--#{$type} {
+      @if map.has-key($toast-border-colors, $type) {
+        border-color: map.get($toast-border-colors, $type);
+      }
+      background-color: var(--rak-toast-#{$type}-bg);
+      color: var(--rak-toast-#{$type}-text);
+    }
   }
 
   // Both icons sit on the heading's line rather than the middle of the toast, which
