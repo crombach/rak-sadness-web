@@ -31,6 +31,15 @@ enum CellType {
   Text = "s",
 }
 
+function allSides(border: (typeof Border)[keyof typeof Border]) {
+  return {
+    left: border,
+    right: border,
+    top: border,
+    bottom: border,
+  };
+}
+
 function headerCell(value: string) {
   return {
     v: value,
@@ -43,12 +52,7 @@ function headerCell(value: string) {
         patternType: "solid",
         fgColor: Color.OFF_BLACK,
       },
-      border: {
-        left: Border.HEADER,
-        right: Border.HEADER,
-        top: Border.HEADER,
-        bottom: Border.HEADER,
-      },
+      border: allSides(Border.HEADER),
     },
   };
 }
@@ -67,12 +71,7 @@ function pickCell(pick: string, isCorrect: Status) {
         patternType: "solid",
         fgColor: cellColor,
       },
-      border: {
-        left: Border.NORMAL,
-        right: Border.NORMAL,
-        top: Border.NORMAL,
-        bottom: Border.NORMAL,
-      },
+      border: allSides(Border.NORMAL),
     },
   };
 }
@@ -101,12 +100,7 @@ function normalCell({
         patternType: "solid",
         fgColor: Color.WHITE,
       },
-      border: {
-        left: Border.NORMAL,
-        right: Border.NORMAL,
-        top: Border.NORMAL,
-        bottom: Border.NORMAL,
-      },
+      border: allSides(Border.NORMAL),
     },
   };
 }

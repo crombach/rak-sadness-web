@@ -82,6 +82,8 @@ describe("useWeekRouteGuard", () => {
       week: expect.objectContaining({ value: CURRENT_WEEK }),
     });
     expect(navigate).not.toHaveBeenCalled();
+    // Setting the same week again would restart the fetch chain behind it.
+    expect(setSelectedWeek).not.toHaveBeenCalled();
   });
 
   it("selects the week the URL names when the season has it", () => {
@@ -90,13 +92,6 @@ describe("useWeekRouteGuard", () => {
     expect(setSelectedWeek).toHaveBeenCalledWith(
       expect.objectContaining({ value: 3 }),
     );
-  });
-
-  it("leaves the selected week alone when the URL already names it", () => {
-    // Setting the same week again would restart the fetch chain behind it.
-    guard(String(SEASON), String(CURRENT_WEEK));
-
-    expect(setSelectedWeek).not.toHaveBeenCalled();
   });
 
   it("sends a season that is not a year home", () => {

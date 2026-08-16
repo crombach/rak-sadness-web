@@ -38,6 +38,19 @@ const COLLEGE_GROUPS = [
   22, // Ivy League (occasionally appears in Rak Madness)
 ];
 
+/** A scoreboard URL's events, or thrown where ESPN answered with neither. */
+async function fetchEspnEvents(url: string): Promise<Array<EspnEvent>> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`ESPN scoreboard request failed: ${response.status}`);
+  }
+  const json = await response.json();
+  if (!Array.isArray(json.events)) {
+    throw new Error("ESPN scoreboard response had no events array");
+  }
+  return json.events as Array<EspnEvent>;
+}
+
 async function getLeagueEvents(
   league: League,
   week: WeekInfo, // Rak Madness week, corresponds with NFL regular season week
@@ -84,35 +97,20 @@ async function getLeagueEvents(
   if (league === League.COLLEGE) {
     const collegePromises = COLLEGE_GROUPS.map((groupId: number) => {
       const requestUrl = `${baseRequestUrl}&limit=400&groups=${groupId}`;
-      return fetch(requestUrl)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(
-              `ESPN scoreboard request failed: ${response.status}`,
-            );
-          }
-          return response.json();
-        })
-        .then((json) => {
-          if (!Array.isArray(json.events)) {
-            throw new Error("ESPN scoreboard response had no events array");
-          }
-          return json.events as Array<EspnEvent>;
-        })
-        .then((events) => {
-          // ESPN jams the entire college postseason into one week.
-          // So, we need to remove events that happen before the given NFL week.
-          // We'd also like to remove events that happen after, but Rak has (once)
-          // put a game in the picks sheet outside the NFL week. Nice.
-          if (!datedFromWeekStart) return events;
-          return events.filter((event) => {
-            const eventDate = new Date(event.date);
-            return (
-              eventDate.valueOf() >= week.startDate.valueOf()
-              // && eventDate.valueOf() <= week.endDate.valueOf()
-            );
-          });
+      return fetchEspnEvents(requestUrl).then((events) => {
+        // ESPN jams the entire college postseason into one week.
+        // So, we need to remove events that happen before the given NFL week.
+        // We'd also like to remove events that happen after, but Rak has (once)
+        // put a game in the picks sheet outside the NFL week. Nice.
+        if (!datedFromWeekStart) return events;
+        return events.filter((event) => {
+          const eventDate = new Date(event.date);
+          return (
+            eventDate.valueOf() >= week.startDate.valueOf()
+            // && eventDate.valueOf() <= week.endDate.valueOf()
+          );
         });
+      });
     });
 
     // Latest first. The postseason arrives as one bowl week spanning a month, so a
@@ -123,15 +121,7 @@ async function getLeagueEvents(
   }
 
   // For pro, we can just return the raw events list fetched from the API.
-  const response = await fetch(baseRequestUrl);
-  if (!response.ok) {
-    throw new Error(`ESPN scoreboard request failed: ${response.status}`);
-  }
-  const json = await response.json();
-  if (!Array.isArray(json.events)) {
-    throw new Error("ESPN scoreboard response had no events array");
-  }
-  return json.events as Array<EspnEvent>;
+  return fetchEspnEvents(baseRequestUrl);
 }
 
 /** The season record, which ESPN sends beside the home and road splits. */

@@ -226,18 +226,13 @@ describe("getPickResults, unscoreable games", () => {
     );
   }
 
-  it("scores nothing for a game the workbook describes two ways", () => {
+  it("scores nothing for a game the workbook describes two ways, and explains itself with the disagreement", () => {
     const [unscoreable] = scoreFirstOfTwo("BUF +7");
 
     expect(unscoreable.pointValue).toBe(0);
     expect(unscoreable.isInvalid).toBe(true);
     expect(unscoreable.isCompleted).toBe(false);
     expect(getStatus(unscoreable)).toBe("unscoreable");
-  });
-
-  it("explains itself with the disagreement", () => {
-    const [unscoreable] = scoreFirstOfTwo("BUF +7");
-
     expect(unscoreable.explanation.header).toBe("Invalid Spread");
     expect(unscoreable.explanation.message).toBe(reason);
   });

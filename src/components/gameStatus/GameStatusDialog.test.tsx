@@ -5,111 +5,63 @@ import {
   within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MockedFunction } from "vitest";
-import { GameStatus, HomeAway } from "../../types/ESPN";
-import { League, WeekInfo } from "../../types/League";
+import { League } from "../../types/League";
 import { LeagueResult } from "../../types/LeagueResult";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import { WeekGame } from "../../types/WeekGame";
+import {
+  finalGame,
+  liveGame,
+  upcomingGame as upcomingGameFixture,
+} from "../../utils/scoring/leagueResultFixtures";
 import { POLL_MS } from "../../hooks/useLiveGame";
-import GameStatusDialog, { gamesMatching } from "./GameStatusDialog";
 
 vi.mock("../../utils/getLeagueResults");
 
-import { getGameResult } from "../../utils/getLeagueResults";
+import { gamesMatching } from "./GameStatusDialog";
+import {
+  dialog,
+  getGameResultMock,
+  SEASON,
+  WEEK,
+} from "./gameStatusDialogTestSupport";
 
-const getGameResultMock = getGameResult as MockedFunction<typeof getGameResult>;
-
-const WEEK: WeekInfo = {
-  value: 5,
-  label: "Week 5",
-  startDate: new Date("2024-10-01T00:00:00Z"),
-  endDate: new Date("2024-10-08T00:00:00Z"),
-};
-const SEASON = 2024;
-
-function result({
-  id,
-  home,
-  away,
-  homeScore,
-  awayScore,
-  status,
-}: {
-  id: string;
-  home: string;
-  away: string;
-  homeScore: number;
-  awayScore: number;
-  status: GameStatus;
-}): LeagueResult {
-  const isFinal = status === GameStatus.FINAL;
+/**
+ * The shared fixtures build a game ESPN's own boxscore never quite is: no id
+ * beyond a shared placeholder, and a team known only by its abbreviation. Real
+ * boxscore fields, distinct per game, so the fetch a game is asked about by and
+ * the name and logo it renders can be told apart on screen.
+ */
+function withEspnDetails(built: LeagueResult, id: string): LeagueResult {
+  const withDetails = (side: LeagueResult["home"]): LeagueResult["home"] => ({
+    ...side,
+    team: {
+      ...side.team,
+      name: `${side.team.abbreviation} Team`,
+      logoUrl: `https://espn.com/${side.team.abbreviation}.png`,
+    },
+  });
   return {
+    ...built,
     id,
-    name: `${away} at ${home}`,
-    shortName: `${away} @ ${home}`,
-    date: new Date("2024-10-06T17:00:00Z"),
-    status,
-    detailMessage: isFinal ? "Final" : "8:42 - 3rd Quarter",
-    isNeutralSite: false,
-    home: {
-      team: {
-        name: `${home} Team`,
-        abbreviation: home,
-        logoUrl: `https://espn.com/${home}.png`,
-      },
-      score: homeScore,
-      linescores: isFinal ? [homeScore] : [],
-    },
-    away: {
-      team: {
-        name: `${away} Team`,
-        abbreviation: away,
-        logoUrl: `https://espn.com/${away}.png`,
-      },
-      score: awayScore,
-      linescores: isFinal ? [awayScore] : [],
-    },
-    possession: {},
-    winner: {
-      team: isFinal ? { name: `${home} Team`, abbreviation: home } : null,
-      homeAway: isFinal ? HomeAway.HOME : null,
-      by: Math.abs(homeScore - awayScore),
-    },
-    loser: {
-      team: isFinal ? { name: `${away} Team`, abbreviation: away } : null,
-      homeAway: isFinal ? HomeAway.AWAY : null,
-      by: Math.abs(homeScore - awayScore),
-    },
-    totalScore: homeScore + awayScore,
+    home: withDetails(built.home),
+    away: withDetails(built.away),
   };
 }
 
 /** The pro game is live, and the college one finished a while ago. */
-const proGame = result({
-  id: "401",
-  home: "BUF",
-  away: "KC",
-  homeScore: 7,
-  awayScore: 0,
-  status: GameStatus.LIVE,
-});
-const collegeGame = result({
-  id: "402",
-  home: "OSU",
-  away: "MICH",
-  homeScore: 20,
-  awayScore: 30,
-  status: GameStatus.FINAL,
-});
-const upcomingGame = result({
-  id: "403",
-  home: "PHI",
-  away: "DAL",
-  homeScore: 0,
-  awayScore: 0,
-  status: GameStatus.UPCOMING,
-});
+const proGame = withEspnDetails(
+  liveGame({ home: "BUF", away: "KC", homeScore: 7, awayScore: 0 }),
+  "401",
+);
+const collegeGame = withEspnDetails(
+  finalGame({ home: "OSU", away: "MICH", homeScore: 20, awayScore: 30 }),
+  "402",
+);
+const upcomingGame = withEspnDetails(
+  upcomingGameFixture({ home: "PHI", away: "DAL" }),
+  "403",
+);
 
 const games: Array<WeekGame> = [
   {
@@ -185,24 +137,13 @@ describe("GameStatusDialog", () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     getGameResultMock.mockResolvedValue(proGame);
 
-    const dialog = (gameLabel?: string, open = true) => (
-      <GameStatusDialog
-        open={open}
-        onOpenChange={() => undefined}
-        gameLabel={gameLabel}
-        scores={scores}
-        week={WEEK}
-        season={SEASON}
-      />
-    );
-
     // Closed, so there is nothing to watch and nothing is asked for.
-    const { rerender } = render(dialog(undefined, false));
+    const { rerender } = render(dialog(undefined, false, scores));
     await vi.advanceTimersByTimeAsync(POLL_MS * 2);
     expect(getGameResultMock).not.toHaveBeenCalled();
 
     // Opened on a cell in the pro column.
-    rerender(dialog("P1"));
+    rerender(dialog("P1", true, scores));
     expect(getGameResultMock).toHaveBeenCalledWith(
       League.PRO,
       WEEK,
@@ -247,14 +188,10 @@ describe("GameStatusDialog", () => {
     // Ten seconds on, the same game is asked about again, and the answer replaces
     // what was on screen.
     getGameResultMock.mockResolvedValue(
-      result({
-        id: "401",
-        home: "BUF",
-        away: "KC",
-        homeScore: 14,
-        awayScore: 7,
-        status: GameStatus.LIVE,
-      }),
+      withEspnDetails(
+        liveGame({ home: "BUF", away: "KC", homeScore: 14, awayScore: 7 }),
+        "401",
+      ),
     );
     await vi.advanceTimersByTimeAsync(POLL_MS);
     expect(getGameResultMock).toHaveBeenCalledTimes(2);
@@ -385,7 +322,7 @@ describe("GameStatusDialog", () => {
     expect(await screen.findByText("BUF Team")).toBeInTheDocument();
 
     // Closing takes the watch off it, whatever the game is doing.
-    rerender(dialog("P1", false));
+    rerender(dialog("P1", false, scores));
     const askedByClose = getGameResultMock.mock.calls.length;
     await vi.advanceTimersByTimeAsync(POLL_MS * 3);
     expect(getGameResultMock).toHaveBeenCalledTimes(askedByClose);

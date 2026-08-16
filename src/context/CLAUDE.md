@@ -8,4 +8,5 @@
 - `PlayerAnalysisContext`: how a player's name in a table opens the player analysis
   on them. One callback, a no-op with no provider above.
 - `GameStatusContext`: the same, for a pick cell opening the game status on the
-  column it sits in.
+  column it sits in. Both single-callback contexts share their plumbing via
+  `createCallbackContext`.

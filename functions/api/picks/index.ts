@@ -1,6 +1,5 @@
-type Env = {
-  RAK_MADNESS_BUCKET: R2Bucket;
-};
+import type { Env } from "./env";
+import { serviceUnavailable } from "./env";
 
 const PICKS_PREFIX = "picks/";
 /** A whole season folder, `picks/2025/`, and nothing else. */
@@ -34,8 +33,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       cursor = listed.truncated ? listed.cursor : undefined;
     } while (cursor != null);
   } catch (error) {
-    console.error("Failed to list picks seasons", error);
-    return new Response("Service Unavailable", { status: 503 });
+    return serviceUnavailable("Failed to list picks seasons", error);
   }
 
   return new Response(JSON.stringify({ years: years.sort((a, b) => b - a) }), {

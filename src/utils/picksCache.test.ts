@@ -1,4 +1,8 @@
 import { readCachedPicks, writeCachedPicks } from "./picksCache";
+import {
+  blockAllStorageMethods,
+  mockRejectedSetItem,
+} from "./storageMockUtils";
 
 const SEASON = 2025;
 
@@ -70,11 +74,7 @@ describe("picksCache", () => {
 
   it("leaves nothing behind when storage rejects a write", () => {
     writeCachedPicks(SEASON, 3, buffer(1));
-    const setItem = vi
-      .spyOn(Storage.prototype, "setItem")
-      .mockImplementation(() => {
-        throw new Error("QuotaExceededError");
-      });
+    const setItem = mockRejectedSetItem();
 
     writeCachedPicks(SEASON, 4, buffer(4));
 
@@ -84,22 +84,8 @@ describe("picksCache", () => {
   });
 
   it("misses rather than throws when every localStorage method throws", () => {
-    const blocked = () => {
-      throw new Error("storage blocked");
-    };
-    const getItem = vi
-      .spyOn(Storage.prototype, "getItem")
-      .mockImplementation(blocked);
-    const setItem = vi
-      .spyOn(Storage.prototype, "setItem")
-      .mockImplementation(blocked);
-    const removeItem = vi
-      .spyOn(Storage.prototype, "removeItem")
-      .mockImplementation(blocked);
-    const key = vi.spyOn(Storage.prototype, "key").mockImplementation(blocked);
-    const length = vi
-      .spyOn(Storage.prototype, "length", "get")
-      .mockImplementation(blocked);
+    const { getItem, setItem, removeItem, key, length } =
+      blockAllStorageMethods();
 
     expect(() => readCachedPicks(SEASON, 3)).not.toThrow();
     expect(() => writeCachedPicks(SEASON, 3, buffer(1))).not.toThrow();

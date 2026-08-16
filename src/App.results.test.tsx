@@ -27,16 +27,17 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("the app, results views", () => {
-  async function mountWithScores() {
-    const user = await mountLoadedApp();
-    await uploadSpreadsheet(user);
-    await waitFor(() => {
-      expect(screen.getByText("View Results")).toBeEnabled();
-    });
-    return user;
-  }
+/** A loaded app with a spreadsheet already scored, its buttons enabled. */
+async function mountWithScores(buttonName = "View Results") {
+  const user = await mountLoadedApp();
+  await uploadSpreadsheet(user);
+  await waitFor(() => {
+    expect(screen.getByText(buttonName)).toBeEnabled();
+  });
+  return user;
+}
 
+describe("the app, results views", () => {
   it("opens the scoreboard view", async () => {
     const user = await mountWithScores();
     await user.click(screen.getByText("View Results"));
@@ -128,11 +129,7 @@ describe("the app, results views", () => {
 
 describe("the app, export", () => {
   it("builds and downloads a spreadsheet for the selected week", async () => {
-    const user = await mountLoadedApp();
-    await uploadSpreadsheet(user);
-    await waitFor(() => {
-      expect(screen.getByText("Export Results")).toBeEnabled();
-    });
+    const user = await mountWithScores("Export Results");
 
     const click = vi.spyOn(HTMLAnchorElement.prototype, "click");
     await user.click(screen.getByText("Export Results"));

@@ -1,8 +1,9 @@
 import { memo } from "react";
 import { PlayerScore, RakMadnessScores } from "../../../types/RakMadnessScores";
 import PlayerName from "../playerName/PlayerName";
-import TableShell, { RankCell } from "../TableShell";
+import TableShell, { PLAYER_COL_CLASS, RankCell } from "../TableShell";
 
+/** Rank, player, MNF pick, MNF distance, college, pro, pro ATS, and total. */
 const COLUMN_COUNT = 8;
 
 function ScoresTable({ scores }: { scores?: RakMadnessScores | null }) {
@@ -17,7 +18,7 @@ function ScoresTable({ scores }: { scores?: RakMadnessScores | null }) {
       header={
         <>
           <th scope="col">Rank</th>
-          <th className="table__player-col" scope="col">
+          <th className={PLAYER_COL_CLASS} scope="col">
             Player
           </th>
           <th scope="col">MNF Points Pick</th>

@@ -5,6 +5,7 @@ import { GameStatus } from "../../types/ESPN";
 import { WeekInfo } from "../../types/League";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import { WeekGame } from "../../types/WeekGame";
+import matching from "../../utils/matching";
 import prefetchLink from "../../utils/prefetchLink";
 import DialogCombobox from "../dialog/DialogCombobox";
 import DialogShell from "../dialog/DialogShell";
@@ -41,10 +42,7 @@ export function gamesMatching(
   games: Array<WeekGame>,
   query: string,
 ): Array<WeekGame> {
-  const needle = query.trim().toLowerCase();
-  return games.filter((game) =>
-    gameSearchText(game).toLowerCase().includes(needle),
-  );
+  return matching(games, query, gameSearchText);
 }
 
 /**

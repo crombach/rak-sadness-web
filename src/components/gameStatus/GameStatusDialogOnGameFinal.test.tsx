@@ -3,27 +3,15 @@ import {
   screen,
   waitForElementToBeRemoved,
 } from "@testing-library/react";
-import { MockedFunction } from "vitest";
-import { League, WeekInfo } from "../../types/League";
+import { League } from "../../types/League";
 import { RakMadnessScores } from "../../types/RakMadnessScores";
 import { WeekGame } from "../../types/WeekGame";
 import { finalGame, liveGame } from "../../utils/scoring/leagueResultFixtures";
 import { POLL_MS } from "../../hooks/useLiveGame";
-import GameStatusDialog from "./GameStatusDialog";
 
 vi.mock("../../utils/getLeagueResults");
 
-import { getGameResult } from "../../utils/getLeagueResults";
-
-const getGameResultMock = getGameResult as MockedFunction<typeof getGameResult>;
-
-const WEEK: WeekInfo = {
-  value: 5,
-  label: "Week 5",
-  startDate: new Date("2024-10-01T00:00:00Z"),
-  endDate: new Date("2024-10-08T00:00:00Z"),
-};
-const SEASON = 2024;
+import { dialog, getGameResultMock } from "./gameStatusDialogTestSupport";
 
 const proGame: WeekGame = {
   label: "P1",
@@ -33,25 +21,6 @@ const proGame: WeekGame = {
 };
 
 const scores: RakMadnessScores = { scores: [], games: [proGame] };
-
-function dialog(
-  gameLabel: string | undefined,
-  open: boolean,
-  onGameFinal: () => void,
-  forScores: RakMadnessScores = scores,
-) {
-  return (
-    <GameStatusDialog
-      open={open}
-      onOpenChange={() => undefined}
-      gameLabel={gameLabel}
-      scores={forScores}
-      week={WEEK}
-      season={SEASON}
-      onGameFinal={onGameFinal}
-    />
-  );
-}
 
 /**
  * `onGameFinal` is what wires the dialog's own live poll back into the week's
@@ -67,8 +36,8 @@ describe("GameStatusDialog onGameFinal", () => {
       liveGame({ home: "BUF", away: "KC", homeScore: 7, awayScore: 0 }),
     );
 
-    const { rerender } = render(dialog(undefined, false, onGameFinal));
-    rerender(dialog("P1", true, onGameFinal));
+    const { rerender } = render(dialog(undefined, false, scores, onGameFinal));
+    rerender(dialog("P1", true, scores, onGameFinal));
     await waitForElementToBeRemoved(() => screen.queryByRole("progressbar"));
     expect(onGameFinal).not.toHaveBeenCalled();
 
@@ -106,9 +75,9 @@ describe("GameStatusDialog onGameFinal", () => {
     };
 
     const { rerender } = render(
-      dialog(undefined, false, onGameFinal, settledScores),
+      dialog(undefined, false, settledScores, onGameFinal),
     );
-    rerender(dialog("P1", true, onGameFinal, settledScores));
+    rerender(dialog("P1", true, settledScores, onGameFinal));
     expect(
       await screen.findByRole("img", { name: "Final" }),
     ).toBeInTheDocument();

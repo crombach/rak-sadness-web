@@ -1,4 +1,4 @@
-import { CSSProperties, useEffect, useState } from "react";
+import { CSSProperties, ReactNode, useEffect, useState } from "react";
 import { FactCheckIcon, LeaderboardIcon, UpdateIcon } from "../icon/Icon";
 import Button from "../button/Button";
 import "./ScoresNavbar.scss";
@@ -11,6 +11,40 @@ export type ScoresView = "Scoreboard" | "Picks";
  * `--collapse-duration`, so the two cannot drift apart.
  */
 export const COLLAPSE_DURATION_MS = 300;
+
+function ViewButton({
+  view,
+  icon,
+  label,
+  currentView,
+  noViewYet,
+  disabled,
+  onViewChange,
+}: {
+  view: ScoresView;
+  icon: ReactNode;
+  label: string;
+  currentView: ScoresView | null;
+  noViewYet: boolean;
+  disabled: boolean;
+  onViewChange: (view: ScoresView) => void;
+}) {
+  return (
+    <Button
+      disabled={noViewYet}
+      ariaDisabled={disabled}
+      compact
+      selected={currentView === view}
+      onClick={() => onViewChange(view)}
+      className="scores-nav__button"
+    >
+      {icon}
+      {/* Drawn only where the navbar has room, and read by a screen reader
+          everywhere, so the button is never nameless. */}
+      <span className="scores-nav__label">{label}</span>
+    </Button>
+  );
+}
 
 /** The scoreboard/picks switch, and the refresh a week still being played gets. */
 export default function ScoresNavbar({
@@ -53,30 +87,24 @@ export default function ScoresNavbar({
     // The two views are the only way through the results, so they are navigation
     // rather than a pair of loose buttons.
     <nav className="scores-nav" aria-label="Results view">
-      <Button
-        disabled={noViewYet}
-        ariaDisabled={disabled}
-        compact
-        selected={view === "Scoreboard"}
-        onClick={() => onViewChange("Scoreboard")}
-        className="scores-nav__button"
-      >
-        <LeaderboardIcon />
-        {/* Drawn only where the navbar has room, and read by a screen reader
-            everywhere, so the button is never nameless. */}
-        <span className="scores-nav__label">Scoreboard</span>
-      </Button>
-      <Button
-        disabled={noViewYet}
-        ariaDisabled={disabled}
-        compact
-        selected={view === "Picks"}
-        onClick={() => onViewChange("Picks")}
-        className="scores-nav__button"
-      >
-        <FactCheckIcon />
-        <span className="scores-nav__label">Picks</span>
-      </Button>
+      <ViewButton
+        view="Scoreboard"
+        icon={<LeaderboardIcon />}
+        label="Scoreboard"
+        currentView={view}
+        noViewYet={noViewYet}
+        disabled={disabled}
+        onViewChange={onViewChange}
+      />
+      <ViewButton
+        view="Picks"
+        icon={<FactCheckIcon />}
+        label="Picks"
+        currentView={view}
+        noViewYet={noViewYet}
+        disabled={disabled}
+        onViewChange={onViewChange}
+      />
       {isLiveMounted && (
         <div
           className={`scores-nav__live ${isWeekLive ? "" : "--collapsed"}`}

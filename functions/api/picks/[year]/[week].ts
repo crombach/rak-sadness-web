@@ -1,6 +1,5 @@
-type Env = {
-  RAK_MADNESS_BUCKET: R2Bucket;
-};
+import type { Env } from "../env";
+import { serviceUnavailable } from "../env";
 
 /**
  * An hour of reuse, then the browser asks whether its copy still stands. A week's
@@ -39,8 +38,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       onlyIf: conditional,
     });
   } catch (error) {
-    console.error("Failed to fetch picks", error);
-    return new Response("Service Unavailable", { status: 503 });
+    return serviceUnavailable("Failed to fetch picks", error);
   }
   if (!spreadsheet) {
     return new Response("Not Found", { status: 404 });

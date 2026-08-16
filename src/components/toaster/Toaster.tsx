@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import {
   CheckCircleIcon,
   CloseIcon,
@@ -14,18 +15,13 @@ import {
 } from "../../context/ToastContext";
 import "./Toaster.scss";
 
-function startIconFor(type: Toast["type"]) {
-  if (type === "success") {
-    return <CheckCircleIcon />;
-  }
-  if (type === "danger") {
-    return <ReportIcon />;
-  }
-  if (type === "warning") {
-    return <WarningIcon />;
-  }
-  return <InfoIcon />;
-}
+const START_ICON_BY_TYPE: Record<Toast["type"], ReactNode> = {
+  primary: <InfoIcon />,
+  neutral: <InfoIcon />,
+  success: <CheckCircleIcon />,
+  warning: <WarningIcon />,
+  danger: <ReportIcon />,
+};
 
 export default function Toaster() {
   const toasts = useToasts();
@@ -53,7 +49,9 @@ export default function Toaster() {
             // read.
             role={isPersistent(toast) ? "alert" : "status"}
           >
-            <span className="toast__icon">{startIconFor(toast.type)}</span>
+            <span className="toast__icon">
+              {START_ICON_BY_TYPE[toast.type]}
+            </span>
             <div className="toast__body">
               <div className="toast__header">{toast.header}</div>
               <div className="toast__message">{toast.message}</div>

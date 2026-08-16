@@ -1,6 +1,7 @@
 import { Combobox } from "@base-ui-components/react/combobox";
 import { ReactNode, useRef } from "react";
 import { UnfoldMoreIcon } from "../icon/Icon";
+import { DIALOG_POPUP_CLASS } from "./DialogShell";
 import "./DialogCombobox.scss";
 
 /**
@@ -68,7 +69,7 @@ export default function DialogCombobox<T>({
    */
   function releaseFocus() {
     const input = inputRef.current;
-    const popup = input?.closest<HTMLElement>(".dialog__popup");
+    const popup = input?.closest<HTMLElement>(`.${DIALOG_POPUP_CLASS}`);
     if (popup != null) popup.focus();
     else input?.blur();
   }

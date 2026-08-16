@@ -137,7 +137,7 @@
   // What the app is mounted in on a screen too wide for the tiles to be its
   // ground. A shade over the frame around the table so that frame still has an
   // edge to be read against, on the same grey ramp as the rest of the app now.
-  --rak-case: #373737;
+  --rak-case: var(--rak-neutral-700);
 
   // Primary scale: the navbar, table header, and key chrome. Grayscale, same as
   // before, just lighter, so the instrument chrome reads as an instrument
