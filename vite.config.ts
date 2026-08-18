@@ -1,10 +1,25 @@
+import { rm } from "node:fs/promises";
+import path from "node:path";
 import react from "@vitejs/plugin-react";
+import type { Plugin } from "vite";
 import { defineConfig } from "vitest/config";
 
 const DEV_PORT = Number(process.env.PORT ?? 3000);
 
+// Vite copies `public/` to the build root, and the CLAUDE.md that indexes it is
+// written for agents reading the repo, not for anyone fetching the site.
+function dropPublicClaudeMd(): Plugin {
+  return {
+    name: "drop-public-claude-md",
+    apply: "build",
+    async writeBundle(options) {
+      await rm(path.join(options.dir ?? "build", "CLAUDE.md"), { force: true });
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), dropPublicClaudeMd()],
   build: {
     // The Cloudflare Pages build serves ./build, and `pages:dev` serves it locally.
     outDir: "build",

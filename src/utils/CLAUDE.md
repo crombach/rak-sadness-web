@@ -19,4 +19,4 @@
 
 ## Subdirectories
 
-- [`scoring/`](scoring/CLAUDE.md) — the picks-to-scoreboard pipeline
+- [`scoring/`](scoring/CLAUDE.md) — pick results, player scores, knockouts

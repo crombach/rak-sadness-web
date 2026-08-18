@@ -28,11 +28,9 @@ check: lint lint-docs typecheck test ## Lint, typecheck, test, and format-check 
 lint: ## ESLint over the repo
 	npm run lint
 
-# Length only. The structure and duplication checks want a CLAUDE.md in public/,
-# which stays out on purpose: that directory is served to the web.
-lint-docs: ## Hold every CLAUDE.md to its word ceiling
+lint-docs: ## Check the CLAUDE.md tree: structure, duplication, length
 	@command -v python3 >/dev/null || { echo "Missing python3"; exit 1; }
-	.claude/scripts/lint_claude_md.py length .
+	.claude/scripts/lint_claude_md.py check .
 
 typecheck: ## tsc --noEmit for src/ and functions/ separately
 	npm run typecheck

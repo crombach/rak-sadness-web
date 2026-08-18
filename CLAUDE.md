@@ -5,18 +5,17 @@ TypeScript, react-router, Base UI, SCSS. Vitest for tests, ESLint flat config.
 Scores an uploaded weekly picks spreadsheet against ESPN game results, exports XLSX.
 Home page at `/`, a week's results at `/:season/:week/scoreboard` and
 `/:season/:week/picks`, and `/scoreboard` and `/picks` redirect to the latest week
-worth showing. Deployed to Cloudflare Pages (`wrangler`);
-`functions/api/picks/index.ts` lists the seasons that have picks, and
-`functions/api/picks/[year]/[week].ts` serves one season's week.
+worth showing. Deployed to Cloudflare Pages (`wrangler`), which serves the picks
+API in `functions/` beside the built app.
 
-`public/` holds the static assets Vite copies to the build root, referenced by
-absolute path: `manifest.json`, the `favicon.ico` and `logo*.png` icons, and
-`robots.txt`. The HTML shell is `index.html` at the repo root.
+`index.html` at the repo root is the HTML shell Vite builds from.
 
 [`SCROLL-FLASH.md`](SCROLL-FLASH.md): an open bug, read before changing sticky.
 
 ## Subdirectories
 
+- [`functions/`](functions/CLAUDE.md) — the picks routes, on Pages and R2
+- [`public/`](public/CLAUDE.md) — icons, manifest, robots.txt
 - [`src/`](src/CLAUDE.md) — application source
 
 ## Maintaining this tree
@@ -28,8 +27,7 @@ CLAUDE.md, outside its Subdirectories list and this block: 120 words, or 40 plus
 not target: land under it, or the next edit pays to shave. `make lint-docs`
 enforces it. Over it, the detail belongs at the point of definition, in a comment
 or docblock beside the code. A skill under `.claude/skills/` is for what no one
-file can hold. `public/` is the exception to the tree: it is served as-is, so it
-is described above instead.
+file can hold.
 
 Measure a rewrite before writing it, which is one pass rather than several:
 
