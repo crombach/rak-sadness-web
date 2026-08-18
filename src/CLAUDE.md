@@ -8,7 +8,18 @@ under an opening dialog. No theme provider: Base UI is unstyled, so tokens plus 
 
 ## Subdirectories
 
-- [`components/`](components/CLAUDE.md) — React UI, layout, routes
+- [`components/button/`](components/button/CLAUDE.md) — shared button, Base UI's primitive
+- [`components/dialog/`](components/dialog/CLAUDE.md) — the shared dialog shell and its search
+- [`components/footer/`](components/footer/CLAUDE.md) — bottom links bar
+- [`components/gameStatus/`](components/gameStatus/CLAUDE.md) — how one game in the week is going
+- [`components/home/`](components/home/CLAUDE.md) — home route: pickers, upload, export
+- [`components/icon/`](components/icon/CLAUDE.md) — SVG icons inlined from Material Design
+- [`components/navbar/`](components/navbar/CLAUDE.md) — top nav bar, view switch, logo button
+- [`components/pageLayout/`](components/pageLayout/CLAUDE.md) — the chrome every page shares
+- [`components/playerAnalysis/`](components/playerAnalysis/CLAUDE.md) — where a player stands, and why
+- [`components/results/`](components/results/CLAUDE.md) — results routes, layout, redirect
+- [`components/table/`](components/table/CLAUDE.md) — shared frame and the results tables
+- [`components/toaster/`](components/toaster/CLAUDE.md) — toast notification renderer
 - [`context/`](context/CLAUDE.md) — app data, toast, and analysis providers
 - [`hooks/`](hooks/CLAUDE.md) — picks, scoring, export, guard, measurement
 - [`styles/`](styles/CLAUDE.md) — Sass mixins: breakpoints, listbox shape

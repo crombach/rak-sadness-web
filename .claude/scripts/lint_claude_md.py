@@ -457,18 +457,6 @@ def budget(text):
     return max(BODY_WORD_LIMIT, ENTRY_BASE + ENTRY_WORDS * described(text))
 
 
-def body_words(path):
-    """Word count of the CLAUDE.md at `path`, outside the exempt sections."""
-    with open(path, encoding="utf-8") as fh:
-        return text_words(fh.read())
-
-
-def body_budget(path):
-    """The word budget of the CLAUDE.md at `path`."""
-    with open(path, encoding="utf-8") as fh:
-        return budget(fh.read())
-
-
 def blocks(text):
     """Counting prose as [(words, first line)], heaviest first.
 
@@ -512,7 +500,9 @@ def length_findings(root):
     findings = []
     for rel in sorted(claude_md_dirs(root)):
         path = os.path.join(root, rel, CLAUDE_MD)
-        count, allowed = body_words(path), body_budget(path)
+        with open(path, encoding="utf-8") as fh:
+            text = fh.read()
+        count, allowed = text_words(text), budget(text)
         if count > allowed:
             findings.append((path, count, allowed))
     return findings
