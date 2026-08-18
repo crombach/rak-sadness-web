@@ -25,8 +25,13 @@ alternatives rejected, counts of files or lines or tests, timings, coverage or
 benchmark numbers nobody asked for, a tour of the code, or a note about your own
 machine. A reviewer reads the diff and can click the ticket.
 
-No em-dashes, no semicolons. Short sentences instead, one idea each. Plain words
-a reader takes in once. Leave no empty headings.
+Write ASD-STE100 Simplified Technical English, for Zinsser's simplicity, brevity,
+clarity and humanity. Active voice. Simple tenses. One idea per sentence, and no
+sentence over 20 words. No -ing form as a noun: "before you run it", not "before
+running it". Condition before action. The same word for the same thing every time.
+The short common word, not the long one. Three nouns in a row at most. Keep the
+articles. No slang, no idiom, no metaphor. No em-dashes, no semicolons. Leave no
+empty headings.
 -->
 
 ## What

@@ -12,11 +12,15 @@ Checks, all mechanical:
   - the body links the ticket its branch names, when the template asks for it
   - the punctuation the template bans stays out of the body
   - the body stays inside the word budget the template states
+  - a subject, a commit body and a PR body obey the Simplified Technical English
+    rules the template turns on: the sentence cap, the short word, no -ing form
+    used as a noun
 
 Fails open everywhere: an unreadable subject or body (editor commits, `-F -`,
 unbalanced quotes, a missing template) is allowed through. What it can read it
 enforces, with no opt-out flag or environment variable. Don't add one.
 """
+import functools
 import json
 import os
 import re
@@ -49,6 +53,38 @@ BANNED = {"—": "em-dash", "–": "en-dash", ";": "semicolon"}
 # The budget comes off the template too, so a repo that never states one, or states
 # its own, is judged by its own words and never by a number hardcoded here.
 WORD_RULE = re.compile(r"under (\d+) words", re.IGNORECASE)
+# The ASD-STE100 rules, read off the template like every other rule here. The
+# marker turns the word and gerund checks on. The cap is worded so it cannot be
+# read as the whole-body budget above, and it may wrap in the template.
+STE_RULE = "ASD-STE100"
+SENTENCE_RULE = re.compile(r"no\s+sentence\s+over\s+(\d+)\s+words", re.IGNORECASE)
+SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
+# One word, one meaning, and the short one. Only swaps that lose no sense.
+LONG_WORDS = {"utilize": "use", "utilise": "use", "leverage": "use",
+              "remediate": "fix", "initiate": "start", "commence": "start",
+              "facilitate": "help", "endeavor": "try", "endeavour": "try",
+              "prior to": "before", "subsequent to": "after", "in order to": "to",
+              "due to the fact that": "because", "in the event that": "if",
+              "at this point in time": "now"}
+# All of them in one pass. Longest first, so "in order to" wins over any prefix.
+LONG_WORD_RE = re.compile(
+    r"\b(%s)\b" % "|".join(re.escape(w) for w in
+                            sorted(LONG_WORDS, key=len, reverse=True)),
+    re.IGNORECASE)
+# An -ing word straight after one of these reads as a gerund, which STE bans.
+GERUND_AFTER = re.compile(
+    r"\b(before|after|without|by|while|upon|through|instead of|rather than)\s+"
+    # The article needs its own boundary, or `a` eats the first letter of
+    # `anything` and the rest reads as a gerund.
+    r"(?:(?:the|a|an|your|its|their)\s+)?(\w{4,}ing)\b", re.IGNORECASE)
+# Nouns that only end in those letters. Without these the check fires on "before
+# anything" and on half the words in a settings file.
+GERUND_SAFE = frozenset((
+    "nothing", "anything", "everything", "something", "thing", "things", "during",
+    "string", "strings", "morning", "evening", "ceiling", "warning", "warnings",
+    "setting", "settings", "meaning", "heading", "headings", "listing", "listings",
+    "building", "buildings", "offering", "offerings", "spring", "sibling",
+    "siblings", "engineering", "tooling", "logging", "timing", "wiring"))
 TABLE_ROW = re.compile(r"^\s*\|")
 CHECKLIST_ITEM = re.compile(r"^\s*[-*+]\s+\[[ xX]\]")
 # Embedded media is markup and a URL, not prose, and either can run hundreds of
@@ -62,6 +98,9 @@ MEDIA = re.compile(
     re.IGNORECASE)
 MEDIA_TOKEN = re.compile(r"^<?\S*%s\S*>?$" % MEDIA_TARGET, re.IGNORECASE)
 LIST_ITEM = re.compile(r"^\s*(?:[-*+]|\d+\.)\s+")
+# Markup a reader never reads, dropped before a sentence is measured.
+QUOTE_MARKER = re.compile(r"^\s*>+\s?")
+CHECKBOX = re.compile(r"^\s*\[[ xX]\]\s*")
 # A heading is the template's word, not the writer's, and an attribution footer is
 # appended after the body is drafted. Charging the budget for either spends it on
 # text nobody chose.
@@ -140,8 +179,8 @@ def option(args, *names):
     return None
 
 
-def commit_subjects(args):
-    """Subjects a `git commit` invocation would write."""
+def commit_messages(args):
+    """Every `-m` a `git commit` invocation carries, in order."""
     messages, index = [], 0
     while index < len(args):
         token = args[index]
@@ -159,19 +198,34 @@ def commit_subjects(args):
             index += 2
             continue
         index += 1
-    # First -m is the subject; the rest are body paragraphs.
-    return messages[:1]
+    return messages
 
 
+def commit_text(args):
+    """(subject, body) a `git commit` invocation would write.
+
+    The first -m is the subject and the rest are body paragraphs. Both come off
+    one parse, since the caller wants both every time.
+    """
+    messages = commit_messages(args)
+    return (messages[0] if messages else None,
+            "\n\n".join(messages[1:]))
+
+
+@functools.lru_cache(maxsize=16)
 def prose(body):
     """The body minus code spans and HTML comments, for punctuation checks."""
     return COMMENTS.sub("", CODE_SPANS.sub("", body))
 
 
+@functools.lru_cache(maxsize=16)
 def headings(text):
     return set(re.findall(r"(?m)^#{2,3}\s+(.+?)\s*$", text))
 
 
+# Bigger than the rest: `blocks` measures one block at a time, and those
+# entries must not evict the whole body.
+@functools.lru_cache(maxsize=128)
 def prose_words(body):
     """Words a reviewer reads. A fenced block, a table, a checklist, a heading, an
     attribution footer and an embedded image or video are not prose the writer chose,
@@ -194,6 +248,71 @@ def prose_words(body):
         kept.append(line)
     return len([word for word in " ".join(kept).split()
                 if not MEDIA_TOKEN.match(word)])
+
+
+@functools.lru_cache(maxsize=16)
+def sentences(body):
+    """Prose split into sentences, for the sentence cap.
+
+    A paragraph wraps, so lines are joined before the split. A list item, a table
+    row and a heading each end the one before it. A code span counts as one word,
+    since that is what a reader takes in.
+    """
+    text = MEDIA.sub("", COMMENTS.sub("", FENCE.sub("", body)))
+    text = CODE_SPANS.sub("code", text)
+    out, current = [], []
+
+    def flush():
+        if current:
+            joined = " ".join(current).strip()
+            out.extend(s for s in SENTENCE_END.split(joined) if s.strip())
+        del current[:]
+
+    for line in text.splitlines() + [""]:
+        line = QUOTE_MARKER.sub("", line)
+        if (TABLE_ROW.match(line) or HEADING_LINE.match(line.strip())
+                or SIGNATURE.match(line) or not line.strip()):
+            flush()
+            continue
+        if LIST_ITEM.match(line):
+            flush()
+            # Neither the marker nor the checkbox is a word. Counting them denies
+            # a bullet that sits exactly on the cap.
+            line = CHECKBOX.sub("", LIST_ITEM.sub("", line))
+        current.append(line)
+    flush()
+    return out
+
+
+def style_problems(text, template, where):
+    """The Simplified Technical English rules the template turns on.
+
+    Only the mechanical ones. Active voice and noun clusters need a reader, so the
+    template states them and this stays quiet about them.
+    """
+    if STE_RULE not in template:
+        return []
+    problems, clean = [], prose(text)
+    for phrase in sorted({m.group(1).lower() for m in LONG_WORD_RE.finditer(clean)}):
+        problems.append("%r in the %s. Simplified Technical English wants %r"
+                        % (phrase, where, LONG_WORDS[phrase]))
+    for match in GERUND_AFTER.finditer(clean):
+        if match.group(2).lower() in GERUND_SAFE:
+            continue
+        problems.append(
+            "%r in the %s is an -ing form used as a noun. Write the verb out: "
+            "\"before you run it\", not \"before running it\""
+            % (match.group(0), where))
+    cap = SENTENCE_RULE.search(template)
+    if cap:
+        limit = int(cap.group(1))
+        for sentence in sentences(text):
+            words = sentence.split()
+            if len(words) > limit:
+                problems.append("%d words in one sentence of the %s, the cap is "
+                                "%d: %s. Split it"
+                                % (len(words), where, limit, sentence[:60]))
+    return problems
 
 
 def heaviest_blocks(body, show=3):
@@ -284,16 +403,16 @@ def body_problems(body, template, branch=""):
         if found:
             problems.append("%s in the body. %s: short sentences instead"
                             % (", ".join(found), PUNCTUATION_RULE.lower()))
-    return problems
+    return problems + style_problems(body, template, "body")
 
 
-def header_problems(header, branch):
+def header_problems(header, branch, template=""):
     """A commit subject and a PR title are held to the same format."""
-    problems = []
+    problems = style_problems(header, template, "subject")
     if not HEADER_PATTERN.match(header):
-        return ["%r does not match %s. Types: %s. Scope: the module changed, "
-                "in parentheses: (api)"
-                % (header, HEADER_SPEC, ", ".join(TYPES))]
+        return problems + [
+            "%r does not match %s. Types: %s. Scope: the module changed, "
+            "in parentheses: (api)" % (header, HEADER_SPEC, ", ".join(TYPES))]
     ticket = TICKET_IN_BRANCH.search(branch or "")
     if ticket:
         key = ticket.group(1)
@@ -340,13 +459,20 @@ def problems_for(command, cwd):
         return []
 
     branch = branch_name(cwd)
+    template = read_file(os.path.join(cwd or ".", TEMPLATE))
     found = []
     for part in segments(tokens):
         part = strip_prefix(part)
         args = subcommand_args(part, "git", ["commit"])
         if args is not None:
-            found += ["Commit subject: " + p for subject in commit_subjects(args)
-                      for p in header_problems(subject, branch)]
+            subject, body = commit_text(args)
+            if subject is not None:
+                found += ["Commit subject: " + p
+                          for p in header_problems(subject, branch, template)]
+            # The prose rules are the template's, so a commit body written on the
+            # command line answers to them too.
+            found += ["Commit body: " + p
+                      for p in style_problems(body, template, "body")]
             continue
         for verb in ("create", "edit"):
             args = subcommand_args(part, "gh", ["pr", verb])
@@ -354,13 +480,13 @@ def problems_for(command, cwd):
                 continue
             title = option(args, "-t", "--title")
             if title:
-                found += ["PR title: " + p for p in header_problems(title, branch)]
+                found += ["PR title: " + p
+                          for p in header_problems(title, branch, template)]
             body = option(args, "-b", "--body")
             body_file = option(args, "-F", "--body-file")
             if body_file and body_file != "-":
                 body = read_file(os.path.join(cwd or ".", body_file))
             if body:
-                template = read_file(os.path.join(cwd or ".", TEMPLATE))
                 found += ["PR body: " + p
                           for p in body_problems(body, template, branch)]
     return found
