@@ -154,12 +154,20 @@
   --rak-primary-600: #c9c9c9;
   --rak-primary-700: #b0b0b0;
   --rak-primary-800: #999999;
-  // The fill a readout's glass and a combobox's field sink into: `lcd-glass` and
-  // `lcd-field` in `_lcd.scss`. Its own token rather than a read of the step
-  // above, which is the header/frame chrome: a screen reads brighter than the
-  // panel it is set into, so this stays near white here while that step stays
-  // mid-grey. Dark mode below pins this back to the old dark glass, unchanged.
+  // The fill a combobox's field sinks into: `lcd-field` in `_lcd.scss`. Its own
+  // token rather than a read of the step above, which is the header/frame
+  // chrome: a field reads brighter than the panel it is set into, so this stays
+  // near white here while that step stays mid-grey. Dark mode below pins this
+  // back to the old dark field, unchanged.
   --rak-well-fill: #f5f5f5;
+  // The fill a readout's own glass sinks into: `lcd-glass` in `_lcd.scss`, the
+  // scoreline and the navbar name. Fixed rather than mode-aware, and so is the
+  // ink and the off-segment wash below: a genuine LCD readout reads as a dark
+  // instrument in both modes, unlike the field above, which the reader chooses
+  // or types into rather than watches.
+  --rak-glass-fill: #262626;
+  --rak-glass-ink: #fff;
+  --rak-glass-unlit: rgb(255 255 255 / 12%);
 
   // Semantic ramps. One ramp per meaning, whatever draws it: 100 is a soft fill
   // behind text, 300 fills a table cell, 500 and up are solid fills and text.
@@ -358,15 +366,19 @@
   --rak-bezel:
     inset 0 1px 0 rgb(255 255 255 / 10%), inset 0 -1px 0 rgb(0 0 0 / 30%);
   // A shadow that reads as a hole against black is a bruise against white, so
-  // this is the weaker cut for the light fill every readout and field is sunk
-  // into here. Dark mode below strengthens it back to the old, stronger cut,
-  // for the dark fill it sinks into there.
+  // this is the weaker cut for the light fill a combobox's field is sunk into
+  // here. Dark mode below strengthens it back to the old, stronger cut, for the
+  // dark fill it sinks into there.
   --rak-well: inset 0 1px 2px rgb(0 0 0 / 12%);
   --rak-well-light: inset 0 1px 2px rgb(0 0 0 / 12%);
-  // A cell of a readout that is not lit. Enough to read as a shape that could
-  // light, not so much that it crowds the ones that are. Dark on the light fill
-  // every readout is sunk into here; dark mode below inverts it to light, on the
-  // dark fill it sinks into there.
+  // The readout glass's own cut, off the same fixed dark fill as
+  // `--rak-glass-fill` above, so it stays the stronger cut in both modes rather
+  // than following the field's own light-mode well.
+  --rak-glass-well: inset 0 1px 2px rgb(0 0 0 / 35%);
+  // A cell of a combobox's field that is not lit. Enough to read as a shape
+  // that could light, not so much that it crowds the ones that are. Dark on
+  // the light fill the field is sunk into here; dark mode below inverts it to
+  // light, on the dark fill it sinks into there.
   --rak-unlit: rgb(0 0 0 / 12%);
   // How far a key stands off the panel, and how far it has left to travel once a
   // finger is on it. The difference is what it sinks by, so the two are named
@@ -458,16 +470,18 @@ html {
     --rak-primary-600: #404040;
     --rak-primary-700: #333333;
     --rak-primary-800: #262626;
-    // The readout glass and combobox field, back to the same dark fill this step
-    // always stood on in this mode.
+    // The combobox field, back to the same dark fill this step always stood on
+    // in this mode. The readout glass needs no override: `--rak-glass-fill`
+    // above is fixed to this same value in both modes already.
     --rak-well-fill: #262626;
     --rak-table-header-divider: #757575;
     // The chrome's own ink, light again against the dark fill above.
     --rak-on-solid: #fff;
-    // The stronger cut, for the dark fill every readout and field sinks into
-    // here.
+    // The stronger cut, for the dark fill the field sinks into here. Same as
+    // `--rak-glass-well` above, since the field's own fill now matches the
+    // glass's fixed one in this mode.
     --rak-well: inset 0 1px 2px rgb(0 0 0 / 35%);
-    // Light again, against the dark fill it reads a cell of a readout on here.
+    // Light again, against the dark fill it reads a cell of the field on here.
     --rak-unlit: rgb(255 255 255 / 12%);
 
     --rak-brand-light: #262626;

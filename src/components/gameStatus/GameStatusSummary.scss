@@ -350,7 +350,7 @@
 .game-status__dash {
   @include segment-face;
 
-  color: var(--rak-on-solid);
+  color: var(--rak-glass-ink);
   font-size: var(--rak-score-size);
   line-height: 1.1;
 }
@@ -422,7 +422,7 @@
   align-items: center;
   gap: var(--rak-score-gap);
   margin: 0;
-  color: var(--rak-on-solid);
+  color: var(--rak-glass-ink);
   font-size: var(--rak-score-size);
   font-weight: var(--rak-weight-bold);
   line-height: 1.1;
@@ -470,7 +470,7 @@
   top: 0;
   // One wash for every cell that is off, whatever the lit ones beside it are drawn in.
   // A cell has no color of its own until it is lit.
-  color: var(--rak-unlit);
+  color: var(--rak-glass-unlit);
   // Out of any selection dragged over the scoreline. Selectable, copying the score
   // carried the row of eights out with it.
   user-select: none;
@@ -485,7 +485,7 @@
   display: flex;
   // Lit like the dash between the scores, and for the same reason: the mark belongs
   // to neither side's hue, and on a readout a cell that is on is on.
-  color: var(--rak-on-solid);
+  color: var(--rak-glass-ink);
 
   // Sized outright rather than in `em`, because `.icon` sets a font size of its
   // own that an `em` here would be read against. Across, whatever that height makes
@@ -502,7 +502,7 @@
   // digits beside it show waiting: the readout has a shape for possession whether or
   // not anybody has it.
   &.--blank {
-    color: var(--rak-unlit);
+    color: var(--rak-glass-unlit);
   }
 }
 
