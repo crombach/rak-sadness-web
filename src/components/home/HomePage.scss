@@ -4,23 +4,18 @@
 
 // Base UI ships the select unstyled, so these rules carry its whole look. Both
 // the season and the week select share them, read as a readout rather than a
-// form field: `lcd-glass` is the well the app name and the scoreline are cut
-// into too.
+// form field: `lcd-field` is the well the app name, the scoreline, and the
+// dialog's own search are all cut into too.
 .select__trigger {
-  @include lcd-glass;
+  @include lcd-field;
   @include focus-ring;
 
-  // Just the well, not the plate ring past it: on the home page's white this
-  // read as a grey outline round a control that already stands out.
-  box-shadow: var(--rak-well);
   display: flex;
   align-items: center;
   justify-content: space-between;
   min-height: var(--rak-touch-target);
   // No padding on the trailing edge: the chevron below has a bay of its own there.
   padding: var(--rak-space-1) 0 var(--rak-space-1) var(--rak-space-3);
-  // The lit color every readout in the app sets its value in.
-  color: var(--rak-on-solid);
   // The face the tables and the dialog's own search are set in.
   font-family: var(--rak-font-mono);
   font-size: var(--rak-text-md);
