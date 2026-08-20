@@ -256,11 +256,15 @@
   --rak-mark-upcoming-bg: var(--rak-neutral-100);
   --rak-mark-upcoming-text: var(--rak-neutral-700);
   // The toast's own fill and ink, each variant its own token rather than a
-  // direct read of its ramp step: `primary`, `success`, and `danger`'s 700
-  // step also fills `Button.scss`'s `--rak-key-edge` for that button, chrome
-  // that stays fixed in both modes while the toast's own ink needs to invert.
+  // direct read of its ramp step: `success` and `danger`'s 700 step also fills
+  // `Button.scss`'s `--rak-key-edge` for that button, chrome that stays fixed
+  // in both modes while the toast's own ink needs to invert. `primary`'s ink
+  // needs its own token for the same reason `--rak-panel-border` does: the
+  // primary ramp itself now inverts, and this has to stay dark on the pale
+  // fill above in both modes. Dark mode still repaints it below, to the
+  // page's own light ink there.
   --rak-toast-primary-bg: var(--rak-primary-100);
-  --rak-toast-primary-text: var(--rak-primary-700);
+  --rak-toast-primary-text: #3d3d3d;
   --rak-toast-neutral-bg: var(--rak-neutral-100);
   --rak-toast-neutral-text: var(--rak-neutral-700);
   --rak-toast-success-bg: var(--rak-success-100);
