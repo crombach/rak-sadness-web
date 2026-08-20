@@ -35,6 +35,11 @@
   position: relative;
   overflow: hidden;
   border-radius: var(--rak-radius-xs);
+  // `<button>` and `<input>` both carry a UA border and appearance that would
+  // otherwise show through or shift this reset depending on element and
+  // browser, so both are turned off here rather than left to each caller.
+  appearance: none;
+  border: 1px solid var(--rak-border);
   background-color: var(--rak-primary-800);
   box-shadow: var(--rak-well);
   color: var(--rak-on-solid);
