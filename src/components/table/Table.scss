@@ -323,9 +323,11 @@
     }
 
     // Keeps the last real row clear of a phone's rounded corners and home
-    // indicator. A row tall, in the header's color, so it reads as the table's own
-    // bottom edge, plus the device's inset where there is one. `index.html` asks
-    // for `viewport-fit=cover`, without which the inset is always zero.
+    // indicator. A row tall, in the frame's color (`ResultsFrame.scss`'s
+    // `.results-scores`), so it reads as that frame reaching up to meet the table
+    // rather than as the table's own bottom edge, plus the device's inset where
+    // there is one. `index.html` asks for `viewport-fit=cover`, without which the
+    // inset is always zero.
     tr:last-child.table__last-row td {
       height: calc(
         var(--rak-table-row-height) + env(safe-area-inset-bottom, 0px)
@@ -333,7 +335,7 @@
       padding: 0;
       // The last real row already carries the table's bottom edge.
       border: var(--rak-table-no-border);
-      background-color: var(--rak-primary-800);
+      background-color: var(--rak-primary-600);
     }
   }
 }
