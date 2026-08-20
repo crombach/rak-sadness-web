@@ -25,8 +25,9 @@
   // The trailing row's own fill, behind the column rather than only in that row.
   // Filler rows come whole, so what is left under the last of them is under a row
   // height; painted the same, it reads as that row being the taller for it rather
-  // than as the page running out before the table does.
-  background-color: var(--rak-primary-800);
+  // than as the page running out before the table does. The caption's own color,
+  // not the header's: this is the frame around the table, not the table itself.
+  background-color: var(--rak-primary-600);
   // The table is the app's screen, so the dark band around it is drawn as the
   // bezel holding it: lit along its top edge and shadowed along its bottom. Inset,
   // so it costs no room and nothing inside the frame moves.
