@@ -255,16 +255,6 @@
   }
 }
 
-// Stands in the same cell the real image below it also holds, so the two swap
-// with nothing else on the row moving. Static rather than the wireframe's sheen:
-// the rest of the row is the real answer already, and a sweep next to it reads
-// as the answer being unsure of itself.
-.game-status__logo.--placeholder {
-  @include skeleton-surface;
-
-  border-radius: 50%;
-}
-
 // Each side out on its own edge, and between them one block holding both scores and,
 // stacked over and under them, where the game is up to and what the offense faces.
 // Both sides are laid into the one grid rather than each into its own, so a label, a

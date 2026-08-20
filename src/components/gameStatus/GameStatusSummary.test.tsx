@@ -1,9 +1,29 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import {
+  fireEvent,
+  render as rtlRender,
+  screen,
+  type RenderResult,
+} from "@testing-library/react";
+import { ReactElement } from "react";
 import { GameStatus, HomeAway } from "../../types/ESPN";
 import { LeagueResult } from "../../types/LeagueResult";
 import { League } from "../../types/League";
 import { WeekGame } from "../../types/WeekGame";
 import GameStatusSummary from "./GameStatusSummary";
+
+/**
+ * jsdom never actually fetches an image, so the logos `GameStatusSummary` waits
+ * on before it leaves its wireframe would sit forever unloaded. Settling every
+ * one straight after render stands in for the common case the wait is for: the
+ * browser's image cache already warm from the dialog's own prefetch.
+ */
+function render(ui: ReactElement): RenderResult {
+  const view = rtlRender(ui);
+  document
+    .querySelectorAll<HTMLImageElement>("img[hidden]")
+    .forEach((img) => fireEvent.load(img));
+  return view;
+}
 
 const KICKOFF = new Date("2024-10-06T17:00:00Z");
 
@@ -117,6 +137,33 @@ describe("GameStatusSummary, before there is anything to show", () => {
     // game, so nothing under the dialog moves when the answer lands.
     render(<GameStatusSummary game={game(final)} />);
     expect(scoreline(".game-status.--skeleton")).toEqual(shown);
+  });
+
+  it("holds the wireframe until both marks have loaded, even once the game has", () => {
+    // `rtlRender` rather than this file's own settling `render`, since this is
+    // what that settling stands in for.
+    rtlRender(<GameStatusSummary game={game(result())} result={result()} />);
+    expect(document.querySelector(".game-status:not(.--skeleton)")).toBeNull();
+
+    const [away, home] = document.querySelectorAll("img[hidden]");
+    fireEvent.load(away);
+    // One of the two loaded is not both of them.
+    expect(document.querySelector(".game-status:not(.--skeleton)")).toBeNull();
+
+    fireEvent.load(home);
+    expect(
+      document.querySelector(".game-status:not(.--skeleton)"),
+    ).not.toBeNull();
+  });
+
+  it("shows the game without its marks rather than wait on one that never loads", () => {
+    rtlRender(<GameStatusSummary game={game(result())} result={result()} />);
+    fireEvent.error(document.querySelectorAll("img[hidden]")[0]);
+
+    expect(
+      document.querySelector(".game-status:not(.--skeleton)"),
+    ).not.toBeNull();
+    expect(logos()).toEqual([]);
   });
 
   it("says so where ESPN listed no game for the column", () => {
