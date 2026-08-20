@@ -16,7 +16,7 @@
   position: relative;
   overflow: hidden;
   border-radius: var(--rak-radius-xs);
-  background-color: var(--rak-primary-800);
+  background-color: var(--rak-well-fill);
   box-shadow:
     var(--rak-well),
     0 0 0 $plate-width var(--rak-primary-500),
@@ -40,7 +40,7 @@
   // browser, so both are turned off here rather than left to each caller.
   appearance: none;
   border: 1px solid var(--rak-border);
-  background-color: var(--rak-primary-800);
+  background-color: var(--rak-well-fill);
   box-shadow: var(--rak-well);
   color: var(--rak-on-solid);
 }
