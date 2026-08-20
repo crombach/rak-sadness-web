@@ -16,11 +16,11 @@
   // A key set into the bar is lit a step over it, so it is a control before its edge
   // is read. Elsewhere a solid key stands on white and needs no lift.
   //
-  // The whole ramp shifts, not the rest fill alone: every state stays one step from
-  // the one before it, so a press deepens once rather than crossing two steps and
-  // reading as the key going down twice.
+  // The pressed/selected fill lands one step past the bar itself, not on it: a fill
+  // level with the bar reads as no press at all, since the key and its surface are
+  // the same color.
   --rak-key-face: var(--rak-primary-400);
-  --rak-key-active: var(--rak-primary-500);
+  --rak-key-active: var(--rak-primary-600);
 }
 
 .navbar__content {

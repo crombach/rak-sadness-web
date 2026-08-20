@@ -336,6 +336,10 @@
   // a key stands on is not here: it is that key's own color one step down, which
   // only `Button.scss` knows.
   --rak-key-top: inset 0 1px 0 rgb(255 255 255 / 18%);
+  // The face dishes rather than sitting flat: a shadow along its lower inside
+  // edge, where a concave cap tips away from the light `--rak-key-top` catches
+  // at the rim.
+  --rak-key-dish: inset 0 -2px 3px rgb(0 0 0 / 14%);
   --rak-bezel:
     inset 0 1px 0 rgb(255 255 255 / 10%), inset 0 -1px 0 rgb(0 0 0 / 30%);
   --rak-well: inset 0 1px 2px rgb(0 0 0 / 35%);
