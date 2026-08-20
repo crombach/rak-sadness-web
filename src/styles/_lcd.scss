@@ -23,3 +23,24 @@
     0 -1px 0 $plate-width rgb(255 255 255 / 20%),
     0 2px 2px $plate-width rgb(0 0 0 / 22%);
 }
+
+/**
+ * The same well, without the plate ring: for a control the reader types or
+ * chooses into rather than a display, sitting on its own page or panel rather
+ * than another readout's surface. The ring's outer two layers read as a grey
+ * outline there instead of an edge to the well, so this keeps only the sunk
+ * shadow, plus the lit color every readout in the app sets its value in.
+ */
+@mixin lcd-field {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--rak-radius-xs);
+  // `<button>` and `<input>` both carry a UA border and appearance that would
+  // otherwise show through or shift this reset depending on element and
+  // browser, so both are turned off here rather than left to each caller.
+  appearance: none;
+  border: 1px solid var(--rak-border);
+  background-color: var(--rak-primary-800);
+  box-shadow: var(--rak-well);
+  color: var(--rak-on-solid);
+}

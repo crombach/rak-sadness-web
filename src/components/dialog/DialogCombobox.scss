@@ -1,20 +1,18 @@
 @use "../../styles/focus" as *;
+@use "../../styles/lcd" as *;
 @use "../../styles/listbox" as *;
 
 // Base UI ships the combobox unstyled, so these rules carry its whole look. It
 // sits inside a popup and is shorter than a page-level control, so it keeps its own
-// box rather than taking `field-shell`, and borrows only the focus ring. The socket
-// that shell is drawn as is repeated here at this one's height, so the two read as
-// the same part of the same panel.
+// box rather than the home page's, and borrows only the well: `lcd-field` is the
+// same one the app name, the scoreline, and the home page's own selects share.
 .dialog__search {
+  @include lcd-field;
+
   display: flex;
   align-items: center;
   gap: var(--rak-space-2);
   padding: 3px 12px;
-  border: var(--rak-border-width-hairline) solid var(--rak-border);
-  border-radius: var(--rak-radius-xs);
-  background-color: var(--rak-surface);
-  box-shadow: var(--rak-well-light);
 
   // On the shell rather than on the input inside it, so the ring goes round the
   // whole search including its icons.
@@ -27,7 +25,7 @@
   padding: 3px 0;
   border: 0 solid var(--rak-border);
   background-color: transparent;
-  color: var(--rak-text-secondary);
+  color: var(--rak-on-solid);
   // The face the tables are set in, since what is typed here and what the list offers
   // are the names and the columns those tables carry.
   font-family: var(--rak-font-mono);
@@ -42,7 +40,7 @@
 .dialog__input-icon {
   display: flex;
   align-items: center;
-  color: var(--rak-text-tertiary);
+  color: var(--rak-on-solid);
 }
 
 .dialog__positioner {

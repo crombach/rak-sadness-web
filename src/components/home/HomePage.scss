@@ -1,20 +1,33 @@
-@use "../../styles/field" as *;
+@use "../../styles/focus" as *;
+@use "../../styles/lcd" as *;
 @use "../../styles/listbox" as *;
 
 // Base UI ships the select unstyled, so these rules carry its whole look. Both
-// the season and the week select share them.
+// the season and the week select share them, read as a readout rather than a
+// form field: `lcd-field` is the well the app name, the scoreline, and the
+// dialog's own search are all cut into too.
 .select__trigger {
-  @include field-shell;
+  @include lcd-field;
+  @include focus-ring;
 
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  // The face the tables and the dialog's own search are set in. What a socket holds
-  // is a value read off the device, the same as a cell of the table below it.
+  min-height: var(--rak-touch-target);
+  // No padding on the trailing edge: the chevron below has a bay of its own there.
+  padding: var(--rak-space-1) 0 var(--rak-space-1) var(--rak-space-3);
+  // The face the tables and the dialog's own search are set in.
   font-family: var(--rak-font-mono);
+  font-size: var(--rak-text-md);
+  line-height: var(--rak-line-height);
+  text-align: left;
   cursor: pointer;
 
   &[data-disabled] {
     cursor: default;
-    color: var(--rak-disabled-text);
+    // A dim readout rather than a greyed field: the glass stays, only the
+    // value goes dark, the same as a socket with nothing chosen yet.
+    color: var(--rak-unlit);
   }
 }
 
@@ -25,7 +38,12 @@
 }
 
 .select__icon {
-  @include field-icon;
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  padding-inline: var(--rak-space-2);
+  // Lit chrome, not muted UI: nothing else on a piece of glass carries a border.
+  color: var(--rak-on-solid);
 }
 
 .select__positioner {
@@ -35,7 +53,7 @@
 .select__item {
   @include listbox-item;
 
-  // The trigger's face, so what an option says and what the socket shows once it is
+  // The trigger's face, so what an option says and what the glass shows once it is
   // chosen are set the same.
   font-family: var(--rak-font-mono);
 }
