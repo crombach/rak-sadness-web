@@ -458,6 +458,14 @@ function hasLogos(result: LeagueResult): boolean {
   return result.home.team.logoUrl != null && result.away.team.logoUrl != null;
 }
 
+/** Both logo URLs a result wears, away first as the scoreline shows them, or none
+ *  where either side has none. */
+function logoUrlsOf(result: LeagueResult): Array<string> {
+  return hasLogos(result)
+    ? [result.away.team.logoUrl as string, result.home.team.logoUrl as string]
+    : [];
+}
+
 /**
  * The lines either side of the scores, each of which is one word on one line.
  *
@@ -682,9 +690,17 @@ function Game({
 function Wireframe({
   result,
   spread,
+  pendingLogoUrls,
+  onLogoLoad,
+  onLogoError,
 }: {
   result: LeagueResult;
   spread?: GameSpread;
+  /** Every logo this game wears, decoded off screen so none of them pop in
+   *  once the wireframe gives way to the game itself. */
+  pendingLogoUrls: Array<string>;
+  onLogoLoad: (url: string) => void;
+  onLogoError: () => void;
 }) {
   return (
     <>
@@ -706,6 +722,16 @@ function Wireframe({
           }
         />
       </div>
+      {pendingLogoUrls.map((url) => (
+        <img
+          key={url}
+          src={url}
+          alt=""
+          hidden
+          onLoad={() => onLogoLoad(url)}
+          onError={onLogoError}
+        />
+      ))}
     </>
   );
 }
@@ -732,8 +758,8 @@ export default function GameStatusSummary({
   // Which game's marks failed to load, rather than a flag, so moving to another
   // game asks about its marks instead of inheriting a verdict on the last one's.
   const [logolessId, setLogolessId] = useState<string>();
-  // Every URL that has already fired its own load, so a team seen once does not
-  // go back to a placeholder on a later game or a poll of this one.
+  // Every URL that has already loaded, so a team seen once does not ask to be
+  // waited on again on a later game or a poll of this one.
   const [loadedLogoUrls, setLoadedLogoUrls] = useState<Set<string>>(new Set());
 
   if (game == null) {
@@ -747,10 +773,30 @@ export default function GameStatusSummary({
       </p>
     );
   }
-  // The wireframe rather than the game before it, so what is on screen is always the
-  // game the search names.
-  if (isLoading || result == null) {
-    return <Wireframe result={game.result} spread={game.spread} />;
+
+  // `GameStatusDialog` has already asked the browser to warm every logo the week
+  // could show, so decoding these here is almost always a cache hit rather than
+  // a fetch, and the wireframe below holds only as long as that hit takes.
+  const chosenId = game.result.id;
+  const pendingLogoUrls = logoUrlsOf(game.result);
+  const logosDone =
+    logolessId === chosenId ||
+    pendingLogoUrls.every((url) => loadedLogoUrls.has(url));
+
+  // The wireframe rather than the game before it, so what is on screen is always
+  // the game the search names, and never a mark still popping in over it.
+  if (isLoading || result == null || !logosDone) {
+    return (
+      <Wireframe
+        result={game.result}
+        spread={game.spread}
+        pendingLogoUrls={pendingLogoUrls}
+        onLogoLoad={(url) =>
+          setLoadedLogoUrls((loaded) => new Set(loaded).add(url))
+        }
+        onLogoError={() => setLogolessId(chosenId)}
+      />
+    );
   }
 
   const logos = hasLogos(result) && logolessId !== result.id;
@@ -763,34 +809,16 @@ export default function GameStatusSummary({
         gamecastHref={gamecastUrl(game.league, result.id)}
         logo={
           logos
-            ? (side) => {
-                const url = side.team.logoUrl as string;
-                const isLoaded = loadedLogoUrls.has(url);
-                return (
-                  <>
-                    {/* Stands in until the real image below fires its own load, so a
-                        team icon never pops in over an answer already on screen. */}
-                    {!isLoaded && (
-                      <span
-                        className="game-status__logo --placeholder"
-                        aria-hidden="true"
-                      />
-                    )}
-                    <img
-                      className="game-status__logo"
-                      src={url}
-                      // The team's name is beside it, so the mark says nothing a
-                      // reader of the page in words is missing.
-                      alt=""
-                      hidden={!isLoaded}
-                      onLoad={() =>
-                        setLoadedLogoUrls((loaded) => new Set(loaded).add(url))
-                      }
-                      onError={() => setLogolessId(result.id)}
-                    />
-                  </>
-                );
-              }
+            ? (side) => (
+                <img
+                  className="game-status__logo"
+                  src={side.team.logoUrl as string}
+                  // The team's name is beside it, so the mark says nothing a
+                  // reader of the page in words is missing.
+                  alt=""
+                  onError={() => setLogolessId(result.id)}
+                />
+              )
             : undefined
         }
       />

@@ -6,8 +6,8 @@ How a game in the week is going, opened from a pick cell.
   table column order, which the query matches. `GameMark` says where a game stands;
   `useLiveGame` keeps the chosen one fresh.
 - `GameStatusSummary`: the pool's line, the game as ESPN's boxscore says it, its kickoff,
-  town and Gamecast link. The wireframe is that layout over the week's own copy, so a
-  wait is the answer's size. `useScorelineFit` measures the scoreline and takes the full
-  names, then the marks, off one too narrow.
+  town and Gamecast link. The wireframe is that layout over the week's own copy, held
+  until both marks decode too, so neither pops in over it. `useScorelineFit`
+  takes the full names, then the marks, off one too narrow.
 - `GameStatusSummary.scss`: both sides in one grid, the dash in a track between two
   equal ones, so neither side moves it. `--rak-score-size` sizes that row.

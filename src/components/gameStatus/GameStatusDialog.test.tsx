@@ -23,6 +23,7 @@ import {
   dialog,
   getGameResultMock,
   SEASON,
+  settleLogos,
   WEEK,
 } from "./gameStatusDialogTestSupport";
 
@@ -181,6 +182,7 @@ describe("GameStatusDialog", () => {
     // The score the fetch came back with, not the one the week was scored at. Waited
     // on by the bar, since the wireframe carries the week's own copy of the game and
     // so already reads the same in places.
+    settleLogos();
     await waitForElementToBeRemoved(() => screen.queryByRole("progressbar"));
     expect(screen.getByText("8:42 - 3rd Quarter")).toBeInTheDocument();
     expect(screen.getByText("BUF Team")).toBeInTheDocument();
@@ -278,6 +280,7 @@ describe("GameStatusDialog", () => {
     ).toBeInTheDocument();
 
     pending.settle(upcomingGame);
+    settleLogos();
     await waitForElementToBeRemoved(() => screen.queryByRole("progressbar"));
     expect(screen.getByText("PHI Team")).toBeInTheDocument();
     // Not started, so the search says so rather than that there is something to watch.
@@ -289,6 +292,7 @@ describe("GameStatusDialog", () => {
     const askedBeforeFinal = getGameResultMock.mock.calls.length;
     await user.click(screen.getByRole("combobox", { name: "Game" }));
     await user.click(await screen.findByRole("option", { name: /MICH @ OSU/ }));
+    settleLogos();
     expect(screen.getByText("OSU Team")).toBeInTheDocument();
     expect(screen.queryByRole("progressbar")).toBeNull();
     expect(screen.getByRole("img", { name: "Final" })).toBeInTheDocument();
