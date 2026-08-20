@@ -54,6 +54,11 @@ export default function Button({
       "--sm": size === "sm",
       "--icon": iconOnly,
       "--compact": compact,
+      // Set whenever `selected` is passed at all, true or false, not just when
+      // held. `--selected` alone cannot carry this: it disappears the moment
+      // the route deselects the button, which is exactly when the release
+      // delay below still needs to apply.
+      "--selectable": selected !== undefined,
       "--selected": !!selected,
       "--busy": busy,
     },

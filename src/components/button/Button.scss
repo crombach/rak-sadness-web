@@ -51,6 +51,12 @@
   cursor: pointer;
   // The key's travel and the edge it stands on are timed with its fill, so a
   // press is one move rather than a colour easing while the face jumps.
+  //
+  // This order (background-color, color, transform, box-shadow) is read
+  // positionally by every `transition-delay` override below, `--selectable`'s
+  // included, since a custom property cannot carry a delay: one that changes
+  // value on the same state change it delays reads its own stale value, and
+  // never delays anything.
   transition:
     background-color var(--rak-duration-fast) var(--rak-ease-standard),
     color var(--rak-duration-fast) var(--rak-ease-standard),
@@ -109,7 +115,21 @@
     // primary, and the offset gap shows that fill too.
     --rak-focus-ring: var(--rak-on-solid);
 
+    // A key that can be chosen (`selected` was passed at all, whether or not
+    // it is right now) gets a pause before its release plays. The browser
+    // drops `:active` the instant the pointer lifts, a render tick before
+    // React can add `--selected`. Without the pause, letting go of the key
+    // that is about to be chosen springs it back to rest and then down again,
+    // instead of staying down. `:active` and `--selected` both clear the
+    // pause below, so pressing, and a key already chosen, still move at once.
+    &.--selectable {
+      transition-delay:
+        var(--rak-duration-fast), 0s, var(--rak-duration-fast),
+        var(--rak-duration-fast);
+    }
+
     &:active {
+      transition-delay: 0s;
       @include key(var(--rak-key-pressed));
     }
 
@@ -117,6 +137,7 @@
     // does and stays there. After `:active`, so pressing the key already chosen
     // moves nothing.
     &.--selected {
+      transition-delay: 0s;
       @include key(var(--rak-key-pressed));
     }
 
