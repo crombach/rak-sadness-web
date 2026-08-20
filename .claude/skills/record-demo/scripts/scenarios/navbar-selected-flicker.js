@@ -1,4 +1,8 @@
-import { buildPicksWorkbook, makeGame, registerAppMocks } from "../lib/mocks.js";
+import {
+  buildPicksWorkbook,
+  makeGame,
+  registerAppMocks,
+} from "../lib/mocks.js";
 
 const SEASON = 2024;
 const WEEK = 5;
