@@ -51,6 +51,12 @@
   cursor: pointer;
   // The key's travel and the edge it stands on are timed with its fill, so a
   // press is one move rather than a colour easing while the face jumps.
+  //
+  // This order (background-color, color, transform, box-shadow) is read
+  // positionally by every `transition-delay` override below, `--selectable`'s
+  // included, since a custom property cannot carry a delay: one that changes
+  // value on the same state change it delays reads its own stale value, and
+  // never delays anything.
   transition:
     background-color var(--rak-duration-fast) var(--rak-ease-standard),
     color var(--rak-duration-fast) var(--rak-ease-standard),
@@ -109,7 +115,21 @@
     // primary, and the offset gap shows that fill too.
     --rak-focus-ring: var(--rak-on-solid);
 
+    // A key that can be chosen (`selected` was passed at all, whether or not
+    // it is right now) gets a pause before its release plays. The browser
+    // drops `:active` the instant the pointer lifts, a render tick before
+    // React can add `--selected`. Without the pause, letting go of the key
+    // that is about to be chosen springs it back to rest and then down again,
+    // instead of staying down. `:active` and `--selected` both clear the
+    // pause below, so pressing, and a key already chosen, still move at once.
+    &.--selectable {
+      transition-delay:
+        var(--rak-duration-fast), 0s, var(--rak-duration-fast),
+        var(--rak-duration-fast);
+    }
+
     &:active {
+      transition-delay: 0s;
       @include key(var(--rak-key-pressed));
     }
 
@@ -117,15 +137,17 @@
     // does and stays there. After `:active`, so pressing the key already chosen
     // moves nothing.
     &.--selected {
+      transition-delay: 0s;
       @include key(var(--rak-key-pressed));
     }
 
-    // Three fills, not four: a pointer on the key and a finger down on it are the
-    // same fill. They were a step apart, which put two eased moves back to back on
-    // every click that ended with the pointer leaving, and that reads as the key
-    // bouncing rather than settling. The press is said in the travel and the edge
-    // instead, which is what a moulded key says it with. A phone has no pointer, so
-    // the same step is the one it gets on touch.
+    // Two fills, not three or four: a pointer on the key, a finger down on it, and
+    // the route holding it selected all land on the same fill. A step apart, and
+    // two eased moves land back to back — the browser drops `:active` the instant
+    // the pointer lifts, a render tick before React can add `--selected`, so a fill
+    // a step darker flashes through the one below it on every click. The press is
+    // said in the travel and the edge instead, which is what a moulded key says it
+    // with. A phone has no pointer, so the same step is the one it gets on touch.
     //
     // Properties rather than an override, because a fill that varies by surface
     // cannot be overridden at one specificity without also beating the rules below.
@@ -141,7 +163,7 @@
 
       // Held by the route rather than the pointer, so it has to come after both.
       &.--selected {
-        background-color: var(--rak-key-held, var(--rak-primary-700));
+        background-color: var(--rak-key-active, var(--rak-primary-600));
       }
     }
 
@@ -164,7 +186,11 @@
 
   // Which one is chosen, said in something other than a fill one step from its
   // neighbours': a rule under the button, on the edge it shares with the page.
-  &.--selected::before {
+  //
+  // Always generated, faded by opacity rather than added on `--selected`, so it
+  // eases in step with the fill and the key's travel instead of popping in and
+  // out a render ahead of them.
+  &::before {
     content: "";
     position: absolute;
     left: var(--rak-space-2);
@@ -173,6 +199,12 @@
     height: var(--rak-border-width);
     border-radius: var(--rak-border-width) var(--rak-border-width) 0 0;
     background-color: var(--rak-on-solid);
+    opacity: 0;
+    transition: opacity var(--rak-duration-fast) var(--rak-ease-standard);
+  }
+
+  &.--selected::before {
+    opacity: 1;
   }
 
   // Soft buttons inherit the surrounding tint, which is how the toast close
