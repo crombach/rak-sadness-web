@@ -165,7 +165,11 @@
 
   // Which one is chosen, said in something other than a fill one step from its
   // neighbours': a rule under the button, on the edge it shares with the page.
-  &.--selected::before {
+  //
+  // Always generated, faded by opacity rather than added on `--selected`, so it
+  // eases in step with the fill and the key's travel instead of popping in and
+  // out a render ahead of them.
+  &::before {
     content: "";
     position: absolute;
     left: var(--rak-space-2);
@@ -174,6 +178,12 @@
     height: var(--rak-border-width);
     border-radius: var(--rak-border-width) var(--rak-border-width) 0 0;
     background-color: var(--rak-on-solid);
+    opacity: 0;
+    transition: opacity var(--rak-duration-fast) var(--rak-ease-standard);
+  }
+
+  &.--selected::before {
+    opacity: 1;
   }
 
   // Soft buttons inherit the surrounding tint, which is how the toast close
