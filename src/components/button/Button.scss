@@ -120,12 +120,13 @@
       @include key(var(--rak-key-pressed));
     }
 
-    // Three fills, not four: a pointer on the key and a finger down on it are the
-    // same fill. They were a step apart, which put two eased moves back to back on
-    // every click that ended with the pointer leaving, and that reads as the key
-    // bouncing rather than settling. The press is said in the travel and the edge
-    // instead, which is what a moulded key says it with. A phone has no pointer, so
-    // the same step is the one it gets on touch.
+    // Two fills, not three or four: a pointer on the key, a finger down on it, and
+    // the route holding it selected all land on the same fill. A step apart, and
+    // two eased moves land back to back — the browser drops `:active` the instant
+    // the pointer lifts, a render tick before React can add `--selected`, so a fill
+    // a step darker flashes through the one below it on every click. The press is
+    // said in the travel and the edge instead, which is what a moulded key says it
+    // with. A phone has no pointer, so the same step is the one it gets on touch.
     //
     // Properties rather than an override, because a fill that varies by surface
     // cannot be overridden at one specificity without also beating the rules below.
@@ -141,7 +142,7 @@
 
       // Held by the route rather than the pointer, so it has to come after both.
       &.--selected {
-        background-color: var(--rak-key-held, var(--rak-primary-700));
+        background-color: var(--rak-key-active, var(--rak-primary-600));
       }
     }
 
