@@ -9,7 +9,6 @@ keyframes. Design tokens live in `src/index.scss` instead.
 - `_focus.scss`: `focus-ring`, the app's one focus ring
 - `_ink.scss`: `ink-height`, an icon drawn as tall as the text beside it
 - `_a11y.scss`: `visually-hidden`
-- `_field.scss`: `field-shell` and `field-icon`, the home page selects' box
 - `_label.scss`: `micro-label`, the tracked capitals every small label is set in
 - `_lcd.scss`: `lcd-glass`, the readout the scoreline and the navbar name share
 - `_listbox.scss`: `listbox-popup` and `listbox-item`, a Base UI popup list's shape
