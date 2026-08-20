@@ -10,6 +10,9 @@
   @include lcd-glass;
   @include focus-ring;
 
+  // Just the well, not the plate ring past it: on the home page's white this
+  // read as a grey outline round a control that already stands out.
+  box-shadow: var(--rak-well);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -18,9 +21,8 @@
   padding: var(--rak-space-1) 0 var(--rak-space-1) var(--rak-space-3);
   // The lit color every readout in the app sets its value in.
   color: var(--rak-on-solid);
-  // The face the app name is set in. What a socket holds is read as a value off
-  // the device, and these hold words rather than digits.
-  font-family: var(--rak-font-display);
+  // The face the tables and the dialog's own search are set in.
+  font-family: var(--rak-font-mono);
   font-size: var(--rak-text-md);
   line-height: var(--rak-line-height);
   text-align: left;
@@ -29,23 +31,9 @@
   &[data-disabled] {
     cursor: default;
     // A dim readout rather than a greyed field: the glass stays, only the
-    // segments go dark, the same as a socket with nothing chosen yet.
+    // value goes dark, the same as a socket with nothing chosen yet.
     color: var(--rak-unlit);
   }
-}
-
-// The segments the display leaves dark, laid under the value the same way
-// `LogoButton`'s and `GameStatusSummary`'s own ghosts are. Sized to the longest
-// option rather than to the placeholder, so it reads as the readout's own fixed
-// width rather than as a hint about the label beside it.
-.select__ghost {
-  position: absolute;
-  inset-block: 0;
-  left: var(--rak-space-3);
-  display: flex;
-  align-items: center;
-  user-select: none;
-  color: var(--rak-unlit);
 }
 
 .select__popup {
@@ -70,9 +58,9 @@
 .select__item {
   @include listbox-item;
 
-  // The trigger's own face, so what an option says and what the glass shows once
-  // it is chosen are set the same.
-  font-family: var(--rak-font-display);
+  // The trigger's face, so what an option says and what the glass shows once it is
+  // chosen are set the same.
+  font-family: var(--rak-font-mono);
 }
 
 .home__controls {

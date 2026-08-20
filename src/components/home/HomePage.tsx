@@ -16,9 +16,6 @@ import "./HomePage.scss";
 /** Title case, to read like the week labels ESPN sends. */
 const seasonLabel = (season: number) => `${season} Season`;
 
-/** DSEG14's all-segments-on glyph, the same one `LogoButton` draws its own ghost in. */
-const ALL_SEGMENTS_ON = "~";
-
 /**
  * The season and week pickers' shared shape: a Base UI select styled by
  * `home__week-input`/`select__*`, so both read from one place instead of
@@ -47,11 +44,6 @@ function LabeledSelect<T>({
   itemKey: (item: T) => string | number;
   itemLabel: (item: T) => string;
 }) {
-  // Sized to the longest option, not to the placeholder, so it reads as the
-  // readout's own fixed width rather than a hint about whatever label sits atop it.
-  const ghostLength = Math.max(0, ...items.map((item) => itemLabel(item).length));
-  const ghost = ALL_SEGMENTS_ON.repeat(ghostLength);
-
   return (
     <Select.Root
       value={value}
@@ -64,9 +56,6 @@ function LabeledSelect<T>({
             current != null ? renderValue(current) : placeholder
           }
         </Select.Value>
-        <span className="select__ghost" aria-hidden="true">
-          {ghost}
-        </span>
         <Select.Icon className="select__icon">
           <UnfoldMoreIcon />
         </Select.Icon>
