@@ -3,7 +3,7 @@
 // so this emits no CSS of its own however many files pull it in.
 
 /**
- * A well of `--rak-primary-800`, framed in a plate `$plate-width` wide: the plate
+ * A well of `--rak-well-fill`, framed in a plate `$plate-width` wide: the plate
  * itself in the surface's own primary, and past it the plate's lit top edge and
  * the shadow it throws. Rings rather than a border or a wrapper, because a spread
  * shadow is drawn outside the box without taking any room in the layout.
