@@ -1,3 +1,5 @@
+import { vi } from "vitest";
+
 // Shared localStorage failure mocks for cache tests: a write that throws quota
 // exhaustion, and every Storage method blocked outright.
 
