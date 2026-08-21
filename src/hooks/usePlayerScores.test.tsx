@@ -7,6 +7,7 @@ import { RakMadnessScores } from "../types/RakMadnessScores";
 import { XLSX_CONTENT_TYPE } from "../utils/buildSpreadsheetBuffer";
 import { writeCachedPicks } from "../utils/picksCache";
 import { getPlayerScores } from "../utils/scoring/getPlayerScores";
+import { SEASON, week } from "../weekFixtures";
 import usePlayerScores from "./usePlayerScores";
 
 vi.mock("../utils/scoring/getPlayerScores", () => ({
@@ -16,17 +17,6 @@ vi.mock("../utils/scoring/getPlayerScores", () => ({
 const getPlayerScoresMock = getPlayerScores as MockedFunction<
   typeof getPlayerScores
 >;
-
-const SEASON = 2024;
-
-function week(value: number): WeekInfo {
-  return {
-    value,
-    label: `Week ${value}`,
-    startDate: new Date(2024, 8, value),
-    endDate: new Date(2024, 8, value + 6),
-  };
-}
 
 /**
  * Held still, not built per render. `usePlayerScores` keys its scoring callback on

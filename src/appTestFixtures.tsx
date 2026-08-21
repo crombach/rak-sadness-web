@@ -4,7 +4,8 @@ import { userEvent } from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { AppDataContextProvider } from "./context/AppDataContext";
 import { ToastContextProvider } from "./context/ToastContext";
-import { League, LeagueInfo, SeasonType, WeekInfo } from "./types/League";
+import { League, LeagueInfo, SeasonType } from "./types/League";
+import { SEASON, week } from "./weekFixtures";
 import { RakMadnessScores } from "./types/RakMadnessScores";
 import App from "./App";
 import Toaster from "./components/toaster/Toaster";
@@ -32,17 +33,7 @@ export const buildSpreadsheetBufferMock =
   buildSpreadsheetBuffer as MockedFunction<typeof buildSpreadsheetBuffer>;
 
 export const CURRENT_WEEK = 3;
-/** The year the fixture season started in, which is what its dates say. */
-export const SEASON = 2024;
-
-export function week(value: number): WeekInfo {
-  return {
-    value,
-    label: `Week ${value}`,
-    startDate: new Date(2024, 8, value),
-    endDate: new Date(2024, 8, value + 6),
-  };
-}
+export { SEASON, week };
 
 export const weeks = [week(1), week(2), week(3), week(4), week(5)];
 

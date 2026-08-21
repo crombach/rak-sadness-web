@@ -2,7 +2,7 @@ import { renderHook } from "@testing-library/react";
 import { Mock } from "vitest";
 import { useAppData } from "../context/AppDataContext";
 import { useToastActions } from "../context/ToastContext";
-import { WeekInfo } from "../types/League";
+import { SEASON, week } from "../weekFixtures";
 import useWeekRouteGuard from "./useWeekRouteGuard";
 
 const navigate = vi.fn();
@@ -16,17 +16,7 @@ vi.mock("../context/ToastContext", async (importOriginal) => ({
   useToastActions: vi.fn(),
 }));
 
-const SEASON = 2024;
 const CURRENT_WEEK = 5;
-
-function week(value: number): WeekInfo {
-  return {
-    value,
-    label: `Week ${value}`,
-    startDate: new Date(2024, 8, value),
-    endDate: new Date(2024, 8, value + 6),
-  };
-}
 
 const WEEKS = [week(1), week(2), week(3), week(4), week(5), week(6)];
 
