@@ -139,22 +139,35 @@
   // edge to be read against, on the same grey ramp as the rest of the app now.
   --rak-case: var(--rak-neutral-700);
 
-  // Primary scale: the navbar, table header, and key chrome. Grayscale, same as
-  // before, just lighter, so the instrument chrome reads as an instrument
-  // rather than a slab of near-black. Every step still clears its pairing's
-  // WCAG AA minimum, with room to spare. Dark mode pins this whole scale back
-  // to its old, darker values below: it already reads as a dark instrument
-  // sitting on a light page, and this lighter light-mode scale is not meant
-  // to change that.
+  // Primary scale: the navbar, table header, and key chrome. Light here, so that
+  // chrome reads as a light panel with dark ink on it, the same as the rest of
+  // the page. Dark mode pins this whole scale to its own, darker values below,
+  // where it reads as a dark instrument instead: that mode is untouched by this
+  // scale going light here. Every step still clears its pairing's WCAG AA
+  // minimum, with room to spare.
   --rak-primary-100: #cccccc;
   // One step over the 500 the navbar is filled in, for the keys set into it. A key
   // in the bar's own color is told from it by its edge alone, which is a line 4px
   // tall to carry a whole control.
-  --rak-primary-400: #6b6b6b;
-  --rak-primary-500: #5c5c5c;
-  --rak-primary-600: #4c4c4c;
-  --rak-primary-700: #3d3d3d;
-  --rak-primary-800: #2e2e2e;
+  --rak-primary-400: #f2f2f2;
+  --rak-primary-500: #eaeaea;
+  --rak-primary-600: #dcdcdc;
+  --rak-primary-700: #c4c4c4;
+  --rak-primary-800: #a8a8a8;
+  // The fill a combobox's field sinks into: `lcd-field` in `_lcd.scss`. Its own
+  // token rather than a read of the step above, which is the header/frame
+  // chrome: a field reads brighter than the panel it is set into, so this stays
+  // near white here while that step stays mid-grey. Dark mode below pins this
+  // back to the old dark field, unchanged.
+  --rak-well-fill: #f5f5f5;
+  // The fill a readout's own glass sinks into: `lcd-glass` in `_lcd.scss`, the
+  // scoreline and the navbar name. Fixed rather than mode-aware, and so is the
+  // ink and the off-segment wash below: a genuine LCD readout reads as a dark
+  // instrument in both modes, unlike the field above, which the reader chooses
+  // or types into rather than watches.
+  --rak-glass-fill: #262626;
+  --rak-glass-ink: #fff;
+  --rak-glass-unlit: rgb(255 255 255 / 12%);
 
   // Semantic ramps. One ramp per meaning, whatever draws it: 100 is a soft fill
   // behind text, 300 fills a table cell, 500 and up are solid fills and text.
@@ -218,23 +231,21 @@
   --rak-divider: #d6d6d6;
   // The edge of a panel pressed into the device: a table cell, a popup opening
   // off a socket. Its own token rather than a direct read of `--rak-primary-800`,
-  // since that ramp step is also the readout/header chrome and stays dark in both
-  // modes, while this has to move: it sits against `--rak-surface`, which
-  // inverts, and the chrome's own dark tone nearly vanishes against a surface
-  // that goes dark too.
-  --rak-panel-border: var(--rak-primary-800);
-  // The rule between header cells. Not a step on the primary ramp: 600 against
-  // the header's own 800 fill cleared barely 1.5:1, in light mode as much as
-  // dark, since the header is chrome and neither one moves. Fixed rather than
-  // mode-aware for the same reason. Hand-picked to clear 3:1 against the
-  // header's lighter light-mode fill. Dark mode pins it back to the old value
-  // below, against the old fill.
-  --rak-table-header-divider: #808080;
+  // since that ramp step is the readout/header chrome, light here and dark in
+  // dark mode, while this has to stay a dark line against `--rak-surface` in
+  // both modes. Dark mode moves this to `--rak-border` below, against the dark
+  // surface that step pairs with there.
+  --rak-panel-border: #2e2e2e;
+  // The rule between header cells. Not a step on the primary ramp: that ramp
+  // is light here and dark in dark mode, and a line has to clear 3:1 against
+  // both. Dark mode pins it to its own old value below, against the header's
+  // dark fill there.
+  --rak-table-header-divider: #373737;
   // The dialog progress bar's sweep. Its own token rather than a direct read of
   // `--rak-primary-500`, for the same reason as `--rak-panel-border`: that ramp
-  // step stays dark in both modes, and the track it sweeps over
-  // (`--rak-fill-subtle`) inverts, so the two nearly merge in dark mode.
-  --rak-progress-fill: var(--rak-primary-500);
+  // step is light here, and the track it sweeps over (`--rak-fill-subtle`)
+  // is lighter still, so the sweep needs its own darker value to stay visible.
+  --rak-progress-fill: #5c5c5c;
   // The picks table's own token rather than a direct read of `--rak-warning-300`:
   // that ramp step also fills the game dialog's `--invalid` mark, paired there
   // with its own fixed dark text, and the two need to move independently once
@@ -253,11 +264,15 @@
   --rak-mark-upcoming-bg: var(--rak-neutral-100);
   --rak-mark-upcoming-text: var(--rak-neutral-700);
   // The toast's own fill and ink, each variant its own token rather than a
-  // direct read of its ramp step: `primary`, `success`, and `danger`'s 700
-  // step also fills `Button.scss`'s `--rak-key-edge` for that button, chrome
-  // that stays fixed in both modes while the toast's own ink needs to invert.
+  // direct read of its ramp step: `success` and `danger`'s 700 step also fills
+  // `Button.scss`'s `--rak-key-edge` for that button, chrome that stays fixed
+  // in both modes while the toast's own ink needs to invert. `primary`'s ink
+  // needs its own token for the same reason `--rak-panel-border` does: the
+  // primary ramp itself now inverts, and this has to stay dark on the pale
+  // fill above in both modes. Dark mode still repaints it below, to the
+  // page's own light ink there.
   --rak-toast-primary-bg: var(--rak-primary-100);
-  --rak-toast-primary-text: var(--rak-primary-700);
+  --rak-toast-primary-text: #3d3d3d;
   --rak-toast-neutral-bg: var(--rak-neutral-100);
   --rak-toast-neutral-text: var(--rak-neutral-700);
   --rak-toast-success-bg: var(--rak-success-100);
@@ -276,7 +291,10 @@
   --rak-text-secondary: #373737;
   --rak-text-tertiary: #5d5d5d;
   // Foreground on a solid fill. Not a background: `--rak-surface` is the page.
-  --rak-on-solid: #fff;
+  // Dark here, since the fills it pairs with (the primary ramp above) are
+  // light in this mode. Dark mode inverts this to white below, against that
+  // ramp's own dark fills there.
+  --rak-on-solid: #1a1a1a;
   // The ink for a player's status cell and a pick's yes/no/unscoreable cell,
   // pale here so this stays dark. Those fills darken instead of staying pale in
   // dark mode, where this inverts to light ink alongside them.
@@ -297,9 +315,12 @@
 
   // How far an even row is taken from the fill its cells already carry. One value
   // for every column, so a striped name cell, a striped pick, and a striped score
-  // are all the same step apart from their odd-row neighbours.
+  // are all the same step apart from their odd-row neighbours. Its own dark value
+  // rather than a read of `--rak-primary-800`, which is light here: mixing toward
+  // a light color would fade the stripe instead of darkening it. Dark mode moves
+  // this to `--rak-text` below, off that mode's own light ink.
   --rak-stripe-strength: 86%;
-  --rak-stripe-with: var(--rak-primary-800);
+  --rak-stripe-with: #2e2e2e;
 
   // How far a cell under the pointer is taken from the fill it carries, striped
   // or not. Both are set well past the stripe above, so a cell darkened by the
@@ -335,22 +356,30 @@
   // laid on and none of them has to be repainted per surface. The dark lower edge
   // a key stands on is not here: it is that key's own color one step down, which
   // only `Button.scss` knows.
-  --rak-key-top: inset 0 1px 0 rgb(255 255 255 / 18%);
+  --rak-key-top: inset 0 1px 0 rgb(255 255 255 / 70%);
   // The face dishes rather than sitting flat: a shadow along its lower inside
   // edge, where a concave cap tips away from the light `--rak-key-top` catches
-  // at the rim.
-  --rak-key-dish: inset 0 -2px 3px rgb(0 0 0 / 14%);
+  // at the rim. Weaker here than in dark mode: this ramp's fills are light, so
+  // the same cut this key always dished by read as a dent rather than a curve,
+  // and the lit rim above needs the same lift to still win the read.
+  --rak-key-dish: inset 0 -2px 3px rgb(0 0 0 / 5%);
   --rak-bezel:
     inset 0 1px 0 rgb(255 255 255 / 10%), inset 0 -1px 0 rgb(0 0 0 / 30%);
-  --rak-well: inset 0 1px 2px rgb(0 0 0 / 35%);
-  // The same cut, on the panel's own white rather than on a readout's dark. A
-  // shadow that reads as a hole against black is a bruise against white.
+  // A shadow that reads as a hole against black is a bruise against white, so
+  // this is the weaker cut for the light fill a combobox's field is sunk into
+  // here. Dark mode below strengthens it back to the old, stronger cut, for the
+  // dark fill it sinks into there.
+  --rak-well: inset 0 1px 2px rgb(0 0 0 / 12%);
   --rak-well-light: inset 0 1px 2px rgb(0 0 0 / 12%);
-  // A cell of a readout that is not lit. Enough to read as a shape that could light,
-  // not so much that it crowds the ones that are. Measured against the fill both
-  // readouts are sunk into, which is darker than the bar around them and so takes
-  // less white than the bar did.
-  --rak-unlit: rgb(255 255 255 / 12%);
+  // The readout glass's own cut, off the same fixed dark fill as
+  // `--rak-glass-fill` above, so it stays the stronger cut in both modes rather
+  // than following the field's own light-mode well.
+  --rak-glass-well: inset 0 1px 2px rgb(0 0 0 / 35%);
+  // A cell of a combobox's field that is not lit. Enough to read as a shape
+  // that could light, not so much that it crowds the ones that are. Dark on
+  // the light fill the field is sunk into here; dark mode below inverts it to
+  // light, on the dark fill it sinks into there.
+  --rak-unlit: rgb(0 0 0 / 12%);
   // How far a key stands off the panel, and how far it has left to travel once a
   // finger is on it. The difference is what it sinks by, so the two are named
   // together.
@@ -424,24 +453,36 @@ html {
 }
 
 // The OS signal alone: no toggle, no stored override. The instrument-panel chrome
-// (navbar, keys, table header, the readout glass) already reads as a dark device
-// standing on a light page, so it carries over unchanged; only the page itself,
-// its text, and the handful of tokens that sit directly on `--rak-surface` invert.
-// Every value below was chosen to clear WCAG AA against the surface it pairs with.
+// (navbar, keys, table header, the readout glass) is a light panel with dark ink
+// in light mode above, and this is where it becomes the dark device it was
+// before: every token that pairs with it inverts here too, so the panel and its
+// ink move together. Every value below was chosen to clear WCAG AA against the
+// surface it pairs with.
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
 
-    // The primary ramp and its header divider went lighter and hue-tinted above,
-    // for the light page they now sit on. Pinned back to their old, darker,
-    // achromatic values here, so the instrument-panel chrome this ramp draws
-    // stays the same dark device it always was in this mode.
+    // The primary ramp and its header divider, back to the dark, achromatic
+    // values the instrument-panel chrome this ramp draws always stood on in
+    // this mode.
     --rak-primary-400: #5e5e5e;
     --rak-primary-500: #4f4f4f;
     --rak-primary-600: #404040;
     --rak-primary-700: #333333;
     --rak-primary-800: #262626;
+    // The combobox field, back to the same dark fill this step always stood on
+    // in this mode. The readout glass needs no override: `--rak-glass-fill`
+    // above is fixed to this same value in both modes already.
+    --rak-well-fill: #262626;
     --rak-table-header-divider: #757575;
+    // The chrome's own ink, light again against the dark fill above.
+    --rak-on-solid: #fff;
+    // The stronger cut, for the dark fill the field sinks into here. Same as
+    // `--rak-glass-well` above, since the field's own fill now matches the
+    // glass's fixed one in this mode.
+    --rak-well: inset 0 1px 2px rgb(0 0 0 / 35%);
+    // Light again, against the dark fill it reads a cell of the field on here.
+    --rak-unlit: rgb(255 255 255 / 12%);
 
     --rak-brand-light: #262626;
 
@@ -533,6 +574,10 @@ html {
     --rak-progress-fill: var(--rak-border);
 
     --rak-well-light: inset 0 1px 2px rgb(0 0 0 / 42%);
+    // The key's own moulding, back to the cut it always dished by against this
+    // mode's dark fills.
+    --rak-key-top: inset 0 1px 0 rgb(255 255 255 / 18%);
+    --rak-key-dish: inset 0 -2px 3px rgb(0 0 0 / 14%);
     --rak-state-hover: rgb(255 255 255 / 8%);
     --rak-state-press: rgb(255 255 255 / 16%);
   }

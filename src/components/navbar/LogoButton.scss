@@ -70,7 +70,8 @@
     // would now be clipped rather than bled, since the glass fills the key's own
     // edge on every side. Sunk and lit from the inside instead, the same two
     // cues drawn further out everywhere else.
-    box-shadow: var(--rak-well), var(--rak-key-top);
+    box-shadow: var(--rak-glass-well), var(--rak-key-top);
+    color: var(--rak-glass-ink);
 
     // Bold is the only cut `src/index.tsx` loads: the face is monospaced, so the
     // heavier segments advance exactly as far as the light ones and cost nothing
@@ -121,6 +122,6 @@
     // Out of any selection the user drags over the bar. Selectable, copying the
     // name carried the row of tildes out with it.
     user-select: none;
-    color: var(--rak-unlit);
+    color: var(--rak-glass-unlit);
   }
 }

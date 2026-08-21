@@ -53,7 +53,7 @@
   .skeleton__bar {
     @include bar;
 
-    // The header is already dark, so the bars read as light gaps in it.
+    // The header's own ink, so the bars read as gaps in it.
     background-color: var(--rak-loading-fill-on-solid);
   }
 

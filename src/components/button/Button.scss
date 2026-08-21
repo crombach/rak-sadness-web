@@ -168,20 +168,30 @@
       }
     }
 
+    // Fixed white ink rather than `--rak-on-solid`: that token now inverts with
+    // the primary ramp's own chrome, but this fill stays the same dark green in
+    // both modes, so its ink has to stay fixed too.
     &.--success {
       @include button-color(
         var(--rak-success-700),
         var(--rak-success-500),
         var(--rak-success-600)
       );
+
+      color: #fff;
+      --rak-focus-ring: #fff;
     }
 
+    // Same reasoning as `--success` above, off the equally fixed dark red.
     &.--danger {
       @include button-color(
         var(--rak-danger-700),
         var(--rak-danger-500),
         var(--rak-danger-600)
       );
+
+      color: #fff;
+      --rak-focus-ring: #fff;
     }
   }
 

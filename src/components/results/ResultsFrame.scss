@@ -109,7 +109,7 @@
     width: 14em;
     height: 0.7rem;
     transform: translateY(-50%);
-    // The frame is already dark, so the bar reads as a light gap in it, the same
+    // The chrome's own ink, so the bar reads as a gap in the frame, the same
     // way the wireframe's header bars do.
     background-color: var(--rak-loading-fill-on-solid);
   }
