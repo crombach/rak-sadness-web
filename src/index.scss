@@ -149,11 +149,11 @@
   // One step over the 500 the navbar is filled in, for the keys set into it. A key
   // in the bar's own color is told from it by its edge alone, which is a line 4px
   // tall to carry a whole control.
-  --rak-primary-400: #e8e8e8;
-  --rak-primary-500: #dddddd;
-  --rak-primary-600: #c9c9c9;
-  --rak-primary-700: #b0b0b0;
-  --rak-primary-800: #999999;
+  --rak-primary-400: #f2f2f2;
+  --rak-primary-500: #eaeaea;
+  --rak-primary-600: #dcdcdc;
+  --rak-primary-700: #c4c4c4;
+  --rak-primary-800: #a8a8a8;
   // The fill a combobox's field sinks into: `lcd-field` in `_lcd.scss`. Its own
   // token rather than a read of the step above, which is the header/frame
   // chrome: a field reads brighter than the panel it is set into, so this stays
